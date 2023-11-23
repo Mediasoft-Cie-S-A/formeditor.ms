@@ -7,9 +7,10 @@ To get started you will first need the following installed on your machine.
 Node.js - https://nodejs.org/en/
 MongoDB - http://docs.mongodb.org/manual/installation/
 ```
-On Mac I recommend using Homebrew brew install mongodb-community
+On Mac, it is recommended to use homebrew brew install mongodb-community
 On Windows, download and install the MSI package @ https://www.mongodb.org/downloads
-You must then make sure you have MongoDB running by typing mongod in your terminal.
+and after that you have to create a db, with the following name: formeditmsapp and the collection with the name: forms
+
 
 ## Running with Node.js
 
