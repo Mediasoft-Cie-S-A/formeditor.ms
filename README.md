@@ -18,7 +18,7 @@ You can then download this repository, navigate to the folder in your Terminal, 
 
 ````
 npm install
-npm start
+npm run start
 ````
 This will walk you through the installation process. When it is done, you will have a running Form.io management application running at the following address in your browser.
 ```
