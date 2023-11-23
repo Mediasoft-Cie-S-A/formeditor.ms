@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Form Editor</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="js/style.css">
+</head>
+<body>
+   <!-- As a link -->
+<nav class="navbar d-flex title">    
+      <img src="img/Logo_header.png" style="max-width: 200px"; />    
+</nav>
+    <div class="container body-content container-fluid">
+        <div class="row">
+           
+
+            <!-- Main Content -->
+            <div >
+                <!-- Tab Navigation -->
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#formsList">.:Forms List:.</a></li>
+                    <li><a data-toggle="tab" href="#editForm">.:Edit Form:.</a></li>
+                    <li><a data-toggle="tab" href="#renderForm">.:Render Form:.</a></li>
+                </ul>
+                
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <div id="formsList" class="tab-pane fade in active" style="min-height: 500px;">                      
+                         
+                            <h1>Forms List</h1>
+                            
+                                <ul id="formsList" class="form-list"></ul>
+
+                                <script src="js/listForms.js"></script>
+                           
+                        </div>
+
+                    <div id="editForm" class="tab-pane fade">
+                            <div class="wrapper">
+                            <!-- Sidebar -->
+                                <div id="sidebar" class=" sidebar-header" style="float: left;">
+                                    <!-- Draggable elements -->
+                                    <div class="draggable" draggable="true" id="textfield">Text Field</div>
+                                    <div class="draggable" draggable="true" id="password">Password</div>
+                                    <div class="draggable" draggable="true" id="number">Number</div>
+                                    <div class="draggable" draggable="true" id="textarea">Textarea</div>
+                                    <div class="draggable" draggable="true" id="checkbox">Checkbox</div>
+                                    <div class="draggable" draggable="true" id="select">Select</div>
+                                    <div class="draggable" draggable="true" id="radio">Radio Button</div>
+                                    <div class="draggable" draggable="true" id="button">Button</div>
+                                    <div class="draggable" draggable="true" id="container">Container</div>
+                                    <div class="draggable" draggable="true" id="datetime">Datetime</div>
+                                    <div class="draggable" draggable="true" id="dbitem">DataSet</div>
+                                    <button onclick="showModalDbStrc()">Database</button>
+                                </div>
+                               
+                            <div id="formContainer" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                <!-- Form elements will be added here -->
+                            </div>
+                            <form id="formDataForm">
+                                <input type="text" id="formId" name="formId" placeholder="Form ID" value="" required><br>
+                                <input type="text" id="formName" name="formName" placeholder="Form Name"  value=""  required><br>
+                                <input type="text" id="formPath" name="formPath" placeholder="Form Path"  value=""  required><br>
+                                <input type="text" id="userCreated" name="userCreated" placeholder="User Created" value=" <%= name %> " required><br>
+                                <input type="text" id="userModified" name="userModified" placeholder="User Modified" value=" <%= name %> " required><br>
+                                <button type="submit">Save</button>
+                                <button onclick="document.getElementById('formContainer').innerHTML=''">Clear</button>
+                            </form>
+                            
+
+                        </div>
+                    </div>
+                    <div id="renderForm" class="tab-pane fade">
+                        <!-- Rendered form will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div id="toast-container"></div>
+    <div id="modalDialogText">
+        <div class="dialogContent">
+            <!-- Edit -->
+        </div>
+        <div>        
+            <button onclick="closeModalEdit()">Close</button>
+        </div>
+    </div>
+
+    <div id="tableDetailsModal">
+        <div id="tablesList">
+            <!-- Tables will be listed here -->
+        </div>
+        <div id="tableDetails">
+            <!-- Table details will be shown here -->
+        </div>
+        <button onclick="insertTable()">Insert</button><button onclick="insertGrid()">Grid</button><button onclick="closeModalDbStrct()">Close</button>
+    </div>
+
+<!-- Footer -->
+<footer class="fixed-bottom mt-auto">
+    <!-- Grid container -->
+    <div class="container p-4 pb-0">
+        <!-- Section: Social media -->
+        <section class="mb-4">
+                       <!-- Github -->
+            <a class="btn btn-outline-light btn-floating m-1" href="#!" role="button"><i class="fab fa-github"></i></a>
+        </section>
+        <!-- Section: Social media -->
+    </div>
+    <!-- Grid container -->
+
+    <!-- Copyright -->
+    <div class="text-center p-3" >
+            <a class="text-white" href="https://www.mediasoft-group.com//">Mediasoft Group</a>
+    </div>
+    <!-- Copyright -->
+</footer>
+<!-- Footer -->
+
+
+    <div onclick="closeModalEdit()" class="overlay" id="overlayModal"></div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/editor.js"></script>
+    <script src="js/dom.js"></script>
+    <script src="js/formSubmit.js"></script>
+    <script src="js/dataset.js"></script>
+
+</body>
+</html>
