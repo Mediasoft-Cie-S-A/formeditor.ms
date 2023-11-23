@@ -1,7 +1,7 @@
 # formeditor.ms
 Progress Openedge Lowcode Framework
 
-##Installation (Node + MongoDB)
+## Installation (Node + MongoDB)
 To get started you will first need the following installed on your machine.
 ```
 Node.js - https://nodejs.org/en/
