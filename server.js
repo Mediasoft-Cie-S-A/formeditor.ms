@@ -66,7 +66,7 @@ const swaggerDefinition = {
     servers: [
         {
             url: `http://localhost:${port}`,
-            description: 'Development server',
+            description: 'Formeditor.ms lowcode api',
         },
     ],
 };
@@ -74,8 +74,9 @@ const swaggerDefinition = {
 // Options for the swagger docs
 const options = {
     swaggerDefinition,
+    definition: {},
     // Paths to files containing OpenAPI definitions
-    apis: ['./routes/*.js'], // Adjust this path to where your route files are
+    apis: ['./*.js'], // Adjust this path to where your route files are
 };
 
 // Initialize swagger-jsdoc

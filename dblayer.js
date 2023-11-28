@@ -181,7 +181,10 @@ app.get('/table-indexes/:tableName',checkAuthenticated, async (req, res) => {
     try {
         await db.connect();
         const tableName = req.params.tableName;
-        const firstRecord = await db.moveToFirst(tableName);
+         // Get the fields from the query string. It's a comma-separated string.
+         const fields = req.query.fields ? req.query.fields.split(',') : null;
+
+        const firstRecord = await db.moveToFirst(tableName,fields);
         res.json(firstRecord);
     } catch (err) {
         console.error('Error:', err);

@@ -28,7 +28,7 @@ async function fetchTableStructure(tableName) {
     }
 }
 
-function createNavigationBar(tableName) {
+function createNavigationBar(tableName,datasetFields) {
     // Create the navigation bar div
     var navigationBar = document.createElement('div');
     navigationBar.id = 'navigationBar';
@@ -37,12 +37,12 @@ function createNavigationBar(tableName) {
 
     // Create buttons and append them to the navigation bar
     var buttons = [
-        { id: 'firstRecordBtn', text: 'F', event:"moveFirst('"+tableName+"')" },
-        { id: 'previousRecordBtn', text: '<', event: "movePrev('"+tableName+"')" },
-        { id: 'nextRecordBtn', text: '>', event: "moveNext('"+tableName+"')" },
-        { id: 'lastRecordBtn', text: 'L', event: "moveLast('"+tableName+"')" },
-        { id: 'EditRecordBtn', text: 'E', event: "EditRecord('"+tableName+"')" },
-        { id: 'SaveRecordBtn', text: 'S', event: "UpdateRecord('"+tableName+"')" }
+        { id: 'firstRecordBtn', text: 'F', event:"moveFirst('"+tableName+"','"+datasetFields+"')" },
+        { id: 'previousRecordBtn', text: '<', event: "movePrev('"+tableName+"','"+datasetFields+"')" },
+        { id: 'nextRecordBtn', text: '>', event: "moveNext('"+tableName+"','"+datasetFields+"')" },
+        { id: 'lastRecordBtn', text: 'L', event: "moveLast('"+tableName+"','"+datasetFields+"')" },
+        { id: 'EditRecordBtn', text: 'E', event: "EditRecord('"+tableName+"','"+datasetFields+"')" },
+        { id: 'SaveRecordBtn', text: 'S', event: "UpdateRecord('"+tableName+"','"+datasetFields+"')" }
     ];
 
     //for the dom2json is mandatory to create a html for the events
@@ -51,7 +51,7 @@ function createNavigationBar(tableName) {
 
         navigationBar.innerHTML+=htm;
     });
-
+    
     // Append the navigation bar to the body or another element in your document
     return navigationBar;
 }
@@ -61,17 +61,15 @@ async function createFormElementsFromStructure(tableName,formContainer) {
    
     const dataset=document.createElement("div");
     dataset.id="DataSet";
-    dataset.appendChild(createNavigationBar(tableName));
+   
     fieldsList=document.querySelectorAll('#tableDetails table input:checked')
-    console.log(fieldsList);
+    var datasetFields=['rowid'];
     fieldsList.forEach(field => { 
         fieldName=field.getAttribute("dataset-field-name");
-        console.log(fieldName);
-        console.log(structure);
+        datasetFields.push(fieldName);
+       
         column=structure.find(({ name }) => name === fieldName);;
-        
-        console.log(column);
-        console.log(">>"+column.dataTypeName);
+   
         const type = mapColumnTypeToInputType(column.dataTypeName); // Map the column type to input type
         switch(type) {
             case 'text':
@@ -104,7 +102,8 @@ async function createFormElementsFromStructure(tableName,formContainer) {
         
        dataset.appendChild(element); // Append to the desired container
     });
-
+    dataset.appendChild(createNavigationBar(tableName,datasetFields));
+    dataset.setAttribute("DataSet-Fields-List",datasetFields);
     formContainer.innerHTML="";
     formContainer.appendChild(dataset);
 }

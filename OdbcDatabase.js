@@ -157,9 +157,15 @@ class OdbcDatabase {
 // CURSOR
 
  // Move to the first record
- async moveToFirst(tableName) {
-    const query = `SELECT TOP 1 * FROM ${tableName} `;
-    return this.queryData(query);
+ async moveToFirst(tableName, fields) {
+    // Construct the SQL query based on the fields provided
+    let query;
+    if (fields && fields.length > 0) {
+        const fieldList = fields.join(', ');
+        const query = `SELECT TOP 1 ${fieldList} FROM ${tableName} `;
+        return this.queryData(query);
+    }
+    return null;
 }
 
 // Move to the last record
