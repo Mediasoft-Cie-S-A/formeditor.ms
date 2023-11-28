@@ -162,6 +162,7 @@ class OdbcDatabase {
     let query;
     if (fields && fields.length > 0) {
         const fieldList = fields.join(', ');
+        console.log(fieldList);
         const query = `SELECT TOP 1 ${fieldList} FROM ${tableName} `;
         return this.queryData(query);
     }
@@ -169,29 +170,41 @@ class OdbcDatabase {
 }
 
 // Move to the last record
-async moveToLast(tableName) {
+async moveToLast(tableName , fields) {
     // OpenEdge doesn't have a direct way to select the last record, so you might need to use an ORDER BY clause
     // with DESC and then select the TOP 1 record. This assumes you have a column to order by.
-    const orderByColumn = 'your_order_by_column'; // Replace with your actual column
-    const query = `SELECT * FROM ${tableName} ORDER BY 1 desc `;    
-    return this.queryData(query);
+    if (fields && fields.length > 0) {
+        const fieldList = fields.join(', ');
+        const query = `SELECT ${fieldList} FROM ${tableName} ORDER BY 1 desc `;    
+        return this.queryData(query);
+    }
+    return null;
 }
 
 // Move to the next record
-async moveToNext(tableName, currentRowId) {
-    // Assuming 'currentRowId' is the ROWID of the current record
-    const query = `SELECT * FROM ${tableName}  OFFSET ${currentRowId} ROWS FETCH NEXT 1 ROWS ONLY`;
-    console.log(query);
-    return this.queryData(query);
+async moveToNext(tableName, fields, currentRowId) {
+    if (fields && fields.length > 0) {
+        const fieldList = fields.join(', ');
+        // Assuming 'currentRowId' is the ROWID of the current record
+        const query = `SELECT ${fieldList} FROM ${tableName}  OFFSET ${currentRowId} ROWS FETCH NEXT 1 ROWS ONLY`;
+        console.log(query);
+        return this.queryData(query);
+    }
+    return null;
+    
 }
 
 // Move to the previous record
-async moveToPrevious(tableName, currentRowId) {
+async moveToPrevious(tableName, fields, currentRowId) {
     // This is a bit tricky as OpenEdge doesn't support fetching the previous record directly
     // You might need to fetch all records with ROWID less than the current one and then take the last one
-    const query = `SELECT * FROM ${tableName} OFFSET ${currentRowId} ROWS FETCH NEXT 1 ROWS ONLY`;
-    console.log(query);
-    return this.queryData(query);
+    if (fields && fields.length > 0) {
+        const fieldList = fields.join(', ');
+            const query = `SELECT ${fieldList} FROM ${tableName} OFFSET ${currentRowId} ROWS FETCH NEXT 1 ROWS ONLY`;
+            console.log(query);
+            return this.queryData(query);
+        }
+        return null;
 }
 
 // Move to the next record

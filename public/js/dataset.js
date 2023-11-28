@@ -1,33 +1,33 @@
 
-function moveFirst(tableName) {
+function moveFirst(tableName,datasetFields) {
         
     if (tableName)
     {
-      navigateRecords('move-to-first', tableName);
+      navigateRecords('move-to-first', tableName,datasetFields);
     }
 }
 
-function movePrev(tableName) {
+function movePrev(tableName,datasetFields) {
   
     if (tableName ) {
-        navigateRecords('move-to-previous', tableName, parseInt(getRowID())-1);
+        navigateRecords('move-to-previous', tableName,datasetFields, parseInt(getRowID())-1);
     }
 }
 
-function moveNext(tableName) {
+function moveNext(tableName,datasetFields) {
     
     if (tableName ) {
-        navigateRecords('move-to-next', tableName, parseInt(getRowID())+1);
+        navigateRecords('move-to-next', tableName,datasetFields, parseInt(getRowID())+1);
     }
 }
 
-function moveLast(tableName) {
+function moveLast(tableName,datasetFields) {
 
-    if (tableName) navigateRecords('move-to-last', tableName);
+    if (tableName) navigateRecords('move-to-last', tableName,datasetFields);
 }
 
-function navigateRecords(action, tableName, rowId = '') {
-    const url = `/${action}/${tableName}` + (rowId ? `/${rowId}` : '');
+function navigateRecords(action, tableName,datasetFields, rowId = '') {
+    const url = `/${action}/${tableName}` + (rowId ? `/${rowId}` : '')+`?fields=${datasetFields}`;
     fetch(url)
         .then(response => response.json())
         .then(data => {
@@ -88,10 +88,13 @@ function CreateUpdated(tableName)
    var updateFields="";
    for (i=0;i<inputs.length;i++)
     {
-        const field = inputs[i].getAttribute('dataset-field-name');
-        console.log(field);
-        updateFields+=`"${field}" = '${inputs[i].value}'`;
-        if (i<inputs.length-1) updateFields+=',';
+        if (inputs[i].type!='hidden') 
+        {
+            const field = inputs[i].getAttribute('dataset-field-name');
+            console.log(field);
+            updateFields+=`"${field}" = '${inputs[i].value}'`;
+            if (i<inputs.length-1) updateFields+=',';
+        }
     };     
     console.log(updateFields);
     return updateFields;
@@ -99,17 +102,8 @@ function CreateUpdated(tableName)
 //update record 
 async function SaveRecord(tableName) {
     try {
-        const currentRowId= getRowID();
-        // Move to the next record
-        let response = await fetch(`/getROWID/${tableName}/${currentRowId}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        let nextRecord = await response.json();
-
-        // Assuming nextRecord contains the ROWID of the next record
-        const nextRowId = nextRecord[0].rowid;
-
+        const nextRowId=document.querySelector('#dataset-rowid').value; 
+         console.log(nextRowId);
         const updateData= {
                             body: CreateUpdated(tableName)
         };

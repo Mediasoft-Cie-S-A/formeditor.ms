@@ -42,7 +42,7 @@ function createNavigationBar(tableName,datasetFields) {
         { id: 'nextRecordBtn', text: '>', event: "moveNext('"+tableName+"','"+datasetFields+"')" },
         { id: 'lastRecordBtn', text: 'L', event: "moveLast('"+tableName+"','"+datasetFields+"')" },
         { id: 'EditRecordBtn', text: 'E', event: "EditRecord('"+tableName+"','"+datasetFields+"')" },
-        { id: 'SaveRecordBtn', text: 'S', event: "UpdateRecord('"+tableName+"','"+datasetFields+"')" }
+        { id: 'SaveRecordBtn', text: 'S', event: "SaveRecord('"+tableName+"')" }
     ];
 
     //for the dom2json is mandatory to create a html for the events
@@ -64,10 +64,15 @@ async function createFormElementsFromStructure(tableName,formContainer) {
    
     fieldsList=document.querySelectorAll('#tableDetails table input:checked')
     var datasetFields=['rowid'];
+    const input=document.createElement('input');
+            input.setAttribute('dataset-table-name', tableName);
+            input.setAttribute('dataset-field-name', 'rowid');
+            input.id="dataset-rowid";
+            input.type='hidden';
+            dataset.appendChild(input); 
     fieldsList.forEach(field => { 
         fieldName=field.getAttribute("dataset-field-name");
-        datasetFields.push(fieldName);
-       
+        datasetFields.push(fieldName);       
         column=structure.find(({ name }) => name === fieldName);;
    
         const type = mapColumnTypeToInputType(column.dataTypeName); // Map the column type to input type

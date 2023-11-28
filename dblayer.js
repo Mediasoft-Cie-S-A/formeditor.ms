@@ -218,7 +218,10 @@ app.get('/move-to-last/:tableName', checkAuthenticated, async (req, res) => {
     try {
         await db.connect();
         const tableName = req.params.tableName;
-        const lastRecord = await db.moveToLast(tableName);
+         // Get the fields from the query string. It's a comma-separated string.
+         const fields = req.query.fields ? req.query.fields.split(',') : null;
+
+        const lastRecord = await db.moveToLast(tableName,fields);
         res.json(lastRecord);
     } catch (err) {
         console.error('Error:', err);
@@ -258,7 +261,10 @@ app.get('/move-to-next/:tableName/:currentRowId', checkAuthenticated, async (req
         await db.connect();
         const tableName = req.params.tableName;
         const currentRowId = req.params.currentRowId;
-        const nextRecord = await db.moveToNext(tableName, currentRowId);
+         // Get the fields from the query string. It's a comma-separated string.
+         const fields = req.query.fields ? req.query.fields.split(',') : null;
+
+        const nextRecord = await db.moveToNext(tableName, fields, currentRowId);
         res.json(nextRecord);
     } catch (err) {
         console.error('Error:', err);
@@ -298,7 +304,10 @@ app.get('/move-to-previous/:tableName/:currentRowId', checkAuthenticated, async 
         await db.connect();
         const tableName = req.params.tableName;
         const currentRowId = req.params.currentRowId;
-        const previousRecord = await db.moveToPrevious(tableName, currentRowId);
+         // Get the fields from the query string. It's a comma-separated string.
+         const fields = req.query.fields ? req.query.fields.split(',') : null;
+
+        const previousRecord = await db.moveToPrevious(tableName,fields, currentRowId);
         res.json(previousRecord);
     } catch (err) {
         console.error('Error:', err);
