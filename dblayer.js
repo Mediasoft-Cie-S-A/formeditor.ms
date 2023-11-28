@@ -26,6 +26,26 @@ module.exports = function(app,session, passport) {
     // Replace with your actual connection string
 const db = new OdbcDatabase(dsn);
 
+/**
+ * @swagger
+ * /table-structure/{tableName}:
+ *   get:
+ *     summary: Get table structure
+ *     description: Retrieve the structure of a specified table.
+ *     parameters:
+ *       - in: path
+ *         name: tableName
+ *         required: true
+ *         description: Name of the table to retrieve structure.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Table structure retrieved successfully.
+ *       500:
+ *         description: Internal Server Error
+ */
+
 app.get('/table-structure/:tableName',checkAuthenticated, async (req, res) => {
     try {
         await db.connect();
@@ -40,6 +60,19 @@ app.get('/table-structure/:tableName',checkAuthenticated, async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /tables-list:
+ *   get:
+ *     summary: Get list of tables
+ *     description: Retrieve a list of all tables.
+ *     responses:
+ *       200:
+ *         description: List of tables retrieved successfully.
+ *       500:
+ *         description: Error retrieving tables list
+ */
+    
 app.get('/tables-list', checkAuthenticated, async (req, res) => {
     try {
         console.log("tablesList");
@@ -54,6 +87,27 @@ app.get('/tables-list', checkAuthenticated, async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /table-fields/{tableName}:
+ *   get:
+ *     summary: Get fields of a table
+ *     description: Retrieve the fields of a specified table.
+ *     parameters:
+ *       - in: path
+ *         name: tableName
+ *         required: true
+ *         description: Name of the table to retrieve fields.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Table fields retrieved successfully.
+ *       500:
+ *         description: Error retrieving fields for table
+ */
+
+    
 app.get('/table-fields/:tableName',checkAuthenticated, async (req, res) => {
     try {
         console.log("table-fields");
@@ -67,6 +121,27 @@ app.get('/table-fields/:tableName',checkAuthenticated, async (req, res) => {
         await db.close();
     }
 });
+
+ /**
+ * @swagger
+ * /table-indexes/{tableName}:
+ *   get:
+ *     summary: Get indexes of a table
+ *     description: Retrieve the indexes of a specified table.
+ *     parameters:
+ *       - in: path
+ *         name: tableName
+ *         required: true
+ *         description: Name of the table to retrieve indexes.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Table indexes retrieved successfully.
+ *       500:
+ *         description: Error retrieving indexes for table
+ */
+
 
 app.get('/table-indexes/:tableName',checkAuthenticated, async (req, res) => {
     try {
@@ -82,7 +157,26 @@ app.get('/table-indexes/:tableName',checkAuthenticated, async (req, res) => {
     }
 });
 
- // Route to move to the first record of a table
+/**
+ * @swagger
+ * /move-to-first/{tableName}:
+ *   get:
+ *     summary: Move to the first record of a table
+ *     description: Retrieve the first record of a specified table.
+ *     parameters:
+ *       - in: path
+ *         name: tableName
+ *         required: true
+ *         description: Name of the table.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: First record retrieved successfully.
+ *       500:
+ *         description: Error moving to first record
+ */
+
  app.get('/move-to-first/:tableName', checkAuthenticated, async (req, res) => {
     try {
         await db.connect();
@@ -97,7 +191,26 @@ app.get('/table-indexes/:tableName',checkAuthenticated, async (req, res) => {
     }
 });
 
-// Route to move to the last record of a table
+
+/**
+ * @swagger
+ * /move-to-last/{tableName}:
+ *   get:
+ *     summary: Move to the last record of a table
+ *     description: Retrieve the last record of a specified table.
+ *     parameters:
+ *       - in: path
+ *         name: tableName
+ *         required: true
+ *         description: Name of the table.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Last record retrieved successfully.
+ *       500:
+ *         description: Error moving to last record
+ */
 app.get('/move-to-last/:tableName', checkAuthenticated, async (req, res) => {
     try {
         await db.connect();
@@ -112,7 +225,31 @@ app.get('/move-to-last/:tableName', checkAuthenticated, async (req, res) => {
     }
 });
 
-// Route to move to the next record of a table
+/**
+ * @swagger
+ * /move-to-next/{tableName}/{currentRowId}:
+ *   get:
+ *     summary: Move to the next record of a table
+ *     description: Retrieve the next record of a specified table based on the current row ID.
+ *     parameters:
+ *       - in: path
+ *         name: tableName
+ *         required: true
+ *         description: Name of the table.
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: currentRowId
+ *         required: true
+ *         description: Current row ID.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Next record retrieved successfully.
+ *       500:
+ *         description: Error moving to next record
+ */
 app.get('/move-to-next/:tableName/:currentRowId', checkAuthenticated, async (req, res) => {
     try {
         await db.connect();
@@ -128,7 +265,31 @@ app.get('/move-to-next/:tableName/:currentRowId', checkAuthenticated, async (req
     }
 });
 
-// Route to move to the previous record of a table
+/**
+ * @swagger
+ * /move-to-previous/{tableName}/{currentRowId}:
+ *   get:
+ *     summary: Move to the previous record of a table
+ *     description: Retrieve the previous record of a specified table based on the current row ID.
+ *     parameters:
+ *       - in: path
+ *         name: tableName
+ *         required: true
+ *         description: Name of the table.
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: currentRowId
+ *         required: true
+ *         description: Current row ID.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Previous record retrieved successfully.
+ *       500:
+ *         description: Error moving to previous record.
+ */
 app.get('/move-to-previous/:tableName/:currentRowId', checkAuthenticated, async (req, res) => {
     try {
         await db.connect();
@@ -144,7 +305,32 @@ app.get('/move-to-previous/:tableName/:currentRowId', checkAuthenticated, async 
     }
 });
 
-// Route to move to the getROWID record of a table
+/**
+ * @swagger
+ * /getROWID/{tableName}/{currentRowId}:
+ *   get:
+ *     summary: Get ROWID of a record in a table
+ *     description: Retrieve the ROWID of a record in a specified table based on the current row ID.
+ *     parameters:
+ *       - in: path
+ *         name: tableName
+ *         required: true
+ *         description: Name of the table.
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: currentRowId
+ *         required: true
+ *         description: Current row ID.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: ROWID retrieved successfully.
+ *       500:
+ *         description: Error retrieving ROWID.
+ */
+
 app.get('/getROWID/:tableName/:currentRowId', checkAuthenticated, async (req, res) => {
     try {
         await db.connect();
@@ -160,7 +346,44 @@ app.get('/getROWID/:tableName/:currentRowId', checkAuthenticated, async (req, re
     }
 });
 
-// Route to update a record
+/**
+ * @swagger
+ * /update-record/{tableName}/{rowID}:
+ *   put:
+ *     summary: Update a record in a table
+ *     description: Update a specific record in a table.
+ *     parameters:
+ *       - in: path
+ *         name: tableName
+ *         required: true
+ *         description: Name of the table where the record is to be updated.
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: rowID
+ *         required: true
+ *         description: ID of the record to update.
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       description: Data to update in the record
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               field1:
+ *                 type: string
+ *               field2:
+ *                 type: string
+ *               # Add other fields as required
+ *     responses:
+ *       200:
+ *         description: Record updated successfully.
+ *       500:
+ *         description: Error updating record.
+ */
 app.put('/update-record/:tableName/:rowID',  checkAuthenticated, async (req, res) => {
     const { tableName, rowID } = req.params;
     const data = req.body; // Assuming the updated data is sent in the request body
