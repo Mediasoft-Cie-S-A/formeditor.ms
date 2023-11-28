@@ -22,6 +22,9 @@ const session = require('express-session')
 const LocalStrategy = require('passport-local').Strategy
 const MongoClient = require('mongodb').MongoClient;
 const bodyParser = require('body-parser');
+const swaggerUi = require('swagger-ui-express');
+const swaggerJSDoc = require('swagger-jsdoc');
+
 const router = express.Router();
 
 
@@ -52,6 +55,34 @@ app.use(bodyParser.urlencoded({ extended: false }));
 require('./formService')(app, client, dbName);
 require('./dblayer')(app,session, passport);
 
+// Swagger definition
+const swaggerDefinition = {
+    openapi: '3.0.0',
+    info: {
+        title: 'Express API for My Application',
+        version: '1.0.0',
+        description: 'This is a REST API application made with Express.',
+    },
+    servers: [
+        {
+            url: `http://localhost:${port}`,
+            description: 'Development server',
+        },
+    ],
+};
+
+// Options for the swagger docs
+const options = {
+    swaggerDefinition,
+    // Paths to files containing OpenAPI definitions
+    apis: ['./routes/*.js'], // Adjust this path to where your route files are
+};
+
+// Initialize swagger-jsdoc
+const swaggerSpec = swaggerJSDoc(options);
+
+// Use swagger-ui-express for your app's documentation endpoint
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
