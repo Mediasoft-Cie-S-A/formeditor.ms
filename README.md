@@ -38,7 +38,8 @@ npm run start
 ````
 This will walk you through the installation process. When it is done, you will have a running Form.io management application running at the following address in your browser.
 ```
-http://localhost:3000
+http://localhost:3000/dashboard
+http://localhost:3000/api-docs/
 ````
 
 The installation process will also ask if you would like to download an application. If selected, the application can be found at the following URL.
