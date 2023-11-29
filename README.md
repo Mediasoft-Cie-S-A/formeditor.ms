@@ -11,6 +11,22 @@ On Mac, it is recommended to use homebrew brew install mongodb-community
 On Windows, download and install the MSI package @ https://www.mongodb.org/downloads
 and after that you have to create a db, with the following name: formeditmsapp and the collection with the name: forms
 
+## Running Progress OpenEdge Sports2000 DB
+
+Create a copy of Sports2000 db
+
+````
+procopy /OpenEdgeInstallDir/Sports2000 /tmp/Sports2000
+````
+
+startup mysport2000 copy with SQL Broker
+
+````
+proenv
+cd /tmp
+proserve Sports2000 -S 10000 -ServerType SQL -n 50 -L 8000 -c 350 -N TCP -SQLLockWaitTimeout 5
+````
+
 
 ## Running with Node.js
 
