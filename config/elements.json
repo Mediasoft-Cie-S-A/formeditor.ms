@@ -1,0 +1,195 @@
+{
+    "textfield": {
+        "type": "textfield",
+        "description": "Text field",
+        "category": "HTML",        
+        "scriptName": "genericInput.js",
+        "createFunction": "createElementInput",
+        "editFunction": "editElementInput"
+    },
+    "number": {
+        "type": "number",
+        "description": "Number field",
+        "category": "HTML",
+        "scriptName": "genericInput.js",
+        "createFunction": "createElementInput",
+        "editFunction": "editElementInput"
+    },
+    "password": {
+        "type": "password",
+        "description": "A password field",
+        "category": "HTML",
+        "scriptName": "genericInput.js",
+        "createFunction": "createElementInput",
+        "editFunction": "editElementInput"
+    },
+    "email": {
+        "type": "email",
+        "description": "An email field",
+        "category": "HTML",
+        "scriptName": "genericInput.js",
+        "createFunction": "createElementInput",
+        "editFunction": "editElementInput"
+    },
+    "textarea": {
+        "type": "textarea",
+        "description": "A textarea",
+        "category": "HTML",
+        "scriptName": "textareaComponent.js",
+        "createFunction": "createElementInput",
+        "editFunction": "editElementInput"
+    },
+    "checkbox": {
+        "type": "checkbox",
+        "description": "A checkbox",
+        "category": "HTML",
+        "scriptName": "genericInput.js",
+        "createFunction": "createElementInput",
+        "editFunction": "editElementInput"
+    },
+    "radio": {
+        "type": "radio",
+        "description": "A radio button",
+        "category": "HTML",
+        "scriptName": "genericInput.js",
+        "createFunction": "createElementInput",
+        "editFunction": "editElementInput"
+    },
+    "select": {
+        "type": "select",
+        "description": "A select",
+        "category": "HTML",
+        "scriptName": "selectComponent.js",
+        "createFunction": "createElementSelect",
+        "editFunction": "editElementSelect"
+        
+    },
+    "button": {
+        "type": "button",
+        "description": "A button",
+        "category": "HTML",
+        "scriptName": "buttonComponent.js",
+        "createFunction": "createElementButton",
+        "editFunction": "editElementButton"
+        
+    },
+    "submit": {
+        "type": "submit",
+        "description": "A submit button",
+        "category": "HTML",
+        "scriptName": "buttonComponent.js",
+        "createFunction": "createElementButton",
+        "editFunction": "editElementButton"
+        
+    },
+    "reset": {
+        "type": "reset",
+        "description": "A reset button",
+        "category": "HTML",
+        "scriptName": "buttonComponent.js",
+        "createFunction": "createElementButton",
+        "editFunction": "editElementButton"
+        
+    },
+    "image": {
+        "type": "image",
+        "description": "An image",
+        "category": "HTML",
+        "scriptName": "imageComponent.js",
+        "creatFunction": "createElementImage",
+        "editFunction": "editElementImage"
+
+    },
+    "file": {
+        "type": "file",
+        "description": "A file upload",
+        "category": "HTML",
+        "scriptName": "fileComponent.js"
+    },
+    "hidden": {
+        "type": "hidden",
+        "description": "A hidden field",
+        "category": "HTML",
+        "scriptName": "hiddenComponent.js"
+    },
+    "date": {
+        "type": "date",
+        "description": "A date field",
+        "category": "HTML",
+        "scriptName": "dateComponent.js"
+    
+    },
+    "datetime": {
+        "type": "datetime",
+        "description": "A datetime field",
+        "category": "HTML",
+        "scriptName": "datetimeComponent.js"
+    },
+   
+    "month": {
+        "type": "month",
+        "description": "A month field",
+        "category": "HTML",
+        "scriptName": "monthComponent.js"
+    },
+    "week": {
+        "type": "week",
+        "description": "A week field",
+        "category": "HTML",
+        "scriptName": "weekComponent.js"
+    },
+    "time": {
+        "type": "time",
+        "description": "A time field",
+        "category": "HTML",
+        "scriptName": "timeComponent.js"
+    },
+    "range": {
+        "type": "range",
+        "description": "A range field",
+        "category": "HTML",
+        "scriptName": "rangeComponent.js"
+    },
+    "color": {
+        "type": "color",
+        "description": "A color field",
+        "category": "HTML",
+        "scriptName": "colorComponent.js"
+    },
+    "search": {
+        "type": "search",
+        "description": "A search field",
+        "category": "Bussiness  Logic",
+        "scriptName": "searchComponent.js"
+    },
+    "tel": {
+        "type": "tel",
+        "description": "A telephone field",
+        "category": "HTML",
+        "scriptName": "telComponent.js"
+    },
+    "url": {
+        "type": "url",
+        "description": "A url field",
+        "category": "HTML",
+        "scriptName": "urlComponent.js"
+    }, 
+    "grid": {
+        "type": "grid",
+        "description": "HTML Grid",
+        "category": "HTML",
+        "scriptName": "gridComponent.js"
+    },
+    "dataSet": {
+        "type": "dataSet",
+        "description": "Data Set",
+        "category": "Bussiness  Logic"  ,
+        "scriptName": "dataSetComponent.js"
+    },
+    "dataGrid": {
+        "type": "dataGrid",
+        "description": "Data Grid",
+        "category": "Bussiness  Logic",
+        "scriptName": "dataGridComponent.js"
+    }
+}

@@ -24,7 +24,7 @@ const MongoClient = require('mongodb').MongoClient;
 const bodyParser = require('body-parser');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJSDoc = require('swagger-jsdoc');
-
+const fs = require('fs');
 const router = express.Router();
 
 
@@ -84,6 +84,18 @@ const swaggerSpec = swaggerJSDoc(options);
 
 // Use swagger-ui-express for your app's documentation endpoint
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+
+app.get('/elementsConfig', (req, res) => {
+    fs.readFile('config/elements.json', 'utf8', (err, data) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Error reading file');
+        } else {
+            res.json(JSON.parse(data));
+        }
+    });
+});
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);

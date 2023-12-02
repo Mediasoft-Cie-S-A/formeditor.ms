@@ -141,13 +141,18 @@ class OdbcDatabase {
         }
     }
 
-    async queryDataWithPagination(tableName, page, pageSize) {
+    async queryDataWithPagination(tableName, page, pageSize,fields) {
         try {
-            const offset = (page - 1) * pageSize;
-            const paginatedQuery = `select * FROM PUB."${tableName}" OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
-            console.log(paginatedQuery)
-            const result = await this.connection.query(paginatedQuery);
-            return result;
+            if (fields && fields.length > 0) {
+                const fieldList = fields.join(', ');
+                const offset = (page - 1) * pageSize;
+                
+                const paginatedQuery = `select  ${fieldList} FROM PUB."${tableName}" OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+                console.log(paginatedQuery)
+                const result = await this.connection.query(paginatedQuery);
+                return result;
+                }
+            return null;
         } catch (err) {
             console.error('Error querying data with pagination:', err);
             throw err;

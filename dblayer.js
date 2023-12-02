@@ -421,8 +421,10 @@ app.get('/table-data/:tableName/:page/:pageSize', checkAuthenticated,  async (re
         // Convert page and pageSize to numbers
         const pageNum = parseInt(page, 10);
         const pageSizeNum = parseInt(pageSize, 10);
+         // Get the fields from the query string. It's a comma-separated string.
+         const fields = req.query.fields ? req.query.fields.split(',') : null;
 
-        const data = await db.queryDataWithPagination(tableName, pageNum, pageSizeNum);
+        const data = await db.queryDataWithPagination(tableName, pageNum, pageSizeNum,fields);
         res.json(data);
     } catch (err) {
         console.error('Error:', err);

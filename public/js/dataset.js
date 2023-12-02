@@ -128,10 +128,10 @@ async function SaveRecord(tableName) {
 }
 
 // Function to fetch and display data
-function gridFetchData(dataGrid,page) {
+function gridFetchData(dataGrid,page,datasetFields) {
     var pageSize=dataGrid.getAttribute("page_size");
     var tableName=dataGrid.getAttribute("Table-Name");
-    fetch(`/table-data/${tableName}/${page}/${pageSize}`)
+    fetch(`/table-data/${tableName}/${page}/${pageSize}?fields=${datasetFields}`)
         .then(response => response.json())
         .then(data => {
             data.forEach(row => {
@@ -141,7 +141,18 @@ function gridFetchData(dataGrid,page) {
                 for (const key in row) {
                     const cell = document.createElement('div');
                     cell.className = 'grid-cell';
+                    
+                    if (key=='rowid')
+                    {
+                        const input=document.createElement('input');
+                        input.type='hidden';
+                        input.value=row[key];
+                        cell.appendChild(input);
+                    }
+                    else
+                    {
                     cell.textContent = row[key];
+                    }
                     rowDiv.appendChild(cell);
                 }
                 dataGrid.appendChild(rowDiv);

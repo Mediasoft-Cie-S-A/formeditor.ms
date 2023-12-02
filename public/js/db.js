@@ -256,11 +256,54 @@ function insertGrid()
     overl.style.display = 'none';
     const tableName = document.getElementById('TableDetails_TableName');
     formContainer.innerHTML=`<div id="dataGrid" style="height: 400px; overflow-y: auto;" dataset-table-name="${tableName}"></div>`;
-    createGrid(tableName.innerText,1,10);
+    fieldsList=document.querySelectorAll('#tableDetails table input:checked')
+    var datasetFields=[];
+    datasetFields.push('rowid');
+    fieldsList.forEach(field => { 
+        fieldName=field.getAttribute("dataset-field-name");
+        datasetFields.push(fieldName);       
+    });
+
+    createGrid(tableName.innerText,datasetFields);
     
 }
 
 
+
+//Grid code
+function createGrid(tableName,datasetFields)
+{
+    const grid = document.getElementById('dataGrid');
+    //header
+    grid.setAttribute("current_page",1);
+    grid.setAttribute("page_size",10);
+    grid.setAttribute("Table-Name",tableName);
+    
+    var header = document.createElement('div');
+    header.className = 'grid-row';   
+    datasetFields.forEach(field => {
+        const cell = document.createElement('div');
+        cell.className = 'grid-cell-header';        
+        cell.textContent = field!=='rowid'?field:'';
+        header.appendChild(cell);
+    });
+    grid.appendChild(header);
+    gridFetchData(grid,1,datasetFields) ;
+    // Infinite scrolling logic
+    grid.addEventListener('scroll', () => {
+        console.log("scroll");
+        if (this.scrollTop + this.clientHeight >= this.scrollHeight) {
+
+            var currentPage=parseInt(this.getAttribute("current_page"));
+            currentPage++;
+            console.log(currentPage);
+            gridFetchData(grid,currentPage,datasetFields);
+        }
+    });
+}
+
+
+// table structure
 function fetchTableDetails(tableName,tableLabel) {
     Promise.all([
         fetch(`/table-fields/${tableName}`).then(response => response.json())        
@@ -299,39 +342,3 @@ function fetchTableDetails(tableName,tableLabel) {
 }
 
  
-
-
-
-
-//Grid code
-function createGrid(tableName)
-{
-    const grid = document.getElementById('dataGrid');
-    //header
-    grid.setAttribute("current_page",1);
-    grid.setAttribute("page_size",10);
-    grid.setAttribute("Table-Name",tableName);
-    const fields=document.querySelectorAll("#tableDetails li");
-    var header = document.createElement('div');
-    header.className = 'grid-row';   
-    fields.forEach(field => {
-        const cell = document.createElement('div');
-        cell.className = 'grid-cell-header';        
-        cell.textContent = field.getAttribute('dataset-field-name');
-        header.appendChild(cell);
-    });
-    grid.appendChild(header);
-    gridFetchData(grid,1) ;
-    // Infinite scrolling logic
-    grid.addEventListener('scroll', () => {
-        console.log("scroll");
-        if (this.scrollTop + this.clientHeight >= this.scrollHeight) {
-
-            var currentPage=parseInt(this.getAttribute("current_page"));
-            currentPage++;
-            console.log(currentPage);
-            gridFetchData(currentPage);
-        }
-    });
-}
-
