@@ -40,7 +40,7 @@ module.exports = function(app,session, passport) {
     // 2. If the password does not match, done (null, false)
     // 3. If user found and password match, done (null, user)
         
-        let authenticated_user = { id: 123, name: "masspe"} 
+        let authenticated_user = { id: 123, name: "admin"} 
     //Let's assume that DB search that user found and password matched for Kyle
         
         return done (null, authenticated_user ) 
