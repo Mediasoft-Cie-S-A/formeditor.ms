@@ -47,8 +47,7 @@ The installation process will also ask if you would like to download an applicat
 
 ## Adding Component
 
-JSON elements.json in the confi folder, is configuration file for the componets config.
-Each key in the JSON object represents a type of low code components. 
+JSON elements.json, in the config folder, is a configuration file for component configuration. Each key in the JSON object represents a low-code component type.
 
 - `"type"`: The type of the element (e.g., "submit", "reset", "image", "dataset").
 - `"description"`: A human-readable description of the  element.
