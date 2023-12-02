@@ -45,4 +45,16 @@ user admin password 123
 
 The installation process will also ask if you would like to download an application. If selected, the application can be found at the following URL.
 
+## Adding Component
 
+JSON elements.json in the confi folder, is configuration file for the componets config.
+Each key in the JSON object represents a type of low code components. 
+
+- `"type"`: The type of the element (e.g., "submit", "reset", "image", "dataset").
+- `"description"`: A human-readable description of the  element.
+- `"category"`: The category to which the  element belongs. 
+- `"scriptName"`: The name of the JavaScript file that contains the functions for creating and editing the element.
+- `"createFunction"`: The name of the function that creates the  element. This function is expected to be defined in the JavaScript file specified by `"scriptName"`.
+- `"editFunction"`: The name of the function that edits the  element. This function is also expected to be defined in the JavaScript file specified by `"scriptName"`.
+
+This structure allows you to dynamically create and edit HTML elements based on the JSON data. By changing the JSON data, you can control which HTML elements are available, how they are created and edited, and so on.
