@@ -16,7 +16,7 @@ and after that you have to create a db, with the following name: formeditmsapp a
 Create a copy of Sports2000 db
 
 ````
-procopy /OpenEdgeInstallDir/Sports2000 /tmp/Sports2000
+prodb /tmp/Sports2000 /OpenEdgeInstallDir/Sports2000 
 ````
 
 startup mysport2000 copy with SQL Broker
