@@ -35,7 +35,7 @@
         "type": "textarea",
         "description": "A textarea",
         "category": "HTML",
-        "scriptName": "textareaComponent.js",
+        "scriptName": "genericInput.js",
         "createFunction": "createElementInput",
         "editFunction": "editElementInput"
     },
@@ -93,10 +93,10 @@
     },
     "image": {
         "type": "image",
-        "description": "An image",
+        "description": "Image",
         "category": "HTML",
         "scriptName": "imageComponent.js",
-        "creatFunction": "createElementImage",
+        "createFunction": "createElementImage",
         "editFunction": "editElementImage"
 
     },
@@ -104,92 +104,122 @@
         "type": "file",
         "description": "A file upload",
         "category": "HTML",
-        "scriptName": "fileComponent.js"
+        "scriptName": "genericInput.js",
+        "createFunction": "createElementInput",
+        "editFunction": "editElementInput"
     },
     "hidden": {
         "type": "hidden",
         "description": "A hidden field",
         "category": "HTML",
-        "scriptName": "hiddenComponent.js"
+        "scriptName": "genericInput.js",
+        "createFunction": "createElementInput",
+        "editFunction": "editElementInput"
     },
     "date": {
         "type": "date",
         "description": "A date field",
         "category": "HTML",
-        "scriptName": "dateComponent.js"
+        "scriptName": "genericInput.js",
+        "createFunction": "createElementInput",
+        "editFunction": "editElementInput"
     
     },
     "datetime": {
         "type": "datetime",
         "description": "A datetime field",
         "category": "HTML",
-        "scriptName": "datetimeComponent.js"
+        "scriptName": "genericInput.js",
+        "createFunction": "createElementInput",
+        "editFunction": "editElementInput"
     },
    
     "month": {
         "type": "month",
         "description": "A month field",
         "category": "HTML",
-        "scriptName": "monthComponent.js"
+        "scriptName": "genericInput.js",
+        "createFunction": "createElementInput",
+        "editFunction": "editElementInput"
     },
     "week": {
         "type": "week",
         "description": "A week field",
         "category": "HTML",
-        "scriptName": "weekComponent.js"
+        "scriptName": "genericInput.js",
+        "createFunction": "createElementInput",
+        "editFunction": "editElementInput"
     },
     "time": {
         "type": "time",
         "description": "A time field",
         "category": "HTML",
-        "scriptName": "timeComponent.js"
+        "scriptName": "genericInput.js",
+        "createFunction": "createElementInput",
+        "editFunction": "editElementInput"
     },
     "range": {
         "type": "range",
         "description": "A range field",
         "category": "HTML",
-        "scriptName": "rangeComponent.js"
+        "scriptName": "genericInput.js",
+        "createFunction": "createElementInput",
+        "editFunction": "editElementInput"
     },
     "color": {
         "type": "color",
         "description": "A color field",
         "category": "HTML",
-        "scriptName": "colorComponent.js"
+        "scriptName": "genericInput.js",
+        "createFunction": "createElementInput",
+        "editFunction": "editElementInput"
     },
     "search": {
         "type": "search",
         "description": "A search field",
         "category": "Bussiness  Logic",
-        "scriptName": "searchComponent.js"
+        "scriptName": "genericInput.js",
+        "createFunction": "createElementInput",
+        "editFunction": "editElementInput"
     },
     "tel": {
         "type": "tel",
         "description": "A telephone field",
         "category": "HTML",
-        "scriptName": "telComponent.js"
+        "scriptName": "genericInput.js",
+        "createFunction": "createElementInput",
+        "editFunction": "editElementInput"
     },
     "url": {
         "type": "url",
         "description": "A url field",
         "category": "HTML",
-        "scriptName": "urlComponent.js"
+        "scriptName": "genericInput.js",
+        "createFunction": "createElementInput",
+        "editFunction": "editElementInput"
     }, 
     "grid": {
         "type": "grid",
         "description": "HTML Grid",
         "category": "HTML",
-        "scriptName": "gridComponent.js"
+        "scriptName": "genericInput.js",
+        "createFunction": "createElementInput",
+        "editFunction": "editElementInput"
     },
     "dataSet": {
         "type": "dataSet",
         "description": "Data Set",
         "category": "Bussiness  Logic"  ,
-        "scriptName": "dataSetComponent.js"
+        "scriptName": "dataSetComponent.js",
+        "createFunction": "createElementDateSet",
+        "editFunction": "editElementDataSet"
     },
     "dataGrid": {
         "type": "dataGrid",
         "description": "Data Grid",
         "category": "Bussiness  Logic",
-        "scriptName": "dataGridComponent.js"
+        "scriptName": "dataSetComponent.js",
+        "createFunction": "createElementDateSet",
+        "editFunction": "editElementDataSet"
     }
 }
