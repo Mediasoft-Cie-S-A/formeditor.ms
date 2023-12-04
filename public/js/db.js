@@ -28,111 +28,6 @@ async function fetchTableStructure(tableName) {
     }
 }
 
-function createNavigationBar(tableName,datasetFields) {
-    // Create the navigation bar div
-    var navigationBar = document.createElement('div');
-    navigationBar.id = 'navigationBar';
-    navigationBar.setAttribute('data-table-name', tableName);
-    navigationBar.setAttribute('data-current-row', '0');
-
-    // Create buttons and append them to the navigation bar
-    var buttons = [
-        { id: 'firstRecordBtn', text: 'F', event:"moveFirst('"+tableName+"','"+datasetFields+"')" },
-        { id: 'previousRecordBtn', text: '<', event: "movePrev('"+tableName+"','"+datasetFields+"')" },
-        { id: 'nextRecordBtn', text: '>', event: "moveNext('"+tableName+"','"+datasetFields+"')" },
-        { id: 'lastRecordBtn', text: 'L', event: "moveLast('"+tableName+"','"+datasetFields+"')" },
-        { id: 'EditRecordBtn', text: 'E', event: "EditRecord('"+tableName+"','"+datasetFields+"')" },
-        { id: 'SaveRecordBtn', text: 'S', event: "SaveRecord('"+tableName+"')" }
-    ];
-
-    //for the dom2json is mandatory to create a html for the events
-    buttons.forEach(buttonInfo => {
-        const htm='<button id="'+buttonInfo.id+'" onclick="'+buttonInfo.event.trim()+'">'+buttonInfo.text+"</button>";
-
-        navigationBar.innerHTML+=htm;
-    });
-    
-    // Append the navigation bar to the body or another element in your document
-    return navigationBar;
-}
-
-async function createFormElementsFromStructure(tableName,formContainer) {
-    var structure = await fetchTableStructure(tableName);
-   
-    const dataset=document.createElement("div");
-    dataset.id="DataSet";
-   
-    fieldsList=document.querySelectorAll('#tableDetails table input:checked')
-    var datasetFields=['rowid'];
-    const input=document.createElement('input');
-            input.setAttribute('dataset-table-name', tableName);
-            input.setAttribute('dataset-field-name', 'rowid');
-            input.id="dataset-rowid";
-            input.type='hidden';
-            dataset.appendChild(input); 
-    fieldsList.forEach(field => { 
-        fieldName=field.getAttribute("dataset-field-name");
-        datasetFields.push(fieldName);       
-        column=structure.find(({ name }) => name === fieldName);;
-   
-        const type = mapColumnTypeToInputType(column.dataTypeName); // Map the column type to input type
-        switch(type) {
-            case 'text':
-            case 'password':
-            case 'numeric':
-            case 'checkbox':
-            case 'radio':
-            case 'datetime-local':
-                element = createInputElement(type);
-                break;
-            case 'textarea':
-                element = createInputElement('textarea');
-                break;
-            case 'select':
-                element = createSelectElement('select');
-                // Add options to select element here
-                break;
-            default:
-                // Handle default case or unknown types
-                element = createInputElement('text');
-        }
-    
-        if (element) {
-            element.querySelector('label').textContent = column.name; // Set label to column name
-            const input=element.querySelector('input');
-            input.setAttribute('dataset-table-name', tableName);
-            input.setAttribute('dataset-field-name', column.name);
-
-        }
-        
-       dataset.appendChild(element); // Append to the desired container
-    });
-    dataset.appendChild(createNavigationBar(tableName,datasetFields));
-    dataset.setAttribute("DataSet-Fields-List",datasetFields);
-    formContainer.innerHTML="";
-    formContainer.appendChild(dataset);
-}
-
-
-
-function mapColumnTypeToInputType(columnType) {
-    // Map your database column types to appropriate input types
-    // This is a basic example, adjust according to your database schema
- 
-    switch(columnType) {
-        case 'SQL_NUMERIC':
-        case 'SQL_VARCHAR':
-            return 'text';
-        case 'SQL_INTEGER':
-                return 'number';
-        case 'date':
-        case 'datetime':
-            return 'datetime-local';
-        // Add more mappings as needed
-        default:
-            return 'text';
-    }
-}
 
 
 // database structure
@@ -211,20 +106,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }, {capture: true, once: true});
 });
 
-function showModalDbStrc() {
-    console.log("show");
-    const modal = document.getElementById('tableDetailsModal');
-    const overl = document.getElementById('overlayModal');
-    modal.style.display = 'block';
-    overl.style.display = 'block';
-}
-
-function closeModalDbStrct() {
-    const modal = document.getElementById('tableDetailsModal');
-    const overl = document.getElementById('overlayModal');
-    modal.style.display = 'none';
-    overl.style.display = 'none';
-}
 
 
 function closeModalEdit() {
@@ -234,20 +115,7 @@ function closeModalEdit() {
     overl.style.display = 'none';
 }
 
-function insertTable()
-{
-    const modal = document.getElementById('tableDetailsModal');
-    const overl = document.getElementById('overlayModal');
-    modal.style.display = 'none';
-    overl.style.display = 'none';
-    console.log("dbitem");
 
-    const tableName = document.getElementById('TableDetails_TableName');
-    element = document.createElement('div');
-    createFormElementsFromStructure('PUB.'+tableName.innerText,element);
-    const formContainer = document.getElementById('formContainer');
-    formContainer.appendChild(element);
-}
 function insertGrid()
 {
     const modal = document.getElementById('tableDetailsModal');

@@ -58,7 +58,7 @@ function createInputDiv(id, labelText, onChangeFunction,text) {
     return div;
 }
 
-function editElement(element) {
+function editElement(element,type) {
         currentElement=element
         var dialog= document.getElementById("modalDialogText");
         dialog.style.display = 'block';
@@ -66,32 +66,18 @@ function editElement(element) {
         document.querySelector(".overlay").style.display = 'block';
         var content= document.querySelector(".dialogContent");
         removeAllChildNodes(content);
+        // Execute the function editor
+        console.log(elementsData[type]);
+         var functionName = elementsData[type].editFunction;
       
-        if (element instanceof HTMLDivElement)
-        {
-            // Create and append the elements
-            var labelDiv = createInputDiv("label", "Text:", updateElementText,element.querySelector('label').innerText);
-            var textDiv = createInputDiv("text", "Value:", updateElementValue,element.querySelector('input').value);
-            var checkedDiv = createInputDiv("sld", "checked", function(value) { updateElementStyle('checked', value); },element.querySelector('input').checked);
-            var onChangeDiv = createInputDiv("change", "OnChange Event:", updateElementOnChange,"");
+         if (typeof window[functionName] === 'function') {
+            console.log("functionName:"+functionName);
+            window[functionName](type,element,content);
+         }
+      
 
-            content.appendChild(labelDiv);
-            content.appendChild(textDiv);
-            content.appendChild(checkedDiv);
-            content.appendChild(onChangeDiv);
-                
-        }
-        if (element instanceof HTMLButtonElement)
-        {
-                // Create and append the elements
-        var textContentDiv = createInputDiv("textContent", "Value:", updateElementTxtC,element.querySelector('textarea').textContent);
-        var clickDiv = createInputDiv("click", "OnChange Event:", updateElementOnChange,"");
-
-        content.appendChild(textContentDiv);
-        content.appendChild(clickDiv);
-        
-        }
         const style = element.style;
+        content.appendChild(createInputItem("vs", "visibility", "visibility",style.visibility));
         content.appendChild(createInputItem("wd", "width", "width",style.width));
         content.appendChild(createInputItem("hg", "height", "height",style.height));
         content.appendChild(createInputItem("cl", "color", "color",style.color));

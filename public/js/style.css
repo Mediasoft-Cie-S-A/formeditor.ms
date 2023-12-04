@@ -71,6 +71,14 @@ body {
     border: 2px dashed #c00  !important;
 }
 
+.category {
+    padding: 10px;
+    border: 1px solid #ccc;
+    background-color: white;
+    margin-bottom: 10px;
+    max-height: 500px;
+    overflow: auto;
+}
 
 .draggable {
     padding: 8px 12px;
