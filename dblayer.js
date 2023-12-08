@@ -418,6 +418,7 @@ app.get('/table-data/:tableName/:page/:pageSize', checkAuthenticated,  async (re
         
         const { tableName, page, pageSize } = req.params;
         await db.connect();
+        
         // Convert page and pageSize to numbers
         const pageNum = parseInt(page, 10);
         const pageSizeNum = parseInt(pageSize, 10);

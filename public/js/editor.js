@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-function removeAllChildNodes(parent) {
-    while (parent.firstChild) {
-        parent.removeChild(parent.firstChild);
-    }
-}
+
 
 function createInputItem(id, label, styleProperty,text) {
     console.log(text);
@@ -42,11 +38,9 @@ function createInputItem(id, label, styleProperty,text) {
 function createInputDiv(id, labelText, onChangeFunction,text) {
     var div = document.createElement("div");
     div.id = id;
-
     var label = document.createElement("label");
     label.setAttribute("for", id + "Input");
     label.textContent = labelText;
-
     var input = document.createElement("input");
     input.type = "text";
     input.id = id + "Input";
@@ -54,7 +48,6 @@ function createInputDiv(id, labelText, onChangeFunction,text) {
     input.value=text;
     div.appendChild(label);
     div.appendChild(input);
-
     return div;
 }
 
@@ -87,6 +80,7 @@ function editElement(element,type) {
         content.appendChild(createInputItem("font", "font", "font",element.getAttribute('font')));
         content.appendChild(createInputItem("margin", "margin", "margin",style.margin));
         content.appendChild(createInputItem("padding", "padding", "padding",style.padding));
+        content.appendChild(createInputItem("html", "html", "html",element.innerHTML));
         content.appendChild(createInputItem("Data Table Name", "dataset-table-name", "dataset-table-name",element.getAttribute('dataset-table-name')));
         content.appendChild(createInputItem("Data Field Name", "dataset-field-name", "dataset-field-name",element.getAttribute('dataset-field-name')));
 }

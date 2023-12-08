@@ -16,14 +16,30 @@
 
 
 function createElementDateSet(type) {
-    console.log("createElementDateSet");
-    showModalDbStrc();
-    return null;
+    var main= document.createElement('div');
+    main.className = 'form-container';
+    main.id=type+ Date.now(); // Unique ID for each new element
+    main.draggable = true;
+    main.tagName=type;
+    main.addEventListener('dblclick', function(){ editElement(main,type); });
+    main.addEventListener('click', function(){ selectElement(main); });
+    fetchTablesList();
+
+    document.getElementById('tablesList').addEventListener('click', function(event) {
+        event.preventDefault();
+        if (event.target.classList.contains('table-item')) {
+            const tableName = event.target.getAttribute('data-table-name');
+            const tableLabel = event.target.getAttribute('data-table-label');
+            fetchTableDetails(tableName,tableLabel);
+        }
+    },{capture: true, once: true});
+
+    showModalDbStrc(main);
+    return main;
 }
 
 function editElementDataSet(type,element,content)
 {
-  alert("editElementDataSet");
 }
 
 // --- internal functions ---
@@ -41,6 +57,7 @@ function createNavigationBar(tableName,datasetFields) {
         { id: 'nextRecordBtn', text: '>', event: "moveNext('"+tableName+"','"+datasetFields+"')" },
         { id: 'lastRecordBtn', text: 'L', event: "moveLast('"+tableName+"','"+datasetFields+"')" },
         { id: 'EditRecordBtn', text: 'E', event: "EditRecord('"+tableName+"','"+datasetFields+"')" },
+        { id: 'InsertRecordBtn', text: 'I', event: "InsertRecord('"+tableName+"','"+datasetFields+"')" },
         { id: 'SaveRecordBtn', text: 'S', event: "SaveRecord('"+tableName+"')" }
     ];
 
@@ -134,9 +151,10 @@ function mapColumnTypeToInputType(columnType) {
 }
 
 
-function showModalDbStrc() {
+function showModalDbStrc(main) {
     console.log("show");
     const modal = document.getElementById('tableDetailsModal');
+    modal.setAttribute('data-main-id', main.id);
     const overl = document.getElementById('overlayModal');
     modal.style.display = 'block';
     overl.style.display = 'block';
@@ -160,7 +178,7 @@ function insertTable()
     const tableName = document.getElementById('TableDetails_TableName');
     element = document.createElement('div');
     createFormElementsFromStructure('PUB.'+tableName.innerText,element);
-    const formContainer = document.getElementById('formContainer');
+    const formContainer = document.getElementById(modal.getAttribute('data-main-id'));
     formContainer.appendChild(element);
 }
 
@@ -327,4 +345,13 @@ function gridFetchData(dataGrid,page,datasetFields) {
             });
         })
         .catch(error => console.error('Error:', error));
+}
+
+
+
+function closeModalEdit() {
+    const modal = document.getElementById('modalDialogText');
+    const overl = document.getElementById('overlayModal');
+    modal.style.display = 'none';
+    overl.style.display = 'none';
 }

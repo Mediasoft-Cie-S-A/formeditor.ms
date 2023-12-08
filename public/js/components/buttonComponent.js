@@ -27,6 +27,8 @@ function createElementButton(type) {
     return element;
 }
 
+
+
 function editElementButton(type,element,content)
 {
     var textContentDiv = createInputDiv("textContent", "Value:", updateElementTxtC,element.textContent);

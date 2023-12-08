@@ -29,26 +29,18 @@ async function fetchTableStructure(tableName) {
 }
 
 
+// The 'DOMContentLoaded' event fires when the initial HTML document has been completely loaded and parsed,
+// without waiting for stylesheets, images, and subframes to finish loading.
+// The function passed as the second argument will be executed once the 'DOMContentLoaded' event is fired.
 
-// database structure
-document.addEventListener('DOMContentLoaded', function() {
-    fetchTablesList();
 
-    document.getElementById('tablesList').addEventListener('click', function(event) {
-        event.preventDefault();
-        if (event.target.classList.contains('table-item')) {
-            const tableName = event.target.getAttribute('data-table-name');
-            const tableLabel = event.target.getAttribute('data-table-label');
-            fetchTableDetails(tableName,tableLabel);
-        }
-    },{capture: true, once: true});
-});
 
 function fetchTablesList() {
     fetch('/tables-list')
         .then(response => response.json())
         .then(tables => {
             const list = document.getElementById('tablesList');
+            list.innerHTML = '';
             tables.forEach(table => {
                 const listItem = document.createElement('div');
                 listItem.classList.add('table-item');
@@ -90,7 +82,7 @@ function fetchTableDetailsOld(tableName,tableLabel) {
         detailsDiv.appendChild(indexesList);
     })
     .catch(error => console.error('Error:', error));
-}*/
+}
 
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -105,70 +97,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, {capture: true, once: true});
 });
+*/
 
 
 
-function closeModalEdit() {
-    const modal = document.getElementById('modalDialogText');
-    const overl = document.getElementById('overlayModal');
-    modal.style.display = 'none';
-    overl.style.display = 'none';
-}
-
-
-function insertGrid()
-{
-    const modal = document.getElementById('tableDetailsModal');
-    const overl = document.getElementById('overlayModal');
-    modal.style.display = 'none';
-    overl.style.display = 'none';
-    const tableName = document.getElementById('TableDetails_TableName');
-    formContainer.innerHTML=`<div id="dataGrid" style="height: 400px; overflow-y: auto;" dataset-table-name="${tableName}"></div>`;
-    fieldsList=document.querySelectorAll('#tableDetails table input:checked')
-    var datasetFields=[];
-    datasetFields.push('rowid');
-    fieldsList.forEach(field => { 
-        fieldName=field.getAttribute("dataset-field-name");
-        datasetFields.push(fieldName);       
-    });
-
-    createGrid(tableName.innerText,datasetFields);
-    
-}
 
 
 
-//Grid code
-function createGrid(tableName,datasetFields)
-{
-    const grid = document.getElementById('dataGrid');
-    //header
-    grid.setAttribute("current_page",1);
-    grid.setAttribute("page_size",10);
-    grid.setAttribute("Table-Name",tableName);
-    
-    var header = document.createElement('div');
-    header.className = 'grid-row';   
-    datasetFields.forEach(field => {
-        const cell = document.createElement('div');
-        cell.className = 'grid-cell-header';        
-        cell.textContent = field!=='rowid'?field:'';
-        header.appendChild(cell);
-    });
-    grid.appendChild(header);
-    gridFetchData(grid,1,datasetFields) ;
-    // Infinite scrolling logic
-    grid.addEventListener('scroll', () => {
-        console.log("scroll");
-        if (this.scrollTop + this.clientHeight >= this.scrollHeight) {
 
-            var currentPage=parseInt(this.getAttribute("current_page"));
-            currentPage++;
-            console.log(currentPage);
-            gridFetchData(grid,currentPage,datasetFields);
-        }
-    });
-}
 
 
 // table structure
