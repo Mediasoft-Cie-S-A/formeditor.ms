@@ -35,11 +35,11 @@ async function fetchTableStructure(tableName) {
 
 
 
-function fetchTablesList() {
+function fetchTablesList(list) {
     fetch('/tables-list')
         .then(response => response.json())
         .then(tables => {
-            const list = document.getElementById('tablesList');
+            
             list.innerHTML = '';
             tables.forEach(table => {
                 const listItem = document.createElement('div');
@@ -53,67 +53,46 @@ function fetchTablesList() {
         })
         .catch(error => console.error('Error:', error));
 }
-/*
-function fetchTableDetailsOld(tableName,tableLabel) {
-    Promise.all([
-        fetch(`/table-fields/${tableName}`).then(response => response.json()),
-        fetch(`/table-indexes/${tableName}`).then(response => response.json())
-    ])
-    .then(([fields, indexes]) => {
-        const detailsDiv = document.getElementById('tableDetails');
-        detailsDiv.innerHTML = `<h2 id='TableDetails_TableName'>${tableName}</h2><h3>${tableLabel}</h3>`;
-        
-        // Display fields
-        const fieldsList = document.createElement('ul');
-        fields.forEach(field => {
-            const fieldItem = document.createElement('li');
-            fieldItem.textContent = `${field.NAME} - ${field.TYPE} - ${field.LABEL}`;
-            fieldsList.appendChild(fieldItem);
-        });
-        detailsDiv.appendChild(fieldsList);
-
-        // Display indexes
-        const indexesList = document.createElement('ul');
-        indexes.forEach(index => {
-            const indexItem = document.createElement('li');
-            indexItem.textContent = index.NAME; // Adjust based on your API response
-            indexesList.appendChild(indexItem);
-        });
-        detailsDiv.appendChild(indexesList);
-    })
-    .catch(error => console.error('Error:', error));
-}
-
-
-document.addEventListener('DOMContentLoaded', function() {
-    fetchTablesList();
-
-    document.getElementById('tablesList').addEventListener('click', function(event) {
+function createTableList(list,tableDetails) {
+    fetchTablesList(list);
+    
+   list.addEventListener('click', function(event) {
+        event.preventDefault();
         if (event.target.classList.contains('table-item')) {
-            event.preventDefault();
             const tableName = event.target.getAttribute('data-table-name');
-            fetchTableDetails(tableName);
-            showModalDbStrc();
+            const tableLabel = event.target.getAttribute('data-table-label');
+            fetchTableDetails(tableName,tableLabel,tableDetails);
         }
-    }, {capture: true, once: true});
-});
-*/
+    },{capture: true, once: true});
 
+}   
 
+function createEditableTableList(list,tableDetails) {
+    fetchTablesList(list);
+    
+   list.addEventListener('click', function(event) {
+        event.preventDefault();
+        if (event.target.classList.contains('table-item')) {
+            const tableName = event.target.getAttribute('data-table-name');
+            const tableLabel = event.target.getAttribute('data-table-label');
+            editTableDetails(tableName,tableLabel,tableDetails);
+        }
+    },{capture: true, once: true});
 
-
+}   
 
 
 
 
 
 // table structure
-function fetchTableDetails(tableName,tableLabel) {
+function fetchTableDetails(tableName,tableLabel,detailsDiv) {
+    removeAllChildNodes(detailsDiv);
     Promise.all([
         fetch(`/table-fields/${tableName}`).then(response => response.json())        
     ])
     .then(([fields]) => {
-        const detailsDiv = document.getElementById('tableDetails');
+      
         detailsDiv.innerHTML = `<h2 id='TableDetails_TableName' table-name='${tableName}'>${tableName}</h2><h3>${tableLabel}</h3>`;
         
         // Display fields
@@ -145,4 +124,111 @@ function fetchTableDetails(tableName,tableLabel) {
     .catch(error => console.error('Error:', error));
 }
 
- 
+
+// table structure
+async function editTableDetails(tableName, tableLabel, detailsDiv) {
+    // Remove all child nodes
+    removeAllChildNodes(detailsDiv);
+
+    try {
+        // Fetch table fields
+        const response = await fetch(`/table-fields/${tableName}`);
+        const fields = await response.json();
+        // Set innerHTML
+        detailsDiv.innerHTML = `<h2 id='TableDetails_TableName' table-name='${tableName}'>${tableName}</h2><h3>${tableLabel}</h3>`;
+        detailsDiv.style.padding = '10px';
+        // Create and append table
+        const table = document.createElement('table');
+        detailsDiv.appendChild(table);
+        const header=['NAME','TYPE','LABEL' ,'FORMAT','MANDATORY', 'DECIMAL', 'WIDTH'];
+        var tr = document.createElement('tr');
+        header.forEach(prop => {
+            const td = document.createElement('td');
+            td.innerText =prop  ;
+            tr.appendChild(td);
+        });
+        table.appendChild(tr);
+        // Add fields to table
+        fields.forEach(field => {
+            const tr = document.createElement('tr');
+           header.forEach(prop => {
+                const td = document.createElement('td');
+                td.innerHTML =`<input name='${prop}' value='${field[prop]}'/>`  ;
+                tr.appendChild(td);
+            });
+            table.appendChild(tr);
+        });
+       
+        const addButton = document.createElement('button');
+        addButton.textContent = 'Add';
+        addButton.onclick = function() {
+            addTableDetails(tableName, tableLabel, detailsDiv);
+        };
+        detailsDiv.appendChild(addButton);
+        const saveButton = document.createElement('button');
+        saveButton.textContent = 'Save';
+        saveButton.onclick = function() {
+            saveTableDetails(tableName, tableLabel, detailsDiv);
+        };  
+        detailsDiv.appendChild(saveButton); 
+
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+
+// table structure
+/*
+
+function editTableDetails(tableName,tableLabel,detailsDiv) {
+    removeAllChildNodes(detailsDiv);
+    Promise.all([
+        fetch(`/table-fields/${tableName}`).then(response => response.json())        
+    ])
+    .then(([fields]) => {
+      
+        detailsDiv.innerHTML = `<h2 id='TableDetails_TableName' table-name='${tableName}'>${tableName}</h2><h3>${tableLabel}</h3>`;
+        
+        // Display fields
+        const table=  document.createElement('table');
+        const tr = document.createElement('tr');
+            const td0 = document.createElement('td');
+            const td1 = document.createElement('td');
+            const td2 = document.createElement('td');
+            const td3 = document.createElement('td');
+            const fieldItem = document.createElement('div');                
+            fieldItem.innerText = `Field Name`;            
+            td0.appendChild(fieldItem);
+            td1.innerHTML=`<div>TYPE</div>`;
+            td2.innerHTML=`<div>FORMAT</div>`;
+            td3.innerHTML=`<div>LABEL</div>`;         
+            tr.appendChild(td0);
+            tr.appendChild(td1);
+            tr.appendChild(td2);
+            tr.appendChild(td3);
+            table.appendChild(tr);
+        fields.forEach(field => {
+            const tr = document.createElement('tr');
+            const td0 = document.createElement('td');
+            const td1 = document.createElement('td');
+            const td2 = document.createElement('td');
+            const td3 = document.createElement('td');
+            const fieldItem = document.createElement('input');                
+            fieldItem.value = `${field.NAME}`;            
+            fieldItem.setAttribute("dataset-field-name",field.NAME);
+            td0.appendChild(fieldItem);
+            td1.innerHTML=`<input value="${field.TYPE}" />`;
+            td2.innerHTML=`<input value="${field.FORMAT}" />`;
+            td3.innerHTML=`<input value="${field.LABEL}" />`;         
+            tr.appendChild(td0);
+            tr.appendChild(td1);
+            tr.appendChild(td2);
+            tr.appendChild(td3);
+            table.appendChild(tr);
+        });
+        detailsDiv.appendChild(table);       
+    })
+    .catch(error => console.error('Error:', error));
+}
+*/

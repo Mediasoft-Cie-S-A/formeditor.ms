@@ -23,17 +23,9 @@ function createElementDateSet(type) {
     main.tagName=type;
     main.addEventListener('dblclick', function(){ editElement(main,type); });
     main.addEventListener('click', function(){ selectElement(main); });
-    fetchTablesList();
-
-    document.getElementById('tablesList').addEventListener('click', function(event) {
-        event.preventDefault();
-        if (event.target.classList.contains('table-item')) {
-            const tableName = event.target.getAttribute('data-table-name');
-            const tableLabel = event.target.getAttribute('data-table-label');
-            fetchTableDetails(tableName,tableLabel);
-        }
-    },{capture: true, once: true});
-
+    const list = document.getElementById('tablesList');
+    const detailsDiv = document.getElementById('tableDetails');
+    createTableList(list,detailsDiv);
     showModalDbStrc(main);
     return main;
 }

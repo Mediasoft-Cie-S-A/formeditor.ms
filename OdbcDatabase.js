@@ -117,7 +117,9 @@ class OdbcDatabase {
     async getTableFields(tableName) {
         try {
             // Query to get fields of a table in OpenEdge
-            const query = `SELECT "_Field-Name" Name, "_Data-Type" TYPE, "_Label" LABEL FROM PUB."_Field" WHERE PUB."_Field"."_File-Recid" = (SELECT ROWID FROM PUB."_File" WHERE "_File-Name" = '${tableName}')`;
+            var query = `SELECT "_Field-Name" Name, "_Data-Type" 'TYPE', "_Label" LABEL, "_Mandatory" 'MANDATORY',`;
+            query+=` "_Format" 'FORMAT', "_Decimals" 'DECIMAL', "_Width" 'WIDTH'FROM PUB."_Field" `;
+            query+=` WHERE PUB."_Field"."_File-Recid" = (SELECT ROWID FROM PUB."_File" WHERE "_File-Name" = '${tableName}')`;
             console.log(query);
             const result = await this.connection.query(query);
             return result;

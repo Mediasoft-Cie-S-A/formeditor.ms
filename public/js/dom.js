@@ -113,6 +113,12 @@ function createDomElement(json, parent) {
             var domContent = jsonToDom(jsonData,renderContainer);
             
         }
+        if (target === '#DatabaseForm') {
+            const list = document.getElementById('tableListBar');
+            const detailsDiv = document.getElementById('mtableDetails');
+            createEditableTableList(list,detailsDiv);
+            
+        }
     }
 
  
