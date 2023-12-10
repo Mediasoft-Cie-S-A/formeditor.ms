@@ -21,12 +21,16 @@ function createElementSelect(type) {
     main.tagName=type;
 
     var label=document.createElement('label');  
+    label.id=main.id+"Label";
+    label.tagName="label";
     label.innerHTML="Text";
     
     main.appendChild(label);
    
     var input = document.createElement('select');
     input.type = type;
+    input.id=main.id+"Input";
+    input.tagName="select";
     main.appendChild(input)
     return main;
 }
@@ -34,14 +38,6 @@ function createElementSelect(type) {
 function editElementSelect(type,element,content)
 {
     // Create and append the elements
-    var labelDiv = createInputDiv("label", "Text:", updateElementText,element.querySelector('label').innerText);
-    var textDiv = createInputDiv("text", "Value:", updateElementValue,element.querySelector('input').value);
-    var checkedDiv = createInputDiv("sld", "checked", function(value) { updateElementStyle('checked', value); },element.querySelector('input').checked);
-    var onChangeDiv = createInputDiv("change", "OnChange Event:", updateElementOnChange,"");
-
-    content.appendChild(labelDiv);
-    content.appendChild(textDiv);
-    content.appendChild(checkedDiv);
-    content.appendChild(onChangeDiv);
-
+ 
+ 
 }

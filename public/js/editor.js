@@ -58,7 +58,7 @@ function createInputDiv(id, labelText, onChangeFunction,text) {
 function editElement(element) {
     // Get the type of the element
      // if type is null get the element type
-    var type = element.tagName;
+    var type = element.getAttribute('tagName');
 
         currentElement=element
         var dialog= document.getElementById("propertiesBar");        
@@ -75,11 +75,16 @@ function editElement(element) {
             
             }
         }
-
+        const label = document.createElement('label');
+        label.textContent = element.id;
+        content.appendChild(label);
+        content.appendChild(document.createElement('hr'));
         const style = element.style;
-        content.appendChild(createInputItem("tx", "Text", "content",element.innerText,"text"));
-        content.appendChild(createInputItem("vl", "Value", "value",element.value,"text"));
+        content.appendChild(createInputDiv("label", "Text:", updateElementText,element.innerText));
+        content.appendChild(createInputDiv("text", "Value:", updateElementValue,element.value));
         content.appendChild(createInputItem("vs", "visibility", "visibility",style.visibility,"text"));
+        content.appendChild(createInputItem("chk", "checked", "checked",element.getAttribute('checked'),"text"));
+
         content.appendChild(createInputItem("wd", "width", "width",style.width,"text"));
         content.appendChild(createInputItem("hg", "height", "height",style.height,"text"));
         content.appendChild(createInputItem("cl", "color", "color",style.color,"color"));
@@ -92,6 +97,11 @@ function editElement(element) {
         content.appendChild(createInputItem("html", "html", "html",element.innerHTML),"text");
         content.appendChild(createInputItem("Data Table Name", "dataset-table-name", "dataset-table-name",element.getAttribute('dataset-table-name'),'text'));
         content.appendChild(createInputItem("Data Field Name", "dataset-field-name", "dataset-field-name",element.getAttribute('dataset-field-name'),'text'));
+        content.appendChild(createInputItem("change", "onChange", "onchange",element.getAttribute('onchange')),"text");
+        content.appendChild(createInputItem("click", "onClick", "onclick",element.getAttribute('onclick')),"text");
+
+        content.appendChild(createInputItem("dblclick", "Double Click", "dblclick",element.getAttribute('dblclick')),"text");
+
 }
 
 
@@ -106,13 +116,13 @@ function closeModalDbStrct() {
 function updateElementText(t)
 {
     
-    var label= currentElement.querySelector('label');   
+    var label= currentElement;   
     label.innerText=t;
 }
 
 function updateElementValue(t)
 {
-    var text= currentElement.querySelector('input');   
+    var text= currentElement;   
     text.value=t; 
     
 }
@@ -160,3 +170,80 @@ window.addEventListener('keyup', function(event) {
 },false);
 
 
+// editor properties on hover, click, double click
+
+// get the formContainer id
+var formContainer = document.getElementById('formContainer');
+// add event listener to the formContainer of on hover and show the context menu editorFloatMenu
+// in the position where the mouse is over and aligned to right for the sub elements
+formContainer.addEventListener('click', function(event) {
+    event.preventDefault();
+    // remove gjs-selection class from all elements
+    removeSelection();
+    console.log("event.target.id:"+event.target.id);    
+    if (event.target.id === 'formContainer') {       
+        
+        hideEditMenu();
+        }
+    //get the offset of formContainer
+    const { top, left } = getAbsoluteOffset(formContainer);
+    var editorElementSelected = event.target;
+    editorElementSelected.classList.add("gjs-selection");
+    const inputElementSelected=document.getElementById("editorElementSelected");
+    inputElementSelected.value=editorElementSelected.id;
+    var editorFloatMenu = document.getElementById('editorFloatMenu');
+    editorFloatMenu.style.display = 'block';
+    // Get the total offset by combining formContainer's and element's offset
+    console.log("formContainer.offsetTop:"+formContainer.offsetTop);
+    var totalOffsetTop = top + editorElementSelected.offsetTop -25;
+    var totalOffsetLeft = top+ editorElementSelected.offsetLeft + editorElementSelected.offsetWidth;
+
+    editorFloatMenu.style.top = totalOffsetTop + 'px';
+    editorFloatMenu.style.left = totalOffsetLeft + 'px';
+    
+});
+
+
+function getAbsoluteOffset(element) {
+    let top = 0, left = 0;
+    while(element) {
+        top += element.offsetTop || 0;
+        left += element.offsetLeft || 0;
+        element = element.offsetParent;
+    }
+    return { top, left };
+}
+
+// showproperties of the element
+function showProperties()
+{
+    const inputElementSelected=document.getElementById("editorElementSelected");
+    console.log("inputElementSelected.value:"+inputElementSelected.value);
+    var editorElementSelected=document.getElementById(inputElementSelected.value);
+
+    editElement(editorElementSelected);
+}
+
+function deleteElement()
+{
+    const inputElementSelected=document.getElementById("editorElementSelected");
+    var editorElementSelected=document.getElementById(inputElementSelected.value);
+    editorElementSelected.parentNode.removeChild(editorElementSelected);
+    hideEditMenu();
+}
+
+function hideEditMenu()
+{
+    var editorFloatMenu = document.getElementById('editorFloatMenu');
+    editorFloatMenu.style.display = 'none';
+}
+
+function removeSelection()
+{
+    var elements  = document.getElementsByClassName("gjs-selection");
+    for(i=0;i<elements.length;i++)
+    {
+        elements[i].classList.remove("gjs-selection");
+     
+    }
+}   

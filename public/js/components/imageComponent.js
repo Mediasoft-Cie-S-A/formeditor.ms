@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
+const e = require("express");
+
 function createElementImage(type) {
     console.log("createElementImage");
     element = document.createElement('img');
             element.src="/img/empty.png";
-
+    element.id=type+ Date.now(); // Unique ID for each new element
+    element.tagName=type;
             element.setAttribute('alt', 'na');
             element.setAttribute('height', '1px');
             element.setAttribute('width', '1px');

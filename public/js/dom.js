@@ -77,7 +77,7 @@ function createDomElement(json, parent) {
             }
         }
 
-        element.classList.remove('Selection');
+        element.classList.remove('gjs-selection');
 
         // Append to parent
         parent.appendChild(element);
@@ -99,6 +99,8 @@ function createDomElement(json, parent) {
     // Function to handle tab switch
     function onTabSwitch(event) {
         var target = event.target.getAttribute("href");
+        removeSelection();
+        hideEditMenu();
 
         if (target === '#renderForm') {
             var formContainer = document.getElementById('formContainer');

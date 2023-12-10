@@ -151,6 +151,8 @@ async function editTableDetails(tableName, tableLabel, detailsDiv) {
         detailsDiv.style.padding = '10px';
         // Create and append table
         const table = document.createElement('table');
+        table.style.padding='10px';
+
         detailsDiv.appendChild(table);
         var tr = document.createElement('tr');
         header.forEach(prop => {
@@ -350,6 +352,7 @@ function  newTable() {
     detailsDiv.appendChild(tableNameInput);
     // generate html table
     const table = document.createElement('table');
+    table.style.padding='10px';
     detailsDiv.appendChild(table);
 
     // header

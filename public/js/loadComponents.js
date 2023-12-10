@@ -80,14 +80,14 @@ function createSidebar(elementsData) {
             const categoryDiv = this.parentElement;
             const height = categoryDiv.style.height;
             console.log(height);
-            if (height === "55px") {
+            if (height === "75px") {
                 categoryDiv.style.height = 'auto';
             } else {
-                categoryDiv.style.height = '55px';
+                categoryDiv.style.height = '75px';
             }
         });
         categoryDiv.appendChild(button);
-        
+        categoryDiv.appendChild(document.createElement('hr'));
         const elements = categories[category];
        
                 for (const elementData of elements) {
@@ -117,10 +117,7 @@ function createSidebar(elementsData) {
                 
                    
                 }
-             sidebar.appendChild(categoryDiv);          
-                
-
-        
+             sidebar.appendChild(categoryDiv);      
     }
 }
 
@@ -180,64 +177,3 @@ function createFormElement(elementId) {
     return element;
 }
 
-
-
-
-
-// editor properties on hover, click, double click
-
-// get the formContainer id
-var formContainer = document.getElementById('formContainer');
-// add event listener to the formContainer of on hover and show the context menu editorFloatMenu
-// in the position where the mouse is over and aligned to right for the sub elements
-formContainer.addEventListener('click', function(event) {
-    event.preventDefault();
-    // remove gjs-selection class from all elements
-    var elements  = document.getElementsByClassName("gjs-selection");
-    for(i=0;i<elements.length;i++)
-    {
-        elements[i].classList.remove("gjs-selection");
-     
-    }
-    console.log("event.target.id:"+event.target.id);    
-    if (event.target.id === 'formContainer') {       
-        
-        var editorFloatMenu = document.getElementById('editorFloatMenu');
-        editorFloatMenu.style.display = 'none';
-        }
-    //get the offset of formContainer
-    const { top, left } = getAbsoluteOffset(formContainer);
-    var editorElementSelected = event.target;
-    editorElementSelected.classList.add("gjs-selection");
-    const inputElementSelected=document.getElementById("editorElementSelected");
-    inputElementSelected.value=editorElementSelected.id;
-    var editorFloatMenu = document.getElementById('editorFloatMenu');
-    editorFloatMenu.style.display = 'block';
-    // Get the total offset by combining formContainer's and element's offset
-    console.log("formContainer.offsetTop:"+formContainer.offsetTop);
-    var totalOffsetTop = top + editorElementSelected.offsetTop -25;
-    var totalOffsetLeft = top+ editorElementSelected.offsetLeft + editorElementSelected.offsetWidth;
-
-    editorFloatMenu.style.top = totalOffsetTop + 'px';
-    editorFloatMenu.style.left = totalOffsetLeft + 'px';
-    
-});
-
-
-function getAbsoluteOffset(element) {
-    let top = 0, left = 0;
-    while(element) {
-        top += element.offsetTop || 0;
-        left += element.offsetLeft || 0;
-        element = element.offsetParent;
-    }
-    return { top, left };
-}
-
-// showproperties of the element
-function showProperties()
-{
-    const inputElementSelected=document.getElementById("editorElementSelected");
-    var editorElementSelected=document.getElementById(inputElementSelected.value);
-    editElement(editorElementSelected);
-}
