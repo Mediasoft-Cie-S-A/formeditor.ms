@@ -20,8 +20,7 @@ function createElementInput(type) {
     main.id=type+ Date.now(); // Unique ID for each new element
     main.draggable = true;
     main.tagName=type;
-    main.addEventListener('dblclick', function(){ editElement(main,type); });
-    main.addEventListener('click', function(){ selectElement(main); });
+   
     var label=document.createElement('label');  
     label.innerHTML=type;    
     main.appendChild(label);   

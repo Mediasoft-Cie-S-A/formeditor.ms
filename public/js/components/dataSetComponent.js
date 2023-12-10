@@ -21,8 +21,7 @@ function createElementDateSet(type) {
     main.id=type+ Date.now(); // Unique ID for each new element
     main.draggable = true;
     main.tagName=type;
-    main.addEventListener('dblclick', function(){ editElement(main,type); });
-    main.addEventListener('click', function(){ selectElement(main); });
+    
     const list = document.getElementById('tablesList');
     const detailsDiv = document.getElementById('tableDetails');
     createTableList(list,detailsDiv);

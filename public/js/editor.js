@@ -20,7 +20,7 @@ function removeAllChildNodes(parent) {
 }
 
 
-function createInputItem(id, label, styleProperty,text) {
+function createInputItem(id, label, styleProperty,text,type) {
     console.log(text);
     var div = document.createElement("div");
     var lbl = document.createElement("label");
@@ -28,7 +28,7 @@ function createInputItem(id, label, styleProperty,text) {
     lbl.textContent = label;
 
     var input = document.createElement("input");
-    input.type = "text";
+    input.type = type;
     input.id = id;
     input.onchange = function() { updateElementStyle(styleProperty, this.value); };
     input.value=text
@@ -55,45 +55,46 @@ function createInputDiv(id, labelText, onChangeFunction,text) {
     return div;
 }
 
-function editElement(element,type) {
+function editElement(element) {
+    // Get the type of the element
+     // if type is null get the element type
+    var type = element.tagName;
+
         currentElement=element
-        var dialog= document.getElementById("modalDialogText");
-        dialog.style.display = 'block';
-        console.log(element);
-        document.querySelector(".overlay").style.display = 'block';
-        var content= document.querySelector(".dialogContent");
+        var dialog= document.getElementById("propertiesBar");        
+ 
+        var content= dialog.querySelector("div");
         removeAllChildNodes(content);
-        // Execute the function editor
-        console.log(elementsData[type]);
-         var functionName = elementsData[type].editFunction;
-      
-         if (typeof window[functionName] === 'function') {
-            console.log("functionName:"+functionName);
-            window[functionName](type,element,content);
-         }
-      
+        // Execute the function editor if exists type   
+        console.log("type:"+elementsData[type]);
+        if (elementsData[type]){
+            if (elementsData[type].editFunction) {
+                var functionName = elementsData[type].editFunction;
+                console.log("functionName:"+functionName);
+                window[functionName](type,element,content);
+            
+            }
+        }
 
         const style = element.style;
-        content.appendChild(createInputItem("vs", "visibility", "visibility",style.visibility));
-        content.appendChild(createInputItem("wd", "width", "width",style.width));
-        content.appendChild(createInputItem("hg", "height", "height",style.height));
-        content.appendChild(createInputItem("cl", "color", "color",style.color));
-        content.appendChild(createInputItem("bg", "background-color", "background-color",style.backgroundColor));
-        content.appendChild(createInputItem("border", "border", "border",style.border));
-        content.appendChild(createInputItem("cl", "class", "class",element.getAttribute('class')));
-        content.appendChild(createInputItem("font", "font", "font",element.getAttribute('font')));
-        content.appendChild(createInputItem("margin", "margin", "margin",style.margin));
-        content.appendChild(createInputItem("padding", "padding", "padding",style.padding));
-        content.appendChild(createInputItem("html", "html", "html",element.innerHTML));
-        content.appendChild(createInputItem("Data Table Name", "dataset-table-name", "dataset-table-name",element.getAttribute('dataset-table-name')));
-        content.appendChild(createInputItem("Data Field Name", "dataset-field-name", "dataset-field-name",element.getAttribute('dataset-field-name')));
+        content.appendChild(createInputItem("tx", "Text", "content",element.innerText,"text"));
+        content.appendChild(createInputItem("vl", "Value", "value",element.value,"text"));
+        content.appendChild(createInputItem("vs", "visibility", "visibility",style.visibility,"text"));
+        content.appendChild(createInputItem("wd", "width", "width",style.width,"text"));
+        content.appendChild(createInputItem("hg", "height", "height",style.height,"text"));
+        content.appendChild(createInputItem("cl", "color", "color",style.color,"color"));
+        content.appendChild(createInputItem("bg", "background-color", "background-color",style.backgroundColor,"color"));
+        content.appendChild(createInputItem("border", "border", "border",style.border,"text"));
+        content.appendChild(createInputItem("cl", "class", "class",element.getAttribute('class') ,"text"));
+        content.appendChild(createInputItem("font", "font", "font",element.getAttribute('font') ,"text"));
+        content.appendChild(createInputItem("margin", "margin", "margin",style.margin),"text");
+        content.appendChild(createInputItem("padding", "padding", "padding",style.padding),"text");
+        content.appendChild(createInputItem("html", "html", "html",element.innerHTML),"text");
+        content.appendChild(createInputItem("Data Table Name", "dataset-table-name", "dataset-table-name",element.getAttribute('dataset-table-name'),'text'));
+        content.appendChild(createInputItem("Data Field Name", "dataset-field-name", "dataset-field-name",element.getAttribute('dataset-field-name'),'text'));
 }
 
 
-
-function initializeEditor() {
-    // Any additional initialization for the editor can go here
-}
 
 function closeModalDbStrct() {
 
@@ -151,11 +152,11 @@ console.log("keypress init");
 // Event listener for keypress on the window
 window.addEventListener('keyup', function(event) {
     // Check if the pressed key is the one you want, e.g., the Delete key
-    console.log(event.key);
+   // console.log(event.key);
     if (event.key === 'Delete') {
      
         deleteSelectedElement();
     }
 },false);
 
-document.addEventListener("DOMContentLoaded", initializeEditor);
+

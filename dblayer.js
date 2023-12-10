@@ -435,4 +435,46 @@ app.get('/table-data/:tableName/:page/:pageSize', checkAuthenticated,  async (re
     }
 });
 
+//Schema modification
+//Alter table
+app.post('/alter-table/:tableName', checkAuthenticated, async (req, res) => {
+    try {
+        await db.connectWrite();
+        const tableName = req.params.tableName;
+        const { action, columnName, columnType, newColumnName, newColumnType } = req.body;
+
+        let result;
+        if (action === 'add') {
+            result = await db.alterTable(tableName, columnName, columnType);
+        } else if (action === 'modify') {
+            result = await db.alterTableColumn(tableName, columnName, newColumnName, newColumnType);
+        } else {
+            throw new Error('Invalid action');
+        }
+
+        res.json({ message: 'Table altered successfully', result });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error altering table');
+    } finally {
+        await db.close();
+    }
+});
+//Create table  
+app.post('/create-table/:tableName', checkAuthenticated, async (req, res) => {
+    try {
+        await db.connectWrite();
+        const tableName = req.params.tableName;
+        const columns = req.body.columns;
+        const result = await db.createTable(tableName, columns);
+        res.json({ message: 'Table created successfully', result });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error creating table');
+    } finally {
+        await db.close();
+    }
+});
+
+
 }

@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+const header=['NAME','TYPE','LABEL' ,'FORMAT','MANDATORY', 'DECIMAL', 'WIDTH', 'DEFAULT'];
+
+
 
 async function fetchTableStructure(tableName) {
     try {
@@ -41,6 +44,14 @@ function fetchTablesList(list) {
         .then(tables => {
             
             list.innerHTML = '';
+             // add new table button
+            const newTableButton = document.createElement('button');
+            newTableButton.textContent = 'New Table';
+            newTableButton.onclick = function(event) {
+                event.preventDefault();
+                newTable();
+            };
+            list.appendChild(newTableButton);
             tables.forEach(table => {
                 const listItem = document.createElement('div');
                 listItem.classList.add('table-item');
@@ -54,6 +65,7 @@ function fetchTablesList(list) {
         .catch(error => console.error('Error:', error));
 }
 function createTableList(list,tableDetails) {
+   
     fetchTablesList(list);
     
    list.addEventListener('click', function(event) {
@@ -140,7 +152,6 @@ async function editTableDetails(tableName, tableLabel, detailsDiv) {
         // Create and append table
         const table = document.createElement('table');
         detailsDiv.appendChild(table);
-        const header=['NAME','TYPE','LABEL' ,'FORMAT','MANDATORY', 'DECIMAL', 'WIDTH'];
         var tr = document.createElement('tr');
         header.forEach(prop => {
             const td = document.createElement('td');
@@ -153,7 +164,7 @@ async function editTableDetails(tableName, tableLabel, detailsDiv) {
             const tr = document.createElement('tr');
            header.forEach(prop => {
                 const td = document.createElement('td');
-                td.innerHTML =`<input name='${prop}' value='${field[prop]}'/>`  ;
+                td.innerHTML =`<input name='${prop}' value='${field[prop]}' readonly/>`  ;
                 tr.appendChild(td);
             });
             table.appendChild(tr);
@@ -161,14 +172,18 @@ async function editTableDetails(tableName, tableLabel, detailsDiv) {
        
         const addButton = document.createElement('button');
         addButton.textContent = 'Add';
-        addButton.onclick = function() {
-            addTableDetails(tableName, tableLabel, detailsDiv);
+        addButton.onclick = function(event) {
+            event.preventDefault();
+            addTableColumn(table);
         };
+
+       
         detailsDiv.appendChild(addButton);
         const saveButton = document.createElement('button');
         saveButton.textContent = 'Save';
-        saveButton.onclick = function() {
-            saveTableDetails(tableName, tableLabel, detailsDiv);
+        saveButton.onclick = function(event) {
+            event.preventDefault();
+            saveAlterTable(table,tableName);
         };  
         detailsDiv.appendChild(saveButton); 
 
@@ -177,58 +192,261 @@ async function editTableDetails(tableName, tableLabel, detailsDiv) {
     }
 }
 
-
-// table structure
-/*
-
-function editTableDetails(tableName,tableLabel,detailsDiv) {
-    removeAllChildNodes(detailsDiv);
-    Promise.all([
-        fetch(`/table-fields/${tableName}`).then(response => response.json())        
-    ])
-    .then(([fields]) => {
-      
-        detailsDiv.innerHTML = `<h2 id='TableDetails_TableName' table-name='${tableName}'>${tableName}</h2><h3>${tableLabel}</h3>`;
-        
-        // Display fields
-        const table=  document.createElement('table');
-        const tr = document.createElement('tr');
-            const td0 = document.createElement('td');
-            const td1 = document.createElement('td');
-            const td2 = document.createElement('td');
-            const td3 = document.createElement('td');
-            const fieldItem = document.createElement('div');                
-            fieldItem.innerText = `Field Name`;            
-            td0.appendChild(fieldItem);
-            td1.innerHTML=`<div>TYPE</div>`;
-            td2.innerHTML=`<div>FORMAT</div>`;
-            td3.innerHTML=`<div>LABEL</div>`;         
-            tr.appendChild(td0);
-            tr.appendChild(td1);
-            tr.appendChild(td2);
-            tr.appendChild(td3);
-            table.appendChild(tr);
-        fields.forEach(field => {
-            const tr = document.createElement('tr');
-            const td0 = document.createElement('td');
-            const td1 = document.createElement('td');
-            const td2 = document.createElement('td');
-            const td3 = document.createElement('td');
-            const fieldItem = document.createElement('input');                
-            fieldItem.value = `${field.NAME}`;            
-            fieldItem.setAttribute("dataset-field-name",field.NAME);
-            td0.appendChild(fieldItem);
-            td1.innerHTML=`<input value="${field.TYPE}" />`;
-            td2.innerHTML=`<input value="${field.FORMAT}" />`;
-            td3.innerHTML=`<input value="${field.LABEL}" />`;         
-            tr.appendChild(td0);
-            tr.appendChild(td1);
-            tr.appendChild(td2);
-            tr.appendChild(td3);
-            table.appendChild(tr);
-        });
-        detailsDiv.appendChild(table);       
-    })
-    .catch(error => console.error('Error:', error));
+function getColumnData(type,newColumn) {
+   var columnData='';
+    switch (type) {
+        case 'DECIMAL':
+        case 'NUMERIC':
+            columnData = `${newColumn.TYPE}(${newColumn.WIDTH}, ${newColumn.DECIMAL})`;
+            break;
+        case 'CHAR':
+        case 'VARCHAR':
+            columnData = `${newColumn.TYPE}(${newColumn.WIDTH})`;
+            break;
+        case 'INTEGER':
+        case 'TIME':
+        case 'TIMESTAMP':
+        case 'DOUBLE':
+        case 'FLOAT':
+        case 'REAL':
+        case 'SMALLINT':
+        case 'BIGINT':
+        case 'BIT':                
+        case 'DATE':
+            columnData = newColumn.TYPE;
+            break;
+        // Add more cases as needed
+        default:
+            throw new Error(`Unsupported type: ${newColumn.TYPE}`);
+    }
+    if (columnData.MANDATORY === '1') {
+        columnData += ' NOT NULL';
+    }   
+    if (columnData.DEFAULT) {
+        columnData += ` DEFAULT ${columnData.DEFAULT}`;
+    }
+    return columnData;
 }
-*/
+
+async function saveAlterTable(table,tabelName) {
+    // Prepare the data
+  
+    const newColumns =table.querySelectorAll('tr[new]');
+    // for each row get the input with property new
+    newColumns.forEach(row => {
+        const newInput = row.querySelectorAll('input[new], select[new]');
+        console.log('newInput:', newInput);
+        if (newInput) {
+            const newColumn = {};       
+            newInput.forEach(input => {
+                newColumn[input.name] = input.value;
+                console.log('input:', input.name);
+            });
+           
+            // create the correct type example char(10 ) using the type and width
+         
+             var columnData=getColumnData(newColumn.TYPE,newColumn);
+            
+            console.log('newColumn:', newColumn.NAME);
+            console.log('columnData:', columnData);
+            // adding mandatory and default value if exists 
+         
+            // call the alter table function
+           alterTable(tabelName, 'add', newColumn.NAME, columnData, null, null);
+        }
+    }
+    );
+
+
+    // adding in array all the elements in order to call altertable function, the column name and type are mandatory
+   
+    
+}
+
+
+function addTableColumn(table) {
+    const tr = document.createElement('tr');
+    tr.setAttribute('new', '');
+    header.forEach(prop => {
+        const td = document.createElement('td');
+        switch (prop) {
+            case 'TYPE':
+                var _select= `<select new name='${prop}'>`;
+                    _select+=`<option value="INTEGER">INTEGER</option>`;
+                    _select+=`<option value="CHAR">CHAR</option>`;
+                    _select+=`<option value="VARCHAR">VARCHAR</option>`;
+                    _select+=`<option value="DATE">DATE</option>`;
+                    _select+=`<option value="DECIMAL">DECIMAL</option>`;
+                    _select+=`<option value="NUMERIC">NUMERIC</option>`;
+                    _select+=`<option value="TIME">TIME</option>`;
+                    _select+=`<option value="TIMESTAMP">TIMESTAMP</option>`;
+                    _select+=`<option value="DOUBLE">DOUBLE</option>`;
+                    _select+=`<option value="FLOAT">FLOAT</option>`;
+                    _select+=`<option value="REAL">REAL</option>`;
+                    _select+=`<option value="SMALLINT">SMALLINT</option>`;
+                    _select+=`<option value="BIGINT">BIGINT</option>`;
+                    _select+=`<option value="BIT">BIT</option>`;    
+                td.innerHTML = _select;
+                break
+            case 'MANDATORY':
+            case 'DECIMAL':
+            case 'WIDTH':
+            td.innerHTML = `<input type='number' new name='${prop}' value='0'/>`;
+            break;
+            case 'NAME':
+                td.innerHTML = `<input new name='${prop}' value=''/ placeholder='Field Name' required>`;
+                break;
+            default:
+            td.innerHTML = `<input new name='${prop}' value=''/>`;
+                
+    
+        }
+        tr.appendChild(td);
+    });
+    table.appendChild(tr);
+}
+
+async function alterTable(tableName, action, columnName, columnType, newColumnName, newColumnType) {
+    try {
+        const response = await fetch(`/alter-table/PUB.${tableName}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                action,
+                columnName,
+                columnType,
+                newColumnName,
+                newColumnType
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const result = await response.json();
+        showToast('Table altered successfully');
+        console.log('Table altered successfully:', result);
+    } catch (error) {
+        console.error('Error altering table:', error);
+    }
+}
+
+function  newTable() {
+    const detailsDiv = document.getElementById('mtableDetails');
+    removeAllChildNodes(detailsDiv);
+    // label and input for table name
+    const tableNameLabel = document.createElement('label');
+    tableNameLabel.textContent = 'Table Name';
+    detailsDiv.appendChild(tableNameLabel);
+    const tableNameInput = document.createElement('input');
+    tableNameInput.setAttribute('type', 'text');
+    tableNameInput.setAttribute('id', 'NewtableName');
+    tableNameInput.setAttribute('name', 'tableName');
+    tableNameInput.setAttribute('placeholder', 'Table Name');
+    tableNameInput.setAttribute('required', '');
+    detailsDiv.appendChild(tableNameInput);
+    // generate html table
+    const table = document.createElement('table');
+    detailsDiv.appendChild(table);
+
+    // header
+    const tr = document.createElement('tr');
+    table.appendChild(tr);
+    header.forEach(prop => {
+        const td = document.createElement('td');
+        td.innerText =prop  ;
+        tr.appendChild(td);
+    });
+    // button to add row    
+    const addButton = document.createElement('button');
+    addButton.textContent = 'Add';
+    addButton.onclick = function(event) {
+        event.preventDefault();
+        addTableColumn(table);
+    };  
+    detailsDiv.appendChild(addButton);
+    // button to save table
+    const saveButton = document.createElement('button');
+    saveButton.textContent = 'Save';
+    saveButton.onclick = function(event) {
+        event.preventDefault();
+        createTable(table);
+    }; 
+    // append all elements
+    detailsDiv.appendChild(saveButton);
+}
+
+async function createTable(table) {
+    // get tablename form input
+    const tableName = document.getElementById('NewtableName').value;
+    console.log('tableName:', tableName);
+    if (!tableName) {
+        showToast('Table name is required');
+        return;
+    }
+    // Prepare the data
+    const newColumns = table.querySelectorAll('tr[new]');
+    const columns = Array.from(newColumns).map(row => {
+        const newInputs = row.querySelectorAll('input[new], select[new]');
+        const newColumn = {};
+        newInputs.forEach(input => {
+            newColumn[input.name] = input.value;
+        });
+        return newColumn;
+    });
+
+    /* organise the columns data following the structure below:
+    
+            CREATE TABLE SPORTS.Customer
+                (
+                cust_no INTEGER NOT NULL,
+                last_name CHAR (30),
+                street CHAR (30),
+                city CHAR (20),
+                state CHAR (2)
+                ) ; 
+     */
+    const columnsData = columns.map(column => {
+         
+        return `${column.NAME} ${getColumnData(column.TYPE,column)}` ;
+    }
+    );
+    // post the data to the backend `/create-table/${tableName}` post body.columns
+    console.log('columnsData:', columnsData);
+    if (columnsData.length === 0) {
+        showToast('Table must have at least one column');
+        return;
+    }   
+    postCreateTable(tableName, columnsData);
+       
+}
+
+async function postCreateTable(tableName, columns) {
+    
+    try {
+        const response = await fetch(`/create-table/${tableName}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // Include other headers as needed, like authentication tokens
+            },
+            body: JSON.stringify({ columns })
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const result = await response.json();
+        console.log('Table created successfully:', result);
+        showToast('Table created successfully');
+    } catch (error) {
+        console.error('Error creating table:', error);
+    }
+}
+
+
+

@@ -18,8 +18,7 @@ function createElementImage(type) {
     console.log("createElementImage");
     element = document.createElement('img');
             element.src="/img/empty.png";
-            element.addEventListener('dblclick', function(){ editElement(element,type); });
-            element.addEventListener('click', function(){ selectElement(element); });
+
             element.setAttribute('alt', 'na');
             element.setAttribute('height', '1px');
             element.setAttribute('width', '1px');
@@ -34,5 +33,5 @@ function editElementImage(type,element,content)
 
     content.appendChild(textContentDiv);
     content.appendChild(clickDiv);
-    content.appendChild(createInputItem("alt", "alt", "alt",element.getAttribute('alt')));
+    content.appendChild(createInputItem("alt", "alt", "alt",element.getAttribute('alt'),"text"));
 }

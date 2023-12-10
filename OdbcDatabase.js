@@ -118,7 +118,7 @@ class OdbcDatabase {
         try {
             // Query to get fields of a table in OpenEdge
             var query = `SELECT "_Field-Name" Name, "_Data-Type" 'TYPE', "_Label" LABEL, "_Mandatory" 'MANDATORY',`;
-            query+=` "_Format" 'FORMAT', "_Decimals" 'DECIMAL', "_Width" 'WIDTH'FROM PUB."_Field" `;
+            query+=` "_Format" 'FORMAT', "_Decimals" 'DECIMAL', "_Width" 'WIDTH', "_Initial" 'DEFAULT' FROM PUB."_Field" `;
             query+=` WHERE PUB."_Field"."_File-Recid" = (SELECT ROWID FROM PUB."_File" WHERE "_File-Name" = '${tableName}')`;
             console.log(query);
             const result = await this.connection.query(query);
@@ -235,6 +235,57 @@ async updateRecord(tableName, data, rowID) {
         return result;
     } catch (err) {
         console.log('Error updating record:', err);
+        throw err;
+    }
+}
+
+
+// SCHEMA Modification
+// Alter table
+// Alter table
+async alterTable(tableName, columnName, columnType) {
+    try {
+        // Construct the SQL statement
+        const sql = `ALTER TABLE ${tableName} ADD ${columnName} ${columnType}`;
+        console.log(sql);
+        // Execute the query
+        const result = await this.connection.query(sql);
+
+        return result;
+    } catch (err) {
+        console.log('Error altering table:', err);
+        throw err;
+    }
+}
+
+// Alter table column
+async alterTableColumn(tableName, columnName, newColumnName, newColumnType) {
+    try {
+        // Construct the SQL statement for renaming the column
+        let sql = `ALTER TABLE ${tableName} RENAME COLUMN ${columnName} TO ${newColumnName}`;
+
+        // Execute the query
+        let result = await this.connection.query(sql);
+
+               return result;
+    } catch (err) {
+        console.log('Error altering table column:', err);
+        throw err;
+    }
+}
+
+// Create table
+async createTable(tableName, columns) {
+    try {
+        // Construct the SQL statement
+        const sql = `CREATE TABLE PUB.${tableName} (${columns.join(', ')})`;
+        console.log(sql);
+        // Execute the query
+        const result = await this.connection.query(sql);
+
+        return result;
+    } catch (err) {
+        console.log('Error creating table:', err);
         throw err;
     }
 }

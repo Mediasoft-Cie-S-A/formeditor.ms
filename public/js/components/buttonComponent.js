@@ -22,8 +22,7 @@ The double-click event listener calls the editElement function with the element 
 function createElementButton(type) {
     element = document.createElement(type);
             element.textContent = type;
-            element.addEventListener('dblclick', function(){ editElement(element,type); });
-            element.addEventListener('click', function(){ selectElement(element); });
+
     return element;
 }
 

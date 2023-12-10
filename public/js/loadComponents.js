@@ -56,7 +56,7 @@ loadJson('/elementsConfig')
     }
 // Create the sidebar
 function createSidebar(elementsData) {
-    const sidebar = document.getElementById('sidebar');
+    const sidebar = document.getElementById('componentsSidebar');
     const categories = {};
     var scriptslist = [];
 
@@ -73,13 +73,26 @@ function createSidebar(elementsData) {
     for (const category in categories) {
         const categoryDiv = document.createElement('div');
         categoryDiv.className = 'category';
-        categoryDiv.textContent = category;
-
+        const button = document.createElement('button');
+        button.textContent = category;
+        button.className = 'category-button';
+        button.addEventListener('click', function() {
+            const categoryDiv = this.parentElement;
+            const height = categoryDiv.style.height;
+            console.log(height);
+            if (height === "55px") {
+                categoryDiv.style.height = 'auto';
+            } else {
+                categoryDiv.style.height = '55px';
+            }
+        });
+        categoryDiv.appendChild(button);
+        
         const elements = categories[category];
        
                 for (const elementData of elements) {
                     const itemDiv = document.createElement('div');
-                    itemDiv.className = 'draggable';
+                    itemDiv.className = 'component-item draggable';
                     itemDiv.draggable = true;
                     itemDiv.textContent = elementData.description;
                     itemDiv.id = elementData.type;
@@ -159,6 +172,7 @@ function createFormElement(elementId) {
          }
       
          if (element) {
+            element.setAttribute("tagName",elementId);
             element.className = 'form-element';
             element.draggable = true;
             element.ondragstart = drag;
@@ -166,82 +180,64 @@ function createFormElement(elementId) {
     return element;
 }
 
-/*
 
-function createFormElement(elementId) {
-    var element = null;
-    console.log(elementId);
-    switch(elementId) {
-        case 'textfield':
-            element = createInputElement('text');
-            break;
-        case 'password':
-            element = createInputElement('password');
-            break;
-        case 'number':
-            element = createInputElement('number');
-            break;
-        case 'textarea':
-            element = createInputElement('textarea');
-            break;
-        case 'checkbox':
-            element = createInputElement('checkbox');
-            break;
-        case 'select':
-            element = createSelectElement('select');
-            // Add options to select element here
-            break;
-        case 'radio':
-            element = createInputElement('radio');
-            break;
-        case 'button':
-            element = document.createElement('button');
-            element.textContent = 'Button';
-            element.addEventListener('dblclick', function(){ editElement(element); });
-            element.addEventListener('click', function(){ selectElement(element); });
-            break;
-        case 'container':
-            element = document.createElement('div');
-            element.className="Container";
-            var htm='<div   onclick="selectElement(this)" class="half-width Container"></div>'
-            element.innerHTML=  htm + '<div   onclick="selectElement(this)" class="half-width Container"></div>'
-          
-            break;
-        case 'datetime':
-            element = createInputElement('datetime-local');
-            break;
-        case 'dbitem':
-               console.log("dbitem");
-                element = document.createElement('div');
 
-                createFormElementsFromStructure('PUB.Item',element);
-        break;
-    }
 
-    if (element) {
-        element.className = 'form-element';
-        element.draggable = true;
-        element.ondragstart = drag;
-    }
 
-    return element;
-}
-*/
+// editor properties on hover, click, double click
 
-function selectElement(element)
-{ 
-    var elements  = document.getElementsByClassName("Selection");
+// get the formContainer id
+var formContainer = document.getElementById('formContainer');
+// add event listener to the formContainer of on hover and show the context menu editorFloatMenu
+// in the position where the mouse is over and aligned to right for the sub elements
+formContainer.addEventListener('click', function(event) {
+    event.preventDefault();
+    // remove gjs-selection class from all elements
+    var elements  = document.getElementsByClassName("gjs-selection");
     for(i=0;i<elements.length;i++)
     {
-        elements[i].classList.remove("Selection");
+        elements[i].classList.remove("gjs-selection");
      
     }
-    currentElement=element; 
-    element.classList.add("Selection");
- }
+    console.log("event.target.id:"+event.target.id);    
+    if (event.target.id === 'formContainer') {       
+        
+        var editorFloatMenu = document.getElementById('editorFloatMenu');
+        editorFloatMenu.style.display = 'none';
+        }
+    //get the offset of formContainer
+    const { top, left } = getAbsoluteOffset(formContainer);
+    var editorElementSelected = event.target;
+    editorElementSelected.classList.add("gjs-selection");
+    const inputElementSelected=document.getElementById("editorElementSelected");
+    inputElementSelected.value=editorElementSelected.id;
+    var editorFloatMenu = document.getElementById('editorFloatMenu');
+    editorFloatMenu.style.display = 'block';
+    // Get the total offset by combining formContainer's and element's offset
+    console.log("formContainer.offsetTop:"+formContainer.offsetTop);
+    var totalOffsetTop = top + editorElementSelected.offsetTop -25;
+    var totalOffsetLeft = top+ editorElementSelected.offsetLeft + editorElementSelected.offsetWidth;
+
+    editorFloatMenu.style.top = totalOffsetTop + 'px';
+    editorFloatMenu.style.left = totalOffsetLeft + 'px';
+    
+});
 
 
+function getAbsoluteOffset(element) {
+    let top = 0, left = 0;
+    while(element) {
+        top += element.offsetTop || 0;
+        left += element.offsetLeft || 0;
+        element = element.offsetParent;
+    }
+    return { top, left };
+}
 
-
-
-
+// showproperties of the element
+function showProperties()
+{
+    const inputElementSelected=document.getElementById("editorElementSelected");
+    var editorElementSelected=document.getElementById(inputElementSelected.value);
+    editElement(editorElementSelected);
+}
