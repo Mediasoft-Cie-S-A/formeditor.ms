@@ -412,19 +412,38 @@ app.put('/update-record/:tableName/:rowID',  checkAuthenticated, async (req, res
     }
 });
 
+// insert record
+app.post('/insert-record/:tableName', checkAuthenticated, async (req, res) => {
+    const { tableName } = req.params;
+    const data = req.body; // Assuming the updated data is sent in the request body
+    console.log(data);    
+    try {
+        await db.connectWrite();
+        const result = await db.insertRecord(tableName, data);
+        res.json({ message: 'Record inserted successfully', result });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error inserting record');
+    } finally {
+        await db.close();
+    }
+});
+
 //GRID
 app.get('/table-data/:tableName/:page/:pageSize', checkAuthenticated,  async (req, res) => {
     try {
         
         const { tableName, page, pageSize } = req.params;
         await db.connect();
+        
         // Convert page and pageSize to numbers
         const pageNum = parseInt(page, 10);
         const pageSizeNum = parseInt(pageSize, 10);
          // Get the fields from the query string. It's a comma-separated string.
          const fields = req.query.fields ? req.query.fields.split(',') : null;
-
-        const data = await db.queryDataWithPagination(tableName, pageNum, pageSizeNum,fields);
+        const filter = req.query.filter ? req.query.filter : null;
+       
+        const data = await db.queryDataWithPagination(tableName, pageNum, pageSizeNum,fields,filter);
         res.json(data);
     } catch (err) {
         console.error('Error:', err);
@@ -433,5 +452,47 @@ app.get('/table-data/:tableName/:page/:pageSize', checkAuthenticated,  async (re
         await db.close();
     }
 });
+
+//Schema modification
+//Alter table
+app.post('/alter-table/:tableName', checkAuthenticated, async (req, res) => {
+    try {
+        await db.connectWrite();
+        const tableName = req.params.tableName;
+        const { action, columnName, columnType, newColumnName, newColumnType } = req.body;
+
+        let result;
+        if (action === 'add') {
+            result = await db.alterTable(tableName, columnName, columnType);
+        } else if (action === 'modify') {
+            result = await db.alterTableColumn(tableName, columnName, newColumnName, newColumnType);
+        } else {
+            throw new Error('Invalid action');
+        }
+
+        res.json({ message: 'Table altered successfully', result });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error altering table');
+    } finally {
+        await db.close();
+    }
+});
+//Create table  
+app.post('/create-table/:tableName', checkAuthenticated, async (req, res) => {
+    try {
+        await db.connectWrite();
+        const tableName = req.params.tableName;
+        const columns = req.body.columns;
+        const result = await db.createTable(tableName, columns);
+        res.json({ message: 'Table created successfully', result });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error creating table');
+    } finally {
+        await db.close();
+    }
+});
+
 
 }

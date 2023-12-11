@@ -20,13 +20,16 @@ function createElementInput(type) {
     main.id=type+ Date.now(); // Unique ID for each new element
     main.draggable = true;
     main.tagName=type;
-    main.addEventListener('dblclick', function(){ editElement(main,type); });
-    main.addEventListener('click', function(){ selectElement(main); });
+   
     var label=document.createElement('label');  
     label.innerHTML=type;    
+    label.id=main.id+"Label";
+    label.tagName="label";
     main.appendChild(label);   
     var input = document.createElement('input');
     input.type = type;
+    input.id=main.id+"Input";
+    input.tagName="input";
     main.appendChild(input)
     return main;
 }
@@ -34,14 +37,7 @@ function createElementInput(type) {
 function editElementInput(type,element,content)
 {
     // Create and append the elements
-    var labelDiv = createInputDiv("label", "Text:", updateElementText,element.querySelector('label').innerText);
-    var textDiv = createInputDiv("text", "Value:", updateElementValue,element.querySelector('input').value);
-    var checkedDiv = createInputDiv("sld", "checked", function(value) { updateElementStyle('checked', value); },element.querySelector('input').checked);
-    var onChangeDiv = createInputDiv("change", "OnChange Event:", updateElementOnChange,"");
-
-    content.appendChild(labelDiv);
-    content.appendChild(textDiv);
-    content.appendChild(checkedDiv);
-    content.appendChild(onChangeDiv);
+   
+   
 
 }

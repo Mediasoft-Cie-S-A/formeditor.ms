@@ -22,17 +22,14 @@ The double-click event listener calls the editElement function with the element 
 function createElementButton(type) {
     element = document.createElement(type);
             element.textContent = type;
-            element.addEventListener('dblclick', function(){ editElement(element,type); });
-            element.addEventListener('click', function(){ selectElement(element); });
+    element.id=type+ Date.now(); // Unique ID for each new element
+    element.tagName=type;
     return element;
 }
 
+
+
 function editElementButton(type,element,content)
 {
-    var textContentDiv = createInputDiv("textContent", "Value:", updateElementTxtC,element.textContent);
-    var clickDiv = createInputDiv("click", "OnClick Event:", updateElementOnChange,"");
-
-    content.appendChild(textContentDiv);
-    content.appendChild(clickDiv);
-
+   
 }

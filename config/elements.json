@@ -218,8 +218,8 @@
         "type": "dataGrid",
         "description": "Data Grid",
         "category": "Bussiness  Logic",
-        "scriptName": "dataSetComponent.js",
-        "createFunction": "createElementDateSet",
-        "editFunction": "editElementDataSet"
+        "scriptName": "databaseGrid.js",
+        "createFunction": "createDatabaseGrid",
+        "editFunction": "editDatabaseGrid"
     }
 }

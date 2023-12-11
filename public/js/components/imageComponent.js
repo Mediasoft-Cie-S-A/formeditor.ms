@@ -18,8 +18,8 @@ function createElementImage(type) {
     console.log("createElementImage");
     element = document.createElement('img');
             element.src="/img/empty.png";
-            element.addEventListener('dblclick', function(){ editElement(element,type); });
-            element.addEventListener('click', function(){ selectElement(element); });
+    element.id=type+ Date.now(); // Unique ID for each new element
+    element.tagName=type;
             element.setAttribute('alt', 'na');
             element.setAttribute('height', '1px');
             element.setAttribute('width', '1px');
@@ -28,11 +28,10 @@ function createElementImage(type) {
 
 function editElementImage(type,element,content)
 {
-    var textContentDiv = createInputDiv("src", "src:", updateElementTxtC,element.src);
-    var clickDiv = createInputDiv("click", "OnChange Event:", updateElementOnChange,"");
-    
-
+    var textContentDiv =createInputItem("scr", "src", "src",element.getAttribute('src'),"file");
+    // create input the open the file explorer
+ 
     content.appendChild(textContentDiv);
-    content.appendChild(clickDiv);
-    content.appendChild(createInputItem("alt", "alt", "alt",element.getAttribute('alt')));
+    
+    content.appendChild(createInputItem("alt", "alt", "alt",element.getAttribute('alt'),"text"));
 }

@@ -56,7 +56,7 @@ loadJson('/elementsConfig')
     }
 // Create the sidebar
 function createSidebar(elementsData) {
-    const sidebar = document.getElementById('sidebar');
+    const sidebar = document.getElementById('componentsSidebar');
     const categories = {};
     var scriptslist = [];
 
@@ -73,13 +73,26 @@ function createSidebar(elementsData) {
     for (const category in categories) {
         const categoryDiv = document.createElement('div');
         categoryDiv.className = 'category';
-        categoryDiv.textContent = category;
-
+        const button = document.createElement('button');
+        button.textContent = category;
+        button.className = 'category-button';
+        button.addEventListener('click', function() {
+            const categoryDiv = this.parentElement;
+            const height = categoryDiv.style.height;
+            console.log(height);
+            if (height === "75px") {
+                categoryDiv.style.height = 'auto';
+            } else {
+                categoryDiv.style.height = '75px';
+            }
+        });
+        categoryDiv.appendChild(button);
+        categoryDiv.appendChild(document.createElement('hr'));
         const elements = categories[category];
        
                 for (const elementData of elements) {
                     const itemDiv = document.createElement('div');
-                    itemDiv.className = 'draggable';
+                    itemDiv.className = 'component-item draggable';
                     itemDiv.draggable = true;
                     itemDiv.textContent = elementData.description;
                     itemDiv.id = elementData.type;
@@ -104,10 +117,7 @@ function createSidebar(elementsData) {
                 
                    
                 }
-             sidebar.appendChild(categoryDiv);          
-                
-
-        
+             sidebar.appendChild(categoryDiv);      
     }
 }
 
@@ -159,89 +169,11 @@ function createFormElement(elementId) {
          }
       
          if (element) {
+            element.setAttribute("tagName",elementId);
             element.className = 'form-element';
             element.draggable = true;
             element.ondragstart = drag;
         }
     return element;
 }
-
-/*
-
-function createFormElement(elementId) {
-    var element = null;
-    console.log(elementId);
-    switch(elementId) {
-        case 'textfield':
-            element = createInputElement('text');
-            break;
-        case 'password':
-            element = createInputElement('password');
-            break;
-        case 'number':
-            element = createInputElement('number');
-            break;
-        case 'textarea':
-            element = createInputElement('textarea');
-            break;
-        case 'checkbox':
-            element = createInputElement('checkbox');
-            break;
-        case 'select':
-            element = createSelectElement('select');
-            // Add options to select element here
-            break;
-        case 'radio':
-            element = createInputElement('radio');
-            break;
-        case 'button':
-            element = document.createElement('button');
-            element.textContent = 'Button';
-            element.addEventListener('dblclick', function(){ editElement(element); });
-            element.addEventListener('click', function(){ selectElement(element); });
-            break;
-        case 'container':
-            element = document.createElement('div');
-            element.className="Container";
-            var htm='<div   onclick="selectElement(this)" class="half-width Container"></div>'
-            element.innerHTML=  htm + '<div   onclick="selectElement(this)" class="half-width Container"></div>'
-          
-            break;
-        case 'datetime':
-            element = createInputElement('datetime-local');
-            break;
-        case 'dbitem':
-               console.log("dbitem");
-                element = document.createElement('div');
-
-                createFormElementsFromStructure('PUB.Item',element);
-        break;
-    }
-
-    if (element) {
-        element.className = 'form-element';
-        element.draggable = true;
-        element.ondragstart = drag;
-    }
-
-    return element;
-}
-*/
-
-function selectElement(element)
-{ 
-    var elements  = document.getElementsByClassName("Selection");
-    for(i=0;i<elements.length;i++)
-    {
-        elements[i].classList.remove("Selection");
-     
-    }
-    currentElement=element; 
-    element.classList.add("Selection");
- }
-
-
-
-
-
 

@@ -105,7 +105,7 @@ class OdbcDatabase {
         try {
             // Query to get list of tables in OpenEdge
             console.log("getTablesList");
-            const query = `SELECT "_File-Name" name, "_Desc" label FROM PUB."_File" WHERE "_file-Number">0`;
+            const query = `SELECT "_File-Name" name, "_Desc" label FROM PUB."_File" WHERE "_file-Number">0 and "_file-Number"<32768 ORDER BY "_File-Name"`;
             const result = await this.connection.query(query);
             return result;
         } catch (err) {
@@ -117,7 +117,9 @@ class OdbcDatabase {
     async getTableFields(tableName) {
         try {
             // Query to get fields of a table in OpenEdge
-            const query = `SELECT "_Field-Name" Name, "_Data-Type" TYPE, "_Label" LABEL FROM PUB."_Field" WHERE PUB."_Field"."_File-Recid" = (SELECT ROWID FROM PUB."_File" WHERE "_File-Name" = '${tableName}')`;
+            var query = `SELECT "_Field-Name" Name, "_Data-Type" 'TYPE', "_Label" LABEL, "_Mandatory" 'MANDATORY',`;
+            query+=` "_Format" 'FORMAT', "_Decimals" 'DECIMAL', "_Width" 'WIDTH', "_Initial" 'DEFAULT' FROM PUB."_Field" `;
+            query+=` WHERE PUB."_Field"."_File-Recid" = (SELECT ROWID FROM PUB."_File" WHERE "_File-Name" = '${tableName}')`;
             console.log(query);
             const result = await this.connection.query(query);
             return result;
@@ -141,13 +143,35 @@ class OdbcDatabase {
         }
     }
 
-    async queryDataWithPagination(tableName, page, pageSize,fields) {
+    async queryDataWithPagination(tableName, page, pageSize,fields,filter) {
         try {
+             // create filter base on filer paramenter, for search based on the input values, 
+             //with field name and value separated by | and each filter separated by ,
+             // and build the query where clause
+             if (filter && filter.length > 0) {
+                var filterList=filter.split(",");
+                var filter="";
+                for (var i=0;i<filterList.length;i++) {
+                    var filterField=filterList[i].split("|");
+                    if (filterField.length==2) {
+                        if (filter.length>0) {
+                            filter+=" and ";
+                        }
+                        filter+=`${filterField[0]} like '%${filterField[1]}%'`;
+                    }
+                }   
+            }
+                
+
             if (fields && fields.length > 0) {
                 const fieldList = fields.join(', ');
                 const offset = (page - 1) * pageSize;
                 
-                const paginatedQuery = `select  ${fieldList} FROM PUB."${tableName}" OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+                var paginatedQuery = `select  ${fieldList} FROM PUB."${tableName}"`;
+                if (filter && filter.length > 0) {
+                    paginatedQuery+=` WHERE ${filter} `;
+                }
+                paginatedQuery+=` OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
                 console.log(paginatedQuery)
                 const result = await this.connection.query(paginatedQuery);
                 return result;
@@ -233,6 +257,72 @@ async updateRecord(tableName, data, rowID) {
         return result;
     } catch (err) {
         console.log('Error updating record:', err);
+        throw err;
+    }
+}
+
+// insert new record
+async insertRecord(tableName, data) {
+    try {
+        // Construct the full SQL statement
+        const sql = `INSERT INTO ${tableName} (${data.fields}) VALUES (${data.values})`;
+        console.log(sql);
+        // Execute the query
+        const result = await this.connection.query(sql);
+
+        return result;
+    } catch (err) {
+        console.log('Error inserting record:', err);
+        throw err;
+    }
+}
+
+// SCHEMA Modification
+// Alter table
+// Alter table
+async alterTable(tableName, columnName, columnType) {
+    try {
+        // Construct the SQL statement
+        const sql = `ALTER TABLE ${tableName} ADD ${columnName} ${columnType}`;
+        console.log(sql);
+        // Execute the query
+        const result = await this.connection.query(sql);
+
+        return result;
+    } catch (err) {
+        console.log('Error altering table:', err);
+        throw err;
+    }
+}
+
+// Alter table column
+async alterTableColumn(tableName, columnName, newColumnName, newColumnType) {
+    try {
+        // Construct the SQL statement for renaming the column
+        let sql = `ALTER TABLE ${tableName} RENAME COLUMN ${columnName} TO ${newColumnName}`;
+
+        // Execute the query
+        let result = await this.connection.query(sql);
+
+               return result;
+    } catch (err) {
+        console.log('Error altering table column:', err);
+        throw err;
+    }
+}
+
+// Create table
+async createTable(tableName, columns) {
+    try {
+        // Construct the SQL statement
+        const sql = `CREATE TABLE PUB.${tableName} (${columns.join(', ')})`;
+        console.log(sql);
+        // Execute the query
+        const result = await this.connection.query(sql);
+
+        return result;
+    } catch (err) {
+        console.log('Error creating table:', err);
         throw err;
     }
 }
