@@ -45,13 +45,7 @@ function fetchTablesList(list) {
             
             list.innerHTML = '';
              // add new table button
-            const newTableButton = document.createElement('button');
-            newTableButton.textContent = 'New Table';
-            newTableButton.onclick = function(event) {
-                event.preventDefault();
-                newTable();
-            };
-            list.appendChild(newTableButton);
+      
             tables.forEach(table => {
                 const listItem = document.createElement('div');
                 listItem.classList.add('table-item');

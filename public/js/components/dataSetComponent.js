@@ -109,7 +109,6 @@ async function createFormElementsFromStructure(tableName,formContainer) {
             const input=element.querySelector('input');
             input.setAttribute('dataset-table-name', tableName);
             input.setAttribute('dataset-field-name', column.name);
-
         }
         
        dataset.appendChild(element); // Append to the desired container
@@ -143,7 +142,6 @@ function mapColumnTypeToInputType(columnType) {
 
 
 function showModalDbStrc(main) {
-    console.log("show");
     const modal = document.getElementById('tableDetailsModal');
     modal.setAttribute('data-main-id', main.id);
     const overl = document.getElementById('overlayModal');
@@ -259,6 +257,28 @@ function EditRecord(tableName)
     document.getElementById("SaveRecordBtn").disabled = false;
 }
 
+function InsertRecord(tableName)
+{
+    const inputs = document.querySelectorAll('#DataSet input');
+   
+    inputs.forEach(input => {
+        const tableLabel = input.getAttribute('dataset-table-name');
+        if (tableLabel == tableName) {           
+            input.readOnly = false;
+            if (input.type==='hidden')
+            {
+                input.value="new";
+            }
+            else{
+                input.value="";
+            }
+        }
+
+    });     
+
+    document.getElementById("SaveRecordBtn").disabled = false;
+}
+
 function CreateUpdated(tableName)
 {
     const inputs = document.querySelectorAll('#DataSet input');
@@ -279,13 +299,65 @@ function CreateUpdated(tableName)
 //update record 
 async function SaveRecord(tableName) {
     try {
-        const nextRowId=document.querySelector('#dataset-rowid').value; 
-         console.log(nextRowId);
-        const updateData= {
-                            body: CreateUpdated(tableName)
-        };
-        // Update the next record
-        response = await fetch(`/update-record/${tableName}/${nextRowId}`, {
+        const nextRowId = document.querySelector('#dataset-rowid').value; 
+        console.log(nextRowId);
+
+      
+        let result;
+        if (nextRowId === 'new') {
+            // create data for insert
+            const data =  CreateInsert(tableName);
+
+            
+            // If nextRowId is 'new', call insertRecord
+            result = await insertRecordDB(tableName, data);
+        } else {
+            // Otherwise, call updateRecord
+            const data = {
+                body: CreateUpdated(tableName)
+            };
+    
+            result = await updateRecordDB(tableName, nextRowId, data);
+        }
+
+        return result;
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+// create insert data structure
+function CreateInsert(tableName)
+{
+
+   // create data for insert following this structure  `INSERT INTO ${tableName} (${data.fields}) VALUES (${data.values})`;
+   // return data with data.fields and data.values
+    const inputs = document.querySelectorAll('#DataSet input');
+    var insertFields="";
+    var insertValues="";
+    for (i=0;i<inputs.length;i++)
+    {
+        if (inputs[i].type!='hidden') 
+        {
+            const field = inputs[i].getAttribute('dataset-field-name');
+            insertFields+=`"${field}"`;
+            insertValues+=`'${inputs[i].value}'`;
+            if (i<inputs.length-1) 
+            {
+                insertFields+=',';
+                insertValues+=',';
+            }
+        }
+    };
+    console.log(insertFields);
+    console.log(insertValues);
+    return {fields:insertFields,values:insertValues};
+
+}
+
+async function updateRecordDB(tableName, nextRowId, updateData) {
+    try {
+        const response = await fetch(`/update-record/${tableName}/${nextRowId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -297,47 +369,37 @@ async function SaveRecord(tableName) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const updateResult = await response.json();
-
+        showToast('Record updated successfully', 5000); // Show toast for 5 seconds
         return updateResult;
     } catch (error) {
         console.error('Error:', error);
     }
 }
 
-// Function to fetch and display data
-function gridFetchData(dataGrid,page,datasetFields) {
-    var pageSize=dataGrid.getAttribute("page_size");
-    var tableName=dataGrid.getAttribute("Table-Name");
-    fetch(`/table-data/${tableName}/${page}/${pageSize}?fields=${datasetFields}`)
-        .then(response => response.json())
-        .then(data => {
-            data.forEach(row => {
-                const rowDiv = document.createElement('div');
-                rowDiv.className = 'grid-row';
-                // Assuming 'row' is an object with keys corresponding to column names
-                for (const key in row) {
-                    const cell = document.createElement('div');
-                    cell.className = 'grid-cell';
-                    
-                    if (key=='rowid')
-                    {
-                        const input=document.createElement('input');
-                        input.type='hidden';
-                        input.value=row[key];
-                        cell.appendChild(input);
-                    }
-                    else
-                    {
-                    cell.textContent = row[key];
-                    }
-                    rowDiv.appendChild(cell);
-                }
-                dataGrid.appendChild(rowDiv);
-            });
-        })
-        .catch(error => console.error('Error:', error));
-}
 
+async function insertRecordDB(tableName, data) {
+    try {
+        const response = await fetch(`/insert-record/${tableName}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // Include other headers as needed, like authentication tokens
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('Record inserted successfully:', result);
+        showToast('Record inserted successfully', 5000); // Show toast for 5 seconds
+        return result;
+    } catch (error) {
+        console.error('Error inserting record:', error);
+    }
+}
 
 
 function closeModalEdit() {

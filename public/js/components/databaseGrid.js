@@ -68,6 +68,7 @@ function createGrid(gridContainer,tableName,datasetFields)
 
     var header = document.createElement('div');
     header.className = 'grid-row';   
+    //header
     datasetFields.forEach(field => {
         const cell = document.createElement('div');
         cell.className = 'grid-cell-header';        
@@ -75,9 +76,26 @@ function createGrid(gridContainer,tableName,datasetFields)
         header.appendChild(cell);
     });
     grid.appendChild(header);
+    // search inputs
+    var search = document.createElement('div');
+    search.className = 'grid-row';  
+    datasetFields.forEach(field => {
+        const cell = document.createElement('div');
+        cell.className = 'grid-cell';    
+        input=document.createElement('input');
+        input.type="text";
+        input.setAttribute("dataset-field-name",field);
+        
+        cell.appendChild(input);    
+        
+        search.appendChild(cell);
+    });
+    grid.appendChild(search);
+
+
     grid.setAttribute("Dataset-Fields-Names",datasetFields);
+    //set search inputs
     gridFetchData(grid) ;
-    // Infinite scrolling logic
  
 }
 
@@ -127,8 +145,6 @@ function gridFetchData(grid) {
         currentPage++;
         
         fetchTableData(grid,tableName,currentPage,pageSize,datasetFields);
-   
-      
     
 }
 
@@ -136,9 +152,6 @@ function fetchTableData(grid,tableName, page, pageSize, datasetFields) {
     // Prepare the fields query parameter
    
 
-    console.log(tableName);
-    console.log(page);
-    console.log(pageSize);
     // Prepare the URL
     const url = `/table-data/${tableName}/${page}/${pageSize}?fields=${datasetFields}`;
 
@@ -182,3 +195,40 @@ function fetchTableData(grid,tableName, page, pageSize, datasetFields) {
             console.error('Error:', error);
         });
 }
+
+
+// Function to fetch and display data
+function gridFetchData(dataGrid,page,datasetFields) {
+    var pageSize=dataGrid.getAttribute("page_size");
+    var tableName=dataGrid.getAttribute("Table-Name");
+    fetch(`/table-data/${tableName}/${page}/${pageSize}?fields=${datasetFields}`)
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(row => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'grid-row';
+                // Assuming 'row' is an object with keys corresponding to column names
+                for (const key in row) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    
+                    if (key=='rowid')
+                    {
+                        const input=document.createElement('input');
+                        input.type='hidden';
+                        input.value=row[key];
+                        cell.appendChild(input);
+                    }
+                    else
+                    {
+                    cell.textContent = row[key];
+                    }
+                    rowDiv.appendChild(cell);
+                }
+                dataGrid.appendChild(rowDiv);
+            });
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+

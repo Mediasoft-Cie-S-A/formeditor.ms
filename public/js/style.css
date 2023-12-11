@@ -232,7 +232,10 @@ button:hover {
     background-color: #6d7fcc;
     color: white;
 }
-
+.grid-row input:hover {
+    background-color: #6d7fcc;
+    color: white;
+}
 
 .grid-cell {
     padding: 5px;

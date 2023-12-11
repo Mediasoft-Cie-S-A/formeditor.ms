@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-const e = require("express");
-
 function createElementImage(type) {
     console.log("createElementImage");
     element = document.createElement('img');
@@ -30,11 +28,10 @@ function createElementImage(type) {
 
 function editElementImage(type,element,content)
 {
-    var textContentDiv = createInputDiv("src", "src:", updateElementTxtC,element.src);
-    var clickDiv = createInputDiv("click", "OnChange Event:", updateElementOnChange,"");
-    
-
+    var textContentDiv =createInputItem("scr", "src", "src",element.getAttribute('src'),"file");
+    // create input the open the file explorer
+ 
     content.appendChild(textContentDiv);
-    content.appendChild(clickDiv);
+    
     content.appendChild(createInputItem("alt", "alt", "alt",element.getAttribute('alt'),"text"));
 }

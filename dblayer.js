@@ -412,6 +412,23 @@ app.put('/update-record/:tableName/:rowID',  checkAuthenticated, async (req, res
     }
 });
 
+// insert record
+app.post('/insert-record/:tableName', checkAuthenticated, async (req, res) => {
+    const { tableName } = req.params;
+    const data = req.body; // Assuming the updated data is sent in the request body
+    console.log(data);    
+    try {
+        await db.connectWrite();
+        const result = await db.insertRecord(tableName, data);
+        res.json({ message: 'Record inserted successfully', result });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error inserting record');
+    } finally {
+        await db.close();
+    }
+});
+
 //GRID
 app.get('/table-data/:tableName/:page/:pageSize', checkAuthenticated,  async (req, res) => {
     try {

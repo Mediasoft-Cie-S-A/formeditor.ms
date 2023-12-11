@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+const e = require("express");
+
 function removeAllChildNodes(parent) {
     while (parent.firstChild) {
         parent.removeChild(parent.firstChild);
@@ -30,9 +33,26 @@ function createInputItem(id, label, styleProperty,text,type) {
     var input = document.createElement("input");
     input.type = type;
     input.id = id;
-    input.onchange = function() { updateElementStyle(styleProperty, this.value); };
-    input.value=text
+    input.onchange = function(event) {
+                                        if (event.target.type=="file")
+                                        {
 
+                                        }
+                                        else
+                                        {
+                                        updateElementStyle(styleProperty, this.value);
+                                        }
+                                   };
+    if (input.type!="file")
+        {
+            //set the relative path for the image
+
+            input.value=text
+        }
+    else
+        {
+            input.setAttribute("accept", "image/*");
+        }        
     div.appendChild(lbl);
     div.appendChild(input);
 

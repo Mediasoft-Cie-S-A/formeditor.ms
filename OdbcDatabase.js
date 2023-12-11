@@ -105,7 +105,7 @@ class OdbcDatabase {
         try {
             // Query to get list of tables in OpenEdge
             console.log("getTablesList");
-            const query = `SELECT "_File-Name" name, "_Desc" label FROM PUB."_File" WHERE "_file-Number">0`;
+            const query = `SELECT "_File-Name" name, "_Desc" label FROM PUB."_File" WHERE "_file-Number">0 and "_file-Number"<32768 ORDER BY "_File-Name"`;
             const result = await this.connection.query(query);
             return result;
         } catch (err) {
@@ -239,6 +239,21 @@ async updateRecord(tableName, data, rowID) {
     }
 }
 
+// insert new record
+async insertRecord(tableName, data) {
+    try {
+        // Construct the full SQL statement
+        const sql = `INSERT INTO ${tableName} (${data.fields}) VALUES (${data.values})`;
+        console.log(sql);
+        // Execute the query
+        const result = await this.connection.query(sql);
+
+        return result;
+    } catch (err) {
+        console.log('Error inserting record:', err);
+        throw err;
+    }
+}
 
 // SCHEMA Modification
 // Alter table
