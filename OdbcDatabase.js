@@ -355,8 +355,8 @@ async createTable(tableName, columns) {
             const result = await this.connection.query(sql);
             // convert result form json to csv
             const json2csv = require('json2csv').parse;
-           // const csv = json2csv(result);
-            console.log(csv);   
+           const csv = json2csv(result);
+           // console.log(csv);   
 
             
             return csv;
