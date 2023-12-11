@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-const e = require("express");
 
 function removeAllChildNodes(parent) {
     while (parent.firstChild) {
@@ -85,7 +84,12 @@ function editElement(element) {
  
         var content= dialog.querySelector("div");
         removeAllChildNodes(content);
-        // Execute the function editor if exists type   
+        
+        const label = document.createElement('label');
+        label.textContent = element.id;
+        content.appendChild(label);
+        content.appendChild(document.createElement('hr'));
+        // Execute the function editor delcared in the components js if exists type   
         console.log("type:"+elementsData[type]);
         if (elementsData[type]){
             if (elementsData[type].editFunction) {
@@ -95,11 +99,10 @@ function editElement(element) {
             
             }
         }
-        const label = document.createElement('label');
-        label.textContent = element.id;
-        content.appendChild(label);
-        content.appendChild(document.createElement('hr'));
+
         const style = element.style;
+
+
         content.appendChild(createInputDiv("label", "Text:", updateElementText,element.innerText));
         content.appendChild(createInputDiv("text", "Value:", updateElementValue,element.value));
         content.appendChild(createInputItem("vs", "visibility", "visibility",style.visibility,"text"));
