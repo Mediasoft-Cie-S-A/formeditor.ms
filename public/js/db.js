@@ -304,7 +304,7 @@ function addTableColumn(table) {
 
 async function alterTable(tableName, action, columnName, columnType, newColumnName, newColumnType) {
     try {
-        const response = await fetch(`/alter-table/PUB.${tableName}`, {
+        const response = await fetch(`/alter-table/${tableName}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

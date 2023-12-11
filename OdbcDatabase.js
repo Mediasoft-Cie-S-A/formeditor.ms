@@ -53,7 +53,7 @@ class OdbcDatabase {
 
     async getTableStructure(tableName) {
         try {
-            const query = `SELECT * FROM ${tableName} WHERE 1=0`; // Query that returns no data but column info
+            const query = `SELECT * FROM PUB.${tableName} WHERE 1=0`; // Query that returns no data but column info
             const result = await this.connection.query(query);
             return result.columns;
         } catch (err) {
@@ -192,7 +192,7 @@ class OdbcDatabase {
     if (fields && fields.length > 0) {
         const fieldList = fields.join(', ');
         console.log(fieldList);
-        const query = `SELECT TOP 1 ${fieldList} FROM ${tableName} `;
+        const query = `SELECT TOP 1 ${fieldList} FROM PUB.${tableName} `;
         return this.queryData(query);
     }
     return null;
@@ -204,7 +204,7 @@ async moveToLast(tableName , fields) {
     // with DESC and then select the TOP 1 record. This assumes you have a column to order by.
     if (fields && fields.length > 0) {
         const fieldList = fields.join(', ');
-        const query = `SELECT ${fieldList} FROM ${tableName} ORDER BY 1 desc `;    
+        const query = `SELECT ${fieldList} FROM PUB.${tableName} ORDER BY 1 desc `;    
         return this.queryData(query);
     }
     return null;
@@ -215,7 +215,7 @@ async moveToNext(tableName, fields, currentRowId) {
     if (fields && fields.length > 0) {
         const fieldList = fields.join(', ');
         // Assuming 'currentRowId' is the ROWID of the current record
-        const query = `SELECT ${fieldList} FROM ${tableName}  OFFSET ${currentRowId} ROWS FETCH NEXT 1 ROWS ONLY`;
+        const query = `SELECT ${fieldList} FROM PUB.${tableName}  OFFSET ${currentRowId} ROWS FETCH NEXT 1 ROWS ONLY`;
         console.log(query);
         return this.queryData(query);
     }
@@ -229,17 +229,30 @@ async moveToPrevious(tableName, fields, currentRowId) {
     // You might need to fetch all records with ROWID less than the current one and then take the last one
     if (fields && fields.length > 0) {
         const fieldList = fields.join(', ');
-            const query = `SELECT ${fieldList} FROM ${tableName} OFFSET ${currentRowId} ROWS FETCH NEXT 1 ROWS ONLY`;
+            const query = `SELECT ${fieldList} FROM PUB.${tableName} OFFSET ${currentRowId} ROWS FETCH NEXT 1 ROWS ONLY`;
             console.log(query);
             return this.queryData(query);
         }
         return null;
 }
 
+// Move to the row with the specified ROWID
+async getRecordByRowID(tableName, fields, rowID) {
+    // Assuming 'rowID' is the ROWID of the record to move to
+    if (fields && fields.length > 0) {
+        const fieldList = fields.join(', ');
+        const query = `SELECT ${fieldList} FROM PUB.${tableName} WHERE ROWID = '${rowID}'`;
+        console.log(query);
+        return this.queryData(query);
+    }
+    return null;
+}
+
+
 // Move to the next record
 async getROWID(tableName, currentRowId) {
     // Assuming 'currentRowId' is the ROWID of the current record
-    const query = `SELECT ROWID FROM ${tableName}  OFFSET ${currentRowId} ROWS FETCH NEXT 1 ROWS ONLY`;
+    const query = `SELECT ROWID FROM PUB.${tableName}  OFFSET ${currentRowId} ROWS FETCH NEXT 1 ROWS ONLY`;
     console.log(query);
     return this.queryData(query);
 }
@@ -248,7 +261,7 @@ async updateRecord(tableName, data, rowID) {
     try {
         
         // Construct the full SQL statement
-        const sql = `UPDATE ${tableName} SET ${data.body} WHERE ROWID = '${rowID}'`;
+        const sql = `UPDATE PUB.${tableName} SET ${data.body} WHERE ROWID = '${rowID}'`;
   
        console.log(sql);
         // Execute the query
@@ -265,7 +278,7 @@ async updateRecord(tableName, data, rowID) {
 async insertRecord(tableName, data) {
     try {
         // Construct the full SQL statement
-        const sql = `INSERT INTO ${tableName} (${data.fields}) VALUES (${data.values})`;
+        const sql = `INSERT INTO PUB.${tableName} (${data.fields}) VALUES (${data.values})`;
         console.log(sql);
         // Execute the query
         const result = await this.connection.query(sql);
@@ -283,7 +296,7 @@ async insertRecord(tableName, data) {
 async alterTable(tableName, columnName, columnType) {
     try {
         // Construct the SQL statement
-        const sql = `ALTER TABLE ${tableName} ADD ${columnName} ${columnType}`;
+        const sql = `ALTER TABLE PUB.${tableName} ADD ${columnName} ${columnType}`;
         console.log(sql);
         // Execute the query
         const result = await this.connection.query(sql);
@@ -299,7 +312,7 @@ async alterTable(tableName, columnName, columnType) {
 async alterTableColumn(tableName, columnName, newColumnName, newColumnType) {
     try {
         // Construct the SQL statement for renaming the column
-        let sql = `ALTER TABLE ${tableName} RENAME COLUMN ${columnName} TO ${newColumnName}`;
+        let sql = `ALTER TABLE PUB.${tableName} RENAME COLUMN ${columnName} TO ${newColumnName}`;
 
         // Execute the query
         let result = await this.connection.query(sql);

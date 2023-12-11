@@ -73,10 +73,13 @@ function createGrid(gridContainer,tableName,datasetFields)
     header.setAttribute("header","");
     //header
     datasetFields.forEach(field => {
-        const cell = document.createElement('div');
-        cell.className = 'grid-cell-header';        
-        cell.textContent = field!=='rowid'?field:'';
-        header.appendChild(cell);
+        if (field!=='rowid')
+            {
+            const cell = document.createElement('div');
+            cell.className = 'grid-cell-header';        
+            cell.textContent = field!=='rowid'?field:'';
+            header.appendChild(cell);
+            }
     });
     grid.appendChild(header);
     // search inputs
@@ -102,15 +105,10 @@ function createGrid(gridContainer,tableName,datasetFields)
                       gridFetchData(grid) ;
                     }
                   });
+                  cell.appendChild(input);
             }
-            else    
-            {
-                input=document.createElement('div');
-                input.textContent="";
-            }
-         
-            
-            cell.appendChild(input);    
+          
+   
             
             search.appendChild(cell);
         
@@ -219,6 +217,11 @@ function fetchTableData(grid,tableName, page, pageSize, datasetFields) {
                 var rowDiv = document.createElement('div');
                 rowDiv.className = 'grid-row';
                 rowDiv.setAttribute("rowid",row.rowid);
+                // add click event to row to call linkRecordToGrid(tableName, rowId)
+                rowDiv.addEventListener("click", function(event) {
+                    event.preventDefault();
+                    linkRecordToGrid(tableName, datasetFields,row.rowid);
+                  });
                 var i=0;
                 Object.values(row).forEach(field => {
                     
@@ -226,13 +229,9 @@ function fetchTableData(grid,tableName, page, pageSize, datasetFields) {
                     cell.className = 'grid-cell';
                     
                     rowDiv.appendChild(cell);
-                    if (i==0 )
+                    // skip rowid field
+                    if (i>0 )
                     {
-                     const input=document.createElement('input');
-                      input.type="hidden";
-                        input.value=field;
-                        cell.appendChild(input);  
-                    } else{
                         cell.textContent = field;
                     }
                     i++;

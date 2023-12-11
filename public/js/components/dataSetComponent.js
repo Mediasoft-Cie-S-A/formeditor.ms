@@ -166,7 +166,7 @@ function insertTable()
 
     const tableName = document.getElementById('TableDetails_TableName');
     element = document.createElement('div');
-    createFormElementsFromStructure('PUB.'+tableName.innerText,element);
+    createFormElementsFromStructure(tableName.innerText,element);
     const formContainer = document.getElementById(modal.getAttribute('data-main-id'));
     formContainer.appendChild(element);
 }
@@ -212,6 +212,27 @@ function navigateRecords(action, tableName,datasetFields, rowId = '') {
         })
         .catch(error => console.error('Error:', error));
 }
+
+// link record to grid using this web service /get-record-by-rowid/:tableName/:rowID and update the inputs with the data
+// use the fetch function to call the web service and update the inputs with the data
+// use the updateInputs function to update the inputs with the data
+// use the setRowID function to set the current row id in the navigation bar
+async function linkRecordToGrid(tableName,datasetFields, rowId) {
+    try {
+        const url = `/get-record-by-rowid/${tableName}/${rowId}?fields=${datasetFields}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        updateInputs(data);
+        setRowID(0); // Assuming the data includes ROWID to-do check if the data includes ROWID
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+
 
 function updateInputs(data) {
     const inputs = document.querySelectorAll('#DataSet input');

@@ -316,6 +316,24 @@ app.get('/move-to-previous/:tableName/:currentRowId', checkAuthenticated, async 
         await db.close();
     }
 });
+//get record by rowid
+app.get('/get-record-by-rowid/:tableName/:rowID', checkAuthenticated, async (req, res) => {
+    try {
+        await db.connect();
+        const tableName = req.params.tableName;
+        const rowID = req.params.rowID;
+         // Get the fields from the query string. It's a comma-separated string.
+         const fields = req.query.fields ? req.query.fields.split(',') : null;
+
+        const record = await db.getRecordByRowID(tableName,fields, rowID);
+        res.json(record);
+    } catch (err) {
+        console.error('Error:', err);
+        res.status(500).send('Error moving to previous record');
+    } finally {
+        await db.close();
+    }
+});
 
 /**
  * @swagger
