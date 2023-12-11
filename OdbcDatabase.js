@@ -143,13 +143,35 @@ class OdbcDatabase {
         }
     }
 
-    async queryDataWithPagination(tableName, page, pageSize,fields) {
+    async queryDataWithPagination(tableName, page, pageSize,fields,filter) {
         try {
+             // create filter base on filer paramenter, for search based on the input values, 
+             //with field name and value separated by | and each filter separated by ,
+             // and build the query where clause
+             if (filter && filter.length > 0) {
+                var filterList=filter.split(",");
+                var filter="";
+                for (var i=0;i<filterList.length;i++) {
+                    var filterField=filterList[i].split("|");
+                    if (filterField.length==2) {
+                        if (filter.length>0) {
+                            filter+=" and ";
+                        }
+                        filter+=`${filterField[0]} like '%${filterField[1]}%'`;
+                    }
+                }   
+            }
+                
+
             if (fields && fields.length > 0) {
                 const fieldList = fields.join(', ');
                 const offset = (page - 1) * pageSize;
                 
-                const paginatedQuery = `select  ${fieldList} FROM PUB."${tableName}" OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+                var paginatedQuery = `select  ${fieldList} FROM PUB."${tableName}"`;
+                if (filter && filter.length > 0) {
+                    paginatedQuery+=` WHERE ${filter} `;
+                }
+                paginatedQuery+=` OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
                 console.log(paginatedQuery)
                 const result = await this.connection.query(paginatedQuery);
                 return result;

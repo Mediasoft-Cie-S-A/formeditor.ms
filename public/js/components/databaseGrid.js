@@ -1,3 +1,5 @@
+const e = require("express");
+
 /*
  * Copyright (c) 2023 Mediasoft & Cie S.A.
  *
@@ -68,6 +70,7 @@ function createGrid(gridContainer,tableName,datasetFields)
 
     var header = document.createElement('div');
     header.className = 'grid-row';   
+    header.setAttribute("header","");
     //header
     datasetFields.forEach(field => {
         const cell = document.createElement('div');
@@ -79,16 +82,38 @@ function createGrid(gridContainer,tableName,datasetFields)
     // search inputs
     var search = document.createElement('div');
     search.className = 'grid-row';  
+    search.setAttribute("header","");
     datasetFields.forEach(field => {
-        const cell = document.createElement('div');
-        cell.className = 'grid-cell';    
-        input=document.createElement('input');
-        input.type="text";
-        input.setAttribute("dataset-field-name",field);
+       
+   
+            const cell = document.createElement('div');
+            cell.className = 'grid-cell';    
+            if (field!=='rowid')
+            {
+                input=document.createElement('input');
+                input.type="text";
+                input.setAttribute("dataset-field-name",field);
+                // set search event on keyup
+                input.addEventListener("keyup", function(event) {
+                    if (event.keyCode === 13) {
+                      event.preventDefault();
+                      grid.setAttribute("current_page",1);
+                      removeAllChildRows(grid);
+                      gridFetchData(grid) ;
+                    }
+                  });
+            }
+            else    
+            {
+                input=document.createElement('div');
+                input.textContent="";
+            }
+         
+            
+            cell.appendChild(input);    
+            
+            search.appendChild(cell);
         
-        cell.appendChild(input);    
-        
-        search.appendChild(cell);
     });
     grid.appendChild(search);
 
@@ -128,10 +153,14 @@ function gridNext(e) {
    
 }
 
-function removeAllChildRows(parent) {
-    while (parent.lastChild && parent.lastChild !== parent.firstChild) {
-        parent.removeChild(parent.lastChild);
+
+//remove all rows except the row get have the header attribute  
+function removeAllChildRows(grid) {
+  for(var i = grid.childNodes.length - 1; i >= 0; i--) {
+    if(grid.childNodes[i].getAttribute("header")===null) {
+        grid.removeChild(grid.childNodes[i]);
     }
+  }
 }
 
 function gridFetchData(grid) {
@@ -142,18 +171,38 @@ function gridFetchData(grid) {
     var datasetFields=grid.getAttribute("dataset-fields-names");
   
         var currentPage=parseInt(currentPage);
-        currentPage++;
-        
+
         fetchTableData(grid,tableName,currentPage,pageSize,datasetFields);
     
 }
 
 function fetchTableData(grid,tableName, page, pageSize, datasetFields) {
     // Prepare the fields query parameter
-   
+    // create filter for search based on the input values, with field name and value separated by | and each filter separated by ,
+    var filter="";
+    var i=0;
+    var fieldsList=grid.querySelectorAll('input[type="text"]')
+    fieldsList.forEach(field => { 
+        fieldName=field.getAttribute("dataset-field-name");
+        fieldValue=field.value;
+        if (fieldValue!=="")
+        {
+            if (i>0)
+            {
+                filter+=",";
+            }
+            filter+=fieldName+"|"+fieldValue;
+            i++;
+        }
+        
+    }); 
+
+    
+    
 
     // Prepare the URL
-    const url = `/table-data/${tableName}/${page}/${pageSize}?fields=${datasetFields}`;
+
+    const url = `/table-data/${tableName}/${page}/${pageSize}?fields=${datasetFields}&filter=${filter}`;
 
     // Fetch the data from the web service
     return fetch(url)
@@ -194,41 +243,6 @@ function fetchTableData(grid,tableName, page, pageSize, datasetFields) {
         .catch(error => {
             console.error('Error:', error);
         });
-}
-
-
-// Function to fetch and display data
-function gridFetchData(dataGrid,page,datasetFields) {
-    var pageSize=dataGrid.getAttribute("page_size");
-    var tableName=dataGrid.getAttribute("Table-Name");
-    fetch(`/table-data/${tableName}/${page}/${pageSize}?fields=${datasetFields}`)
-        .then(response => response.json())
-        .then(data => {
-            data.forEach(row => {
-                const rowDiv = document.createElement('div');
-                rowDiv.className = 'grid-row';
-                // Assuming 'row' is an object with keys corresponding to column names
-                for (const key in row) {
-                    const cell = document.createElement('div');
-                    cell.className = 'grid-cell';
-                    
-                    if (key=='rowid')
-                    {
-                        const input=document.createElement('input');
-                        input.type='hidden';
-                        input.value=row[key];
-                        cell.appendChild(input);
-                    }
-                    else
-                    {
-                    cell.textContent = row[key];
-                    }
-                    rowDiv.appendChild(cell);
-                }
-                dataGrid.appendChild(rowDiv);
-            });
-        })
-        .catch(error => console.error('Error:', error));
 }
 
 
