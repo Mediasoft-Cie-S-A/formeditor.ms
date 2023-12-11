@@ -511,6 +511,26 @@ app.post('/create-table/:tableName', checkAuthenticated, async (req, res) => {
         await db.close();
     }
 });
+// export table to csv
+// set html mime type in header
+app.get('/export-table/:tableName', checkAuthenticated, async (req, res) => {
+    try {
+        await db.connect();
+        const tableName = req.params.tableName;
+        const fields = req.query.fields ? req.query.fields.split(',') : null;
+        const result = await db.exportTableToCSV(tableName,fields);
+        // res set header
+        res.set('Content-Type', 'text/csv');
+        res.set('Content-Disposition', `attachment; filename=${tableName}.csv`);
+        res.status(200).send(result);
+        
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error exporting table');
+    } finally {
+        await db.close();
+    }
+});
 
 
 }

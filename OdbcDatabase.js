@@ -340,6 +340,31 @@ async createTable(tableName, columns) {
     }
 }
 
+
+
+// ----------------------------------
+// Export table to CSV
+// ----------------------------------
+    async exportTableToCSV(tableName, fields) {
+        try {
+            // Construct the SQL statement
+            const fieldList = fields.join(', ');
+            const sql = `SELECT ${fieldList} FROM PUB.${tableName}`;
+            console.log(sql);
+            // Execute the query
+            const result = await this.connection.query(sql);
+            // convert result form json to csv
+            const json2csv = require('json2csv').parse;
+           // const csv = json2csv(result);
+            console.log(csv);   
+
+            
+            return csv;
+        } catch (err) {
+            console.log('Error exporting table to CSV:', err);
+            throw err;
+        }
+        }
 }
 
 module.exports = OdbcDatabase;
