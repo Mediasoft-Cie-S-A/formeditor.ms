@@ -43,13 +43,16 @@ function createNavigationBar(tableName,datasetFields) {
 
     // Create buttons and append them to the navigation bar
     var buttons = [
-        { id: 'firstRecordBtn', text: 'F', event:"moveFirst('"+tableName+"','"+datasetFields+"')" },
-        { id: 'previousRecordBtn', text: '<', event: "movePrev('"+tableName+"','"+datasetFields+"')" },
-        { id: 'nextRecordBtn', text: '>', event: "moveNext('"+tableName+"','"+datasetFields+"')" },
-        { id: 'lastRecordBtn', text: 'L', event: "moveLast('"+tableName+"','"+datasetFields+"')" },
-        { id: 'EditRecordBtn', text: 'E', event: "EditRecord('"+tableName+"','"+datasetFields+"')" },
-        { id: 'InsertRecordBtn', text: 'I', event: "InsertRecord('"+tableName+"','"+datasetFields+"')" },
-        { id: 'SaveRecordBtn', text: 'S', event: "SaveRecord('"+tableName+"')" }
+
+        { id: 'firstRecordBtn', text: '<i class="bi bi-arrow-up-circle-fill"></i>', event:"moveFirst('"+tableName+"','"+datasetFields+"')" },
+        { id: 'previousRecordBtn', text: '<i class="bi bi-arrow-left-circle-fill"></i>', event: "movePrev('"+tableName+"','"+datasetFields+"')" },
+        { id: 'nextRecordBtn', text: '<i class="bi bi-arrow-right-circle-fill"></i>', event: "moveNext('"+tableName+"','"+datasetFields+"')" },
+        { id: 'lastRecordBtn', text: '<i class="bi bi-arrow-down-square-fill"></i>', event: "moveLast('"+tableName+"','"+datasetFields+"')" },
+        { id: 'EditRecordBtn', text: '<i class="bi bi-credit-card-2-front"></i>', event: "EditRecord('"+tableName+"','"+datasetFields+"')" },
+        { id: 'InsertRecordBtn', text: '<i class="bi bi-sticky-fill"></i>', event: "InsertRecord('"+tableName+"','"+datasetFields+"')" },
+        { id: 'SaveRecordBtn', text: '<i class="bi bi-sim-fill"></i>', event: "SaveRecord('"+tableName+"')" }
+       
+
     ];
 
     //for the dom2json is mandatory to create a html for the events
@@ -166,7 +169,9 @@ function insertTable()
 
     const tableName = document.getElementById('TableDetails_TableName');
     element = document.createElement('div');
-    createFormElementsFromStructure('PUB.'+tableName.innerText,element);
+
+    createFormElementsFromStructure(tableName.innerText,element);
+
     const formContainer = document.getElementById(modal.getAttribute('data-main-id'));
     formContainer.appendChild(element);
 }
@@ -212,6 +217,27 @@ function navigateRecords(action, tableName,datasetFields, rowId = '') {
         })
         .catch(error => console.error('Error:', error));
 }
+
+// link record to grid using this web service /get-record-by-rowid/:tableName/:rowID and update the inputs with the data
+// use the fetch function to call the web service and update the inputs with the data
+// use the updateInputs function to update the inputs with the data
+// use the setRowID function to set the current row id in the navigation bar
+async function linkRecordToGrid(tableName,datasetFields, rowId) {
+    try {
+        const url = `/get-record-by-rowid/${tableName}/${rowId}?fields=${datasetFields}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        updateInputs(data);
+        setRowID(0); // Assuming the data includes ROWID to-do check if the data includes ROWID
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+
 
 function updateInputs(data) {
     const inputs = document.querySelectorAll('#DataSet input');
