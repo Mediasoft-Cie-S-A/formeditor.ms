@@ -18,18 +18,7 @@ const header=['NAME','TYPE','LABEL' ,'FORMAT','MANDATORY', 'DECIMAL', 'WIDTH', '
 
 
 
-async function fetchTableStructure(tableName) {
-    try {
-        var response = await fetch(`/table-structure/${tableName}`);
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return await response.json();
-    } catch (error) {
-        console.error('Fetch error:', error);
-        return [];
-    }
-}
+
 
 
 // The 'DOMContentLoaded' event fires when the initial HTML document has been completely loaded and parsed,
@@ -103,7 +92,7 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
         
         // Display fields
         const table=  document.createElement('table');
-                
+        const isNotSearch=document.getElementById('_insertSearch').style.display == 'none';   
         fields.forEach(field => {
             const tr = document.createElement('tr');
             const td0 = document.createElement('td');
@@ -116,8 +105,17 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
             const fieldItem = document.createElement('input');                
             fieldItem.value = `${field.NAME}`;
             fieldItem.setAttribute("type", "checkbox");
-            fieldItem.checked=true;
+           
+            fieldItem.checked=isNotSearch;
             fieldItem.setAttribute("dataset-field-name",field.NAME);
+            fieldItem.setAttribute("dataset-field-type",field.TYPE);
+            fieldItem.setAttribute("dataset-field-label",field.LABEL);
+            fieldItem.setAttribute("dataset-field-format",field.FORMAT);
+            fieldItem.setAttribute("dataset-field-mandatory",field.MANDATORY);
+            fieldItem.setAttribute("dataset-field-decimal",field.DECIMAL);
+            fieldItem.setAttribute("dataset-field-width",field.WIDTH);
+            fieldItem.setAttribute("dataset-field-default",field.DEFAULT);
+
 
             td0.appendChild(fieldItem);
             td1.innerHTML=`${field.NAME}`;
@@ -125,7 +123,7 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
             td3.innerHTML=`${field.LABEL}`;       
             td4.innerHTML=`${field.FORMAT}`;  
             td5.innerHTML=`${field.MANDATORY}`;
-            td6.innerHTML=`isSelect <input type='checkbox'/>`;
+            td6.innerHTML=`${field.WIDTH}`;
             tr.appendChild(td0);
             tr.appendChild(td1);
             tr.appendChild(td2);

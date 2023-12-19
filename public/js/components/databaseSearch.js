@@ -59,7 +59,7 @@ function insertSearch()
     const formContainer = document.getElementById(modal.getAttribute('data-main-id'));
     
     fieldsList=document.querySelectorAll('#tableDetails table input:checked')
-
+    var field=fieldsList[0];
     // create serach form with input and button and autocomplete
     var label=document.createElement('label');
     label.innerHTML="Search";
@@ -74,12 +74,17 @@ function insertSearch()
     searchInput.setAttribute("list", "searchList");
     searchInput.setAttribute("autocomplete", "off");
     searchInput.setAttribute("oninput", "searchAutoComplete(event,this)");
+    searchInput.setAttribute("onfocus", "searchAutoComplete(event,this)");
+    searchInput.setAttribute("data-table-name",tableName.innerText);
+    searchInput.setAttribute("data-field-name",field.getAttribute("dataset-field-name"));
+    searchInput.setAttribute("data-field-type",field.getAttribute("dataset-field-type"));
     searchInput.placeholder="Search";
     const searchButton = document.createElement('button');
     element.appendChild(searchInput)
     searchButton.type = 'button';
     searchButton.className = 'search-button';
     searchButton.innerHTML = '  <i class="search-icon">&#128269;</i> ';
+    searchButton.setAttribute("onclick", "gridSearch(event,'"+searchInput.id+"')");
     element.appendChild(searchButton);
     const autocomplete = document.createElement('div');
     autocomplete.id = 'autocomplete';
@@ -88,24 +93,74 @@ function insertSearch()
     
     formContainer.appendChild(element);
 
-    /*
-       const searchInput = document.createElement('input');
-    searchInput.type = 'text';
-    searchInput.id = tableName.value;
-    searchInput.className = 'form-control';
-    searchInput.placeholder = 'Search';
-    searchInput.autocomplete = 'off';
-    searchInput.setAttribute('onkeyup','search(event)');
-    element.appendChild(searchInput);
-    const searchButton = document.createElement('button');
-    searchButton.type = 'button';
-    searchButton.className = 'btn btn-primary';
-    searchButton.innerHTML = 'Search';
-    element.appendChild(searchButton);
-    const autocomplete = document.createElement('div');
-    autocomplete.id = 'autocomplete';
-    autocomplete.className = 'autocomplete-items';
-    element.appendChild(autocomplete);
-    */
+    
     return element;
+}
+
+function gridSearch(event,id)
+{
+    console.log("gridSearch");
+    element = document.getElementById(id);
+    const filedName = element.getAttribute("data-field-name");
+    const searchValue = filedName+"|"+element.value;
+   
+    searchGrid(searchValue);
+}
+// searchAutoComplete that call the search function "/select-distinct/:tableName/:fieldName" and display the result in the autocomplete div
+function searchAutoComplete(event,element)
+{
+    const tableName = element.getAttribute("data-table-name");
+    const fieldName = element.getAttribute("data-field-name");
+    const fieldType = element.getAttribute("data-field-type");
+    const autocomplete = document.getElementById('autocomplete');
+    const searchValue = element.value;
+    
+        var url = "/select-distinct/"+tableName+"/"+fieldName;
+        // generate filter from searchValue if fieldType is text with openedge syntax
+        if (searchValue.length>2)
+            {
+                switch (fieldType) {
+                    case "character":
+                        url=url+"?filter="+fieldName+" like '%"+searchValue+"%'";
+                        break;
+                    case "integer":
+                        url=url+"?filter="+fieldName+"="+searchValue;
+                        break;
+                    case "date":
+                        url=url+"?filter="+fieldName+"="+searchValue;
+                        break;
+                    case "logical":
+                        url=url+"?filter="+fieldName+"="+searchValue;
+                        break;
+                    default:
+                        url=url+"?filter="+fieldName+" like '%"+searchValue+"%'";;
+                }
+            }
+        fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            autocomplete.innerHTML="";
+            autocomplete.style.display="block";
+            data.forEach(row => {
+                console.log(row);
+                var rowDiv = document.createElement('div');
+                rowDiv.className = 'autocomplete-row';
+                rowDiv.setAttribute("rowid",row.rowid);
+                rowDiv.setAttribute("data-table-name",tableName);
+                rowDiv.setAttribute("data-field-name",fieldName);
+                rowDiv.setAttribute("data-field-type",fieldType);
+                rowDiv.setAttribute("data-search-value",searchValue);
+                rowDiv.addEventListener("click", function(event) {
+                    event.preventDefault();
+                    element.value=row[fieldName];
+                    autocomplete.style.display="none";
+                  });
+                var i=0;
+                rowDiv.innerHTML=row[fieldName];
+                autocomplete.appendChild(rowDiv);
+            });
+        })
+        .catch(error => {
+            console.error(error);
+        });
 }

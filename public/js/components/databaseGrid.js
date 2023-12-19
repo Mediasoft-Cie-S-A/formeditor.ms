@@ -153,6 +153,16 @@ function gridNext(e) {
    
 }
 
+function searchGrid(filter){
+    const grid = document.getElementById('Data-Grid');
+    grid.setAttribute("current_page",1);
+    var tableName=grid.getAttribute("Table-Name");
+    var datasetFields=grid.getAttribute("Dataset-Fields-Names");
+    removeAllChildRows(grid);
+    gridGetData(grid,tableName,1,10,datasetFields,filter );
+
+}
+
 // export grid to csv
 function export2CSV(e) {
     e.preventDefault();
@@ -208,9 +218,14 @@ function fetchTableData(grid,tableName, page, pageSize, datasetFields) {
         
     }); 
 
-    
+    gridGetData(grid,tableName,page,pageSize,datasetFields,filter );
     
 
+}
+
+function gridGetData(grid,tableName,page,pageSize,datasetFields,filter)
+{
+    
     // Prepare the URL
 
     const url = `/table-data/${tableName}/${page}/${pageSize}?fields=${datasetFields}&filter=${filter}`;
@@ -256,5 +271,4 @@ function fetchTableData(grid,tableName, page, pageSize, datasetFields) {
             console.error('Error:', error);
         });
 }
-
 

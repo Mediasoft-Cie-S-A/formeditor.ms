@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+const e = require("express");
+
 
 function createElementDateSet(type) {
     var main= document.createElement('div');
@@ -65,128 +67,95 @@ function createNavigationBar(tableName,datasetFields) {
     return navigationBar;
 }
 
-async function createFormElementsFromStructure(tableName,formContainer) {
-    var structure = await fetchTableStructure(tableName);
-   
-    const dataset=document.createElement("div");
-    dataset.id="DataSet";
-   
-    fieldsList=document.querySelectorAll('#tableDetails table input:checked')
-    var datasetFields=['rowid'];
-    const input=document.createElement('input');
-            input.setAttribute('dataset-table-name', tableName);
-            input.setAttribute('dataset-field-name', 'rowid');
-            input.id="dataset-rowid";
-            input.type='hidden';
-            dataset.appendChild(input); 
-    fieldsList.forEach(field => { 
-        fieldName=field.getAttribute("dataset-field-name");
-        datasetFields.push(fieldName);       
-        column=structure.find(({ name }) => name === fieldName);
-   
-        const type = mapColumnTypeToInputType(column.dataTypeName); // Map the column type to input type
-        switch(type) {
-            case 'text':
-            case 'password':
-            case 'numeric':
-            case 'checkbox':
-            case 'radio':
-            case 'datetime-local':
-                element = createElementInput(type);
-                break;
-            case 'textarea':
-                element = createElementInput('textarea');
-                break;
-            case 'select':
-                element = createSelectElement('select');
-                // Add options to select element here
-                break;
-            default:
-                // Handle default case or unknown types
-                element = createElementInput('text');
-        }
-    
-        if (element) {
-            element.querySelector('label').textContent = column.name; // Set label to column name
-            const input=element.querySelector('input');
-            input.setAttribute('dataset-table-name', tableName);
-            input.setAttribute('dataset-field-name', column.name);
-        }
-        
-       dataset.appendChild(element); // Append to the desired container
-    });
-    dataset.appendChild(createNavigationBar(tableName,datasetFields));
-    dataset.setAttribute("DataSet-Fields-List",datasetFields);
-    formContainer.innerHTML="";
-    formContainer.appendChild(dataset);
+async function createFormElementsFromStructure(tableName,container) {
+    try {
+                    const dataset=document.createElement("div");
+                    dataset.id="DataSet_"+tableName;
+                
+                    fieldsList=document.querySelectorAll('#tableDetails table input:checked')
+                    var datasetFields=['rowid'];
+                    var datasetFieldsTypes=['rowid'];
+                    const input=document.createElement('input');
+                            input.setAttribute('dataset-table-name', tableName);
+                            input.setAttribute('dataset-field-name', 'rowid');
+                            input.id="dataset-rowid";
+                            input.type='hidden';
+                            dataset.appendChild(input); 
+                        //  console.log(fieldsList);
+                    fieldsList.forEach(field => { 
+                        fieldName=field.getAttribute("dataset-field-name");
+                        fieldType=field.getAttribute("dataset-field-type");
+                        datasetFields.push(fieldName);
+                        datasetFieldsTypes.push(fieldType);
+                        //console.log(field.getAttribute("dataset-field-type"));
+                        var element=null;
+                        switch(fieldType) {
+                            case 'character':
+                            case 'varchar':
+                            case 'text':
+                            case 'fixchar':
+                                element = createElementInput('text');
+                                break;
+                            case 'INT':
+                            case 'integer':
+                            case 'bigint':
+                            case 'float':
+                            case 'double':
+                            case 'decimal':
+                                element = createElementInput('number');
+                                break;
+                            case 'date':
+                            case 'datetime':
+                                element = createElementInput('date');
+                                break;
+                            case 'time':
+                                element = createElementInput('time');
+                                break;
+                            case 'boolean':
+                            case 'bool':
+                            case 'bit':
+                                element = createElementInput('checkbox');
+                                break;
+                            
+                            default:
+                                // Handle default case or unknown types
+                                element = createElementInput('text');
+                                break;
+                        }
+                        
+                       console.log(element);
+                    
+                        if (element !== undefined && element !== null) {
+                            element.querySelector('label').textContent = fieldName; // Set label to column name
+                            const input=element.querySelector('input');
+                            input.setAttribute('dataset-table-name', tableName);
+                            input.setAttribute('dataset-field-name', fieldName);
+                            input.id=tableName+"_"+fieldName;
+                            input.setAttribute('dataset-field-type', field.getAttribute("dataset-field-type"));
+                            input.setAttribute('dataset-field-size', field.getAttribute("dataset-field-size"));
+                            input.setAttribute('dataset-field-mandatory', field.getAttribute("dataset-field-mandatory"));
+                            input.setAttribute('dataset-field-format', field.getAttribute("dataset-field-format"));
+
+                            if (field.MANDATORY)
+                            {
+                                input.required=true;
+                            }
+
+                        }
+                    //console.log(element);
+                        
+                    dataset.appendChild(element); // Append to the desired container
+                    });
+
+                    dataset.appendChild(createNavigationBar(tableName,datasetFields));
+                    dataset.setAttribute("DataSet-Fields-List",datasetFields);
+                    dataset.setAttribute("DataSet-Fields-Types",datasetFieldsTypes);
+                    console.log(dataset);
+                    container.appendChild(dataset);
+            } catch (error) {
+                    console.error('Error:', error);
+            }
 }
-
-
-
-function mapColumnTypeToInputType(columnType) {
-    // Map your database column types to appropriate input types
-    // This is a basic example, adjust according to your database schema
- 
-    switch(columnType) {
-        case 'SQL_NUMERIC':
-            return 'number';
-        case 'SQL_VARCHAR':
-            return 'text';
-        case 'SQL_INTEGER':
-                return 'number';
-        case 'date':
-        case 'datetime':
-            return 'datetime-local';
-        case 'SQL_BOOLEAN':
-            return 'checkbox';
-        case 'SQL_LONGVARCHAR':
-            return 'textarea';
-        case 'SQL_CHAR':
-            return 'text';
-        case 'SQL_BIT':
-            return 'checkbox';
-        case 'SQL_TIMESTAMP':
-            return 'datetime-local';
-        case 'SQL_TIME':
-            return 'time';
-        case 'SQL_DATE':
-            return 'date';
-        case 'SQL_DOUBLE':
-            return 'number';
-        case 'SQL_FLOAT':
-            return 'number';
-        case 'SQL_DECIMAL':
-            return 'number';
-        case 'SQL_LONGVARBINARY':
-            return 'file';
-        case 'SQL_BINARY':
-            return 'file';
-        case 'SQL_VARBINARY':
-            return 'file';
-        case 'SQL_TINYINT':
-            return 'number';
-        case 'SQL_SMALLINT':
-            return 'number';
-        case 'SQL_BIGINT':
-            return 'number';
-        case 'SQL_REAL':
-            return 'number';
-        case 'SQL_BLOB':
-            return 'file';
-        case 'SQL_CLOB':
-            return 'file';
-        case 'SQL_ARRAY':
-            return 'text';
-        case 'SQL_DISTINCT':
-            return 'text';
-        
-        // Add more mappings as needed
-        default:
-            return 'text';
-    }
-}
-
-
 
 
 function insertTable()
@@ -196,11 +165,11 @@ function insertTable()
     modal.style.display = 'none';
     overl.style.display = 'none';
     console.log("dbitem");
-
+    const formContainer = document.getElementById(modal.getAttribute('data-main-id'));
     const tableName = document.getElementById('TableDetails_TableName');
     element = document.createElement('div');
     createFormElementsFromStructure(tableName.innerText,element);
-    const formContainer = document.getElementById(modal.getAttribute('data-main-id'));
+
     formContainer.appendChild(element);
 }
 
@@ -239,7 +208,7 @@ function navigateRecords(action, tableName,datasetFields, rowId = '') {
     fetch(url)
         .then(response => response.json())
         .then(data => {
-            updateInputs(data);
+            updateInputs(data,tableName);
             rowId=rowId==""?0:rowId;
             setRowID(rowId); // Assuming the data includes ROWID
         })
@@ -258,7 +227,7 @@ async function linkRecordToGrid(tableName,datasetFields, rowId) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        updateInputs(data);
+        updateInputs(data,tableName);
         setRowID(0); // Assuming the data includes ROWID to-do check if the data includes ROWID
     } catch (error) {
         console.error('Error:', error);
@@ -267,13 +236,14 @@ async function linkRecordToGrid(tableName,datasetFields, rowId) {
 
 
 
-function updateInputs(data) {
-    const inputs = document.querySelectorAll('#DataSet input');
-   // console.log(data[0]);
+function updateInputs(data,tableName) {
+    
+    const inputs = document.querySelectorAll(`#DataSet_${tableName} input`);
+    console.log(inputs);
     inputs.forEach(input => {
        // console.log(input);
         const fieldLabel = input.getAttribute('dataset-field-name');
-        console.log(fieldLabel+":"+data[0][fieldLabel]);
+      //  console.log(fieldLabel+":"+data[0][fieldLabel]);
         if (data[0][fieldLabel] !== undefined) {
             input.value = data[0][fieldLabel];
             input.readOnly = true;
@@ -298,7 +268,7 @@ return navbar.getAttribute("dataset-current-row");
 
 function EditRecord(tableName)
 {
-    const inputs = document.querySelectorAll('#DataSet input');
+    const inputs = document.querySelectorAll(`#DataSet_${tableName} input`);
    
     inputs.forEach(input => {
         const tableLabel = input.getAttribute('dataset-table-name');
@@ -313,7 +283,7 @@ function EditRecord(tableName)
 
 function InsertRecord(tableName)
 {
-    const inputs = document.querySelectorAll('#DataSet input');
+    const inputs = document.querySelectorAll(`#DataSet_${tableName} input`);
    
     inputs.forEach(input => {
         const tableLabel = input.getAttribute('dataset-table-name');
@@ -335,7 +305,7 @@ function InsertRecord(tableName)
 
 function CreateUpdated(tableName)
 {
-    const inputs = document.querySelectorAll('#DataSet input');
+    const inputs = document.querySelectorAll(`#DataSet_${tableName} input`);
    var updateFields="";
    for (i=0;i<inputs.length;i++)
     {
@@ -376,7 +346,7 @@ async function SaveRecord(tableName) {
 
         return result;
     } catch (error) {
-        console.error('Error:', error);
+        showToast('Error:'+ error);
     }
 }
 
@@ -386,7 +356,7 @@ function CreateInsert(tableName)
 
    // create data for insert following this structure  `INSERT INTO ${tableName} (${data.fields}) VALUES (${data.values})`;
    // return data with data.fields and data.values
-    const inputs = document.querySelectorAll('#DataSet input');
+    const inputs = document.querySelectorAll(`#DataSet_${tableName} input`);
     var insertFields="";
     var insertValues="";
     for (i=0;i<inputs.length;i++)
@@ -403,8 +373,7 @@ function CreateInsert(tableName)
             }
         }
     };
-    console.log(insertFields);
-    console.log(insertValues);
+
     return {fields:insertFields,values:insertValues};
 
 }
@@ -420,13 +389,13 @@ async function updateRecordDB(tableName, nextRowId, updateData) {
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            showToast(`HTTP error! status: ${response.status}`);
         }
         const updateResult = await response.json();
         showToast('Record updated successfully', 5000); // Show toast for 5 seconds
         return updateResult;
     } catch (error) {
-        console.error('Error:', error);
+        showToast('Error:'+ error);
     }
 }
 
@@ -443,7 +412,7 @@ async function insertRecordDB(tableName, data) {
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+            showToast(`HTTP error! Status: ${response.status}`);
         }
 
         const result = await response.json();
@@ -451,7 +420,7 @@ async function insertRecordDB(tableName, data) {
         showToast('Record inserted successfully', 5000); // Show toast for 5 seconds
         return result;
     } catch (error) {
-        console.error('Error inserting record:', error);
+        showToast('Error inserting record:'+error);
     }
 }
 

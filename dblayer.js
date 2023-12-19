@@ -15,6 +15,7 @@
  */
 
 const OdbcDatabase = require('./OdbcDatabase'); 
+const he = require('he');
 
 module.exports = function(app,session, passport) {
     const checkAuthenticated = (req, res, next) => {
@@ -511,6 +512,37 @@ app.post('/create-table/:tableName', checkAuthenticated, async (req, res) => {
         await db.close();
     }
 });
+
+function decodeSpecialChars(data)
+{
+ // replace %20 by space
+    data=data.replaceAll("%20", " ").replaceAll("%27", "'").replaceAll("%2C", ",").replaceAll("%3A", ":").replaceAll("%3B", ";").replaceAll("%3D", "=").replaceAll("%3F", "?").replaceAll("%40", "@");
+   
+    return data;
+}
+
+//select distinct values for a field
+app.get('/select-distinct/:tableName/:fieldName', checkAuthenticated, async (req, res) => {
+    try {
+        await db.connect();
+        const tableName = req.params.tableName;
+        const fieldName = req.params.fieldName;
+       
+        // convert html code to special characters
+    
+        const filter = req.query.filter ?  decodeSpecialChars(req.query.filter) : null;
+       
+        const result = await db.selectDistinct(tableName, fieldName,filter);
+        res.json(result);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error selecting distinct values');
+    } finally {
+        await db.close();
+    }
+});
+
+
 // export table to csv
 // set html mime type in header
 app.get('/export-table/:tableName', checkAuthenticated, async (req, res) => {

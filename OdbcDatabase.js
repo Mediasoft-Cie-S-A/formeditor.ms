@@ -51,16 +51,7 @@ class OdbcDatabase {
         }
     }
 
-    async getTableStructure(tableName) {
-        try {
-            const query = `SELECT * FROM PUB.${tableName} WHERE 1=0`; // Query that returns no data but column info
-            const result = await this.connection.query(query);
-            return result.columns;
-        } catch (err) {
-            console.log('Error retrieving table structure:', err);
-         //   throw err;
-        }
-    }
+
 
     async queryData(queryString) {
         try {
@@ -340,7 +331,26 @@ async createTable(tableName, columns) {
     }
 }
 
+// select distinct values from column
+async selectDistinct(tableName, columnName, filter) {
+    try {
+        // Construct the SQL statement
+        // if filter is not empty, add it to the query
 
+        var sql = `SELECT DISTINCT ${columnName} FROM PUB.${tableName} `;	
+        if (filter && filter.length > 0) {
+            sql+=` WHERE ${filter} `;
+        }
+        console.log(sql);
+        // Execute the query
+        const result = await this.connection.query(sql);
+
+        return result;
+    } catch (err) {
+        console.log('Error selecting distinct values:', err);
+        throw err;
+    }
+}
 
 // ----------------------------------
 // Export table to CSV
