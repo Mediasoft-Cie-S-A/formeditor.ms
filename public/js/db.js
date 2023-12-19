@@ -110,19 +110,29 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
             const td1 = document.createElement('td');
             const td2 = document.createElement('td');
             const td3 = document.createElement('td');
+            const td4 = document.createElement('td');
+            const td5 = document.createElement('td');
+            const td6 = document.createElement('td');
             const fieldItem = document.createElement('input');                
             fieldItem.value = `${field.NAME}`;
             fieldItem.setAttribute("type", "checkbox");
             fieldItem.checked=true;
             fieldItem.setAttribute("dataset-field-name",field.NAME);
+
             td0.appendChild(fieldItem);
             td1.innerHTML=`${field.NAME}`;
             td2.innerHTML=`${field.TYPE}`;
-            td3.innerHTML=`${field.LABEL}`;         
+            td3.innerHTML=`${field.LABEL}`;       
+            td4.innerHTML=`${field.FORMAT}`;  
+            td5.innerHTML=`${field.MANDATORY}`;
+            td6.innerHTML=`isSelect <input type='checkbox'/>`;
             tr.appendChild(td0);
             tr.appendChild(td1);
             tr.appendChild(td2);
             tr.appendChild(td3);
+            tr.appendChild(td4);
+            tr.appendChild(td5);
+            tr.appendChild(td6);
             table.appendChild(tr);
         });
         detailsDiv.appendChild(table);       
@@ -268,9 +278,10 @@ function addTableColumn(table) {
         switch (prop) {
             case 'TYPE':
                 var _select= `<select new name='${prop}'>`;
-                    _select+=`<option value="INTEGER">INTEGER</option>`;
+                  
                     _select+=`<option value="CHAR">CHAR</option>`;
                     _select+=`<option value="VARCHAR">VARCHAR</option>`;
+                    _select+=`<option value="INTEGER">INTEGER</option>`;
                     _select+=`<option value="DATE">DATE</option>`;
                     _select+=`<option value="DECIMAL">DECIMAL</option>`;
                     _select+=`<option value="NUMERIC">NUMERIC</option>`;
@@ -443,6 +454,48 @@ async function postCreateTable(tableName, columns) {
     } catch (error) {
         console.error('Error creating table:', error);
     }
+}
+
+
+function showModalDbStrc(main,type) {
+    console.log(type);
+    const modal = document.getElementById('tableDetailsModal');
+    modal.setAttribute('data-main-id', main.id);
+    const overl = document.getElementById('overlayModal');
+    modal.style.display = 'block';
+    overl.style.display = 'block';
+    switch(type)
+    {
+       
+        case "dataGrid":
+            document.getElementById('_insertGrid').style.display = 'block';
+            document.getElementById('_insertSearch').style.display = 'none';
+            document.getElementById('_insertTable').style.display = 'none';
+            break;
+        case "dataSet":
+                document.getElementById('_insertTable').style.display = 'block';
+                document.getElementById('_insertGrid').style.display = 'none';
+                document.getElementById('_insertSearch').style.display = 'none';
+                break;
+        case "dataSearch":
+            document.getElementById('_insertSearch').style.display = 'block';
+            document.getElementById('_insertTable').style.display = 'none';
+            document.getElementById('_insertGrid').style.display = 'none';
+            break;  
+        default:
+            document.getElementById('_insertSearch').style.display = 'none';
+            document.getElementById('_insertTable').style.display = 'none';
+            document.getElementById('_insertGrid').style.display = 'none';
+            break;
+    }
+
+}
+
+function closeModalDbStrct() {
+    const modal = document.getElementById('tableDetailsModal');
+    const overl = document.getElementById('overlayModal');
+    modal.style.display = 'none';
+    overl.style.display = 'none';
 }
 
 

@@ -174,14 +174,7 @@
         "createFunction": "createElementInput",
         "editFunction": "editElementInput"
     },
-    "search": {
-        "type": "search",
-        "description": "A search field",
-        "category": "Bussiness  Logic",
-        "scriptName": "genericInput.js",
-        "createFunction": "createElementInput",
-        "editFunction": "editElementInput"
-    },
+    
     "tel": {
         "type": "tel",
         "description": "A telephone field",
@@ -221,5 +214,13 @@
         "scriptName": "databaseGrid.js",
         "createFunction": "createDatabaseGrid",
         "editFunction": "editDatabaseGrid"
+    },
+    "dataSearch": {
+        "type": "dataSearch",
+        "description": "A search field",
+        "category": "Bussiness  Logic",
+        "scriptName": "databaseSearch.js",
+        "createFunction": "createDatabaseSearch",
+        "editFunction": "editDatabaseSearch"
     }
 }

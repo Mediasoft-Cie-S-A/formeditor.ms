@@ -1,5 +1,3 @@
-const e = require("express");
-
 /*
  * Copyright (c) 2023 Mediasoft & Cie S.A.
  *
@@ -25,7 +23,7 @@ function createDatabaseGrid(type) {
     const list = document.getElementById('tablesList');
     const detailsDiv = document.getElementById('tableDetails');
     createTableList(list,detailsDiv);
-    showModalDbStrc(main);
+    showModalDbStrc(main,type);
     return main;
 }
 

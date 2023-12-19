@@ -25,7 +25,7 @@ function createElementDateSet(type) {
     const list = document.getElementById('tablesList');
     const detailsDiv = document.getElementById('tableDetails');
     createTableList(list,detailsDiv);
-    showModalDbStrc(main);
+    showModalDbStrc(main,type);
     return main;
 }
 
@@ -38,6 +38,7 @@ function createNavigationBar(tableName,datasetFields) {
     // Create the navigation bar div
     var navigationBar = document.createElement('div');
     navigationBar.id = 'navigationBar';
+    navigationBar.type = 'navigation-bar';
     navigationBar.setAttribute('data-table-name', tableName);
     navigationBar.setAttribute('data-current-row', '0');
 
@@ -81,7 +82,7 @@ async function createFormElementsFromStructure(tableName,formContainer) {
     fieldsList.forEach(field => { 
         fieldName=field.getAttribute("dataset-field-name");
         datasetFields.push(fieldName);       
-        column=structure.find(({ name }) => name === fieldName);;
+        column=structure.find(({ name }) => name === fieldName);
    
         const type = mapColumnTypeToInputType(column.dataTypeName); // Map the column type to input type
         switch(type) {
@@ -128,6 +129,7 @@ function mapColumnTypeToInputType(columnType) {
  
     switch(columnType) {
         case 'SQL_NUMERIC':
+            return 'number';
         case 'SQL_VARCHAR':
             return 'text';
         case 'SQL_INTEGER':
@@ -135,6 +137,49 @@ function mapColumnTypeToInputType(columnType) {
         case 'date':
         case 'datetime':
             return 'datetime-local';
+        case 'SQL_BOOLEAN':
+            return 'checkbox';
+        case 'SQL_LONGVARCHAR':
+            return 'textarea';
+        case 'SQL_CHAR':
+            return 'text';
+        case 'SQL_BIT':
+            return 'checkbox';
+        case 'SQL_TIMESTAMP':
+            return 'datetime-local';
+        case 'SQL_TIME':
+            return 'time';
+        case 'SQL_DATE':
+            return 'date';
+        case 'SQL_DOUBLE':
+            return 'number';
+        case 'SQL_FLOAT':
+            return 'number';
+        case 'SQL_DECIMAL':
+            return 'number';
+        case 'SQL_LONGVARBINARY':
+            return 'file';
+        case 'SQL_BINARY':
+            return 'file';
+        case 'SQL_VARBINARY':
+            return 'file';
+        case 'SQL_TINYINT':
+            return 'number';
+        case 'SQL_SMALLINT':
+            return 'number';
+        case 'SQL_BIGINT':
+            return 'number';
+        case 'SQL_REAL':
+            return 'number';
+        case 'SQL_BLOB':
+            return 'file';
+        case 'SQL_CLOB':
+            return 'file';
+        case 'SQL_ARRAY':
+            return 'text';
+        case 'SQL_DISTINCT':
+            return 'text';
+        
         // Add more mappings as needed
         default:
             return 'text';
@@ -142,20 +187,7 @@ function mapColumnTypeToInputType(columnType) {
 }
 
 
-function showModalDbStrc(main) {
-    const modal = document.getElementById('tableDetailsModal');
-    modal.setAttribute('data-main-id', main.id);
-    const overl = document.getElementById('overlayModal');
-    modal.style.display = 'block';
-    overl.style.display = 'block';
-}
 
-function closeModalDbStrct() {
-    const modal = document.getElementById('tableDetailsModal');
-    const overl = document.getElementById('overlayModal');
-    modal.style.display = 'none';
-    overl.style.display = 'none';
-}
 
 function insertTable()
 {
