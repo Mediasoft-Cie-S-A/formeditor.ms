@@ -30,12 +30,24 @@ const router = express.Router();
 
 
 const app = express();
-const port = 3000;
 
-// Connection URL
-const url = 'mongodb://0.0.0.0:27017';
-const dbName = 'formeditmsapp';
 
+
+
+// get the config
+app.config = {};
+try {
+    app.config = JSON.parse(fs.readFileSync("appconfig.json", 'utf8'));
+} catch (err) {
+    console.log('Error loading config file:', err);
+}
+
+
+// mongodb Connection URL
+const url = app.config.mongoDbUrl;
+// Database Name
+const dbName = app.config.mongoDbName;
+const port =app.config.port;
 // Create a new MongoClient
 const client = new MongoClient(url, { useUnifiedTopology: true });
 require('./mongodb')(app,client,dbName);
@@ -44,12 +56,14 @@ app.use(express.urlencoded({extended: false}))
 
 // Serve static files from the 'public' folder
 app.use(express.static('public'));
-
-
-require('./authentication')(app,session, passport);
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+// authentication
+// init session
+require('./authentication')(app,session, passport);
+require('./authAzureAd')(app,session, passport);
+require('./authStatic')(app,session, passport);
+
 
 // Import routes
 require('./formService')(app, client, dbName);
