@@ -52,7 +52,8 @@ function createNavigationBar(tableName,datasetFields) {
         { id: 'lastRecordBtn', text: '<i class="bi bi-arrow-down-square-fill"></i>', event: "moveLast('"+tableName+"','"+datasetFields+"')" },
         { id: 'EditRecordBtn', text: '<i class="bi bi-credit-card-2-front"></i>', event: "EditRecord('"+tableName+"','"+datasetFields+"')" },
         { id: 'InsertRecordBtn', text: '<i class="bi bi-sticky-fill"></i>', event: "InsertRecord('"+tableName+"','"+datasetFields+"')" },
-        { id: 'SaveRecordBtn', text: '<i class="bi bi-sim-fill"></i>', event: "SaveRecord('"+tableName+"')" }
+        { id: 'SaveRecordBtn', text: '<i class="bi bi-sim-fill"></i>', event: "SaveRecord('"+tableName+"')" },
+        { id: 'RefreshBtn', text: '<i class="bi bi-sim-fill"></i>', event: "RefreshRecord('"+tableName+"')" }
        
     ];
 
@@ -72,7 +73,7 @@ async function createFormElementsFromStructure(tableName,container) {
                     const dataset=document.createElement("div");
                     dataset.id="DataSet_"+tableName;
                 
-                    fieldsList=document.querySelectorAll('#tableDetails table input:checked')
+                    fieldsList=document.querySelectorAll('#tableDetails table tr')
                     var datasetFields=['rowid'];
                     var datasetFieldsTypes=['rowid'];
                     const input=document.createElement('input');
@@ -82,69 +83,99 @@ async function createFormElementsFromStructure(tableName,container) {
                             input.type='hidden';
                             dataset.appendChild(input); 
                         //  console.log(fieldsList);
-                    fieldsList.forEach(field => { 
-                        fieldName=field.getAttribute("dataset-field-name");
-                        fieldType=field.getAttribute("dataset-field-type");
-                        datasetFields.push(fieldName);
-                        datasetFieldsTypes.push(fieldType);
-                        //console.log(field.getAttribute("dataset-field-type"));
-                        var element=null;
-                        switch(fieldType) {
-                            case 'character':
-                            case 'varchar':
-                            case 'text':
-                            case 'fixchar':
-                                element = createElementInput('text');
-                                break;
-                            case 'INT':
-                            case 'integer':
-                            case 'bigint':
-                            case 'float':
-                            case 'double':
-                            case 'decimal':
-                                element = createElementInput('number');
-                                break;
-                            case 'date':
-                            case 'datetime':
-                                element = createElementInput('date');
-                                break;
-                            case 'time':
-                                element = createElementInput('time');
-                                break;
-                            case 'boolean':
-                            case 'bool':
-                            case 'bit':
-                                element = createElementInput('checkbox');
-                                break;
-                            
-                            default:
-                                // Handle default case or unknown types
-                                element = createElementInput('text');
-                                break;
-                        }
-                        
-                       console.log(element);
-                    
-                        if (element !== undefined && element !== null) {
-                            element.querySelector('label').textContent = fieldName; // Set label to column name
-                            const input=element.querySelector('input');
-                            input.setAttribute('dataset-table-name', tableName);
-                            input.setAttribute('dataset-field-name', fieldName);
-                            input.id=tableName+"_"+fieldName;
-                            input.setAttribute('dataset-field-type', field.getAttribute("dataset-field-type"));
-                            input.setAttribute('dataset-field-size', field.getAttribute("dataset-field-size"));
-                            input.setAttribute('dataset-field-mandatory', field.getAttribute("dataset-field-mandatory"));
-                            input.setAttribute('dataset-field-format', field.getAttribute("dataset-field-format"));
+                    fieldsList.forEach(trline => { 
+                        field=trline.querySelector('input:checked');
+                        isSelect=trline.querySelector('select[name="inputType"]')
+                        inputType=isSelect.options[isSelect.selectedIndex].text;
+                        if (field)
+                        {
+                                    fieldName=field.getAttribute("dataset-field-name");
+                                    fieldType=field.getAttribute("dataset-field-type");
+                                    datasetFields.push(fieldName);
+                                    datasetFieldsTypes.push(fieldType);
+                                    //console.log(field.getAttribute("dataset-field-type"));
+                                    var element=null;
+                                    switch(fieldType) {
+                                        case 'character':
+                                        case 'varchar':
+                                        case 'text':
+                                        case 'fixchar':
+                                            // Get the select value 
+                                           
+                                                // get option value from the select
+                                               switch( inputType)
+                                               {
+                                                case "input":
+                                                    element = createElementInput('text');
+                                                     einput=element.querySelector('input');
+                                                break;
+                                                case "select":
+                                                    element = createElementSelect('select');
+                                                    einput=element.querySelector('select');
+                                                break;
+                                                case "checkbox":
+                                                    element = createElementInput('checkbox');
+                                                    einput=element.querySelector('input');
+                                                    break; 
+                                               }
+                                           
+                                            break;
+                                        case 'INT':
+                                        case 'integer':
+                                        case 'bigint':
+                                        case 'float':
+                                        case 'double':
+                                        case 'decimal':
+                                            element = createElementInput('number');
+                                            einput=element.querySelector('input');
+                                            break;
+                                        case 'date':
+                                        case 'datetime':
+                                            element = createElementInput('date');
+                                            einput=element.querySelector('input');
+                                            break;
+                                        case 'time':
+                                            element = createElementInput('time');
+                                            einput=element.querySelector('input');
+                                            break;
+                                        case 'boolean':
+                                        case 'bool':
+                                        case 'bit':
+                                            element = createElementInput('checkbox');
+                                            einput=element.querySelector('input');
+                                            break;
+                                        
+                                        default:
+                                            // Handle default case or unknown types
+                                            element = createElementInput('text');
+                                            einput=element.querySelector('input');
+                                            break;
+                                    }
+                                    
+                                console.log(element);
+                                
+                                    if (element !== undefined && element !== null) {
+                                        element.querySelector('label').textContent = fieldName; // Set label to column name
+                                        
+                                        
+                                        einput.setAttribute('dataset-table-name', tableName);
+                                        einput.setAttribute('dataset-field-name', fieldName);
+                                        einput.id=tableName+"_"+fieldName;
+                                        einput.setAttribute('dataset-field-type', field.getAttribute("dataset-field-type"));
+                                        einput.setAttribute('dataset-field-size', field.getAttribute("dataset-field-size"));
+                                        einput.setAttribute('dataset-field-mandatory', field.getAttribute("dataset-field-mandatory"));
+                                        einput.setAttribute('dataset-field-format', field.getAttribute("dataset-field-format"));
 
-                            if (field.MANDATORY)
-                            {
-                                input.required=true;
-                            }
+                                        if (field.MANDATORY)
+                                        {
+                                            einput.required=true;
+                                        }
 
-                        }
-                    //console.log(element);
-                        
-                    dataset.appendChild(element); // Append to the desired container
+                                    }
+                                //console.log(element);
+                                    
+                                dataset.appendChild(element); // Append to the desired container
+                                }
                     });
 
                     dataset.appendChild(createNavigationBar(tableName,datasetFields));
@@ -201,6 +232,14 @@ function moveNext(tableName,datasetFields) {
 function moveLast(tableName,datasetFields) {
 
     if (tableName) navigateRecords('move-to-last', tableName,datasetFields);
+}
+
+// refresh record
+function RefreshRecord(tableName)
+{
+    if (tableName ) {
+        navigateRecords('move-to-next', tableName,datasetFields, parseInt(getRowID()));
+    }
 }
 
 function navigateRecords(action, tableName,datasetFields, rowId = '') {

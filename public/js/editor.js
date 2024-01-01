@@ -131,7 +131,7 @@ function editElement(element) {
 
 function closeModalDbStrct() {
 
-    document.getElementById("modalDialogText").style.display = 'none';
+    document.getElementById("tableDetailsModal").style.display = 'none';
     document.querySelector(".overlay").style.display = 'none';
     currentElement = null;
 }

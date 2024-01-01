@@ -94,45 +94,53 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
         const table=  document.createElement('table');
         const isNotSearch=document.getElementById('_insertSearch').style.display == 'none';   
         fields.forEach(field => {
-            const tr = document.createElement('tr');
-            const td0 = document.createElement('td');
-            const td1 = document.createElement('td');
-            const td2 = document.createElement('td');
-            const td3 = document.createElement('td');
-            const td4 = document.createElement('td');
-            const td5 = document.createElement('td');
-            const td6 = document.createElement('td');
-            const fieldItem = document.createElement('input');                
-            fieldItem.value = `${field.NAME}`;
-            fieldItem.setAttribute("type", "checkbox");
+            // Sample configuration array
+                                const fieldConfig = [
+                                    { name: 'fieldItem', type: 'checkbox', attributes: { type: 'checkbox', 
+                                                                                        'dataset-field-name': field.NAME, 
+                                                                                        'dataset-field-type': field.TYPE,
+                                                                                        'dataset-field-label':field.LABEL,
+                                                                                        'dataset-field-format':field.FORMAT,
+                                                                                        'dataset-field-mandatory':field.MANDATORY,
+                                                                                        'dataset-field-decimal':field.DECIMAL,
+                                                                                        'dataset-field-width':field.WIDTH,
+                                                                                        'dataset-field-default':field.DEFAULT
+                                    } 
+                                    },
+                                    { name: 'td1', innerHTML: field.NAME },
+                                    { name: 'td2', innerHTML: field.TYPE },
+                                    { name: 'td3', innerHTML: field.LABEL },
+                                    { name: 'td4', innerHTML: field.FORMAT },
+                                    { name: 'td5', innerHTML: field.MANDATORY },
+                                    { name: 'td6', innerHTML: field.WIDTH },
+                                
+                                    { name: 'td7', innerHTML: '<select name="inputType"><option value="input">input</option><option value="select">select</option><option value="checkbox">checkbox</option></select>' },
+                                    { name: 'td8', innerHTML: '<select name="tableName"></select>' },
+                                    { name: 'td9', innerHTML: '<select name="fieldName"></select>' }
+                                ];
+
+                                // Create table row and elements dynamically based on the configuration array
+                                const tr = document.createElement('tr');
+
+                                fieldConfig.forEach(field => {
+                                    const element = document.createElement(field.name === 'fieldItem' ? 'input' : 'td');
+
+                                    if (field.attributes) {
+                                        for (const attr in field.attributes) {
+                                            element.setAttribute(attr, field.attributes[attr]);
+                                        }
+                                    } else if (field.innerHTML) {
+                                        element.innerHTML = field.innerHTML;
+                                    }
+
+                                    tr.appendChild(element);
+                                });
+
+                                // Append the created table row to the table
+                                table.appendChild(tr);
+
            
-            fieldItem.checked=isNotSearch;
-            fieldItem.setAttribute("dataset-field-name",field.NAME);
-            fieldItem.setAttribute("dataset-field-type",field.TYPE);
-            fieldItem.setAttribute("dataset-field-label",field.LABEL);
-            fieldItem.setAttribute("dataset-field-format",field.FORMAT);
-            fieldItem.setAttribute("dataset-field-mandatory",field.MANDATORY);
-            fieldItem.setAttribute("dataset-field-decimal",field.DECIMAL);
-            fieldItem.setAttribute("dataset-field-width",field.WIDTH);
-            fieldItem.setAttribute("dataset-field-default",field.DEFAULT);
-
-
-            td0.appendChild(fieldItem);
-            td1.innerHTML=`${field.NAME}`;
-            td2.innerHTML=`${field.TYPE}`;
-            td3.innerHTML=`${field.LABEL}`;       
-            td4.innerHTML=`${field.FORMAT}`;  
-            td5.innerHTML=`${field.MANDATORY}`;
-            td6.innerHTML=`${field.WIDTH}`;
-            tr.appendChild(td0);
-            tr.appendChild(td1);
-            tr.appendChild(td2);
-            tr.appendChild(td3);
-            tr.appendChild(td4);
-            tr.appendChild(td5);
-            tr.appendChild(td6);
-            table.appendChild(tr);
-        });
+       });
         detailsDiv.appendChild(table);       
     })
     .catch(error => console.error('Error:', error));
