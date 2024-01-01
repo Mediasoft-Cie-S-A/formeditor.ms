@@ -16,11 +16,7 @@
 
 const header=['NAME','TYPE','LABEL' ,'FORMAT','MANDATORY', 'DECIMAL', 'WIDTH', 'DEFAULT'];
 
-
-
-
-
-
+var tableList=[];
 // The 'DOMContentLoaded' event fires when the initial HTML document has been completely loaded and parsed,
 // without waiting for stylesheets, images, and subframes to finish loading.
 // The function passed as the second argument will be executed once the 'DOMContentLoaded' event is fired.
@@ -34,7 +30,7 @@ function fetchTablesList(list) {
             
             list.innerHTML = '';
              // add new table button
-      
+             tableList=[];
             tables.forEach(table => {
                 const listItem = document.createElement('div');
                 listItem.classList.add('table-item');
@@ -43,6 +39,7 @@ function fetchTablesList(list) {
                 listItem.setAttribute('data-table-label', table.LABEL);
 
                 list.appendChild(listItem);
+                tableList.push(table.NAME);
             });
         })
         .catch(error => console.error('Error:', error));
@@ -93,6 +90,16 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
         // Display fields
         const table=  document.createElement('table');
         const isNotSearch=document.getElementById('_insertSearch').style.display == 'none';   
+        const header=['SEL','NAME','TYPE','LABEL' ,'FORMAT','*',  'WIDTH','TYPE','TABLE','FIELD'];
+        // create table header with th elements base on the foreach
+        const tr = document.createElement('tr');
+        tr.id='TableFieldsList';
+        header.forEach(prop => {
+            const td = document.createElement('th');
+            td.innerText =prop  ;
+            tr.appendChild(td);
+        }); 
+        table.appendChild(tr);
         fields.forEach(field => {
             // Sample configuration array
                                 const fieldConfig = [
@@ -115,12 +122,13 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
                                     { name: 'td6', innerHTML: field.WIDTH },
                                 
                                     { name: 'td7', innerHTML: '<select name="inputType"><option value="input">input</option><option value="select">select</option><option value="checkbox">checkbox</option></select>' },
-                                    { name: 'td8', innerHTML: '<select name="tableName"></select>' },
+                                    { name: 'td8', innerHTML: `<select name="tableName" onchange="loadFieldsList('${field.NAME}')"><option></option>#TABLELIST#</select>`	 },
                                     { name: 'td9', innerHTML: '<select name="fieldName"></select>' }
                                 ];
 
                                 // Create table row and elements dynamically based on the configuration array
                                 const tr = document.createElement('tr');
+                                tr.setAttribute('data-field-name', field.NAME);
 
                                 fieldConfig.forEach(field => {
                                     const element = document.createElement(field.name === 'fieldItem' ? 'input' : 'td');
@@ -131,6 +139,10 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
                                         }
                                     } else if (field.innerHTML) {
                                         element.innerHTML = field.innerHTML;
+                                        // check if innerHTML contains #TABLELIST# and replace it with the table list
+                                        if (element.innerHTML.indexOf('#TABLELIST#') !== -1) {
+                                            element.innerHTML = element.innerHTML.replace('#TABLELIST#', tableList.map(t => `<option value="${t}">${t}</option>`).join(''));
+                                        }
                                     }
 
                                     tr.appendChild(element);
@@ -146,6 +158,29 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
     .catch(error => console.error('Error:', error));
 }
 
+// loadFieldsList function check the table name and load the fields in the select
+function loadFieldsList(fieldName)
+{
+   var table= document.getElementById('TableFieldsList');
+   var tableNameSelect= document.querySelector('tr[data-field-name="'+fieldName+'"] select[name="tableName"]');
+   console.log('tableNameSelect:', tableNameSelect);
+   var tableName=tableNameSelect.options[tableNameSelect.selectedIndex].value;
+    var select = document.querySelector('tr[data-field-name="'+fieldName+'"] select[name="fieldName"]');
+    select.innerHTML = '';
+    if (table) {
+        fetch(`/table-fields/${tableName}`)
+            .then(response => response.json())
+            .then(fields => {
+                fields.forEach(field => {
+                    const option = document.createElement('option');
+                    option.value = field.NAME;
+                    option.text = field.NAME;
+                    select.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    }
+}
 
 // table structure
 async function editTableDetails(tableName, tableLabel, detailsDiv) {

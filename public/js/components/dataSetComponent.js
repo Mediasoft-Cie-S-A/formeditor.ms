@@ -218,14 +218,14 @@ function moveFirst(tableName,datasetFields) {
 function movePrev(tableName,datasetFields) {
   
     if (tableName ) {
-        navigateRecords('move-to-previous', tableName,datasetFields, parseInt(getRowID())-1);
+        navigateRecords('move-to-previous', tableName,datasetFields, getRowID()-1);
     }
 }
 
 function moveNext(tableName,datasetFields) {
     
     if (tableName ) {
-        navigateRecords('move-to-next', tableName,datasetFields, parseInt(getRowID())+1);
+        navigateRecords('move-to-next', tableName,datasetFields, getRowID()+1);
     }
 }
 
@@ -238,7 +238,7 @@ function moveLast(tableName,datasetFields) {
 function RefreshRecord(tableName)
 {
     if (tableName ) {
-        navigateRecords('move-to-next', tableName,datasetFields, parseInt(getRowID()));
+        navigateRecords('move-to-next', tableName,datasetFields, getRowID());
     }
 }
 
@@ -302,7 +302,8 @@ navbar.setAttribute("dataset-current-row",id);
 function getRowID()
 {
 navbar=document.getElementById("navigationBar");
-return navbar.getAttribute("dataset-current-row");
+rowId=parseInt(navbar.getAttribute("dataset-current-row"));
+return rowId;
 }
 
 function EditRecord(tableName)
