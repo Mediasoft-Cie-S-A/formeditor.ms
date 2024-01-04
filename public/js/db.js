@@ -121,9 +121,9 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
                                     { name: 'td5', innerHTML: field.MANDATORY },
                                     { name: 'td6', innerHTML: field.WIDTH },
                                 
-                                    { name: 'td7', innerHTML: '<select name="inputType"><option value="input">input</option><option value="select">select</option><option value="checkbox">checkbox</option></select>' },
-                                    { name: 'td8', innerHTML: `<select name="tableName" onchange="loadFieldsList('${field.NAME}')"><option></option>#TABLELIST#</select>`	 },
-                                    { name: 'td9', innerHTML: '<select name="fieldName"></select>' }
+                                    { name: 'td7', innerHTML: `<select name="inputType" onchange="activateSelect('${field.NAME}')"><option value="input">input</option><option value="select">select</option><option value="checkbox">checkbox</option></select>` },
+                                    { name: 'td8', innerHTML: `<select name="tableName" onchange="loadFieldsList('${field.NAME}')" disabled=true><option></option>#TABLELIST#</select>`	 },
+                                    { name: 'td9', innerHTML: '<select name="fieldName" disabled=true></select>' }
                                 ];
 
                                 // Create table row and elements dynamically based on the configuration array
@@ -156,6 +156,26 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
         detailsDiv.appendChild(table);       
     })
     .catch(error => console.error('Error:', error));
+}
+
+// if the select value is "select" activate tablename select and fieldName otherwise desactivated them
+function activateSelect(fieldName)
+{
+    var table= document.getElementById('TableFieldsList');
+    var select= document.querySelector('tr[data-field-name="'+fieldName+'"] select[name="inputType"]');
+    var tableNameSelect= document.querySelector('tr[data-field-name="'+fieldName+'"] select[name="tableName"]');
+    var fieldNameSelect= document.querySelector('tr[data-field-name="'+fieldName+'"] select[name="fieldName"]');
+    var type=select.options[select.selectedIndex].value;
+    if (type==="select")
+    {
+        tableNameSelect.setAttribute("disabled",false);
+        fieldNameSelect.setAttribute("disabled",false);
+    }
+    else
+    {
+        tableNameSelect.setAttribute("disabled",true);
+        fieldNameSelect.setAttribute("disabled",true);
+    }
 }
 
 // loadFieldsList function check the table name and load the fields in the select

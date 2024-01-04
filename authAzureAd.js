@@ -76,7 +76,8 @@ app.get('/auth/openid/return',
    (req, res) => {
     // Authentication was successful
     // get username from req.user.oid
-    const username = req.user.oid;
+    console.log(req.user);
+    const username = req.user.displayName;
     res.send(`
       <!DOCTYPE html>
       <html>

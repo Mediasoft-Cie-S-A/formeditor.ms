@@ -37,6 +37,7 @@ module.exports = function(app,session, passport) {
                 // define authenticated_user object
                 let authenticated_user = {}
                 authenticated_user.oid = user.username;   
+                authenticated_user.username=user.username;
                 return done (null, authenticated_user ) 
             }
             else {

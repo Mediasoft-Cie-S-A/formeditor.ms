@@ -1,4 +1,36 @@
 {
+    "dataSet": {
+        "type": "dataSet",
+        "description": "Data Set",
+        "category": "Bussiness  Logic"  ,
+        "scriptName": "dataSetComponent.js",
+        "createFunction": "createElementDateSet",
+        "editFunction": "editElementDataSet"
+    },
+    "dataGrid": {
+        "type": "dataGrid",
+        "description": "Data Grid",
+        "category": "Bussiness  Logic",
+        "scriptName": "databaseGrid.js",
+        "createFunction": "createDatabaseGrid",
+        "editFunction": "editDatabaseGrid"
+    },
+    "dataSearch": {
+        "type": "dataSearch",
+        "description": "A search field",
+        "category": "Bussiness  Logic",
+        "scriptName": "databaseSearch.js",
+        "createFunction": "createDatabaseSearch",
+        "editFunction": "editDatabaseSearch"
+    },
+    "jscode":{
+        "type": "jscode",
+        "description": "javascript code",
+        "category": "Bussiness  Logic",
+        "scriptName": "jscode.js",
+        "createFunction": "createJScode",
+        "editFunction": "editJScode"
+    },
     "textfield": {
         "type": "textfield",
         "description": "Text field",
@@ -198,29 +230,5 @@
         "scriptName": "genericInput.js",
         "createFunction": "createElementInput",
         "editFunction": "editElementInput"
-    },
-    "dataSet": {
-        "type": "dataSet",
-        "description": "Data Set",
-        "category": "Bussiness  Logic"  ,
-        "scriptName": "dataSetComponent.js",
-        "createFunction": "createElementDateSet",
-        "editFunction": "editElementDataSet"
-    },
-    "dataGrid": {
-        "type": "dataGrid",
-        "description": "Data Grid",
-        "category": "Bussiness  Logic",
-        "scriptName": "databaseGrid.js",
-        "createFunction": "createDatabaseGrid",
-        "editFunction": "editDatabaseGrid"
-    },
-    "dataSearch": {
-        "type": "dataSearch",
-        "description": "A search field",
-        "category": "Bussiness  Logic",
-        "scriptName": "databaseSearch.js",
-        "createFunction": "createDatabaseSearch",
-        "editFunction": "editDatabaseSearch"
     }
 }
