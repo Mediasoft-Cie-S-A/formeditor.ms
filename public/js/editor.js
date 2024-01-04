@@ -22,7 +22,7 @@ function removeAllChildNodes(parent) {
 }
 
 
-function createInputItem(id, label, styleProperty,text,type) {
+function createInputItem(id, label, styleProperty,text,type,attribute) {
     console.log(text);
     var div = document.createElement("div");
     var lbl = document.createElement("label");
@@ -37,9 +37,16 @@ function createInputItem(id, label, styleProperty,text,type) {
                                         {
 
                                         }
-                                        else
+                                        else 
                                         {
-                                        updateElementStyle(styleProperty, this.value);
+                                            if (attribute===true)
+                                            {   
+                                            updateAttribute(styleProperty, this.value);
+                                                }
+                                            else
+                                            {
+                                            updateElementStyle(styleProperty, this.value);
+                                            }
                                         }
                                    };
     if (input.type!="file")
@@ -113,17 +120,17 @@ function editElement(element) {
         content.appendChild(createInputItem("cl", "color", "color",style.color,"color"));
         content.appendChild(createInputItem("bg", "background-color", "background-color",style.backgroundColor,"color"));
         content.appendChild(createInputItem("border", "border", "border",style.border,"text"));
-        content.appendChild(createInputItem("cl", "class", "class",element.getAttribute('class') ,"text"));
-        content.appendChild(createInputItem("font", "font", "font",element.getAttribute('font') ,"text"));
-        content.appendChild(createInputItem("margin", "margin", "margin",style.margin),"text");
-        content.appendChild(createInputItem("padding", "padding", "padding",style.padding),"text");
-        content.appendChild(createInputItem("html", "html", "html",element.innerHTML),"text");
-        content.appendChild(createInputItem("Data Table Name", "dataset-table-name", "dataset-table-name",element.getAttribute('dataset-table-name'),'text'));
-        content.appendChild(createInputItem("Data Field Name", "dataset-field-name", "dataset-field-name",element.getAttribute('dataset-field-name'),'text'));
-        content.appendChild(createInputItem("change", "onChange", "onchange",element.getAttribute('onchange')),"text");
-        content.appendChild(createInputItem("click", "onClick", "onclick",element.getAttribute('onclick')),"text");
+        content.appendChild(createInputItem("cl", "class", "class",element.getAttribute('class')) ,"text");
+        content.appendChild(createInputItem("font", "font", "font",style.font ,true,"text"));
+        content.appendChild(createInputItem("margin", "margin", "margin",style.margin,"text"));
+        content.appendChild(createInputItem("padding", "padding", "padding",style.padding,"text"));
+        content.appendChild(createInputItem("html", "html", "html",element.innerHTML,"text",true));
+        content.appendChild(createInputItem("Data Table Name", "dataset-table-name", "dataset-table-name",element.getAttribute('dataset-table-name'),"text",true));
+        content.appendChild(createInputItem("Data Field Name", "dataset-field-name", "dataset-field-name",element.getAttribute('dataset-field-name'),"text",true));
+        content.appendChild(createInputItem("change", "onChange", "onchange",element.getAttribute('onchange'),"text",true));
+        content.appendChild(createInputItem("click", "onClick", "onclick",element.getAttribute('onclick'),"text",true));
 
-        content.appendChild(createInputItem("dblclick", "Double Click", "dblclick",element.getAttribute('dblclick')),"text");
+        content.appendChild(createInputItem("dblclick", "Double Click", "dblclick",element.getAttribute('dblclick'),"text",true));
 
 }
 
@@ -158,11 +165,19 @@ function updateElementTxtC(t)
 
 function updateElementStyle(type,t)
 {
-   
-    currentElement.style.setProperty(type,t);  
-    
+   console.log("updateElementStyle:"+type+" "+t);
+    currentElement.style.setProperty(type,t);     
     
 }
+
+function updateAttribute(type,t)
+{
+   console.log("updateElementAttribute:"+type+" "+t);
+    currentElement.setAttribute(type,t);     
+    
+}
+
+
 function updateElementOnChange(t)
 {
     var text= currentElement.querySelector('input');   
@@ -270,3 +285,31 @@ function removeSelection()
      
     }
 }   
+
+const codeEditor = CodeMirror.fromTextArea(document.getElementById('jsCodeEditor'), {
+    lineNumbers: false,
+    mode: 'javascript',
+    theme: 'material',
+    copyWithEmptySelection: true,
+    autoCloseBrackets: true,
+    matchBrackets: true,
+    autoCloseTags: true,
+    matchTags: true,
+    showTrailingSpace: true,
+    highlightSelectionMatches: true,
+    styleActiveLine: true,
+    lint: true,
+    
+
+  })
+
+
+  codeEditor.on('change', function(instance, changeObj) {
+    // Syntax checking logic here (if needed)
+    // For example, you can use a linter library like ESLint or JSHint
+   /* textarea=document.getElementById('jsCodeEditor');
+    console.log(codeEditor.getValue());
+    textarea.value=codeEditor.getValue();*/
+  });
+
+  

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+const { Double } = require("mongodb");
+
 
 function createJScode(type) {
     showjsCodeEditor();
@@ -38,19 +40,25 @@ function showjsCodeEditor() {
   }
 
   function executejsCodeCode() {
-    const jsCode = document.getElementById('jsCode').value;
+    
+    const procedureCode=codeEditor.getValue();
+    console.log(procedureCode);
+
     try {
       const script = document.createElement('script');
-      script.text = jsCode;
+      script.text = procedureCode;
       document.body.appendChild(script);
+      document.body.removeChild(script);
     } catch (error) {
       console.error('Error in the entered code:', error);
     }
   }
 
   function savejsCodeCode() {
-    const jsCode = document.getElementById('jsCode').value;
-    const scriptTag = `<script>${jsCode}</script>`;
-    document.body.innerHTML += scriptTag;
+
+    const formContainer = document.getElementById('formContainer');
+    const scriptTag = `<script>${codeEditor.getValue()}</script>`;
+    formContainer.innerHTML += scriptTag;
+    showtoast("Code saved");
     // You can also save it to localStorage or another storage method
   }
