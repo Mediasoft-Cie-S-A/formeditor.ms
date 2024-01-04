@@ -16,8 +16,41 @@
 
 
 function createJScode(type) {
+    showjsCodeEditor();
 }
 
 function editJScode(type,element,content)
 {
 }
+
+function showjsCodeEditor() {
+    const editor = document.getElementById('jsCodeDialog');
+    if (editor) {
+     editor.style.display='block';
+    }
+  }
+
+  function hidejsCodeEditor() {
+    const editor = document.getElementById('jsCodeDialog');
+    if (editor) {
+        editor.style.display='none';
+    }
+  }
+
+  function executejsCodeCode() {
+    const jsCode = document.getElementById('jsCode').value;
+    try {
+      const script = document.createElement('script');
+      script.text = jsCode;
+      document.body.appendChild(script);
+    } catch (error) {
+      console.error('Error in the entered code:', error);
+    }
+  }
+
+  function savejsCodeCode() {
+    const jsCode = document.getElementById('jsCode').value;
+    const scriptTag = `<script>${jsCode}</script>`;
+    document.body.innerHTML += scriptTag;
+    // You can also save it to localStorage or another storage method
+  }
