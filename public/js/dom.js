@@ -78,7 +78,10 @@ function createDomElement(json, parent) {
         }
 
         element.classList.remove('gjs-selection');
-
+        // onlyEditor is used to hide the element in the render view
+        if (element.getAttribute('onlyEditor') === 'true') {
+            element.style.display = 'none';
+        }
         // Append to parent
         parent.appendChild(element);
 

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-const { Double } = require("mongodb");
-
 
 function createJScode(type) {
     showjsCodeEditor();
@@ -23,10 +21,31 @@ function createJScode(type) {
 
 function editJScode(type,element,content)
 {
+  if (type=="jscode" && element.getAttribute("onlyEditor")=="true")
+  {
+
+  // get script from the element
+  const scriptTag = element.getElementsByTagName("script")[0];
+  // set the code in code editor
+  codeEditor.setValue(scriptTag.innerHTML);
+  
+  //set id of the div in the code editor
+
+  showjsCodeEditor(element);
+  }
 }
 
-function showjsCodeEditor() {
+function showjsCodeEditor(elementDIV) {
     const editor = document.getElementById('jsCodeDialog');
+    if (elementDIV){
+      editor.setAttribute("elementDIV",elementDIV.id);
+    }
+    else
+    {
+      editor.removeAttribute("elementDIV");
+      codeEditor.setValue("");
+      
+    }
     if (editor) {
      editor.style.display='block';
     }
@@ -36,6 +55,8 @@ function showjsCodeEditor() {
     const editor = document.getElementById('jsCodeDialog');
     if (editor) {
         editor.style.display='none';
+        codeEditor.setValue("");
+
     }
   }
 
@@ -55,10 +76,25 @@ function showjsCodeEditor() {
   }
 
   function savejsCodeCode() {
-
-    const formContainer = document.getElementById('formContainer');
-    const scriptTag = `<script>${codeEditor.getValue()}</script>`;
-    formContainer.innerHTML += scriptTag;
-    showtoast("Code saved");
-    // You can also save it to localStorage or another storage method
+    const editor = document.getElementById('jsCodeDialog');
+    elementDIV= editor.getAttribute("elementDIV");
+    
+    if (elementDIV===undefined || elementDIV===null )    {
+        const formContainer = document.getElementById('formContainer');
+        const divId = `jscode${Date.now()}`;
+        const scriptTag = `<div id="${divId}" tagName="jscode" onlyEditor="true" class="editorElement"><b><.:JSCODE:.></b><script>${codeEditor.getValue()}</script></div>`;
+        editor.setAttribute("elementDIV",divId);
+        formContainer.innerHTML += scriptTag;
+      // show toas message
+      showToast("Code saved");
+      }
+    else
+    {
+      if (elementDIV.tagName!="jscode")
+      {
+        elementDIV.innerHTML="<b><.:JSCODE:.></b>"+codeEditor.getValue();
+        showToast("Code updated");
+      }
+    }
+  
   }

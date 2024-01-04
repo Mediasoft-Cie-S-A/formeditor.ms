@@ -23,7 +23,7 @@ function removeAllChildNodes(parent) {
 
 
 function createInputItem(id, label, styleProperty,text,type,attribute) {
-    console.log(text);
+ //   console.log(text);
     var div = document.createElement("div");
     var lbl = document.createElement("label");
     lbl.setAttribute("for", id);
@@ -97,15 +97,17 @@ function editElement(element) {
         content.appendChild(label);
         content.appendChild(document.createElement('hr'));
         // Execute the function editor delcared in the components js if exists type   
-        console.log("type:"+elementsData[type]);
+      //  console.log("type:"+elementsData[type]);
         if (elementsData[type]){
             if (elementsData[type].editFunction) {
                 var functionName = elementsData[type].editFunction;
-                console.log("functionName:"+functionName);
+               // console.log("functionName:"+functionName);
                 window[functionName](type,element,content);
             
             }
         }
+
+
 
         const style = element.style;
 
@@ -232,7 +234,7 @@ formContainer.addEventListener('click', function(event) {
     var editorFloatMenu = document.getElementById('editorFloatMenu');
     editorFloatMenu.style.display = 'block';
     // Get the total offset by combining formContainer's and element's offset
-    console.log("formContainer.offsetTop:"+formContainer.offsetTop);
+   // console.log("formContainer.offsetTop:"+formContainer.offsetTop);
     var totalOffsetTop = top + editorElementSelected.offsetTop -25;
     var totalOffsetLeft = top+ editorElementSelected.offsetLeft + editorElementSelected.offsetWidth;
 
@@ -256,7 +258,7 @@ function getAbsoluteOffset(element) {
 function showProperties()
 {
     const inputElementSelected=document.getElementById("editorElementSelected");
-    console.log("inputElementSelected.value:"+inputElementSelected.value);
+  //  console.log("inputElementSelected.value:"+inputElementSelected.value);
     var editorElementSelected=document.getElementById(inputElementSelected.value);
 
     editElement(editorElementSelected);
@@ -288,19 +290,16 @@ function removeSelection()
 
 const codeEditor = CodeMirror.fromTextArea(document.getElementById('jsCodeEditor'), {
     lineNumbers: false,
-    mode: 'javascript',
-    theme: 'material',
-    copyWithEmptySelection: true,
-    autoCloseBrackets: true,
+    mode: 'javascript',  
+    lint: true, // Enable JavaScript linting
+    extraKeys: {"Tab": "autocomplete"}, // Enable autocompletion
+    autoCloseBrackets: true, // Enable auto-closing of brackets
+    // enable copy 
+    readOnly: false,
+    // enable paste
     matchBrackets: true,
+    // enable cut
     autoCloseTags: true,
-    matchTags: true,
-    showTrailingSpace: true,
-    highlightSelectionMatches: true,
-    styleActiveLine: true,
-    lint: true,
-    
-
   })
 
 
