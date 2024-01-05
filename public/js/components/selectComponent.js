@@ -37,7 +37,47 @@ function createElementSelect(type) {
 
 function editElementSelect(type,element,content)
 {
-    // Create and append the elements
+    // generate the list of options
+    var optionsList = document.createElement('div');
+    // generate a label for the list
+    var label=document.createElement('label');
+    label.innerHTML="Options: value, label";
+    optionsList.appendChild(label);
+    // generate a textarea for the list
+    var textarea=document.createElement('textarea');
+    textarea.id=element.id+"Options";
+    textarea.value=element.getAttribute("options");
+    // adding to the textarea onchage event to update the options
+    textarea.onchange=function(){updateOptions(element.id,textarea.value)};
+    optionsList.appendChild(textarea);   
+    content.appendChild(optionsList);
  
- 
+}
+
+// generate the options list
+function updateOptions(elementId,options)
+{
+    var element=document.getElementById(elementId);
+    element.setAttribute("options",options);
+    var optionsList = document.getElementById(elementId+"Input");
+    optionsList.innerHTML="";
+    var optionsArray=options.split("\n");
+    optionsArray.forEach(option => {
+        // if the option is empty, skip it
+        if (option=="") return;
+        // split the option in value and label
+        var optionArray=option.split(",");
+         // if the comman is missing, use the value as label
+        if (optionArray.length==1)
+        {
+            optionArray[1]=optionArray[0];
+        }
+        // create the option element
+        var optionElement=document.createElement("option");
+        optionElement.value=optionArray[0];
+        optionElement.innerHTML=optionArray[1];
+        // add the option to the select
+        optionsList.appendChild(optionElement);
+
+    });
 }
