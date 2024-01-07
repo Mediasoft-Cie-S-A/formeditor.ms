@@ -47,6 +47,14 @@
         "createFunction": "createQRCode",
         "editFunction": "editQRCode"
     },
+    "qrcodeScanner": {
+        "type": "qrcodeScanner",
+        "description": "QR Code Scanner",
+        "category": "Bussiness  Logic",
+        "scriptName": "qrcodeScannerComponent.js",
+        "createFunction": "createQRCodeScanner",
+        "editFunction": "editQRCodeScanner"
+    },
     "textfield": {
         "type": "textfield",
         "description": "Text field",
