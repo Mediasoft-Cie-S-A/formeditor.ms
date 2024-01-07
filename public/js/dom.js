@@ -62,7 +62,13 @@ function jsonToDom(json, parent) {
         createDomElement(json, parent);
     }
 
-    
+    // planning
+ 
+    planningElements = parent.querySelectorAll('div[tagname="planning"]');
+    for (var i = 0; i < planningElements.length; i++) {
+        console.log("planning:"+planningElements[i]);
+        gantrender(planningElements[i]);
+    }
 }
 // Function to create DOM element from JSON
 function createDomElement(json, parent) {

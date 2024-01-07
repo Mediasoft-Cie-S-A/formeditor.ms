@@ -225,7 +225,7 @@ button:hover {
 
 
 .grid-row {
-    display: flex;
+    
     border-bottom: 1px solid #ccc;
 }
 .grid-row:hover {
@@ -235,18 +235,23 @@ button:hover {
 .grid-row input:hover {
     background-color: #6d7fcc;
     color: white;
+    max-height: 40px;
 }
 
 .grid-cell {
     padding: 5px;
-    flex: 1;
+  
 }
 
+.grid-body {
+   vertical-align: top;
+   
+}
 
 
 .grid-cell-header {
     padding: 5px;
-    flex: 1;
+ 
     background-color: #6d7fcc;
     color: white;
 }
@@ -481,8 +486,6 @@ button:hover {
     text-align: center;
 }
 .gantt-scheduled {
-    background-color: #00ff00;
-    border: 1px solid #000;
-    padding: 10px;
     text-align: center;
+    border: 1px solid #ddd;
 }

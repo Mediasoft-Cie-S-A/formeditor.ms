@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 function createElementDateSet(type) {
     var main= document.createElement('div');
     main.className = 'form-container';
@@ -37,7 +36,7 @@ function editElementDataSet(type,element,content)
 function createNavigationBar(tableName,datasetFields) {
     // Create the navigation bar div
     var navigationBar = document.createElement('div');
-    navigationBar.id = 'navigationBar';
+    navigationBar.id = 'navigationBar_'+tableName;
     navigationBar.type = 'navigation-bar';
     navigationBar.setAttribute('data-table-name', tableName);
     navigationBar.setAttribute('data-current-row', '0');
@@ -51,7 +50,7 @@ function createNavigationBar(tableName,datasetFields) {
         { id: 'EditRecordBtn', text: '<i class="bi bi-credit-card-2-front"></i>', event: "EditRecord('"+tableName+"','"+datasetFields+"')" },
         { id: 'InsertRecordBtn', text: '<i class="bi bi-sticky-fill"></i>', event: "InsertRecord('"+tableName+"','"+datasetFields+"')" },
         { id: 'SaveRecordBtn', text: '<i class="bi bi-sim-fill"></i>', event: "SaveRecord('"+tableName+"')" },
-        { id: 'RefreshBtn', text: '<i class="bi bi-sim-fill"></i>', event: "RefreshRecord('"+tableName+"')" }
+        { id: 'RefreshBtn', text: '<i class="bi bi-arrow-clockwise"></i>', event: "RefreshRecord('"+tableName+"')" }
        
     ];
 
@@ -70,7 +69,8 @@ async function createFormElementsFromStructure(tableName,container) {
     try {
                     const dataset=document.createElement("div");
                     dataset.id="DataSet_"+tableName;
-                
+                    dataset.setAttribute('data-table-name', tableName);
+
                     fieldsList=document.querySelectorAll('#tableDetails table tr')
                     
                     var datasetFields=['rowid'];
@@ -224,14 +224,16 @@ function moveFirst(tableName,datasetFields) {
 function movePrev(tableName,datasetFields) {
   
     if (tableName ) {
-        navigateRecords('move-to-previous', tableName,datasetFields, getRowID()-1);
+        const rowNum=getRowNum(tableName);
+        if (rowNum==0) return;
+        navigateRecords('move-to-previous', tableName,datasetFields, rowNum-1);
     }
 }
 
 function moveNext(tableName,datasetFields) {
     
     if (tableName ) {
-        navigateRecords('move-to-next', tableName,datasetFields, getRowID()+1);
+        navigateRecords('move-to-next', tableName,datasetFields, getRowNum(tableName)+1);
     }
 }
 
@@ -244,18 +246,18 @@ function moveLast(tableName,datasetFields) {
 function RefreshRecord(tableName)
 {
     if (tableName ) {
-        navigateRecords('move-to-next', tableName,datasetFields, getRowID());
+        navigateRecords('move-to-next', tableName,datasetFields, getRowNum(tableName));
     }
 }
 
-function navigateRecords(action, tableName,datasetFields, rowId = '') {
-    const url = `/${action}/${tableName}` + (rowId ? `/${rowId}` : '')+`?fields=${datasetFields}`;
+function navigateRecords(action, tableName,datasetFields, rowNum = '') {
+    const url = `/${action}/${tableName}` + (rowNum ? `/${rowNum}` : '')+`?fields=${datasetFields}`;
     fetch(url)
         .then(response => response.json())
         .then(data => {
             updateInputs(data,tableName);
-            rowId=rowId==""?0:rowId;
-            setRowID(rowId); // Assuming the data includes ROWID
+            rowNum=rowNum==""?0:rowNum;
+            setRowNum(tableName, rowNum); // Assuming the data includes ROWID
         })
         .catch(error => console.error('Error:', error));
 }
@@ -264,8 +266,9 @@ function navigateRecords(action, tableName,datasetFields, rowId = '') {
 // use the fetch function to call the web service and update the inputs with the data
 // use the updateInputs function to update the inputs with the data
 // use the setRowID function to set the current row id in the navigation bar
-async function linkRecordToGrid(tableName,datasetFields, rowId) {
+async function linkRecordToGrid(tableName,datasetFields, rowId,rowNum) {
     try {
+ 
         const url = `/get-record-by-rowid/${tableName}/${rowId}?fields=${datasetFields}`;
         const response = await fetch(url);
         if (!response.ok) {
@@ -273,7 +276,7 @@ async function linkRecordToGrid(tableName,datasetFields, rowId) {
         }
         const data = await response.json();
         updateInputs(data,tableName);
-        setRowID(0); // Assuming the data includes ROWID to-do check if the data includes ROWID
+        setRowNum(tableName,rowNum); // Assuming the data includes ROWID to-do check if the data includes ROWID
     } catch (error) {
         console.error('Error:', error);
     }
@@ -283,33 +286,46 @@ async function linkRecordToGrid(tableName,datasetFields, rowId) {
 
 function updateInputs(data,tableName) {
     
-    const inputs = document.querySelectorAll(`#DataSet_${tableName} input`);
-    console.log(inputs);
-    inputs.forEach(input => {
-       // console.log(input);
-        const fieldLabel = input.getAttribute('dataset-field-name');
-      //  console.log(fieldLabel+":"+data[0][fieldLabel]);
-        if (data[0][fieldLabel] !== undefined) {
-            input.value = data[0][fieldLabel];
-            input.readOnly = true;
+    // get all the datasets
+    const datasets = document.querySelectorAll("#DataSet_"+tableName);    
+
+    // for all the datasets check the div with name DataSet
+    datasets.forEach(dataset => {
+       
+        // get table name from the dataset
+        datasetTableName=dataset.getAttribute("data-table-name");
+        // if the table name is the same as the table name of the record
+        if (datasetTableName==tableName)
+        {
+            const inputs = dataset.querySelectorAll('input');
+           // console.log(inputs);
+            inputs.forEach(input => {
+            // console.log(input);
+                const fieldLabel = input.getAttribute('dataset-field-name');
+            //  console.log(fieldLabel+":"+data[0][fieldLabel]);
+                if (data[0][fieldLabel] !== undefined) {
+                    input.value = data[0][fieldLabel];
+                    input.readOnly = true;
+                }
+            // disable save record button
+             document.getElementById("SaveRecordBtn").disabled = true;        
+            });
         }
     });
-    // disable save record button
-    document.getElementById("SaveRecordBtn").disabled = true;
 }
 
 
-function setRowID(id)
+function setRowNum(tabelName,Num)
 {
-navbar=document.getElementById("navigationBar");
-navbar.setAttribute("dataset-current-row",id);
+navbar=document.getElementById("navigationBar_"+tabelName);
+navbar.setAttribute("dataset-current-row",Num);
 }
 
-function getRowID()
+function getRowNum(tabelName)
 {
-navbar=document.getElementById("navigationBar");
-rowId=parseInt(navbar.getAttribute("dataset-current-row"));
-return rowId;
+navbar=document.getElementById("navigationBar_"+tabelName);
+rowNum=parseInt(navbar.getAttribute("dataset-current-row"));
+return rowNum;
 }
 
 function EditRecord(tableName)
@@ -369,31 +385,40 @@ function CreateUpdated(tableName)
 //update record 
 async function SaveRecord(tableName) {
     try {
-        const nextRowId = document.querySelector('#dataset-rowid').value; 
-        console.log(nextRowId);
+        // Get the next row id from the navigation bar
+        const nextRowIds = document.querySelectorAll('#dataset-rowid'); 
+        nextRowIds.forEach(nextRowId => {
+            // get table name from the dataset
+            datasetTableName=nextRowId.getAttribute("dataset-table-name");
+            // if the table name is the same as the table name of the record
+                    if (datasetTableName==tableName)
+                    {
+                        nextRowId=nextRowId.value;
+                    
+                        let result;
+                        if (nextRowId === 'new') {
+                            // create data for insert
+                            const data =  CreateInsert(tableName);
 
-      
-        let result;
-        if (nextRowId === 'new') {
-            // create data for insert
-            const data =  CreateInsert(tableName);
+                            
+                            // If nextRowId is 'new', call insertRecord
+                            result =  insertRecordDB(tableName, data);
+                        } else {
+                            // Otherwise, call updateRecord
+                            const data = {
+                                body: CreateUpdated(tableName)
+                            };
+                    
+                            result =  updateRecordDB(tableName, nextRowId, data);
+                        }
 
+                        return result;
+                    }
+                });
             
-            // If nextRowId is 'new', call insertRecord
-            result = await insertRecordDB(tableName, data);
-        } else {
-            // Otherwise, call updateRecord
-            const data = {
-                body: CreateUpdated(tableName)
-            };
-    
-            result = await updateRecordDB(tableName, nextRowId, data);
-        }
-
-        return result;
-    } catch (error) {
-        showToast('Error:'+ error);
-    }
+            } catch (error) {
+                showToast('Error:'+ error);
+            }
 }
 
 // create insert data structure

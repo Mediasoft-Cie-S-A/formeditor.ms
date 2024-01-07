@@ -39,6 +39,14 @@
         "createFunction": "createPlanning",
         "editFunction": "editPlanning"
     },
+    "qrcode": {
+        "type": "qrcode",
+        "description": "QR Code",
+        "category": "Bussiness  Logic",
+        "scriptName": "qrcodeComponent.js",
+        "createFunction": "createQRCode",
+        "editFunction": "editQRCode"
+    },
     "textfield": {
         "type": "textfield",
         "description": "Text field",
