@@ -110,6 +110,18 @@ function createDomElement(json, parent) {
 
             // Clear previous content
             renderContainer.innerHTML = '';
+            
+            // Check if current form has elements, if not -> display message
+            if (jsonData.length === 0) {
+                const emptyContent = document.createElement('div');
+                const emptyContentMessage = document.createElement('p');
+                emptyContentMessage.innerHTML = 'Current form has no fields attached to it';
+                
+                emptyContent.className = 'render-empty';
+                emptyContent.appendChild(emptyContentMessage);
+
+                renderContainer.appendChild(emptyContent);
+            }
 
             // Convert JSON back to DOM and append
             var domContent = jsonToDom(jsonData,renderContainer);

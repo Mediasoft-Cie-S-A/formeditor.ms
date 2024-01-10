@@ -89,6 +89,7 @@ async function createFormElementsFromStructure(tableName,formContainer) {
             case 'numeric':
             case 'checkbox':
             case 'radio':
+            case 'button':
             case 'datetime-local':
                 element = createElementInput(type);
                 break;

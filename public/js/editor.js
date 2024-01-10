@@ -31,6 +31,7 @@ function createInputItem(id, label, styleProperty,text,type) {
 
     var input = document.createElement("input");
     input.type = type;
+    input.className = "input-element";
     input.id = id;
     input.onchange = function(event) {
                                         if (event.target.type=="file")
@@ -66,6 +67,7 @@ function createInputDiv(id, labelText, onChangeFunction,text) {
     label.textContent = labelText;
     var input = document.createElement("input");
     input.type = "text";
+    input.className = "input-element";
     input.id = id + "Input";
     input.onchange = function() { onChangeFunction(this.value); };
     input.value=text;
@@ -216,14 +218,20 @@ formContainer.addEventListener('click', function(event) {
     inputElementSelected.value=editorElementSelected.id;
     var editorFloatMenu = document.getElementById('editorFloatMenu');
     editorFloatMenu.style.display = 'block';
+
     // Get the total offset by combining formContainer's and element's offset
     console.log("formContainer.offsetTop:"+formContainer.offsetTop);
+
+    console.log("formContainer.offsetTop:"+formContainer.offsetTop);
+    console.log("editorElementSelected.offsetWidth:"+editorElementSelected.offsetWidth);
+    console.log("editorElementSelected.offsetLeft:"+editorElementSelected.offsetLeft);
+    console.log('top', top);
+
     var totalOffsetTop = top + editorElementSelected.offsetTop -25;
     var totalOffsetLeft = top+ editorElementSelected.offsetLeft + editorElementSelected.offsetWidth;
 
     editorFloatMenu.style.top = totalOffsetTop + 'px';
     editorFloatMenu.style.left = totalOffsetLeft + 'px';
-    
 });
 
 
