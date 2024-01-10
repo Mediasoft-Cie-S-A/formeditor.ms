@@ -44,7 +44,13 @@ function insertGrid()
     overl.style.display = 'none';
     const tableName = document.getElementById('TableDetails_TableName').innerText;
     const gridContainer = document.getElementById(modal.getAttribute("data-main-id"));
-    gridContainer.innerHTML=`<div id="Data-Grid" style="height: 400px; overflow-y: auto;" ></div><div><button onclick='gridPrev(event)'><</button><button onclick='gridNext(event)'>></button></div>`;
+
+    var html=`<div id="Data-Grid" style="height: 400px; overflow-y: auto;" ></div>`;
+    html+=`<div><button onclick='gridPrev(event)'><i class="bi bi-arrow-left-circle-fill"></i></button>`;
+    html+=`<button onclick='gridNext(event)'><i class="bi bi-arrow-right-circle-fill"></i></button>`;
+    html+=`<button onclick='export2CSV(event)'><i class="bi bi-arrow-right-circle-fill"></i></button></div>`;
+    gridContainer.innerHTML=html;
+
     fieldsList=document.querySelectorAll('#tableDetails table input:checked')
     var datasetFields=[];
     datasetFields.push('rowid');
@@ -73,10 +79,15 @@ function createGrid(gridContainer,tableName,datasetFields)
     header.setAttribute("header","");
     //header
     datasetFields.forEach(field => {
-        const cell = document.createElement('div');
-        cell.className = 'grid-cell-header';        
-        cell.textContent = field!=='rowid'?field:'';
-        header.appendChild(cell);
+
+        if (field!=='rowid')
+            {
+            const cell = document.createElement('div');
+            cell.className = 'grid-cell-header';        
+            cell.textContent = field!=='rowid'?field:'';
+            header.appendChild(cell);
+            }
+
     });
     grid.appendChild(header);
     // search inputs
@@ -102,15 +113,12 @@ function createGrid(gridContainer,tableName,datasetFields)
                       gridFetchData(grid) ;
                     }
                   });
+
+                  cell.appendChild(input);
             }
-            else    
-            {
-                input=document.createElement('div');
-                input.textContent="";
-            }
-         
-            
-            cell.appendChild(input);    
+          
+   
+
             
             search.appendChild(cell);
         
@@ -151,6 +159,17 @@ function gridNext(e) {
         removeAllChildRows(grid);
         gridFetchData(grid) ;
    
+}
+
+
+function export2CSV(e) {
+    e.preventDefault();
+    const grid = document.getElementById('Data-Grid');
+    var tableName=grid.getAttribute("Table-Name");
+    var datasetFields=grid.getAttribute("Dataset-Fields-Names");
+    // call the export service
+    const url = `/export-table/${tableName}?fields=${datasetFields}`;
+    window.open(url, '_blank');
 }
 
 
@@ -219,6 +238,13 @@ function fetchTableData(grid,tableName, page, pageSize, datasetFields) {
                 var rowDiv = document.createElement('div');
                 rowDiv.className = 'grid-row';
                 rowDiv.setAttribute("rowid",row.rowid);
+
+                // add click event to row to call linkRecordToGrid(tableName, rowId)
+                rowDiv.addEventListener("click", function(event) {
+                    event.preventDefault();
+                    linkRecordToGrid(tableName, datasetFields,row.rowid);
+                  });
+
                 var i=0;
                 Object.values(row).forEach(field => {
                     
@@ -226,6 +252,7 @@ function fetchTableData(grid,tableName, page, pageSize, datasetFields) {
                     cell.className = 'grid-cell';
                     
                     rowDiv.appendChild(cell);
+
                     if (i==0 )
                     {
                      const input=document.createElement('input');
@@ -233,6 +260,11 @@ function fetchTableData(grid,tableName, page, pageSize, datasetFields) {
                         input.value=field;
                         cell.appendChild(input);  
                     } else{
+
+                    // skip rowid field
+                    if (i>0 )
+                    {
+
                         cell.textContent = field;
                     }
                     i++;

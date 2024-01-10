@@ -31,12 +31,24 @@ const User = require("./model/user");
 
 
 const app = express();
-const port = 3000;
 
-// Connection URL
-const url = 'mongodb+srv://dbUser:ILDskVhsmVZYAcVE@cluster0.l5j3qem.mongodb.net/';
-const dbName = 'lowcode';
 
+
+
+// get the config
+app.config = {};
+try {
+    app.config = JSON.parse(fs.readFileSync("appconfig.json", 'utf8'));
+} catch (err) {
+    console.log('Error loading config file:', err);
+}
+
+
+// mongodb Connection URL
+const url = app.config.mongoDbUrl;
+// Database Name
+const dbName = app.config.mongoDbName;
+const port =app.config.port;
 // Create a new MongoClient
 const client = new MongoClient(url, { useUnifiedTopology: true });
 require('./mongodb')(app,client,dbName);
@@ -45,12 +57,14 @@ app.use(express.urlencoded({extended: false}))
 
 // Serve static files from the 'public' folder
 app.use(express.static('public'));
-
-
-require('./authentication')(app,session, passport);
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+// authentication
+// init session
+require('./authentication')(app,session, passport);
+require('./authAzureAd')(app,session, passport);
+require('./authStatic')(app,session, passport);
+
 
 // Import routes
 require('./formService')(app, client, dbName);
@@ -101,60 +115,3 @@ app.get('/elementsConfig', (req, res) => {
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
-
-
-
-// Login
-app.post("/login", (req, res) => {
-// our login logic goes here
-});
-
-app.post("/register", async (req, res) => {
-
-    // Our register logic starts here
-    try {
-      // Get user input
-      const { first_name, last_name, email, password } = req.body;
-  
-      // Validate user input
-      if (!(email && password && first_name && last_name)) {
-        res.status(400).send("All input is required");
-      }
-  
-      // check if user already exist
-      // Validate if user exist in our database
-      const oldUser = await User.findOne({ email });
-  
-      if (oldUser) {
-        return res.status(409).send("User Already Exist. Please Login");
-      }
-  
-      //Encrypt user password
-      encryptedPassword = await bcrypt.hash(password, 10);
-  
-      // Create user in our database
-      const user = await User.create({
-        first_name,
-        last_name,
-        email: email.toLowerCase(), // sanitize: convert email to lowercase
-        password: encryptedPassword,
-      });
-  
-      // Create token
-      const token = jwt.sign(
-        { user_id: user._id, email },
-        process.env.TOKEN_KEY,
-        {
-          expiresIn: "2h",
-        }
-      );
-      // save user token
-      user.token = token;
-  
-      // return new user
-      res.status(201).json(user);
-    } catch (err) {
-      console.log(err);
-    }
-    // Our register logic ends here
-  });

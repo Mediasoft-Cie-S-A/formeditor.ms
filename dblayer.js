@@ -22,7 +22,7 @@ module.exports = function(app,session, passport) {
         res.redirect("/login");
     };
 
-    const dsn = 'DSN=Sports2000;UID=sysprogress;PWD=sysprogress'; 
+    const dsn = app.config.odbcString;
     // Replace with your actual connection string
 const db = new OdbcDatabase(dsn);
 
@@ -316,6 +316,24 @@ app.get('/move-to-previous/:tableName/:currentRowId', checkAuthenticated, async 
         await db.close();
     }
 });
+//get record by rowid
+app.get('/get-record-by-rowid/:tableName/:rowID', checkAuthenticated, async (req, res) => {
+    try {
+        await db.connect();
+        const tableName = req.params.tableName;
+        const rowID = req.params.rowID;
+         // Get the fields from the query string. It's a comma-separated string.
+         const fields = req.query.fields ? req.query.fields.split(',') : null;
+
+        const record = await db.getRecordByRowID(tableName,fields, rowID);
+        res.json(record);
+    } catch (err) {
+        console.error('Error:', err);
+        res.status(500).send('Error moving to previous record');
+    } finally {
+        await db.close();
+    }
+});
 
 /**
  * @swagger
@@ -493,6 +511,28 @@ app.post('/create-table/:tableName', checkAuthenticated, async (req, res) => {
         await db.close();
     }
 });
+
+// export table to csv
+// set html mime type in header
+app.get('/export-table/:tableName', checkAuthenticated, async (req, res) => {
+    try {
+        await db.connect();
+        const tableName = req.params.tableName;
+        const fields = req.query.fields ? req.query.fields.split(',') : null;
+        const result = await db.exportTableToCSV(tableName,fields);
+        // res set header
+        res.set('Content-Type', 'text/csv');
+        res.set('Content-Disposition', `attachment; filename=${tableName}.csv`);
+        res.status(200).send(result);
+        
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error exporting table');
+    } finally {
+        await db.close();
+    }
+});
+
 
 
 }

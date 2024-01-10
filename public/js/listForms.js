@@ -110,10 +110,7 @@ function loadFormData(formId) {
             var domContent = jsonToDom(form.formData,renderContainer);
         
             console.log(domContent);
-            Array.from(renderContainer.childNodes).forEach(child => {
-                child.addEventListener('dblclick', function(){ editElement(child); });
-                child.addEventListener('click', function(){ selectElement(child); });
-            });
+           
         })
         .catch(error => {
             showToast('Error!'+error, 5000); // Show toast for 5 seconds
