@@ -7,7 +7,18 @@
     <link rel="icon" type="image/x-icon" href="img/favicon.ico">
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+
+  <!-- Option 1: Include in HTML -->
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/hint/show-hint.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/lint/lint.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/lint/lint.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/lint/lint.min.css"></script>
+
+
     <link rel="stylesheet" href="js/style.css">
     
     <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script> -->
@@ -99,6 +110,9 @@
                                         <div class="col" style="display: inline-block; margin-top: 10px;">
                                             <button class="button form-edit-button" type="button" onclick="document.getElementById('formContainer').innerHTML=''">Clear</button>
                                         </div>
+                                        
+                                        <div class="col" style="display: inline-block;">
+                                            <button type="button" onclick="exportJson()">Export</button>
                                         </div>
                                         </form>
                                         
@@ -129,7 +143,7 @@
                                 </tr>
                               </table>
                             </div><!-- End of row -->
-
+                            </div><!-- End of container -->
                              
                         </div>
                     </div>
@@ -194,15 +208,24 @@
     <div id="toast-container"></div>
     
 
-    <div id="tableDetailsModal">
-        <div id="tablesList">
-            <!-- Tables will be listed here -->
+    <dialog id="tableDetailsModal">
+        <div style="align-content: center;width: 100%;"><h3 style="align-content: center;">Database Strcuture</h3> </div>
+        <div>
+            <div id="tablesList">
+                <!-- Tables will be listed here -->
+            </div>
+            <div id="tableDetails">
+                <!-- Table details will be shown here -->
+            </div>
         </div>
-        <div id="tableDetails">
-            <!-- Table details will be shown here -->
-        </div>
-        <button onclick="insertTable()">Insert</button><button onclick="insertGrid()">Grid</button><button onclick="closeModalDbStrct()">Close</button>
-    </div>
+        
+            <button id="_insertTable" onclick="insertTable()">Insert</button>
+            <button id="_insertGrid" onclick="insertGrid()">Grid</button>
+            <button id="_insertSearch" onclick="insertSearch()">Search</button>
+            <button onclick="closeModalDbStrct()">Close</button>
+        
+    </dialog>
+
 
     <div id="htmlGridModal">
         <div id="htmlGridOptions">
@@ -240,6 +263,17 @@
         </div>
     </div>
 
+
+<dialog id="jsCodeDialog" >
+    <div>JSCODE Editor</div>   
+    <div style="border: 1px solid black;">
+   <textarea id="jsCodeEditor" name="jsCodeEditor" style="width: 100%; height: 100%"></textarea>
+    </div>
+    <button onclick="executejsCodeCode()">Run Code</button>
+    <button onclick="savejsCodeCode()">Save Code</button>
+    <button onclick="hidejsCodeEditor()">Close Editor</button>
+</dialog>
+
 <!-- Footer -->
 <footer class="fixed-bottom mt-auto">
     <!-- Grid container -->
@@ -267,13 +301,25 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
 
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.1/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/meta.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/hint/javascript-hint.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/hint/show-hint.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/lint/javascript-lint.min.js"></script>
+  
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/edit/closebrackets.min.js"></script>
+   <script src="/js/components/qrcode.js"></script>
+   <script src="https://unpkg.com/html5-qrcode"></script>
+
+
     <script src="js/db.js"></script>
     <script src="js/loadComponents.js"></script>
     <script src="js/Components/userComponent.js"></script>
     <script src="js/editor.js"></script>
     <script src="js/dom.js"></script>
     <script src="js/formSubmit.js"></script>
-
-
+    
 </body>
 </html>

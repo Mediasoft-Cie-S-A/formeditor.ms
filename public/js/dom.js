@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-
+// Function to create json from DOM
 function domToJson(element) {
     // Create an array to hold the JSON representation of the children
     var childrenJson = [];
@@ -31,7 +31,7 @@ function domToJson(element) {
     // If there's only one child, return it directly, otherwise return the array
     return childrenJson.length === 1 ? childrenJson[0] : childrenJson;
 }
-
+// Function to convert DOM to JSON
 function elementToJson(element) {
     var obj = {
         tag: element.tagName.toLowerCase(),
@@ -54,7 +54,7 @@ function elementToJson(element) {
     return obj;
 }
 
-
+// Function to convert JSON to DOM
 function jsonToDom(json, parent) {
     if (Array.isArray(json)) {
         json.forEach(childJson => createDomElement(childJson, parent));
@@ -62,9 +62,15 @@ function jsonToDom(json, parent) {
         createDomElement(json, parent);
     }
 
-    
+    // planning
+ 
+    planningElements = parent.querySelectorAll('div[tagname="planning"]');
+    for (var i = 0; i < planningElements.length; i++) {
+        console.log("planning:"+planningElements[i]);
+        gantrender(planningElements[i]);
+    }
 }
-
+// Function to create DOM element from JSON
 function createDomElement(json, parent) {
     if (json.tag) {
         // Create element for tag
@@ -78,7 +84,10 @@ function createDomElement(json, parent) {
         }
 
         element.classList.remove('gjs-selection');
-
+        // onlyEditor is used to hide the element in the render view
+        if (element.getAttribute('onlyEditor') === 'true') {
+            element.style.display = 'none';
+        }
         // Append to parent
         parent.appendChild(element);
 
@@ -93,6 +102,20 @@ function createDomElement(json, parent) {
         var textNode = document.createTextNode(json.text);
         parent.appendChild(textNode);
     }
+}
+
+
+// Function to export the json to file
+function exportJson() {
+    var formContainer = document.getElementById('formContainer');
+    var jsonData = domToJson(formContainer);
+    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(jsonData));
+    var downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "form.json");
+    document.body.appendChild(downloadAnchorNode); // required for firefox
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
 }
 
 

@@ -16,22 +16,7 @@
 
 const header=['NAME','TYPE','LABEL' ,'FORMAT','MANDATORY', 'DECIMAL', 'WIDTH', 'DEFAULT'];
 
-
-
-async function fetchTableStructure(tableName) {
-    try {
-        var response = await fetch(`/table-structure/${tableName}`);
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return await response.json();
-    } catch (error) {
-        console.error('Fetch error:', error);
-        return [];
-    }
-}
-
-
+var tableList=[];
 // The 'DOMContentLoaded' event fires when the initial HTML document has been completely loaded and parsed,
 // without waiting for stylesheets, images, and subframes to finish loading.
 // The function passed as the second argument will be executed once the 'DOMContentLoaded' event is fired.
@@ -45,7 +30,7 @@ function fetchTablesList(list) {
             
             list.innerHTML = '';
              // add new table button
-      
+             tableList=[];
             tables.forEach(table => {
                 const listItem = document.createElement('div');
                 listItem.classList.add('table-item');
@@ -54,6 +39,7 @@ function fetchTablesList(list) {
                 listItem.setAttribute('data-table-label', table.LABEL);
 
                 list.appendChild(listItem);
+                tableList.push(table.NAME);
             });
         })
         .catch(error => console.error('Error:', error));
@@ -103,33 +89,118 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
         
         // Display fields
         const table=  document.createElement('table');
-                
+        const isNotSearch=document.getElementById('_insertSearch').style.display == 'none';   
+        const header=['SEL','NAME','TYPE','LABEL' ,'FORMAT','*',  'WIDTH','TYPE','TABLE','FIELD'];
+        // create table header with th elements base on the foreach
+        const tr = document.createElement('tr');
+        tr.id='TableFieldsList';
+        header.forEach(prop => {
+            const td = document.createElement('th');
+            td.innerText =prop  ;
+            tr.appendChild(td);
+        }); 
+        table.appendChild(tr);
         fields.forEach(field => {
-            const tr = document.createElement('tr');
-            const td0 = document.createElement('td');
-            const td1 = document.createElement('td');
-            const td2 = document.createElement('td');
-            const td3 = document.createElement('td');
-            const fieldItem = document.createElement('input');                
-            fieldItem.value = `${field.NAME}`;
-            fieldItem.setAttribute("type", "checkbox");
-            fieldItem.checked=true;
-            fieldItem.setAttribute("dataset-field-name",field.NAME);
-            td0.appendChild(fieldItem);
-            td1.innerHTML=`${field.NAME}`;
-            td2.innerHTML=`${field.TYPE}`;
-            td3.innerHTML=`${field.LABEL}`;         
-            tr.appendChild(td0);
-            tr.appendChild(td1);
-            tr.appendChild(td2);
-            tr.appendChild(td3);
-            table.appendChild(tr);
-        });
+            // Sample configuration array
+                                const fieldConfig = [
+                                    { name: 'fieldItem', type: 'checkbox', attributes: { type: 'checkbox', 
+                                                                                        'dataset-field-name': field.NAME, 
+                                                                                        'dataset-field-type': field.TYPE,
+                                                                                        'dataset-field-label':field.LABEL,
+                                                                                        'dataset-field-format':field.FORMAT,
+                                                                                        'dataset-field-mandatory':field.MANDATORY,
+                                                                                        'dataset-field-decimal':field.DECIMAL,
+                                                                                        'dataset-field-width':field.WIDTH,
+                                                                                        'dataset-field-default':field.DEFAULT
+                                    } 
+                                    },
+                                    { name: 'td1', innerHTML: field.NAME },
+                                    { name: 'td2', innerHTML: field.TYPE },
+                                    { name: 'td3', innerHTML: field.LABEL },
+                                    { name: 'td4', innerHTML: field.FORMAT },
+                                    { name: 'td5', innerHTML: field.MANDATORY },
+                                    { name: 'td6', innerHTML: field.WIDTH },
+                                
+                                    { name: 'td7', innerHTML: `<select name="inputType" onchange="activateSelect('${field.NAME}')"><option value="input">input</option><option value="select">select</option><option value="checkbox">checkbox</option></select>` },
+                                    { name: 'td8', innerHTML: `<select name="tableName" onchange="loadFieldsList('${field.NAME}')" disabled=true><option></option>#TABLELIST#</select>`	 },
+                                    { name: 'td9', innerHTML: '<select name="fieldName" disabled=true></select>' }
+                                ];
+
+                                // Create table row and elements dynamically based on the configuration array
+                                const tr = document.createElement('tr');
+                                tr.setAttribute('data-field-name', field.NAME);
+
+                                fieldConfig.forEach(field => {
+                                    const element = document.createElement(field.name === 'fieldItem' ? 'input' : 'td');
+
+                                    if (field.attributes) {
+                                        for (const attr in field.attributes) {
+                                            element.setAttribute(attr, field.attributes[attr]);
+                                        }
+                                    } else if (field.innerHTML) {
+                                        element.innerHTML = field.innerHTML;
+                                        // check if innerHTML contains #TABLELIST# and replace it with the table list
+                                        if (element.innerHTML.indexOf('#TABLELIST#') !== -1) {
+                                            element.innerHTML = element.innerHTML.replace('#TABLELIST#', tableList.map(t => `<option value="${t}">${t}</option>`).join(''));
+                                        }
+                                    }
+
+                                    tr.appendChild(element);
+                                });
+
+                                // Append the created table row to the table
+                                table.appendChild(tr);
+
+           
+       });
         detailsDiv.appendChild(table);       
     })
     .catch(error => console.error('Error:', error));
 }
 
+// if the select value is "select" activate tablename select and fieldName otherwise desactivated them
+function activateSelect(fieldName)
+{
+    var table= document.getElementById('TableFieldsList');
+    var select= document.querySelector('tr[data-field-name="'+fieldName+'"] select[name="inputType"]');
+    var tableNameSelect= document.querySelector('tr[data-field-name="'+fieldName+'"] select[name="tableName"]');
+    var fieldNameSelect= document.querySelector('tr[data-field-name="'+fieldName+'"] select[name="fieldName"]');
+    var type=select.options[select.selectedIndex].value;
+    if (type==="select")
+    {
+        tableNameSelect.setAttribute("disabled",false);
+        fieldNameSelect.setAttribute("disabled",false);
+    }
+    else
+    {
+        tableNameSelect.setAttribute("disabled",true);
+        fieldNameSelect.setAttribute("disabled",true);
+    }
+}
+
+// loadFieldsList function check the table name and load the fields in the select
+function loadFieldsList(fieldName)
+{
+   var table= document.getElementById('TableFieldsList');
+   var tableNameSelect= document.querySelector('tr[data-field-name="'+fieldName+'"] select[name="tableName"]');
+   console.log('tableNameSelect:', tableNameSelect);
+   var tableName=tableNameSelect.options[tableNameSelect.selectedIndex].value;
+    var select = document.querySelector('tr[data-field-name="'+fieldName+'"] select[name="fieldName"]');
+    select.innerHTML = '';
+    if (table) {
+        fetch(`/table-fields/${tableName}`)
+            .then(response => response.json())
+            .then(fields => {
+                fields.forEach(field => {
+                    const option = document.createElement('option');
+                    option.value = field.NAME;
+                    option.text = field.NAME;
+                    select.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    }
+}
 
 // table structure
 async function editTableDetails(tableName, tableLabel, detailsDiv) {
@@ -168,8 +239,7 @@ async function editTableDetails(tableName, tableLabel, detailsDiv) {
        
         const addButton = document.createElement('button');
         addButton.textContent = 'Add';
-        addButton.className   = 'button';
-        addButton.onclick     = function(event) {
+        addButton.onclick = function(event) {
             event.preventDefault();
             addTableColumn(table);
         };
@@ -178,8 +248,7 @@ async function editTableDetails(tableName, tableLabel, detailsDiv) {
         detailsDiv.appendChild(addButton);
         const saveButton = document.createElement('button');
         saveButton.textContent = 'Save';
-        addButton.className    = 'button';
-        saveButton.onclick     = function(event) {
+        saveButton.onclick = function(event) {
             event.preventDefault();
             saveAlterTable(table,tableName);
         };  
@@ -267,13 +336,13 @@ function addTableColumn(table) {
     tr.setAttribute('new', '');
     header.forEach(prop => {
         const td = document.createElement('td');
-        td.style.padding = '0 2px';
         switch (prop) {
             case 'TYPE':
-                var _select= `<select class="input-element" new name='${prop}'>`;
-                    _select+=`<option value="INTEGER">INTEGER</option>`;
+                var _select= `<select new name='${prop}'>`;
+                  
                     _select+=`<option value="CHAR">CHAR</option>`;
                     _select+=`<option value="VARCHAR">VARCHAR</option>`;
+                    _select+=`<option value="INTEGER">INTEGER</option>`;
                     _select+=`<option value="DATE">DATE</option>`;
                     _select+=`<option value="DECIMAL">DECIMAL</option>`;
                     _select+=`<option value="NUMERIC">NUMERIC</option>`;
@@ -290,13 +359,13 @@ function addTableColumn(table) {
             case 'MANDATORY':
             case 'DECIMAL':
             case 'WIDTH':
-            td.innerHTML = `<input class="input-element" type='number' new name='${prop}' value='0'/>`;
+            td.innerHTML = `<input type='number' new name='${prop}' value='0'/>`;
             break;
             case 'NAME':
-                td.innerHTML = `<input class="input-element" new name='${prop}' value=''/ placeholder='Field Name' required>`;
+                td.innerHTML = `<input new name='${prop}' value=''/ placeholder='Field Name' required>`;
                 break;
             default:
-            td.innerHTML = `<input class="input-element" new name='${prop}' value=''/>`;
+            td.innerHTML = `<input new name='${prop}' value=''/>`;
                 
     
         }
@@ -307,9 +376,7 @@ function addTableColumn(table) {
 
 async function alterTable(tableName, action, columnName, columnType, newColumnName, newColumnType) {
     try {
-
         const response = await fetch(`/alter-table/${tableName}`, {
-
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -348,13 +415,10 @@ function  newTable() {
     tableNameInput.setAttribute('name', 'tableName');
     tableNameInput.setAttribute('placeholder', 'Table Name');
     tableNameInput.setAttribute('required', '');
-    tableNameInput.className = 'input-element';
     detailsDiv.appendChild(tableNameInput);
-    
     // generate html table
     const table = document.createElement('table');
     table.style.padding='10px';
-    table.style.marginTop='10px';
     detailsDiv.appendChild(table);
 
     // header
@@ -365,31 +429,23 @@ function  newTable() {
         td.innerText =prop  ;
         tr.appendChild(td);
     });
-
-    const buttonContainer = document.createElement('div');
-    buttonContainer.className   = 'button-container';
-
     // button to add row    
     const addButton = document.createElement('button');
     addButton.textContent = 'Add';
-    addButton.className   = 'button';
     addButton.onclick = function(event) {
         event.preventDefault();
         addTableColumn(table);
     };  
-    buttonContainer.appendChild(addButton);
+    detailsDiv.appendChild(addButton);
     // button to save table
     const saveButton = document.createElement('button');
     saveButton.textContent = 'Save';
-    saveButton.className    = 'button';
     saveButton.onclick = function(event) {
         event.preventDefault();
         createTable(table);
     }; 
     // append all elements
-    buttonContainer.appendChild(saveButton);
-
-    detailsDiv.appendChild(buttonContainer);
+    detailsDiv.appendChild(saveButton);
 }
 
 async function createTable(table) {
@@ -459,6 +515,48 @@ async function postCreateTable(tableName, columns) {
     } catch (error) {
         console.error('Error creating table:', error);
     }
+}
+
+
+function showModalDbStrc(main,type) {
+    console.log(type);
+    const modal = document.getElementById('tableDetailsModal');
+    modal.setAttribute('data-main-id', main.id);
+    const overl = document.getElementById('overlayModal');
+    modal.style.display = 'block';
+    overl.style.display = 'block';
+    switch(type)
+    {
+       
+        case "dataGrid":
+            document.getElementById('_insertGrid').style.display = 'block';
+            document.getElementById('_insertSearch').style.display = 'none';
+            document.getElementById('_insertTable').style.display = 'none';
+            break;
+        case "dataSet":
+                document.getElementById('_insertTable').style.display = 'block';
+                document.getElementById('_insertGrid').style.display = 'none';
+                document.getElementById('_insertSearch').style.display = 'none';
+                break;
+        case "dataSearch":
+            document.getElementById('_insertSearch').style.display = 'block';
+            document.getElementById('_insertTable').style.display = 'none';
+            document.getElementById('_insertGrid').style.display = 'none';
+            break;  
+        default:
+            document.getElementById('_insertSearch').style.display = 'none';
+            document.getElementById('_insertTable').style.display = 'none';
+            document.getElementById('_insertGrid').style.display = 'none';
+            break;
+    }
+
+}
+
+function closeModalDbStrct() {
+    const modal = document.getElementById('tableDetailsModal');
+    const overl = document.getElementById('overlayModal');
+    modal.style.display = 'none';
+    overl.style.display = 'none';
 }
 
 

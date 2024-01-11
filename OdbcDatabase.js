@@ -51,16 +51,7 @@ class OdbcDatabase {
         }
     }
 
-    async getTableStructure(tableName) {
-        try {
-            const query = `SELECT * FROM PUB.${tableName} WHERE 1=0`; // Query that returns no data but column info
-            const result = await this.connection.query(query);
-            return result.columns;
-        } catch (err) {
-            console.log('Error retrieving table structure:', err);
-         //   throw err;
-        }
-    }
+
 
     async queryData(queryString) {
         try {
@@ -148,6 +139,8 @@ class OdbcDatabase {
              // create filter base on filer paramenter, for search based on the input values, 
              //with field name and value separated by | and each filter separated by ,
              // and build the query where clause
+            
+
              if (filter && filter.length > 0) {
                 var filterList=filter.split(",");
                 var filter="";
@@ -157,8 +150,16 @@ class OdbcDatabase {
                         if (filter.length>0) {
                             filter+=" and ";
                         }
-                        filter+=`${filterField[0]} like '%${filterField[1]}%'`;
-                    }
+                        switch (filterField[2]) {
+                            // text search
+                            case "like":
+                                filter+=`${filterField[0]} like '%${filterField[1]}%'`;
+                            break;
+                            // numeric search
+                            case "eq":
+                                filter+=`${filterField[0]} = ${filterField[1]}`;
+                            break;                                            
+                            }
                 }   
             }
                 
@@ -346,7 +347,26 @@ async createTable(tableName, columns) {
     }
 }
 
+// select distinct values from column
+async selectDistinct(tableName, columnName, filter) {
+    try {
+        // Construct the SQL statement
+        // if filter is not empty, add it to the query
 
+        var sql = `SELECT DISTINCT ${columnName} FROM PUB.${tableName} `;	
+        if (filter && filter.length > 0) {
+            sql+=` WHERE ${filter} `;
+        }
+        console.log(sql);
+        // Execute the query
+        const result = await this.connection.query(sql);
+
+        return result;
+    } catch (err) {
+        console.log('Error selecting distinct values:', err);
+        throw err;
+    }
+}
 
 // ----------------------------------
 // Export table to CSV

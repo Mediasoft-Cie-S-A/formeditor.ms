@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 function createElementDateSet(type) {
     var main= document.createElement('div');
     main.className = 'form-container';
@@ -25,7 +24,7 @@ function createElementDateSet(type) {
     const list = document.getElementById('tablesList');
     const detailsDiv = document.getElementById('tableDetails');
     createTableList(list,detailsDiv);
-    showModalDbStrc(main);
+    showModalDbStrc(main,type);
     return main;
 }
 
@@ -37,22 +36,22 @@ function editElementDataSet(type,element,content)
 function createNavigationBar(tableName,datasetFields) {
     // Create the navigation bar div
     var navigationBar = document.createElement('div');
-    navigationBar.id = 'navigationBar';
+    navigationBar.id = 'navigationBar_'+tableName;
+    navigationBar.type = 'navigation-bar';
     navigationBar.setAttribute('data-table-name', tableName);
     navigationBar.setAttribute('data-current-row', '0');
 
     // Create buttons and append them to the navigation bar
     var buttons = [
-
         { id: 'firstRecordBtn', text: '<i class="bi bi-arrow-up-circle-fill"></i>', event:"moveFirst('"+tableName+"','"+datasetFields+"')" },
         { id: 'previousRecordBtn', text: '<i class="bi bi-arrow-left-circle-fill"></i>', event: "movePrev('"+tableName+"','"+datasetFields+"')" },
         { id: 'nextRecordBtn', text: '<i class="bi bi-arrow-right-circle-fill"></i>', event: "moveNext('"+tableName+"','"+datasetFields+"')" },
         { id: 'lastRecordBtn', text: '<i class="bi bi-arrow-down-square-fill"></i>', event: "moveLast('"+tableName+"','"+datasetFields+"')" },
         { id: 'EditRecordBtn', text: '<i class="bi bi-credit-card-2-front"></i>', event: "EditRecord('"+tableName+"','"+datasetFields+"')" },
         { id: 'InsertRecordBtn', text: '<i class="bi bi-sticky-fill"></i>', event: "InsertRecord('"+tableName+"','"+datasetFields+"')" },
-        { id: 'SaveRecordBtn', text: '<i class="bi bi-sim-fill"></i>', event: "SaveRecord('"+tableName+"')" }
+        { id: 'SaveRecordBtn', text: '<i class="bi bi-sim-fill"></i>', event: "SaveRecord('"+tableName+"')" },
+        { id: 'RefreshBtn', text: '<i class="bi bi-arrow-clockwise"></i>', event: "RefreshRecord('"+tableName+"')" }
        
-
     ];
 
     //for the dom2json is mandatory to create a html for the events
@@ -66,99 +65,135 @@ function createNavigationBar(tableName,datasetFields) {
     return navigationBar;
 }
 
-async function createFormElementsFromStructure(tableName,formContainer) {
-    var structure = await fetchTableStructure(tableName);
-   
-    const dataset=document.createElement("div");
-    dataset.id="DataSet";
-   
-    fieldsList=document.querySelectorAll('#tableDetails table input:checked')
-    var datasetFields=['rowid'];
-    const input=document.createElement('input');
-            input.setAttribute('dataset-table-name', tableName);
-            input.setAttribute('dataset-field-name', 'rowid');
-            input.id="dataset-rowid";
-            input.type='hidden';
-            dataset.appendChild(input); 
-    fieldsList.forEach(field => { 
-        fieldName=field.getAttribute("dataset-field-name");
-        datasetFields.push(fieldName);       
-        column=structure.find(({ name }) => name === fieldName);;
-   
-        const type = mapColumnTypeToInputType(column.dataTypeName); // Map the column type to input type
-        switch(type) {
-            case 'text':
-            case 'password':
-            case 'numeric':
-            case 'checkbox':
-            case 'radio':
-            case 'button':
-            case 'datetime-local':
-                element = createElementInput(type);
-                break;
-            case 'textarea':
-                element = createElementInput('textarea');
-                break;
-            case 'select':
-                element = createSelectElement('select');
-                // Add options to select element here
-                break;
-            default:
-                // Handle default case or unknown types
-                element = createElementInput('text');
-        }
-    
-        if (element) {
-            element.querySelector('label').textContent = column.name; // Set label to column name
-            const input=element.querySelector('input');
-            input.setAttribute('dataset-table-name', tableName);
-            input.setAttribute('dataset-field-name', column.name);
-        }
-        
-       dataset.appendChild(element); // Append to the desired container
-    });
-    dataset.appendChild(createNavigationBar(tableName,datasetFields));
-    dataset.setAttribute("DataSet-Fields-List",datasetFields);
-    formContainer.innerHTML="";
-    formContainer.appendChild(dataset);
+async function createFormElementsFromStructure(tableName,container) {
+    try {
+                    const dataset=document.createElement("div");
+                    dataset.id="DataSet_"+tableName;
+                    dataset.setAttribute('data-table-name', tableName);
+
+                    fieldsList=document.querySelectorAll('#tableDetails table tr')
+                    
+                    var datasetFields=['rowid'];
+                    var datasetFieldsTypes=['rowid'];
+                    const input=document.createElement('input');
+                            input.setAttribute('dataset-table-name', tableName);
+                            input.setAttribute('dataset-field-name', 'rowid');
+                            input.id="dataset-rowid";
+                            input.type='hidden';
+                            dataset.appendChild(input); 
+                        //  console.log(fieldsList);
+                    fieldsList.forEach(trline => { 
+                        if (trline.querySelector('td')) 
+                        {
+
+                                field=trline.querySelector('input:checked');
+                                console.log(trline);
+                                isSelect=trline.querySelector('select[name="inputType"]');
+                                console.log(isSelect);
+                                inputType=isSelect.options[isSelect.selectedIndex].text;
+                                if (field)
+                                {
+                                            fieldName=field.getAttribute("dataset-field-name");
+                                            fieldType=field.getAttribute("dataset-field-type");
+                                            datasetFields.push(fieldName);
+                                            datasetFieldsTypes.push(fieldType);
+                                            //console.log(field.getAttribute("dataset-field-type"));
+                                            var element=null;
+                                            switch(fieldType) {
+                                                case 'character':
+                                                case 'varchar':
+                                                case 'text':
+                                                case 'fixchar':
+                                                    // Get the select value 
+                                                
+                                                        // get option value from the select
+                                                    switch( inputType)
+                                                    {
+                                                        case "input":
+                                                            element = createElementInput('text');
+                                                            einput=element.querySelector('input');
+                                                        break;
+                                                        case "select":
+                                                            element = createElementSelect('select');
+                                                            einput=element.querySelector('select');
+                                                        break;
+                                                        case "checkbox":
+                                                            element = createElementInput('checkbox');
+                                                            einput=element.querySelector('input');
+                                                            break; 
+                                                    } 
+                                                    element = createElementInput('text');
+                                                    einput=element.querySelector('input');
+                                                    break;
+                                                case 'INT':
+                                                case 'integer':
+                                                case 'bigint':
+                                                case 'float':
+                                                case 'double':
+                                                case 'decimal':
+                                                    element = createElementInput('number');
+                                                    einput=element.querySelector('input');
+                                                    break;
+                                                case 'date':
+                                                case 'datetime':
+                                                    element = createElementInput('date');
+                                                    einput=element.querySelector('input');
+                                                    break;
+                                                case 'time':
+                                                    element = createElementInput('time');
+                                                    einput=element.querySelector('input');
+                                                    break;
+                                                case 'boolean':
+                                                case 'bool':
+                                                case 'bit':
+                                                    element = createElementInput('checkbox');
+                                                    einput=element.querySelector('input');
+                                                    break;
+                                                
+                                                default:
+                                                    // Handle default case or unknown types
+                                                    element = createElementInput('text');
+                                                    einput=element.querySelector('input');
+                                                    break;
+                                            }
+                                            
+                                        console.log(element);
+                                        
+                                            if (element !== undefined && element !== null) {
+                                                element.querySelector('label').textContent = fieldName; // Set label to column name
+                                                
+                                                
+                                                einput.setAttribute('dataset-table-name', tableName);
+                                                einput.setAttribute('dataset-field-name', fieldName);
+                                                einput.id=tableName+"_"+fieldName;
+                                                einput.setAttribute('dataset-field-type', field.getAttribute("dataset-field-type"));
+                                                einput.setAttribute('dataset-field-size', field.getAttribute("dataset-field-size"));
+                                                einput.setAttribute('dataset-field-mandatory', field.getAttribute("dataset-field-mandatory"));
+                                                einput.setAttribute('dataset-field-format', field.getAttribute("dataset-field-format"));
+
+                                                if (field.MANDATORY)
+                                                {
+                                                    einput.required=true;
+                                                }
+
+                                            }
+                                        //console.log(element);
+                                            
+                                        dataset.appendChild(element); // Append to the desired container
+                                        }
+                            }
+                    });
+
+                    dataset.appendChild(createNavigationBar(tableName,datasetFields));
+                    dataset.setAttribute("DataSet-Fields-List",datasetFields);
+                    dataset.setAttribute("DataSet-Fields-Types",datasetFieldsTypes);
+                    console.log(dataset);
+                    container.appendChild(dataset);
+            } catch (error) {
+                    console.error('Error:', error);
+            }
 }
 
-
-
-function mapColumnTypeToInputType(columnType) {
-    // Map your database column types to appropriate input types
-    // This is a basic example, adjust according to your database schema
- 
-    switch(columnType) {
-        case 'SQL_NUMERIC':
-        case 'SQL_VARCHAR':
-            return 'text';
-        case 'SQL_INTEGER':
-                return 'number';
-        case 'date':
-        case 'datetime':
-            return 'datetime-local';
-        // Add more mappings as needed
-        default:
-            return 'text';
-    }
-}
-
-
-function showModalDbStrc(main) {
-    const modal = document.getElementById('tableDetailsModal');
-    modal.setAttribute('data-main-id', main.id);
-    const overl = document.getElementById('overlayModal');
-    modal.style.display = 'block';
-    overl.style.display = 'block';
-}
-
-function closeModalDbStrct() {
-    const modal = document.getElementById('tableDetailsModal');
-    const overl = document.getElementById('overlayModal');
-    modal.style.display = 'none';
-    overl.style.display = 'none';
-}
 
 function insertTable()
 {
@@ -167,13 +202,11 @@ function insertTable()
     modal.style.display = 'none';
     overl.style.display = 'none';
     console.log("dbitem");
-
+    const formContainer = document.getElementById(modal.getAttribute('data-main-id'));
     const tableName = document.getElementById('TableDetails_TableName');
     element = document.createElement('div');
-
     createFormElementsFromStructure(tableName.innerText,element);
 
-    const formContainer = document.getElementById(modal.getAttribute('data-main-id'));
     formContainer.appendChild(element);
 }
 
@@ -191,14 +224,16 @@ function moveFirst(tableName,datasetFields) {
 function movePrev(tableName,datasetFields) {
   
     if (tableName ) {
-        navigateRecords('move-to-previous', tableName,datasetFields, parseInt(getRowID())-1);
+        const rowNum=getRowNum(tableName);
+        if (rowNum==0) return;
+        navigateRecords('move-to-previous', tableName,datasetFields, rowNum-1);
     }
 }
 
 function moveNext(tableName,datasetFields) {
     
     if (tableName ) {
-        navigateRecords('move-to-next', tableName,datasetFields, parseInt(getRowID())+1);
+        navigateRecords('move-to-next', tableName,datasetFields, getRowNum(tableName)+1);
     }
 }
 
@@ -207,14 +242,22 @@ function moveLast(tableName,datasetFields) {
     if (tableName) navigateRecords('move-to-last', tableName,datasetFields);
 }
 
-function navigateRecords(action, tableName,datasetFields, rowId = '') {
-    const url = `/${action}/${tableName}` + (rowId ? `/${rowId}` : '')+`?fields=${datasetFields}`;
+// refresh record
+function RefreshRecord(tableName)
+{
+    if (tableName ) {
+        navigateRecords('move-to-next', tableName,datasetFields, getRowNum(tableName));
+    }
+}
+
+function navigateRecords(action, tableName,datasetFields, rowNum = '') {
+    const url = `/${action}/${tableName}` + (rowNum ? `/${rowNum}` : '')+`?fields=${datasetFields}`;
     fetch(url)
         .then(response => response.json())
         .then(data => {
-            updateInputs(data);
-            rowId=rowId==""?0:rowId;
-            setRowID(rowId); // Assuming the data includes ROWID
+            updateInputs(data,tableName);
+            rowNum=rowNum==""?0:rowNum;
+            setRowNum(tableName, rowNum); // Assuming the data includes ROWID
         })
         .catch(error => console.error('Error:', error));
 }
@@ -223,16 +266,17 @@ function navigateRecords(action, tableName,datasetFields, rowId = '') {
 // use the fetch function to call the web service and update the inputs with the data
 // use the updateInputs function to update the inputs with the data
 // use the setRowID function to set the current row id in the navigation bar
-async function linkRecordToGrid(tableName,datasetFields, rowId) {
+async function linkRecordToGrid(tableName,datasetFields, rowId,rowNum) {
     try {
+ 
         const url = `/get-record-by-rowid/${tableName}/${rowId}?fields=${datasetFields}`;
         const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        updateInputs(data);
-        setRowID(0); // Assuming the data includes ROWID to-do check if the data includes ROWID
+        updateInputs(data,tableName);
+        setRowNum(tableName,rowNum); // Assuming the data includes ROWID to-do check if the data includes ROWID
     } catch (error) {
         console.error('Error:', error);
     }
@@ -240,38 +284,53 @@ async function linkRecordToGrid(tableName,datasetFields, rowId) {
 
 
 
-function updateInputs(data) {
-    const inputs = document.querySelectorAll('#DataSet input');
-   // console.log(data[0]);
-    inputs.forEach(input => {
-       // console.log(input);
-        const fieldLabel = input.getAttribute('dataset-field-name');
-        console.log(fieldLabel+":"+data[0][fieldLabel]);
-        if (data[0][fieldLabel] !== undefined) {
-            input.value = data[0][fieldLabel];
-            input.readOnly = true;
+function updateInputs(data,tableName) {
+    
+    // get all the datasets
+    const datasets = document.querySelectorAll("#DataSet_"+tableName);    
+
+    // for all the datasets check the div with name DataSet
+    datasets.forEach(dataset => {
+       
+        // get table name from the dataset
+        datasetTableName=dataset.getAttribute("data-table-name");
+        // if the table name is the same as the table name of the record
+        if (datasetTableName==tableName)
+        {
+            const inputs = dataset.querySelectorAll('input');
+           // console.log(inputs);
+            inputs.forEach(input => {
+            // console.log(input);
+                const fieldLabel = input.getAttribute('dataset-field-name');
+            //  console.log(fieldLabel+":"+data[0][fieldLabel]);
+                if (data[0][fieldLabel] !== undefined) {
+                    input.value = data[0][fieldLabel];
+                    input.readOnly = true;
+                }
+            // disable save record button
+             document.getElementById("SaveRecordBtn").disabled = true;        
+            });
         }
     });
-    // disable save record button
-    document.getElementById("SaveRecordBtn").disabled = true;
 }
 
 
-function setRowID(id)
+function setRowNum(tabelName,Num)
 {
-navbar=document.getElementById("navigationBar");
-navbar.setAttribute("dataset-current-row",id);
+navbar=document.getElementById("navigationBar_"+tabelName);
+navbar.setAttribute("dataset-current-row",Num);
 }
 
-function getRowID()
+function getRowNum(tabelName)
 {
-navbar=document.getElementById("navigationBar");
-return navbar.getAttribute("dataset-current-row");
+navbar=document.getElementById("navigationBar_"+tabelName);
+rowNum=parseInt(navbar.getAttribute("dataset-current-row"));
+return rowNum;
 }
 
 function EditRecord(tableName)
 {
-    const inputs = document.querySelectorAll('#DataSet input');
+    const inputs = document.querySelectorAll(`#DataSet_${tableName} input`);
    
     inputs.forEach(input => {
         const tableLabel = input.getAttribute('dataset-table-name');
@@ -286,7 +345,7 @@ function EditRecord(tableName)
 
 function InsertRecord(tableName)
 {
-    const inputs = document.querySelectorAll('#DataSet input');
+    const inputs = document.querySelectorAll(`#DataSet_${tableName} input`);
    
     inputs.forEach(input => {
         const tableLabel = input.getAttribute('dataset-table-name');
@@ -308,7 +367,7 @@ function InsertRecord(tableName)
 
 function CreateUpdated(tableName)
 {
-    const inputs = document.querySelectorAll('#DataSet input');
+    const inputs = document.querySelectorAll(`#DataSet_${tableName} input`);
    var updateFields="";
    for (i=0;i<inputs.length;i++)
     {
@@ -326,31 +385,40 @@ function CreateUpdated(tableName)
 //update record 
 async function SaveRecord(tableName) {
     try {
-        const nextRowId = document.querySelector('#dataset-rowid').value; 
-        console.log(nextRowId);
+        // Get the next row id from the navigation bar
+        const nextRowIds = document.querySelectorAll('#dataset-rowid'); 
+        nextRowIds.forEach(nextRowId => {
+            // get table name from the dataset
+            datasetTableName=nextRowId.getAttribute("dataset-table-name");
+            // if the table name is the same as the table name of the record
+                    if (datasetTableName==tableName)
+                    {
+                        nextRowId=nextRowId.value;
+                    
+                        let result;
+                        if (nextRowId === 'new') {
+                            // create data for insert
+                            const data =  CreateInsert(tableName);
 
-      
-        let result;
-        if (nextRowId === 'new') {
-            // create data for insert
-            const data =  CreateInsert(tableName);
+                            
+                            // If nextRowId is 'new', call insertRecord
+                            result =  insertRecordDB(tableName, data);
+                        } else {
+                            // Otherwise, call updateRecord
+                            const data = {
+                                body: CreateUpdated(tableName)
+                            };
+                    
+                            result =  updateRecordDB(tableName, nextRowId, data);
+                        }
 
+                        return result;
+                    }
+                });
             
-            // If nextRowId is 'new', call insertRecord
-            result = await insertRecordDB(tableName, data);
-        } else {
-            // Otherwise, call updateRecord
-            const data = {
-                body: CreateUpdated(tableName)
-            };
-    
-            result = await updateRecordDB(tableName, nextRowId, data);
-        }
-
-        return result;
-    } catch (error) {
-        console.error('Error:', error);
-    }
+            } catch (error) {
+                showToast('Error:'+ error);
+            }
 }
 
 // create insert data structure
@@ -359,7 +427,7 @@ function CreateInsert(tableName)
 
    // create data for insert following this structure  `INSERT INTO ${tableName} (${data.fields}) VALUES (${data.values})`;
    // return data with data.fields and data.values
-    const inputs = document.querySelectorAll('#DataSet input');
+    const inputs = document.querySelectorAll(`#DataSet_${tableName} input`);
     var insertFields="";
     var insertValues="";
     for (i=0;i<inputs.length;i++)
@@ -376,8 +444,7 @@ function CreateInsert(tableName)
             }
         }
     };
-    console.log(insertFields);
-    console.log(insertValues);
+
     return {fields:insertFields,values:insertValues};
 
 }
@@ -393,13 +460,13 @@ async function updateRecordDB(tableName, nextRowId, updateData) {
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            showToast(`HTTP error! status: ${response.status}`);
         }
         const updateResult = await response.json();
         showToast('Record updated successfully', 5000); // Show toast for 5 seconds
         return updateResult;
     } catch (error) {
-        console.error('Error:', error);
+        showToast('Error:'+ error);
     }
 }
 
@@ -416,7 +483,7 @@ async function insertRecordDB(tableName, data) {
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+            showToast(`HTTP error! Status: ${response.status}`);
         }
 
         const result = await response.json();
@@ -424,7 +491,7 @@ async function insertRecordDB(tableName, data) {
         showToast('Record inserted successfully', 5000); // Show toast for 5 seconds
         return result;
     } catch (error) {
-        console.error('Error inserting record:', error);
+        showToast('Error inserting record:'+error);
     }
 }
 

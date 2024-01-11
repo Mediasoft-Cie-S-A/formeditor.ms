@@ -22,8 +22,8 @@ function removeAllChildNodes(parent) {
 }
 
 
-function createInputItem(id, label, styleProperty,text,type) {
-    console.log(text);
+function createInputItem(id, label, styleProperty,text,type,attribute) {
+ //   console.log(text);
     var div = document.createElement("div");
     var lbl = document.createElement("label");
     lbl.setAttribute("for", id);
@@ -38,9 +38,16 @@ function createInputItem(id, label, styleProperty,text,type) {
                                         {
 
                                         }
-                                        else
+                                        else 
                                         {
-                                        updateElementStyle(styleProperty, this.value);
+                                            if (attribute===true)
+                                            {   
+                                            updateAttribute(styleProperty, this.value);
+                                                }
+                                            else
+                                            {
+                                            updateElementStyle(styleProperty, this.value);
+                                            }
                                         }
                                    };
     if (input.type!="file")
@@ -92,15 +99,17 @@ function editElement(element) {
         content.appendChild(label);
         content.appendChild(document.createElement('hr'));
         // Execute the function editor delcared in the components js if exists type   
-        console.log("type:"+elementsData[type]);
+      //  console.log("type:"+elementsData[type]);
         if (elementsData[type]){
             if (elementsData[type].editFunction) {
                 var functionName = elementsData[type].editFunction;
-                console.log("functionName:"+functionName);
+               // console.log("functionName:"+functionName);
                 window[functionName](type,element,content);
             
             }
         }
+
+
 
         const style = element.style;
 
@@ -115,17 +124,17 @@ function editElement(element) {
         content.appendChild(createInputItem("cl", "color", "color",style.color,"color"));
         content.appendChild(createInputItem("bg", "background-color", "background-color",style.backgroundColor,"color"));
         content.appendChild(createInputItem("border", "border", "border",style.border,"text"));
-        content.appendChild(createInputItem("cl", "class", "class",element.getAttribute('class') ,"text"));
-        content.appendChild(createInputItem("font", "font", "font",element.getAttribute('font') ,"text"));
-        content.appendChild(createInputItem("margin", "margin", "margin",style.margin),"text");
-        content.appendChild(createInputItem("padding", "padding", "padding",style.padding),"text");
-        content.appendChild(createInputItem("html", "html", "html",element.innerHTML),"text");
-        content.appendChild(createInputItem("Data Table Name", "dataset-table-name", "dataset-table-name",element.getAttribute('dataset-table-name'),'text'));
-        content.appendChild(createInputItem("Data Field Name", "dataset-field-name", "dataset-field-name",element.getAttribute('dataset-field-name'),'text'));
-        content.appendChild(createInputItem("change", "onChange", "onchange",element.getAttribute('onchange')),"text");
-        content.appendChild(createInputItem("click", "onClick", "onclick",element.getAttribute('onclick')),"text");
+        content.appendChild(createInputItem("cl", "class", "class",element.getAttribute('class')) ,"text");
+        content.appendChild(createInputItem("font", "font", "font",style.font ,true,"text"));
+        content.appendChild(createInputItem("margin", "margin", "margin",style.margin,"text"));
+        content.appendChild(createInputItem("padding", "padding", "padding",style.padding,"text"));
+        content.appendChild(createInputItem("html", "html", "html",element.innerHTML,"text",true));
+        content.appendChild(createInputItem("Data Table Name", "dataset-table-name", "dataset-table-name",element.getAttribute('dataset-table-name'),"text",true));
+        content.appendChild(createInputItem("Data Field Name", "dataset-field-name", "dataset-field-name",element.getAttribute('dataset-field-name'),"text",true));
+        content.appendChild(createInputItem("change", "onChange", "onchange",element.getAttribute('onchange'),"text",true));
+        content.appendChild(createInputItem("click", "onClick", "onclick",element.getAttribute('onclick'),"text",true));
 
-        content.appendChild(createInputItem("dblclick", "Double Click", "dblclick",element.getAttribute('dblclick')),"text");
+        content.appendChild(createInputItem("dblclick", "Double Click", "dblclick",element.getAttribute('dblclick'),"text",true));
 
 }
 
@@ -133,7 +142,7 @@ function editElement(element) {
 
 function closeModalDbStrct() {
 
-    document.getElementById("modalDialogText").style.display = 'none';
+    document.getElementById("tableDetailsModal").style.display = 'none';
     document.querySelector(".overlay").style.display = 'none';
     currentElement = null;
 }
@@ -160,11 +169,19 @@ function updateElementTxtC(t)
 
 function updateElementStyle(type,t)
 {
-   
-    currentElement.style.setProperty(type,t);  
-    
+   console.log("updateElementStyle:"+type+" "+t);
+    currentElement.style.setProperty(type,t);     
     
 }
+
+function updateAttribute(type,t)
+{
+   console.log("updateElementAttribute:"+type+" "+t);
+    currentElement.setAttribute(type,t);     
+    
+}
+
+
 function updateElementOnChange(t)
 {
     var text= currentElement.querySelector('input');   
@@ -219,13 +236,14 @@ formContainer.addEventListener('click', function(event) {
     var editorFloatMenu = document.getElementById('editorFloatMenu');
     editorFloatMenu.style.display = 'block';
 
-    // Get the total offset by combining formContainer's and element's offset
+
     console.log("formContainer.offsetTop:"+formContainer.offsetTop);
 
     console.log("formContainer.offsetTop:"+formContainer.offsetTop);
     console.log("editorElementSelected.offsetWidth:"+editorElementSelected.offsetWidth);
     console.log("editorElementSelected.offsetLeft:"+editorElementSelected.offsetLeft);
     console.log('top', top);
+
 
     var totalOffsetTop = top + editorElementSelected.offsetTop -25;
     var totalOffsetLeft = top+ editorElementSelected.offsetLeft + editorElementSelected.offsetWidth;
@@ -249,7 +267,7 @@ function getAbsoluteOffset(element) {
 function showProperties()
 {
     const inputElementSelected=document.getElementById("editorElementSelected");
-    console.log("inputElementSelected.value:"+inputElementSelected.value);
+  //  console.log("inputElementSelected.value:"+inputElementSelected.value);
     var editorElementSelected=document.getElementById(inputElementSelected.value);
 
     editElement(editorElementSelected);
@@ -278,3 +296,28 @@ function removeSelection()
      
     }
 }   
+
+const codeEditor = CodeMirror.fromTextArea(document.getElementById('jsCodeEditor'), {
+    lineNumbers: false,
+    mode: 'javascript',  
+    lint: true, // Enable JavaScript linting
+    extraKeys: {"Tab": "autocomplete"}, // Enable autocompletion
+    autoCloseBrackets: true, // Enable auto-closing of brackets
+    // enable copy 
+    readOnly: false,
+    // enable paste
+    matchBrackets: true,
+    // enable cut
+    autoCloseTags: true,
+  })
+
+
+  codeEditor.on('change', function(instance, changeObj) {
+    // Syntax checking logic here (if needed)
+    // For example, you can use a linter library like ESLint or JSHint
+   /* textarea=document.getElementById('jsCodeEditor');
+    console.log(codeEditor.getValue());
+    textarea.value=codeEditor.getValue();*/
+  });
+
+  

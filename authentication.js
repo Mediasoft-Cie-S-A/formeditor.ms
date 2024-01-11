@@ -14,13 +14,13 @@ module.exports = function(app,session, passport) {
 
 
  passport.serializeUser((user, done) => {
-    done(null, user.oid);
+    done(null, user.oid,user.username);
 });
 
-passport.deserializeUser((oid, done) => {
+passport.deserializeUser((oid, username, done) => {
     // Find the user by OID and return the user object
     // Implement your logic to retrieve user from your database or user store
-    done(null, { oid: oid, username: oid });
+    done(null, { oid: oid, username: username });
 });
 
 
