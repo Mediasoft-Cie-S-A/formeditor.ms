@@ -26,11 +26,24 @@ function createElementInput(type) {
     label.id=main.id+"Label";
     label.tagName="label";
     main.appendChild(label);   
-    var input = document.createElement('input');
-    input.type = type;
-    input.id=main.id+"Input";
-    input.tagName="input";
-    main.appendChild(input)
+    if (type === 'textarea') {
+        var input = document.createElement('textarea');
+        input.tagName="input";	       
+        input.className = "input-element textarea-element";   
+            input.id=main.id+"Textarea";
+            input.tagName="textarea";
+            input.placeholder = type;
+            main.appendChild(input)
+        } else {
+            var input = document.createElement('input');
+            input.type = type;
+            input.className = "input-element";
+            input.id=main.id+"Input";
+            input.tagName="input";
+            input.placeholder = type;
+            main.appendChild(input)
+        }
+
     return main;
 }
 

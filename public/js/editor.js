@@ -31,6 +31,7 @@ function createInputItem(id, label, styleProperty,text,type,attribute) {
 
     var input = document.createElement("input");
     input.type = type;
+    input.className = "input-element";
     input.id = id;
     input.onchange = function(event) {
                                         if (event.target.type=="file")
@@ -74,6 +75,7 @@ function createInputDiv(id, labelText, onChangeFunction,text) {
     var input = document.createElement("input");
     input.type = "text";
     input.id = id + "Input";
+    input.className = "input-element";
     input.onchange = function() { onChangeFunction(this.value); };
     input.value=text;
     div.appendChild(label);

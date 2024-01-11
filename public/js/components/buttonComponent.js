@@ -24,6 +24,7 @@ function createElementButton(type) {
             element.textContent = type;
     element.id=type+ Date.now(); // Unique ID for each new element
     element.tagName=type;
+    element.className = 'button';
     return element;
 }
 

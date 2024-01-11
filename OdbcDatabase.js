@@ -141,12 +141,15 @@ class OdbcDatabase {
              // and build the query where clause
             
 
-             if (filter && filter.length > 0) {
+             if (filter && filter.length > 0) 
+             {
                 var filterList=filter.split(",");
                 var filter="";
-                for (var i=0;i<filterList.length;i++) {
+                for (var i=0;i<filterList.length;i++) 
+                {
                     var filterField=filterList[i].split("|");
-                    if (filterField.length==2) {
+                    if (filterField.length==2) 
+                    {
                         if (filter.length>0) {
                             filter+=" and ";
                         }
@@ -160,9 +163,9 @@ class OdbcDatabase {
                                 filter+=`${filterField[0]} = ${filterField[1]}`;
                             break;                                            
                             }
-                }   
-            }
-                
+                    }   
+                }
+             }  
 
             if (fields && fields.length > 0) {
                 const fieldList = fields.join(', ');

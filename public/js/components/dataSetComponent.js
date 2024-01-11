@@ -102,7 +102,7 @@ async function createFormElementsFromStructure(tableName,container) {
                                             switch(fieldType) {
                                                 case 'character':
                                                 case 'varchar':
-                                                case 'text':
+                                                case 'text':                                              
                                                 case 'fixchar':
                                                     // Get the select value 
                                                 

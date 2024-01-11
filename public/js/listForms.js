@@ -33,7 +33,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Create delete button
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = 'Delete';
-                deleteButton.classList.add('delete-button');
+                deleteButton.classList.add('button ');
+               
                 deleteButton.onclick = function() {
                     deleteForm(form.formId, listItem);
                 };

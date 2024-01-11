@@ -75,7 +75,9 @@ function createSidebar(elementsData) {
         categoryDiv.className = 'category';
         const button = document.createElement('button');
         button.textContent = category;
-        button.className = 'category-button';
+        button.className = 'category-button button';
+        button.style.justifyContent = 'center';
+        button.style.padding = "15px 10px"; 
         button.addEventListener('click', function() {
             const categoryDiv = this.parentElement;
             const height = categoryDiv.style.height;
@@ -96,8 +98,13 @@ function createSidebar(elementsData) {
                     itemDiv.draggable = true;
                     itemDiv.textContent = elementData.description;
                     itemDiv.id = elementData.type;
+                    if (elementData.type === 'grid') {
+                        itemDiv.style.marginBottom = "20px";
+                    }
+
                     itemDiv.addEventListener('dragstart', drag);
-                    categoryDiv.appendChild(itemDiv);
+                    itemDiv.addEventListener("dblclick", doubleclick);
+                    categoryDiv.appendChild(itemDiv);	                    
 
                     // Check if the script exists
                     // Check if the script exists
@@ -137,11 +144,26 @@ function drop(event) {
     var elementId = event.dataTransfer.getData("text");
     console.log("elementId:"+elementId);
             var newElement = createFormElement(elementId);
-            
+            newElement.setAttribute("position", event.target.childElementCount);
             if (newElement) {
                 event.target.appendChild(newElement);
             }
      
+}
+
+function doubleclick(event) {
+
+    var elementId = event.target.id;
+        var newElement = createFormElement(elementId);
+
+        /** Check if element is other that grid (created via dedicated modal) **/
+        if (event.target.id !== 'grid') {
+            newElement.setAttribute("position", event.target.childElementCount);
+        }
+
+        if (newElement) {
+            document.getElementById("formContainer").appendChild(newElement);
+        }
 }
 
 // Assuming you're in a browser environment

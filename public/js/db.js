@@ -236,23 +236,28 @@ async function editTableDetails(tableName, tableLabel, detailsDiv) {
             });
             table.appendChild(tr);
         });
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className   = 'button-container';
        
         const addButton = document.createElement('button');
         addButton.textContent = 'Add';
+        addButton.className   = 'button';
         addButton.onclick = function(event) {
             event.preventDefault();
             addTableColumn(table);
         };
-
+        buttonContainer.appendChild(addButton);
        
-        detailsDiv.appendChild(addButton);
+       
         const saveButton = document.createElement('button');
         saveButton.textContent = 'Save';
+        saveButton.className   = 'button';
         saveButton.onclick = function(event) {
             event.preventDefault();
             saveAlterTable(table,tableName);
         };  
-        detailsDiv.appendChild(saveButton); 
+        buttonContainer.appendChild(saveButton);
+        detailsDiv.appendChild(buttonContainer);
 
     } catch (error) {
         console.error('Error:', error);
@@ -338,7 +343,7 @@ function addTableColumn(table) {
         const td = document.createElement('td');
         switch (prop) {
             case 'TYPE':
-                var _select= `<select new name='${prop}'>`;
+                var _select= `<select new name='${prop}' class="input-element">`;
                   
                     _select+=`<option value="CHAR">CHAR</option>`;
                     _select+=`<option value="VARCHAR">VARCHAR</option>`;
@@ -359,14 +364,13 @@ function addTableColumn(table) {
             case 'MANDATORY':
             case 'DECIMAL':
             case 'WIDTH':
-            td.innerHTML = `<input type='number' new name='${prop}' value='0'/>`;
+            td.innerHTML = `<input class="input-element" type='number' new name='${prop}' value='0'/>`;
             break;
             case 'NAME':
-                td.innerHTML = `<input new name='${prop}' value=''/ placeholder='Field Name' required>`;
+                td.innerHTML = `<input class="input-element" new name='${prop}' value=''/ placeholder='Field Name' required>`;
                 break;
             default:
-            td.innerHTML = `<input new name='${prop}' value=''/>`;
-                
+            td.innerHTML = `<input class="input-element" new name='${prop}' value=''/>`;                 
     
         }
         tr.appendChild(td);
@@ -415,10 +419,12 @@ function  newTable() {
     tableNameInput.setAttribute('name', 'tableName');
     tableNameInput.setAttribute('placeholder', 'Table Name');
     tableNameInput.setAttribute('required', '');
+    tableNameInput.className = 'input-element';
     detailsDiv.appendChild(tableNameInput);
     // generate html table
     const table = document.createElement('table');
     table.style.padding='10px';
+    table.style.marginTop='10px';
     detailsDiv.appendChild(table);
 
     // header

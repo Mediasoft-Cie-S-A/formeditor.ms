@@ -55,6 +55,14 @@
         "createFunction": "createQRCodeScanner",
         "editFunction": "editQRCodeScanner"
     },
+    "grid": {
+        "type": "grid",
+        "description": "HTML Grid",
+        "category": "HTML",
+        "scriptName": "htmlGridInput.js",
+        "createFunction": "showHtmlGridModal",
+        "editFunction": "editGridElement"
+    },
     "textfield": {
         "type": "textfield",
         "description": "Text field",
@@ -246,13 +254,6 @@
         "scriptName": "genericInput.js",
         "createFunction": "createElementInput",
         "editFunction": "editElementInput"
-    }, 
-    "grid": {
-        "type": "grid",
-        "description": "HTML Grid",
-        "category": "HTML",
-        "scriptName": "genericInput.js",
-        "createFunction": "createElementInput",
-        "editFunction": "editElementInput"
-    }
+    } 
+   
 }
