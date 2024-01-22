@@ -31,8 +31,13 @@ function fetchTablesList(list) {
             list.innerHTML = '';
              // add new table button
              tableList=[];
+             var i=0;
             tables.forEach(table => {
                 const listItem = document.createElement('div');
+                if (i%2==0) 
+                {
+                    listItem.style.backgroundColor='#f2a2a2';
+                }
                 listItem.classList.add('table-item');
                 listItem.textContent = table.NAME; // Adjust based on your API response
                 listItem.setAttribute('data-table-name', table.NAME);
@@ -40,6 +45,7 @@ function fetchTablesList(list) {
 
                 list.appendChild(listItem);
                 tableList.push(table.NAME);
+                i++;
             });
         })
         .catch(error => console.error('Error:', error));
@@ -93,6 +99,7 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
         const header=['SEL','NAME','TYPE','LABEL' ,'FORMAT','*',  'WIDTH','TYPE','TABLE','FIELD'];
         // create table header with th elements base on the foreach
         const tr = document.createElement('tr');
+        tr.style.backgroundColor='#e6e6e6';
         tr.id='TableFieldsList';
         header.forEach(prop => {
             const td = document.createElement('th');
@@ -100,6 +107,7 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
             tr.appendChild(td);
         }); 
         table.appendChild(tr);
+        var i=0;
         fields.forEach(field => {
             // Sample configuration array
                                 const fieldConfig = [
@@ -128,6 +136,10 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
 
                                 // Create table row and elements dynamically based on the configuration array
                                 const tr = document.createElement('tr');
+                                if (i%2==0) 
+                                {
+                                    tr.style.backgroundColor='#f2f2f2';
+                                }
                                 tr.setAttribute('data-field-name', field.NAME);
 
                                 fieldConfig.forEach(field => {
@@ -150,7 +162,7 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
 
                                 // Append the created table row to the table
                                 table.appendChild(tr);
-
+                                i++;
            
        });
         detailsDiv.appendChild(table);       

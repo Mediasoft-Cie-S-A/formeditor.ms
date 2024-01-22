@@ -23,7 +23,7 @@ module.exports = function(app,session, passport) {
         res.redirect("/login");
     };
 
-    const dsn = 'DSN=Sports2000;UID=sysprogress;PWD=sysprogress'; 
+    const dsn = app.config.odbcString;
     // Replace with your actual connection string
 const db = new OdbcDatabase(dsn);
 

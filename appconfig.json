@@ -1,6 +1,6 @@
 {
     "port": 3000,
-    "odbcString": "DSN=Sports2000;UID=sysprogress;PWD=sysprogress",
+    "odbcString": "DSN=msdb;UID=sysprogress;PWD=sysprogress",
     "mongoDbUrl": "mongodb://0.0.0.0:27017",
     "mongoDbName": "formeditmsapp",    
     "sessionSecret": "secJKDFUret",
