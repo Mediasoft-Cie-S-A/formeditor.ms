@@ -23,7 +23,7 @@ function createElementDateSet(type) {
     
     const list = document.getElementById('tablesList');
     const detailsDiv = document.getElementById('tableDetails');
-    createTableList(list,detailsDiv);
+    fetchTablesList(list,detailsDiv,"");
     showModalDbStrc(main,type);
     return main;
 }

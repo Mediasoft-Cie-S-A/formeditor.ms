@@ -102,3 +102,30 @@ function showToast(message, duration = 3000) {
         toast.addEventListener('transitionend', () => toast.remove());
     }, duration);
 }
+
+// show hint like a toastmessage wiht absolute position, based on the mouse position
+function showHint(message, duration = 1000, event) {
+    const hintContainer = document.getElementById('hint-container');
+    hintContainer.style.top = 10+event.clientY + 'px';
+    hintContainer.style.left = 10+event.clientX + 'px';
+    const hint = document.createElement('div');
+    hint.classList.add('hint-message');
+    hint.textContent = message;
+
+    hintContainer.innerHTML = '';   
+
+    // Add the toast to the container
+    hintContainer.appendChild(hint);
+
+    // Make the toast visible
+    setTimeout(() => {
+        hint.style.opacity = 1;
+    }, 100);
+
+    // Hide and remove the toast after 'duration'
+    setTimeout(() => {
+        hint.style.opacity = 0;
+        hint.addEventListener('transitionend', () => hint.remove());
+    }, duration);
+}
+

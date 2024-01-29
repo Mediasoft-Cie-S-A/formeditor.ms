@@ -152,7 +152,7 @@ body {
     cursor: pointer;	    
     user-select: none;  	    
     align-items: center;	  
-    
+    max-width: 120px;
 }
 
 .input-element {
@@ -314,6 +314,27 @@ button:hover {
     opacity: 0;
     transition: opacity 0.5s;
 }
+
+#hint-container {
+    position: fixed;
+    left: 20px;
+    top: 20px;
+    
+    align-items: center;
+    z-index: 9999;
+}
+
+.hint-message {
+    background-color:yellow;
+    color: black;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    opacity: 0;
+    transition: opacity 0.5s;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Add a shadow effect */
+}
+
 
 .form-list {
     list-style-type: none;
@@ -906,51 +927,9 @@ a.brand-logo {
     z-index: 9
 }
 
-.search-box {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
 
-.search-input {
-    padding: 8px;
-    margin-right: 4px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
 
-.search-button {
-    background: #007bff;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-}
 
-.search-button .search-icon {
-    font-size: 16px;
-}
-
-.autocomplete-results {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    border: 1px solid #ccc;
-    background: white;
-    z-index: 1000;
-    display: none;
-}
-
-.autocomplete-results div {
-    padding: 8px;
-    cursor: pointer;
-}
-
-.autocomplete-results div:hover {
-    background-color: #f0f0f0;
-}
 
 #hint {
     position: absolute;
@@ -1065,4 +1044,143 @@ a.brand-logo {
 .gantt-scheduled {
     text-align: center;
     border: 1px solid #ddd;
+}
+
+/* style for seach */
+/* Style the search field */
+.search input[type=text] {
+    padding: 10px;
+    font-size: 17px;
+    border: 1px solid grey;
+    float: left;
+    width: 80%;
+    background: #f1f1f1;
+    margin-top: -5px;
+  }
+  
+  /* Style the submit button */
+ .search button {
+    float: left;
+    width: 20%;
+    padding: 10px;
+    background: #2196F3;
+    color: white;
+    font-size: 17px;
+    border: 1px solid grey;
+    border-left: none; /* Prevent double borders */
+    cursor: pointer;
+    
+  }
+  
+  .search button:hover {
+    background: #0b7dda;
+  }
+  
+  /* Clear floats */
+  .search::after {
+    content: "";
+    clear: both;
+    display: table;
+  }
+
+  .autocomplete-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    border: 1px solid #ccc;
+    background: white;
+    z-index: 1000;
+    display: none;
+}
+
+.autocomplete-results div {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.autocomplete-results div:hover {
+    background-color: #f0f0f0;
+}
+
+
+/**********************************************************************************/
+
+.fileExplorerTable {
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid #ddd;
+    font-size: 17px;
+    height: 400px;
+    overflow-y: none;
+}
+
+
+
+
+.fileExplorerTbody{
+    height: 400px;
+    overflow-y: auto;
+
+}
+
+.fileExplorerTbody::-webkit-scrollbar {
+    width: 10px;
+}
+
+.fileExplorerTbody::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+}
+
+.fileExplorerTbody::-webkit-scrollbar-thumb {
+    background: #888; 
+}
+
+.fileExplorerTbody tr {
+    cursor: pointer;
+}
+
+.fileExplorerTbody tr:hover {
+    background-color: #f0f0f0;
+}
+
+.fileExplorerTbody td {
+    padding: 10px;
+    width: auto;
+}
+
+.fileExplorerTbody td:first-child {
+    width: 30px;
+}
+
+.fileExplorerTbody td:last-child {
+    width: 25%;
+}
+
+.fileExplorerTbody td:nth-child(2) {
+    width: auto;
+}
+
+.fileExplorerThead {
+    background-color: #f5f5f5;
+    color: #333;
+
+}   
+
+.fileExplorerThead th {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+}   
+
+.fileExplorerThead th:first-child {
+    width: 30px;
+}
+
+.fileExplorerThead th:last-child {
+    width: 25%;
+}
+
+.fileExplorerThead th:nth-child(2) {
+    width: auto;
 }

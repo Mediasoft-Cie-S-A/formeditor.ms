@@ -116,7 +116,7 @@ require('./authStatic')(app,session, passport);
 // Import routes
 require('./formService')(app, client, dbName);
 require('./dblayer')(app,session, passport);
-
+require('./GED')(app,session, passport);
 // Swagger definition
 const swaggerDefinition = {
     openapi: '3.0.0',

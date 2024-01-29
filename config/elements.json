@@ -5,7 +5,8 @@
         "category": "Bussiness  Logic"  ,
         "scriptName": "dataSetComponent.js",
         "createFunction": "createElementDateSet",
-        "editFunction": "editElementDataSet"
+        "editFunction": "editElementDataSet",
+        "icon": "fa fa-database"
     },
     "dataGrid": {
         "type": "dataGrid",
@@ -13,7 +14,8 @@
         "category": "Bussiness  Logic",
         "scriptName": "databaseGrid.js",
         "createFunction": "createDatabaseGrid",
-        "editFunction": "editDatabaseGrid"
+        "editFunction": "editDatabaseGrid",
+        "icon": "fa fa-table"
     },
     "dataSearch": {
         "type": "dataSearch",
@@ -21,7 +23,56 @@
         "category": "Bussiness  Logic",
         "scriptName": "databaseSearch.js",
         "createFunction": "createDatabaseSearch",
-        "editFunction": "editDatabaseSearch"
+        "editFunction": "editDatabaseSearch",
+        "icon": "fa fa-search"
+    },
+    "combox": {
+        "type": "dataCombox",
+        "description": "dataCombox",
+        "category": "Bussiness  Logic",
+        "scriptName": "comboxComponent.js",
+        "createFunction": "createElementCombox",
+        "editFunction": "editElementCombox",
+        "icon": "fa fa-list"
+
+    },
+    "workflow": {
+        "type": "workflow",
+        "description": "Workflow",
+        "category": "Workflow",
+        "scriptName": "workflowComponent.js",
+        "createFunction": "createElementWorkflow",
+        "editFunction": "editElementWorkflow",
+        "icon": "fa fa-sitemap"
+
+    },
+    "fileExplorer": {
+        "type": "fileExplorer",
+        "description": "File Explorer",
+        "category": "Workflow",
+        "scriptName": "fileExplorerComponent.js",
+        "createFunction": "createElementFileExplorer",
+        "editFunction": "editElementFileExplorer",
+        "icon": "fa fa-folder-open"
+    },
+
+    "workflowStep": {
+        "type": "workflowStep",
+        "description": "Workflow Step",
+        "category": "Workflow",
+        "scriptName": "workflowStepComponent.js",
+        "createFunction": "createElementWorkflowStep",
+        "editFunction": "editElementWorkflowStep",
+        "icon": "fa fa-sitemap"
+    },
+    "workflowStepAction": {
+        "type": "workflowStepAction",
+        "description": "Workflow Step Action",
+        "category": "Workflow",
+        "scriptName": "workflowStepActionComponent.js",
+        "createFunction": "createElementWorkflowStepAction",
+        "editFunction": "editElementWorkflowStepAction",
+        "icon": "fa fa-sitemap"
     },
     "jscode":{
         "type": "jscode",
@@ -29,7 +80,8 @@
         "category": "Bussiness  Logic",
         "scriptName": "jscode.js",
         "createFunction": "createJScode",
-        "editFunction": "editJScode"
+        "editFunction": "editJScode",
+        "icon": "fa fa-code"
     },
     "planning": {
         "type": "planning",
@@ -37,7 +89,8 @@
         "category": "Bussiness  Logic",
         "scriptName": "planning.js",
         "createFunction": "createPlanning",
-        "editFunction": "editPlanning"
+        "editFunction": "editPlanning",
+        "icon": "fa fa-calendar"
     },
     "qrcode": {
         "type": "qrcode",
@@ -45,7 +98,8 @@
         "category": "Bussiness  Logic",
         "scriptName": "qrcodeComponent.js",
         "createFunction": "createQRCode",
-        "editFunction": "editQRCode"
+        "editFunction": "editQRCode",
+        "icon": "fa fa-qrcode"
     },
     "qrcodeScanner": {
         "type": "qrcodeScanner",
@@ -53,7 +107,8 @@
         "category": "Bussiness  Logic",
         "scriptName": "qrcodeScannerComponent.js",
         "createFunction": "createQRCodeScanner",
-        "editFunction": "editQRCodeScanner"
+        "editFunction": "editQRCodeScanner",
+        "icon": "fa fa-qrcode"
     },
     "grid": {
         "type": "grid",
@@ -61,7 +116,8 @@
         "category": "HTML",
         "scriptName": "htmlGridInput.js",
         "createFunction": "showHtmlGridModal",
-        "editFunction": "editGridElement"
+        "editFunction": "editGridElement",
+        "icon": "fa fa-table"
     },
     "textfield": {
         "type": "textfield",
@@ -69,7 +125,8 @@
         "category": "HTML",        
         "scriptName": "genericInput.js",
         "createFunction": "createElementInput",
-        "editFunction": "editElementInput"
+        "editFunction": "editElementInput",
+        "icon": "fa fa-font"
     },
     "number": {
         "type": "number",
@@ -77,7 +134,8 @@
         "category": "HTML",
         "scriptName": "genericInput.js",
         "createFunction": "createElementInput",
-        "editFunction": "editElementInput"
+        "editFunction": "editElementInput",
+        "icon": "fa fa-sort-numeric-asc"
     },
     "password": {
         "type": "password",
@@ -85,7 +143,8 @@
         "category": "HTML",
         "scriptName": "genericInput.js",
         "createFunction": "createElementInput",
-        "editFunction": "editElementInput"
+        "editFunction": "editElementInput",
+        "icon": "fa fa-key"
     },
     "email": {
         "type": "email",
@@ -93,7 +152,8 @@
         "category": "HTML",
         "scriptName": "genericInput.js",
         "createFunction": "createElementInput",
-        "editFunction": "editElementInput"
+        "editFunction": "editElementInput",
+        "icon": "fa fa-envelope"
     },
     "textarea": {
         "type": "textarea",
@@ -101,7 +161,8 @@
         "category": "HTML",
         "scriptName": "genericInput.js",
         "createFunction": "createElementInput",
-        "editFunction": "editElementInput"
+        "editFunction": "editElementInput",
+        "icon": "fa fa-text-height"
     },
     "checkbox": {
         "type": "checkbox",
@@ -109,7 +170,8 @@
         "category": "HTML",
         "scriptName": "genericInput.js",
         "createFunction": "createElementInput",
-        "editFunction": "editElementInput"
+        "editFunction": "editElementInput",
+        "icon": "fa fa-check-square-o"
     },
     "radio": {
         "type": "radio",
@@ -117,7 +179,8 @@
         "category": "HTML",
         "scriptName": "genericInput.js",
         "createFunction": "createElementInput",
-        "editFunction": "editElementInput"
+        "editFunction": "editElementInput",
+        "icon": "fa fa-dot-circle-o"
     },
     "select": {
         "type": "select",
@@ -125,7 +188,8 @@
         "category": "HTML",
         "scriptName": "selectComponent.js",
         "createFunction": "createElementSelect",
-        "editFunction": "editElementSelect"
+        "editFunction": "editElementSelect",
+        "icon": "fa fa-list"
         
     },
     "button": {
@@ -134,7 +198,8 @@
         "category": "HTML",
         "scriptName": "buttonComponent.js",
         "createFunction": "createElementButton",
-        "editFunction": "editElementButton"
+        "editFunction": "editElementButton",
+        "icon": "fa fa-hand-pointer-o"
         
     },
     "submit": {
@@ -143,7 +208,8 @@
         "category": "HTML",
         "scriptName": "buttonComponent.js",
         "createFunction": "createElementButton",
-        "editFunction": "editElementButton"
+        "editFunction": "editElementButton",
+        "icon": "fa fa-hand-pointer-o"
         
     },
     "reset": {
@@ -152,7 +218,8 @@
         "category": "HTML",
         "scriptName": "buttonComponent.js",
         "createFunction": "createElementButton",
-        "editFunction": "editElementButton"
+        "editFunction": "editElementButton",
+        "icon": "fa fa-hand-pointer-o"
         
     },
     "image": {
@@ -161,7 +228,8 @@
         "category": "HTML",
         "scriptName": "imageComponent.js",
         "createFunction": "createElementImage",
-        "editFunction": "editElementImage"
+        "editFunction": "editElementImage",
+        "icon": "fa fa-picture-o"
 
     },
     "file": {
@@ -170,7 +238,8 @@
         "category": "HTML",
         "scriptName": "genericInput.js",
         "createFunction": "createElementInput",
-        "editFunction": "editElementInput"
+        "editFunction": "editElementInput",
+        "icon": "fa fa-file"
     },
     "hidden": {
         "type": "hidden",
@@ -178,7 +247,8 @@
         "category": "HTML",
         "scriptName": "genericInput.js",
         "createFunction": "createElementInput",
-        "editFunction": "editElementInput"
+        "editFunction": "editElementInput",
+        "icon": "fa fa-eye-slash"
     },
     "date": {
         "type": "date",
@@ -186,7 +256,8 @@
         "category": "HTML",
         "scriptName": "genericInput.js",
         "createFunction": "createElementInput",
-        "editFunction": "editElementInput"
+        "editFunction": "editElementInput",
+        "icon": "fa fa-calendar"
     
     },
     "datetime": {
@@ -195,7 +266,8 @@
         "category": "HTML",
         "scriptName": "genericInput.js",
         "createFunction": "createElementInput",
-        "editFunction": "editElementInput"
+        "editFunction": "editElementInput",
+            "icon": "fa fa-calendar"
     },
    
     "month": {
@@ -204,7 +276,8 @@
         "category": "HTML",
         "scriptName": "genericInput.js",
         "createFunction": "createElementInput",
-        "editFunction": "editElementInput"
+        "editFunction": "editElementInput",
+            "icon": "fa fa-calendar"
     },
     "week": {
         "type": "week",
@@ -212,7 +285,8 @@
         "category": "HTML",
         "scriptName": "genericInput.js",
         "createFunction": "createElementInput",
-        "editFunction": "editElementInput"
+        "editFunction": "editElementInput",
+        "icon": "fa fa-calendar"
     },
     "time": {
         "type": "time",
@@ -220,7 +294,8 @@
         "category": "HTML",
         "scriptName": "genericInput.js",
         "createFunction": "createElementInput",
-        "editFunction": "editElementInput"
+        "editFunction": "editElementInput",
+        "icon": "fa fa-calendar"
     },
     "range": {
         "type": "range",
@@ -228,7 +303,8 @@
         "category": "HTML",
         "scriptName": "genericInput.js",
         "createFunction": "createElementInput",
-        "editFunction": "editElementInput"
+        "editFunction": "editElementInput",            
+        "icon": "fa fa-sliders"
     },
     "color": {
         "type": "color",
@@ -236,7 +312,8 @@
         "category": "HTML",
         "scriptName": "genericInput.js",
         "createFunction": "createElementInput",
-        "editFunction": "editElementInput"
+        "editFunction": "editElementInput",
+        "icon": "fa fa-paint-brush"
     },
     
     "tel": {
@@ -245,7 +322,8 @@
         "category": "HTML",
         "scriptName": "genericInput.js",
         "createFunction": "createElementInput",
-        "editFunction": "editElementInput"
+        "editFunction": "editElementInput",
+        "icon":"fa fa-phone"
     },
     "url": {
         "type": "url",
@@ -253,7 +331,8 @@
         "category": "HTML",
         "scriptName": "genericInput.js",
         "createFunction": "createElementInput",
-        "editFunction": "editElementInput"
+        "editFunction": "editElementInput",
+        "icon":"fa fa-link"
     } 
    
 }

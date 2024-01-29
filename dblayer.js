@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const { query } = require('express');
 const OdbcDatabase = require('./OdbcDatabase'); 
 const he = require('he');
 
@@ -563,6 +564,45 @@ app.get('/export-table/:tableName', checkAuthenticated, async (req, res) => {
         await db.close();
     }
 });
+
+
+// select distinct values for a field selectDistinct(tableName, columnName, filter) 
+app.get('/get-distinct-data/:tableName', checkAuthenticated, async (req, res) => {
+    try {
+        await db.connect();
+        const tableName = req.params.tableName;
+        const fields = req.query.fields ? req.query.fields.split(',') : null;
+        const filter = req.query.filter ? req.query.filter : null;
+        const result = await db.selectDistinct(tableName,fields,filter);
+        res.json(result);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error selecting data');
+    } finally {
+        await db.close();
+    }
+});
+
+// get count of records in a table with selectDistinct
+app.get('/get-count/:tableName', checkAuthenticated, async (req, res) => {
+    try {
+        // connect to database
+        await db.connect();
+        const tableName = req.params.tableName;
+       
+        // filter
+        const filter = req.query.filter ? req.query.filter : null;
+        const result = await db.count(tableName, filter);
+        res.json(result);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error selecting count');
+    } finally {
+        await db.close();
+    }
+});
+
+
 
 
 }

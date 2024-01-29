@@ -23,46 +23,46 @@ var tableList=[];
 
 
 
-function fetchTablesList(list) {
+function fetchTablesList(mainlist,tableDetailsDiv,filter) {
     fetch('/tables-list')
         .then(response => response.json())
         .then(tables => {
-            
+            // Clear the list
+            list=mainlist.querySelector('#Content');
             list.innerHTML = '';
              // add new table button
              tableList=[];
              var i=0;
             tables.forEach(table => {
-                const listItem = document.createElement('div');
-                if (i%2==0) 
-                {
-                    listItem.style.backgroundColor='#f2a2a2';
+                if (filter==="" || table.NAME.indexOf(filter) > -1) {
+                        const listItem = document.createElement('div');
+                        if (i%2==0) 
+                        {
+                            listItem.style.backgroundColor='#f2f2e2';
+                        }
+                        listItem.classList.add('table-item');
+                        listItem.textContent = table.NAME; // Adjust based on your API response
+                        listItem.setAttribute('data-table-name', table.NAME);
+                        listItem.setAttribute('data-table-label', table.LABEL);
+                        listItem.onclick = function(event) {
+                                event.preventDefault();
+                                    const tableName = event.target.getAttribute('data-table-name');
+                                    const tableLabel = event.target.getAttribute('data-table-label');
+                                    fetchTableDetails(tableName,tableLabel,tableDetailsDiv);
+                        }
+                        list.appendChild(listItem);
+                        tableList.push(table.NAME);
+                        i++;
                 }
-                listItem.classList.add('table-item');
-                listItem.textContent = table.NAME; // Adjust based on your API response
-                listItem.setAttribute('data-table-name', table.NAME);
-                listItem.setAttribute('data-table-label', table.LABEL);
-
-                list.appendChild(listItem);
-                tableList.push(table.NAME);
-                i++;
             });
         })
         .catch(error => console.error('Error:', error));
 }
-function createTableList(list,tableDetails) {
+function createTableList(list,tableDetails,filter) {
    
-    fetchTablesList(list);
+    fetchTablesList(list,filter);
     
-   list.addEventListener('click', function(event) {
-        event.preventDefault();
-        if (event.target.classList.contains('table-item')) {
-            const tableName = event.target.getAttribute('data-table-name');
-            const tableLabel = event.target.getAttribute('data-table-label');
-            fetchTableDetails(tableName,tableLabel,tableDetails);
-        }
-    },{capture: true, once: true});
-
+   
 }   
 
 function createEditableTableList(list,tableDetails) {

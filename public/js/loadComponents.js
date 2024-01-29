@@ -77,7 +77,8 @@ function createSidebar(elementsData) {
         button.textContent = category;
         button.className = 'category-button button';
         button.style.justifyContent = 'center';
-        button.style.padding = "15px 10px"; 
+        button.style.padding = "10px 10px"; 
+        
         button.addEventListener('click', function() {
             const categoryDiv = this.parentElement;
             const height = categoryDiv.style.height;
@@ -89,22 +90,34 @@ function createSidebar(elementsData) {
             }
         });
         categoryDiv.appendChild(button);
-        categoryDiv.appendChild(document.createElement('hr'));
+        const divContainer = document.createElement('div');
+        divContainer.style.display = 'flex';
+        divContainer.style.flexWrap = 'wrap';
+        divContainer.style.justifyContent = 'center';
+        divContainer.style.flexDirection = 'row';
+        categoryDiv.appendChild(divContainer);
         const elements = categories[category];
        
                 for (const elementData of elements) {
                     const itemDiv = document.createElement('div');
-                    itemDiv.className = 'component-item draggable';
+                    itemDiv.className = 'draggable';
+                    
                     itemDiv.draggable = true;
-                    itemDiv.textContent = elementData.description;
+                    itemDiv.innerHTML = "<i class='"+elementData.icon+"'></i> ";
                     itemDiv.id = elementData.type;
+                    itemDiv.style.height = "40px";
+                    itemDiv.style.width = "40px";
+                    itemDiv.style.alignContent = "center";
                     if (elementData.type === 'grid') {
-                        itemDiv.style.marginBottom = "20px";
+                        itemDiv.style.marginBottom = "10px";
                     }
 
                     itemDiv.addEventListener('dragstart', drag);
                     itemDiv.addEventListener("dblclick", doubleclick);
-                    categoryDiv.appendChild(itemDiv);	                    
+                    itemDiv.addEventListener("mouseover", function(event) {
+                        showHint(elementData.description,1000,event);
+                    });
+                    divContainer.appendChild(itemDiv);	                    
 
                     // Check if the script exists
                     // Check if the script exists

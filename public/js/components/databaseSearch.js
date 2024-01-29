@@ -23,7 +23,7 @@ function createDatabaseSearch(type) {
 
     const list = document.getElementById('tablesList');
     const detailsDiv = document.getElementById('tableDetails');
-    createTableList(list,detailsDiv);
+    fetchTablesList(list,detailsDiv,"");
     showModalDbStrc(main,type);
     return main;
 
@@ -54,7 +54,7 @@ function insertSearch()
     const tableName = document.getElementById('TableDetails_TableName');
     element = document.createElement('div');
     element.className =  'form-container';
-    element.classList.add('search-box');
+    
    // createFormElementsFromStructure(tableName.innerText,element);
     const formContainer = document.getElementById(modal.getAttribute('data-main-id'));
     
@@ -66,11 +66,18 @@ function insertSearch()
     label.id=element.id+"Label";
     label.tagName="label";
     element.appendChild(label);
+
+    // create search input div
+    var searchDiv = document.createElement('div');
+    searchDiv.className = 'search';
+    searchDiv.id=element.id+"searchDiv";
+    searchDiv.tagName="searchDiv";
+    element.appendChild(searchDiv);
     var searchInput = document.createElement('input');
     searchInput.type = 'text';
     searchInput.id=element.id+"search";
     searchInput.tagName="search";
-    searchInput.className="search-input";
+    
     searchInput.setAttribute("list", "searchList");
     searchInput.setAttribute("autocomplete", "off");
     searchInput.setAttribute("oninput", "searchAutoComplete(event,this)");
@@ -80,16 +87,16 @@ function insertSearch()
     searchInput.setAttribute("data-field-type",field.getAttribute("dataset-field-type"));
     searchInput.placeholder="Search";
     const searchButton = document.createElement('button');
-    element.appendChild(searchInput)
+    searchDiv.appendChild(searchInput)
     searchButton.type = 'button';
-    searchButton.className = 'search-button';
-    searchButton.innerHTML = '  <i class="search-icon">&#128269;</i> ';
+    
+    searchButton.innerHTML = '<i class="search-icon">&#128269;</i> ';
     searchButton.setAttribute("onclick", "gridSearch(event,'"+searchInput.id+"')");
-    element.appendChild(searchButton);
+    searchDiv.appendChild(searchButton);
     const autocomplete = document.createElement('div');
     autocomplete.id = 'autocomplete';
     autocomplete.className = 'autocomplete-results';
-    element.appendChild(autocomplete);
+    searchDiv.appendChild(autocomplete);
     
     formContainer.appendChild(element);
 

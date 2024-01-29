@@ -90,14 +90,28 @@ function editElement(element) {
 
         currentElement=element
         var dialog= document.getElementById("propertiesBar");        
- 
+        dialog.style.display = 'block';
         var content= dialog.querySelector("div");
-        removeAllChildNodes(content);
+        content.innerHTML="";
+        // adding icon close to the dialog
+        var closeIcon = document.createElement("i");
+        closeIcon.className = "fa fa-close";
+        closeIcon.onclick = function() {  document.getElementById("propertiesBar").style.display = 'none'; };
+        // set the icon top right
+        closeIcon.style.float = "right";      
+        closeIcon.style.cursor = "pointer";
+        closeIcon.style.border = "1px solid black";
+        content.appendChild(closeIcon);
+
         
         const label = document.createElement('label');
         label.textContent = element.id;
+        label.style.float = "left";
+        label.style.backgroundColor = "grey";
+        label.style.color = "white";
         content.appendChild(label);
-        content.appendChild(document.createElement('hr'));
+        
+
         // Execute the function editor delcared in the components js if exists type   
       //  console.log("type:"+elementsData[type]);
         if (elementsData[type]){
@@ -238,7 +252,7 @@ formContainer.addEventListener('click', function(event) {
     // Get the total offset by combining formContainer's and element's offset
    // console.log("formContainer.offsetTop:"+formContainer.offsetTop);
     var totalOffsetTop = top + editorElementSelected.offsetTop -25;
-    var totalOffsetLeft = top+ editorElementSelected.offsetLeft + editorElementSelected.offsetWidth;
+    var totalOffsetLeft = left+ editorElementSelected.offsetLeft + editorElementSelected.offsetWidth /2;
 
     editorFloatMenu.style.top = totalOffsetTop + 'px';
     editorFloatMenu.style.left = totalOffsetLeft + 'px';
@@ -248,12 +262,12 @@ formContainer.addEventListener('click', function(event) {
 
 function getAbsoluteOffset(element) {
     let top = 0, left = 0;
-    while(element) {
+    do {
         top += element.offsetTop || 0;
         left += element.offsetLeft || 0;
         element = element.offsetParent;
-    }
-    return { top, left };
+    } while(element);
+    return { top,left };
 }
 
 // showproperties of the element
