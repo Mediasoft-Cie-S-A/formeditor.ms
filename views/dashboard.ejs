@@ -158,7 +158,12 @@
                                     <td style="width: 200px; max-height: 2000px; overflow: auto;">
                                         <!-- Sidebar -->
                                         <div id="tableListBar" class="col table-bordered" >
-                                        
+                                            <!-- Tables will be listed here -->
+                                            <div  >
+                                                <input type="text" placeholder="filter.. table" name="searchtable" onchange="searchtable(this.value,'ContentTableListBar')">
+                                                
+                                            </div>
+                                            <div id="ContentTableListBar" style="overflow: auto;" ></div>
                                         </div>
                                     </td>
                                     <td style="width: 100%;">
@@ -205,22 +210,24 @@
         
             <table style="padding: 10px; border-spacing: 0px;width: 100%;" >
                 <tbody>
-                    <tr style="background-color: gray;height: 40px;">
-                    <td colspan="2" style="text-align: center; color: white; font-weight: bold;">Table Details</td>
+                    <tr style="background-color:silver;height: 40px;">
+                    <td colspan="2" style="text-align: center; color: black; font-weight: bold;">
+                        <span><b>Table Details</b></span>
+                        <button title="Close" class="button form-edit-button" onclick="closeModalDbStrct()" style="float: right;">x</button></td>
                     </tr>
                     <tr>
                         <td>
                              <div id="tablesList" style="width: 250px;">
-                                <div class="search" >
-                                    <input type="text" placeholder="filter.. table" name="searchtable">
-                                    <button  onclick="filterTables()"><i class="fa fa-search"></i></button>
+                                <div  >
+                                    <input type="text" placeholder="filter.. table" name="searchtable" onchange="searchtable(this.value,'ContentTableList')">
+                                    
                                 </div>
-                                <div id="Content" style="overflow: auto;" ></div>
+                                <div id="ContentTableList" style="overflow: auto;" ></div>
                             <!-- Tables will be listed here -->
                             </div>
                         </td>
                         <td>
-                            <div id="tableDetails" style="width: 100%;max-height: 600px; overflow: auto;">
+                            <div id="tableDetails" style="width: 100%;max-height: 600px; overflow: auto; vertical-align: top; ">
                             <!-- Table details will be displayed here -->
                             </div>
                         </td>
@@ -231,7 +238,7 @@
                                 <button id="_insertTable" class="button form-edit-button" onclick="insertTable()">Insert</button>
                                 <button id="_insertGrid" class="button form-edit-button" onclick="insertGrid()">Grid</button>
                                 <button id="_insertSearch" class="button form-edit-button" onclick="insertSearch()">Search</button>
-                                <button class="button form-edit-button" onclick="closeModalDbStrct()">Close</button>
+                                
                           </div> 
                         </td>
                 </tbody>

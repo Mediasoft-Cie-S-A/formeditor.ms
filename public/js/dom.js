@@ -139,7 +139,7 @@ function exportJson() {
             
         }
         if (target === '#DatabaseForm') {
-            const list = document.getElementById('tableListBar');
+            const list = document.getElementById('ContentTableListBar');
             const detailsDiv = document.getElementById('mtableDetails');
             createEditableTableList(list,detailsDiv);
             

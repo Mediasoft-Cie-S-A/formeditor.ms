@@ -22,19 +22,21 @@ var tableList=[];
 // The function passed as the second argument will be executed once the 'DOMContentLoaded' event is fired.
 
 
-
-function fetchTablesList(mainlist,tableDetailsDiv,filter) {
+// this function is used to get the table list from the server
+// it will be used to create the table list
+// is called when the page is loaded and when the user click on the table list
+function fetchTablesList(list,tableDetailsDiv) {
     fetch('/tables-list')
         .then(response => response.json())
         .then(tables => {
             // Clear the list
-            list=mainlist.querySelector('#Content');
+            
             list.innerHTML = '';
              // add new table button
              tableList=[];
              var i=0;
             tables.forEach(table => {
-                if (filter==="" || table.NAME.indexOf(filter) > -1) {
+               
                         const listItem = document.createElement('div');
                         if (i%2==0) 
                         {
@@ -55,18 +57,19 @@ function fetchTablesList(mainlist,tableDetailsDiv,filter) {
                         list.appendChild(listItem);
                         tableList.push(table.NAME);
                         i++;
-                }
+                
             });
         })
         .catch(error => console.error('Error:', error));
 }
-function createTableList(list,tableDetails,filter) {
+function createTableList(list,tableDetails) {
    
-    fetchTablesList(list,filter);
-    
+    fetchTablesList(list);    
    
 }   
 
+
+// called when you change the tab to create a new table
 function createEditableTableList(list,tableDetails) {
     fetchTablesList(list);
     
@@ -600,10 +603,10 @@ function closeModalDbStrct() {
 
 
 
-function searchtable(search)
+function searchtable(search,contentDivID)
 {
     var filter=search.toUpperCase();
-    var list=document.getElementById('Content');
+    var list=document.getElementById(contentDivID);
     var items = list.getElementsByClassName('table-item');
     for (var i = 0; i < items.length; i++) {
         var txtValue = items[i].textContent || items[i].innerText;

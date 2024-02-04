@@ -21,7 +21,7 @@ function createDatabaseGrid(type) {
     main.draggable = true;
     main.tagName=type;
 
-    const list = document.getElementById('tablesList');
+    const list = document.getElementById('ContentTableList');
     const detailsDiv = document.getElementById('tableDetails');
     fetchTablesList(list,detailsDiv,"");
     showModalDbStrc(main,type);
