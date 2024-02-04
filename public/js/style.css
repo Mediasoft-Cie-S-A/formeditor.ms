@@ -263,16 +263,18 @@ select {
 
 button {
     padding: 8px 15px;
-    background-color: white;
+    background-color:white;
     color: gray;
     border: none;
-    cursor: pointer;
-    border: black 1px solid;
+    cursor: hand;
+    box-shadow: 2px 9px 49px -17px rgba(0, 0, 0, 0.1);
 }
 
 button:hover {
-    background-color: #0056b3;
-    color: #bbb;
+    background-color: gray;
+    color: white;
+    transition: 0.5s;
+    border: 1px solid #000;
 }
 
 .overlay {
@@ -438,14 +440,10 @@ button:hover {
     border-bottom: 1px solid #ccc;
 }
 .grid-row:hover {
-    background-color: #6d7fcc;
-    color: white;
+    
+    color:  #6d7fcc;
 }
-.grid-row input:hover {
-    background-color: #6d7fcc;
-    color: white;
-    max-height: 40px;
-}
+
 
 .grid-cell {
     padding: 5px;

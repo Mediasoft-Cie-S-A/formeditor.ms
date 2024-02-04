@@ -60,21 +60,7 @@ function editDatabaseGrid(type,element,content)
 
 function insertGrid()
 {
-    const modal = document.getElementById('tableDetailsModal');
-    const overl = document.getElementById('overlayModal');
-    modal.style.display = 'none';
-    overl.style.display = 'none';
-    const tableName = document.getElementById('TableDetails_TableName').innerText;
-    const gridContainer = document.getElementById(modal.getAttribute("data-main-id"));
-    var html=`<table id="DataGrid_${tableName}" style="min-height: 400px; overflow-y: auto; vertical-align: top;"></table>`;
-    html+=`<div><button onclick='gridPrev(event,"${tableName}")'><i class="bi bi-arrow-left-circle-fill"  style='color:blue;'></i></button>`;
-    html+=`<button onclick='gridNext(event,"${tableName}")'><i class="bi bi-arrow-right-circle-fill"  style='color:blue;'></i></button>`;
-    html+=`<button onclick='refresh(event,"${tableName}")'><i class="bi bi-arrow-repeat"  style='color:green;'></i></button>`;
-    html+=`<button onclick='postit(event,"${tableName}")'><i class="bi bi-card-text" style='color:yellow;'></i></button>`;
-    html+=`<button onclick='export2CSV(event,"${tableName}")'><i class="bi bi-file-spreadsheet" style='color:green;'></i></button></div>`;
-    html+=`<div id="Data-Grid-Postit" style="display:none;position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.5); z-index: 1000;">`;
-    html+=`<select onchange='grid_page_size(event,"${tableName}")'><option value='10'>10</option><option value='20'>20</option><option value='50'>50</option><option value='100'>100</option></select>`;
-    gridContainer.innerHTML=html;
+    // get fields list
     fieldsList=document.querySelectorAll('#tableDetails table input:checked')
     var datasetFields=[];
     var datasetFieldsTypes=[];
@@ -85,6 +71,88 @@ function insertGrid()
         datasetFields.push(fieldName);   
         datasetFieldsTypes.push(fieldType);    
     });
+
+    const modal = document.getElementById('tableDetailsModal');
+    const overl = document.getElementById('overlayModal');
+    modal.style.display = 'none';
+    overl.style.display = 'none';
+    const tableName = document.getElementById('TableDetails_TableName').innerText;
+    const gridContainer = document.getElementById(modal.getAttribute("data-main-id"));
+    gridContainer.innerHTML="";
+    gridContainer.style.padding="10px";
+    gridContainer.style.display="flex";
+    gridContainer.style.flexDirection="column";
+    gridContainer.style.justifyContent="space-between";
+    gridContainer.style.width="100%";
+    gridContainer.style.height="100%";
+    gridContainer.style.alignItems="flex-start";
+    gridContainer.style.overflow="auto";
+
+    
+    
+      // search header
+      var search = document.createElement('div');
+      search.style="display:flex;flex-direction:row;justify-content:space-between;width:50%;align-items:right;float:right; padding: 10px;";      
+      gridContainer.appendChild(search);
+      var searchfields=document.createElement('select');
+      searchfields.setAttribute("id","searchfields");
+      search.appendChild(searchfields);
+      for (var i=0;i<datasetFields.length;i++)
+       {       
+              field=datasetFields[i];
+              const cell = document.createElement('option');
+              
+              if (field!=='rowid')
+              {
+                  cell.textContent = field;
+                  cell.value=field;
+              }
+              searchfields.appendChild(cell);
+      }
+      searchOperator=document.createElement('select');
+      searchOperator.setAttribute("id","searchOperator");
+      search.appendChild(searchOperator);
+      const operators=["like","eq","gt","lt","gte","lte"];
+      for (var i=0;i<operators.length;i++)
+          {
+              const cell = document.createElement('option');
+              cell.textContent = operators[i];
+              cell.value=operators[i];
+              searchOperator.appendChild(cell);
+          }
+      var  input=document.createElement('input');
+          input.type="text";
+          input.setAttribute("id","searchValue");
+          // set search event on keyup
+          input.addEventListener("keyup", function(event) {
+              if (event.keyCode === 13) {
+                      event.preventDefault();
+                      grid.setAttribute("current_page",1);
+                      removeAllChildRows(grid);
+                      gridFetchData(grid) ;
+              }
+          });
+          search.appendChild(input);
+  
+    var html=`<table id="DataGrid_${tableName}" style="min-height: 400px; overflow-y: auto; vertical-align: top;"></table>`;
+    html+=`<div style='display:flex;flex-direction:row;width:50%;align-items:right;float:right; padding: 10px;'>`;
+    html+=`<span>Page Size:</span><select onchange='grid_page_size(event,"${tableName}")' style='width:80px'>`;
+    html+=`<option value='10'>10</option>`;
+    html+=`<option value='20'>20</option>`;
+    html+=`<option value='50'>50</option>`;
+    html+=`<option value='100'>100</option>`;
+    html+=`</select>`;
+    // record count
+    html+=`<div style='padding: 10px;'>Record Count:<span id="recordCount_${tableName}">0</span></div>`;
+    html+=`<button title='Previus'  onclick='gridPrev(event,"${tableName}")'><i class="bi bi-arrow-left-circle-fill"  style='color:blue;'></i></button>`;
+    html+=`<button title='Next' onclick='gridNext(event,"${tableName}")'><i class="bi bi-arrow-right-circle-fill"  style='color:blue;'></i></button>`;
+    html+=`<button  title='Refresh' onclick='refresh(event,"${tableName}")'><i class="bi bi-arrow-repeat"  style='color:green;'></i></button>`;
+    html+=`<button  title='Postit' onclick='postit(event,"${tableName}")'><i class="bi bi-card-text" style='color:#aa0;'></i></button>`;
+    html+=`<button  title='Export Data' onclick='export2CSV(event,"${tableName}")'><i class="bi bi-file-spreadsheet" style='color:green;'></i></button></div>`;
+    html+=`<div id="Data-Grid-Postit" style="display:none;position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.5); z-index: 1000;"></div>`;    
+    html+="</div>";
+    gridContainer.innerHTML+=html;
+    
 
     createGrid(gridContainer,tableName,datasetFields,datasetFieldsTypes);
     
@@ -105,6 +173,10 @@ function createGrid(gridContainer,tableName,datasetFields,datasetFieldsTypes)
     // table header
     var header = document.createElement('thead');
     header.className = 'grid-row';
+  
+    // header
+
+
     var row = document.createElement('tr');
     row.className = 'grid-row';
 
@@ -128,34 +200,7 @@ function createGrid(gridContainer,tableName,datasetFields,datasetFieldsTypes)
     header.appendChild(row);
     grid.appendChild(header);
     // search inputs
-    var search = document.createElement('tr');
-    search.className = 'grid-row';  
    
-    for (var i=0;i<datasetFields.length;i++)
-     {       
-            field=datasetFields[i];
-            const cell = document.createElement('td');
-            cell.className = 'grid-cell';    
-            if (field!=='rowid')
-            {
-                input=document.createElement('input');
-                input.type="text";
-                input.setAttribute("dataset-field-name",field);
-                input.setAttribute("dataset-field-type",datasetFieldsTypes[i]);
-                // set search event on keyup
-                input.addEventListener("keyup", function(event) {
-                    if (event.keyCode === 13) {
-                      event.preventDefault();
-                      grid.setAttribute("current_page",1);
-                      removeAllChildRows(grid);
-                      gridFetchData(grid) ;
-                    }
-                  });
-                  cell.appendChild(input);
-            }
-            search.appendChild(cell);
-    }
-    header.appendChild(search);
     grid.setAttribute("Dataset-Fields-Names",datasetFields);
     grid.setAttribute("Dataset-Fields-Types",datasetFieldsTypes);
     const body = document.createElement('tbody');
@@ -258,23 +303,19 @@ function fetchTableData(grid,tableName, page, pageSize, datasetFields) {
     // create filter for search based on the input values, with field name and value separated by | and each filter separated by ,
     var filter="";
     var i=0;
-    var fieldsList=grid.querySelectorAll('input[type="text"]')
-    fieldsList.forEach(field => { 
-        fieldName=field.getAttribute("dataset-field-name");
-        fieldType=field.getAttribute("dataset-field-type");
-        fieldValue=field.value;
-        if (fieldValue!=="")
-        {
-            if (i>0)
-            {
-                filter+=",";
-            }
-            filter+=fieldName+"|"+fieldValue+"|"+getFilterType(fieldType);
-            i++;
-        }
-        
-    }); 
+    var filtervalue=grid.querySelectorAll('input[id^="searchValue"]')
+    var searchfields=grid.querySelectorAll('select[id^="searchfields"]')
+    var searchOperator=grid.querySelectorAll('select[id^="searchOperator"]')
+    if (filtervalue.length>0)
+    {
+        filter=filtervalue[0].value;
+        filter+="|";
+        filter+=searchfields[0].value;
+        filter+="|";
+        filter+=searchOperator[0].value;
+    }
 
+    
     gridGetData(grid,tableName,page,pageSize,datasetFields,filter );
     
 
@@ -313,6 +354,10 @@ async function gridGetData(grid,tableName,page,pageSize,datasetFields,filter)
             const row = data[j];
             // console.log(Object.values(row));
             var rowDiv = document.createElement('tr');
+            if (j % 2 == 0)
+              rowDiv.style.backgroundColor = "#f2f2f2";
+            else
+                rowDiv.style.backgroundColor = "#ffffff";
             rowDiv.className = 'grid-row';
             rowDiv.setAttribute("rowid", row.rowid);
             // add click event to row to call linkRecordToGrid(tableName, rowId)

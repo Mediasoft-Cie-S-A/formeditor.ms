@@ -38,12 +38,14 @@ function fetchTablesList(mainlist,tableDetailsDiv,filter) {
                         const listItem = document.createElement('div');
                         if (i%2==0) 
                         {
-                            listItem.style.backgroundColor='#f2f2e2';
+                            listItem.style.backgroundColor='#e6e6e6';
                         }
+                        listItem.classList.add('grid-row');
                         listItem.classList.add('table-item');
                         listItem.textContent = table.NAME; // Adjust based on your API response
                         listItem.setAttribute('data-table-name', table.NAME);
                         listItem.setAttribute('data-table-label', table.LABEL);
+                        listItem.setAttribute('title', table.LABEL);
                         listItem.onclick = function(event) {
                                 event.preventDefault();
                                     const tableName = event.target.getAttribute('data-table-name');
@@ -92,21 +94,34 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
     .then(([fields]) => {
       
         detailsDiv.innerHTML = `<h2 id='TableDetails_TableName' table-name='${tableName}'>${tableName}</h2><h3>${tableLabel}</h3>`;
-        
+        // align the content to top
+        detailsDiv.style.verticalAlign = 'top';
+        detailsDiv.style.padding = '10px';
+
         // Display fields
         const table=  document.createElement('table');
+        table.style.padding='10px';
+        
         const isNotSearch=document.getElementById('_insertSearch').style.display == 'none';   
-        const header=['SEL','NAME','TYPE','LABEL' ,'FORMAT','*',  'WIDTH','TYPE','TABLE','FIELD'];
+        const header=['x','NAME','TYPE','LABEL' ,'FORMAT','*',  'WIDTH','TYPE','TABLE','FIELD'];
         // create table header with th elements base on the foreach
+        const thead = document.createElement('thead');
+        thead.style.padding='10px';
+        table.appendChild(thead);
         const tr = document.createElement('tr');
-        tr.style.backgroundColor='#e6e6e6';
+        tr.classList.add('table-header');
+        tr.style.padding='10px';
+        tr.style.backgroundColor='#0056b3';
+        tr.style.color='white';
         tr.id='TableFieldsList';
         header.forEach(prop => {
-            const td = document.createElement('th');
-            td.innerText =prop  ;
-            tr.appendChild(td);
+            const th = document.createElement('th');
+            th.innerText =prop  ;
+            tr.appendChild(th);
         }); 
-        table.appendChild(tr);
+        thead.appendChild(tr);
+        const tbody = document.createElement('tbody');
+        table.appendChild(tbody);
         var i=0;
         fields.forEach(field => {
             // Sample configuration array
@@ -126,7 +141,7 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
                                     { name: 'td2', innerHTML: field.TYPE },
                                     { name: 'td3', innerHTML: field.LABEL },
                                     { name: 'td4', innerHTML: field.FORMAT },
-                                    { name: 'td5', innerHTML: field.MANDATORY },
+                                    { name: 'td5', innerHTML: field.MANDATORY==1?'Yes':'No' },
                                     { name: 'td6', innerHTML: field.WIDTH },
                                 
                                     { name: 'td7', innerHTML: `<select name="inputType" onchange="activateSelect('${field.NAME}')"><option value="input">input</option><option value="select">select</option><option value="checkbox">checkbox</option></select>` },
@@ -136,19 +151,25 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
 
                                 // Create table row and elements dynamically based on the configuration array
                                 const tr = document.createElement('tr');
+                                tr.classList.add('grid-row');
+                                tr.style.padding='10px';
                                 if (i%2==0) 
                                 {
                                     tr.style.backgroundColor='#f2f2f2';
                                 }
                                 tr.setAttribute('data-field-name', field.NAME);
-
+                                
                                 fieldConfig.forEach(field => {
-                                    const element = document.createElement(field.name === 'fieldItem' ? 'input' : 'td');
-
-                                    if (field.attributes) {
-                                        for (const attr in field.attributes) {
-                                            element.setAttribute(attr, field.attributes[attr]);
+                                    const element = document.createElement('td');
+                                    if (field.type === 'checkbox') {
+                                        const input = document.createElement('input');
+                                        input.type = field.type;
+                                        input.name = field.name;
+                                        input.checked = false;
+                                        for (const key in field.attributes) {
+                                            input.setAttribute(key, field.attributes[key]);
                                         }
+                                        element.appendChild(input);
                                     } else if (field.innerHTML) {
                                         element.innerHTML = field.innerHTML;
                                         // check if innerHTML contains #TABLELIST# and replace it with the table list
@@ -161,7 +182,7 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
                                 });
 
                                 // Append the created table row to the table
-                                table.appendChild(tr);
+                                tbody.appendChild(tr);
                                 i++;
            
        });
@@ -579,3 +600,17 @@ function closeModalDbStrct() {
 
 
 
+function searchtable(search)
+{
+    var filter=search.toUpperCase();
+    var list=document.getElementById('Content');
+    var items = list.getElementsByClassName('table-item');
+    for (var i = 0; i < items.length; i++) {
+        var txtValue = items[i].textContent || items[i].innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            items[i].style.display = "";
+        } else {
+            items[i].style.display = "none";
+        }
+    }
+}

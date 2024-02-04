@@ -43,14 +43,14 @@ function createNavigationBar(tableName,datasetFields) {
 
     // Create buttons and append them to the navigation bar
     var buttons = [
-        { id: 'firstRecordBtn', text: '<i class="bi bi-arrow-up-circle-fill"></i>', event:"moveFirst('"+tableName+"','"+datasetFields+"')" },
-        { id: 'previousRecordBtn', text: '<i class="bi bi-arrow-left-circle-fill"></i>', event: "movePrev('"+tableName+"','"+datasetFields+"')" },
-        { id: 'nextRecordBtn', text: '<i class="bi bi-arrow-right-circle-fill"></i>', event: "moveNext('"+tableName+"','"+datasetFields+"')" },
-        { id: 'lastRecordBtn', text: '<i class="bi bi-arrow-down-square-fill"></i>', event: "moveLast('"+tableName+"','"+datasetFields+"')" },
-        { id: 'EditRecordBtn', text: '<i class="bi bi-credit-card-2-front"></i>', event: "EditRecord('"+tableName+"','"+datasetFields+"')" },
-        { id: 'InsertRecordBtn', text: '<i class="bi bi-sticky-fill"></i>', event: "InsertRecord('"+tableName+"','"+datasetFields+"')" },
-        { id: 'SaveRecordBtn', text: '<i class="bi bi-sim-fill"></i>', event: "SaveRecord('"+tableName+"')" },
-        { id: 'RefreshBtn', text: '<i class="bi bi-arrow-clockwise"></i>', event: "RefreshRecord('"+tableName+"')" }
+        { id: 'firstRecordBtn', title: 'First',  text: '<i class="bi bi-arrow-up-circle-fill"></i>', event:"moveFirst('"+tableName+"','"+datasetFields+"')" },
+        { id: 'previousRecordBtn',title: 'Previus',  text: '<i class="bi bi-arrow-left-circle-fill"></i>', event: "movePrev('"+tableName+"','"+datasetFields+"')" },
+        { id: 'nextRecordBtn',title: 'Next',  text: '<i class="bi bi-arrow-right-circle-fill"></i>', event: "moveNext('"+tableName+"','"+datasetFields+"')" },
+        { id: 'lastRecordBtn',title: 'Last', text: '<i class="bi bi-arrow-down-square-fill"></i>', event: "moveLast('"+tableName+"','"+datasetFields+"')" },
+        { id: 'EditRecordBtn', title: 'Edit Record',text: '<i class="bi bi-credit-card-2-front"></i>', event: "EditRecord('"+tableName+"','"+datasetFields+"')" },
+        { id: 'InsertRecordBtn',title: 'Insert Record', text: '<i class="bi bi-sticky-fill"></i>', event: "InsertRecord('"+tableName+"','"+datasetFields+"')" },
+        { id: 'SaveRecordBtn', title: 'Save Record', text: '<i class="bi bi-sim-fill"></i>', event: "SaveRecord('"+tableName+"')" },
+        { id: 'RefreshBtn', title: 'Refresh Data',text: '<i class="bi bi-arrow-clockwise"></i>', event: "RefreshRecord('"+tableName+"')" }
        
     ];
 
@@ -86,15 +86,16 @@ async function createFormElementsFromStructure(tableName,container) {
                         if (trline.querySelector('td')) 
                         {
 
-                                field=trline.querySelector('input:checked');
+                                var field=trline.querySelector('input:checked');                                
                                 console.log(trline);
                                 isSelect=trline.querySelector('select[name="inputType"]');
                                 console.log(isSelect);
                                 inputType=isSelect.options[isSelect.selectedIndex].text;
                                 if (field)
                                 {
-                                            fieldName=field.getAttribute("dataset-field-name");
-                                            fieldType=field.getAttribute("dataset-field-type");
+                                            var  fieldName=field.getAttribute("dataset-field-name");
+                                            var  fieldType=field.getAttribute("dataset-field-type");
+                                            var  fieldLabel=field.getAttribute("dataset-field-label");
                                             datasetFields.push(fieldName);
                                             datasetFieldsTypes.push(fieldType);
                                             //console.log(field.getAttribute("dataset-field-type"));
@@ -160,7 +161,7 @@ async function createFormElementsFromStructure(tableName,container) {
                                         console.log(element);
                                         
                                             if (element !== undefined && element !== null) {
-                                                element.querySelector('label').textContent = fieldName; // Set label to column name
+                                                element.querySelector('label').textContent = fieldLabel===''?fieldName:fieldLabel; // Set label to column name
                                                 
                                                 
                                                 einput.setAttribute('dataset-table-name', tableName);
