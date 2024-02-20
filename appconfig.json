@@ -9,7 +9,8 @@
         "azureAd": {
             "tenantId": "89218426-003e-4883-a0d3-445bcca6f8c6",
             "clientId": "8ceb09f3-fdc2-4a87-b5e6-067a7db86482",
-            "clientSecret": "1-K8Q~MTHGtDOLonCupMCnAFkU~TJiewxHaCybaw"
+            "clientSecret": "1-K8Q~MTHGtDOLonCupMCnAFkU~TJiewxHaCybaw",
+            "graphMeEndpoint": "https://graph.microsoft.com/v1.0/me"
         },
         "static": 
             [{

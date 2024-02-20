@@ -110,7 +110,7 @@ function showHint(message, duration = 1000, event) {
     hintContainer.style.left = 10+event.clientX + 'px';
     const hint = document.createElement('div');
     hint.classList.add('hint-message');
-    hint.textContent = message;
+    hint.innerHTML = message;
 
     hintContainer.innerHTML = '';   
 
@@ -129,3 +129,4 @@ function showHint(message, duration = 1000, event) {
     }, duration);
 }
 
+loadForms();

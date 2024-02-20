@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+const e = require("express");
+
 function createElementDateSet(type) {
     var main= document.createElement('div');
     main.className = 'form-container';
@@ -71,10 +73,14 @@ async function createFormElementsFromStructure(tableName,container) {
                     dataset.id="DataSet_"+tableName;
                     dataset.setAttribute('data-table-name', tableName);
 
-                    fieldsList=document.querySelectorAll('#tableDetails table tr')
+                    fieldsList=document.querySelectorAll('#tableDetails table input:checked')
                     
                     var datasetFields=['rowid'];
                     var datasetFieldsTypes=['rowid'];
+                    var datasetFieldsLabels=['rowid'];
+                    var datasetFieldsSize=[100];
+                    var datasetFieldsMandatory=[false];
+                    var datasetFieldsFormat=[''];
                     const input=document.createElement('input');
                             input.setAttribute('dataset-table-name', tableName);
                             input.setAttribute('dataset-field-name', 'rowid');
@@ -82,108 +88,170 @@ async function createFormElementsFromStructure(tableName,container) {
                             input.type='hidden';
                             dataset.appendChild(input); 
                         //  console.log(fieldsList);
-                    fieldsList.forEach(trline => { 
-                        if (trline.querySelector('td')) 
-                        {
-
-                                var field=trline.querySelector('input:checked');                                
-                                console.log(trline);
-                                isSelect=trline.querySelector('select[name="inputType"]');
-                                console.log(isSelect);
-                                inputType=isSelect.options[isSelect.selectedIndex].text;
-                                if (field)
-                                {
-                                            var  fieldName=field.getAttribute("dataset-field-name");
-                                            var  fieldType=field.getAttribute("dataset-field-type");
-                                            var  fieldLabel=field.getAttribute("dataset-field-label");
-                                            datasetFields.push(fieldName);
-                                            datasetFieldsTypes.push(fieldType);
+                    fieldsList.forEach(field => { 
+                       
+                                           
+                                            datasetFields.push(field.getAttribute("dataset-field-name"));
+                                            datasetFieldsTypes.push(field.getAttribute("dataset-field-type"));
+                                            datasetFieldsLabels.push(field.getAttribute("dataset-field-label"));
+                                            datasetFieldsSize.push(field.getAttribute("dataset-field-size"));
+                                            datasetFieldsMandatory.push(field.getAttribute("dataset-field-mandatory"));
+                                            datasetFieldsFormat.push(field.getAttribute("dataset-field-format"));
                                             //console.log(field.getAttribute("dataset-field-type"));
-                                            var element=null;
-                                            switch(fieldType) {
-                                                case 'character':
-                                                case 'varchar':
-                                                case 'text':                                              
-                                                case 'fixchar':
-                                                    // Get the select value 
-                                                
-                                                        // get option value from the select
-                                                    switch( inputType)
-                                                    {
-                                                        case "input":
-                                                            element = createElementInput('text');
-                                                            einput=element.querySelector('input');
-                                                        break;
-                                                        case "select":
-                                                            element = createElementSelect('select');
-                                                            einput=element.querySelector('select');
-                                                        break;
-                                                        case "checkbox":
-                                                            element = createElementInput('checkbox');
-                                                            einput=element.querySelector('input');
-                                                            break; 
-                                                    } 
-                                                    element = createElementInput('text');
-                                                    einput=element.querySelector('input');
-                                                    break;
-                                                case 'INT':
-                                                case 'integer':
-                                                case 'bigint':
-                                                case 'float':
-                                                case 'double':
-                                                case 'decimal':
-                                                    element = createElementInput('number');
-                                                    einput=element.querySelector('input');
-                                                    break;
-                                                case 'date':
-                                                case 'datetime':
-                                                    element = createElementInput('date');
-                                                    einput=element.querySelector('input');
-                                                    break;
-                                                case 'time':
-                                                    element = createElementInput('time');
-                                                    einput=element.querySelector('input');
-                                                    break;
-                                                case 'boolean':
-                                                case 'bool':
-                                                case 'bit':
-                                                    element = createElementInput('checkbox');
-                                                    einput=element.querySelector('input');
-                                                    break;
-                                                
-                                                default:
-                                                    // Handle default case or unknown types
-                                                    element = createElementInput('text');
-                                                    einput=element.querySelector('input');
-                                                    break;
-                                            }
-                                            
-                                        console.log(element);
-                                        
-                                            if (element !== undefined && element !== null) {
-                                                element.querySelector('label').textContent = fieldLabel===''?fieldName:fieldLabel; // Set label to column name
-                                                
-                                                
-                                                einput.setAttribute('dataset-table-name', tableName);
-                                                einput.setAttribute('dataset-field-name', fieldName);
-                                                einput.id=tableName+"_"+fieldName;
-                                                einput.setAttribute('dataset-field-type', field.getAttribute("dataset-field-type"));
-                                                einput.setAttribute('dataset-field-size', field.getAttribute("dataset-field-size"));
-                                                einput.setAttribute('dataset-field-mandatory', field.getAttribute("dataset-field-mandatory"));
-                                                einput.setAttribute('dataset-field-format', field.getAttribute("dataset-field-format"));
-
-                                                if (field.MANDATORY)
-                                                {
-                                                    einput.required=true;
-                                                }
-
-                                            }
-                                        //console.log(element);
-                                            
-                                        dataset.appendChild(element); // Append to the desired container
-                                        }
-                            }
+                         
                     });
+                
+
+                        // invert the position based on the order
+                        var pos=1;
+                        fieldsList.forEach(field => {
+                            // get field order
+                            var row=field.parentElement.parentElement;
+                            // get select with name order
+                            var select=row.querySelector('select[name="order"]');
+                            // get selected value
+                            var order=select.options[select.selectedIndex].value;
+                            // check if the position is correct
+                            if (order!=pos)
+                            {
+                                if (order<fieldsList.length)
+                                {
+                                    // get the field in the old position$
+                                    var oldField=datasetFields[pos];
+                                    var oldFieldType=datasetFieldsTypes[pos];
+                                    var oldFieldLabel=datasetFieldsLabels[pos];
+                                    var oldFieldSize=datasetFieldsSize[pos];
+                                    var oldFieldMandatory=datasetFieldsMandatory[pos];
+                                    var oldFieldFormat=datasetFieldsFormat[pos];
+
+                                    // get the field in the new position
+                                    var newField=datasetFields[order];
+                                    var newFieldType=datasetFieldsTypes[order];
+                                    var newFieldLabel=datasetFieldsLabels[order];
+                                    var newFieldSize=datasetFieldsSize[order];
+                                    var newFieldMandatory=datasetFieldsMandatory[order];
+                                    var newFieldFormat=datasetFieldsFormat[order];
+
+                                    // swap the fields
+                                    datasetFields[pos]=newField;
+                                    datasetFieldsTypes[pos]=newFieldType;
+                                    datasetFieldsLabels[pos]=newFieldLabel;
+                                    datasetFieldsSize[pos]=newFieldSize;
+                                    datasetFieldsMandatory[pos]=newFieldMandatory;
+                                    datasetFieldsFormat[pos]=newFieldFormat;
+
+                                    datasetFields[order]=oldField;
+                                    datasetFieldsTypes[order]=oldFieldType;
+                                    datasetFieldsLabels[order]=oldFieldLabel;
+                                    datasetFieldsSize[order]=oldFieldSize;
+                                    datasetFieldsMandatory[order]=oldFieldMandatory;
+                                    datasetFieldsFormat[order]=oldFieldFormat;
+                                }
+                            }
+                            pos++;
+                        });
+                    var i=0;
+                    datasetFields.forEach(fieldName => {
+                        var element=null;
+                        switch(datasetFieldsTypes[i]) {
+                            case 'character':
+                            case 'varchar':
+                            case 'text':                                              
+                            case 'fixchar':
+                            case 'rowid':
+                                // Get the select value 
+                            
+                            // get option value from the select
+                             /*   switch( inputType)
+                                {
+                                    case "input":
+                                        element = createElementInput('text');
+                                        einput=element.querySelector('input');
+                                    break;
+                                    case "select":
+                                        element = createElementSelect('select');
+                                        einput=element.querySelector('select');
+                                    break;
+                                    case "checkbox":
+                                        element = createElementInput('checkbox');
+                                        einput=element.querySelector('input');
+                                        break; 
+                                }  */
+                                if (fieldName!='rowid')
+                                {
+                                element = createElementInput('text');
+                                einput=element.querySelector('input');
+                                }
+                                else
+                                {
+                                    element = document.createElement('input');
+                                    element.type='hidden';
+                                    element.id=tableName+"_"+fieldName;
+                                    einput=element;
+                                }
+                                break;
+                            case 'INT':
+                            case 'integer':
+                            case 'bigint':
+                            case 'float':
+                            case 'double':
+                            case 'decimal':
+                                element = createElementInput('number');
+                                einput=element.querySelector('input');
+                                break;
+                            case 'date':
+                            case 'datetime':
+                                element = createElementInput('date');
+                                einput=element.querySelector('input');
+                                break;
+                            case 'time':
+                                element = createElementInput('time');
+                                einput=element.querySelector('input');
+                                break;
+                            case 'boolean':
+                            case 'bool':
+                            case 'bit':
+                                element = createElementInput('checkbox');
+                                einput=element.querySelector('input');
+                                break;
+                            
+                            default:
+                                // Handle default case or unknown types
+                                element = createElementInput('text');
+                                einput=element.querySelector('input');
+                                break;
+                        }
+                        
+                    console.log(element);
+                    
+                        if (element !== undefined && element !== null) {
+                            // get label from the element   
+                            var label=element.querySelector('label');
+                            // if the label exists set the text
+                            if (label!==null) label.textContent = datasetFieldsLabels[i]==='' || datasetFieldsLabels==='null' ?fieldName:datasetFieldsLabels[i]; // Set label to column name
+                            // set the input attributes
+                            
+                            
+                            einput.setAttribute('dataset-table-name', tableName);
+                            einput.setAttribute('dataset-field-name', fieldName);
+                            einput.id=tableName+"_"+fieldName;
+                            einput.setAttribute('dataset-field-type', datasetFieldsTypes[i]);
+                            einput.setAttribute('dataset-field-size', datasetFieldsSize[i]);
+                            einput.setAttribute('dataset-field-mandatory', datasetFieldsMandatory[i]);
+                            einput.setAttribute('dataset-field-format', datasetFieldsFormat[i]);
+                            
+
+                            if (datasetFieldsMandatory[i])
+                            {
+                                einput.required=true;
+                            }
+
+                        }
+                    //console.log(element);
+                        i++;
+                    dataset.appendChild(element); // Append to the desired container
+                    });
+
 
                     dataset.appendChild(createNavigationBar(tableName,datasetFields));
                     dataset.setAttribute("DataSet-Fields-List",datasetFields);
@@ -204,9 +272,9 @@ function insertTable()
     overl.style.display = 'none';
     console.log("dbitem");
     const formContainer = document.getElementById(modal.getAttribute('data-main-id'));
-    const tableName = document.getElementById('TableDetails_TableName');
+    const tableName = document.getElementById('TableDetails_TableName').getAttribute('table-name');
     element = document.createElement('div');
-    createFormElementsFromStructure(tableName.innerText,element);
+    createFormElementsFromStructure(tableName,element);
 
     formContainer.appendChild(element);
 }
@@ -271,13 +339,11 @@ async function linkRecordToGrid(tableName,datasetFields, rowId,rowNum) {
     try {
  
         const url = `/get-record-by-rowid/${tableName}/${rowId}?fields=${datasetFields}`;
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        updateInputs(data,tableName);
-        setRowNum(tableName,rowNum); // Assuming the data includes ROWID to-do check if the data includes ROWID
+        fetch(url).then(response => response.json()).then(data => {
+            updateInputs(data,tableName);
+            setRowNum(tableName,rowNum); // Assuming the data includes ROWID to-do check if the data includes ROWID
+        }).catch(error => showToast('Error:'+ error));
+        
     } catch (error) {
         console.error('Error:', error);
     }
@@ -304,8 +370,14 @@ function updateInputs(data,tableName) {
             // console.log(input);
                 const fieldLabel = input.getAttribute('dataset-field-name');
             //  console.log(fieldLabel+":"+data[0][fieldLabel]);
-                if (data[0][fieldLabel] !== undefined) {
+                if (data[0][fieldLabel] !== undefined && data[0][fieldLabel] !== '')
+                 {
                     input.value = data[0][fieldLabel];
+                    input.readOnly = true;
+                }
+                else
+                {
+                    input.value = '';
                     input.readOnly = true;
                 }
             // disable save record button

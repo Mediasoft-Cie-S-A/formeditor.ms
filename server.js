@@ -109,7 +109,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // authentication
 // init session
 require('./authentication')(app,session, passport);
-require('./authAzureAd')(app,session, passport);
+require('./authCustom')(app,session, passport);
 require('./authStatic')(app,session, passport);
 
 

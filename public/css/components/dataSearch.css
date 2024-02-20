@@ -1,0 +1,71 @@
+/* style for seach */
+/* Style the search field */
+.search{
+  display: inline-block;
+  vertical-align: top;
+  margin-left: 9px
+
+}
+
+
+.search input[type=text] {
+    padding: 10px;
+    font-size: 17px;
+    border: 1px solid grey;
+    float: left;
+    width: 80%;
+    background: #f1f1f1;
+  
+  }
+  
+  /* Style the submit button */
+ .search button {
+    float: left;
+    width: 20%;
+    padding: 10px;
+    background: #2196F3;
+    color: white;
+    font-size: 17px;
+    border: 1px solid grey;
+    border-left: none; /* Prevent double borders */
+    cursor: pointer;
+    margin-top: 5px  ;
+  }
+  
+  .search button:hover {
+    background: #0b7dda;
+  }
+  
+  /* Clear floats */
+  .search::after {
+    content: "";
+    clear: both;
+    display: table;
+  }
+
+  .autocomplete-results {
+    position: absolute;
+  
+    border: 1px solid #ccc;
+    background: white;
+    z-index: 1000;
+    display: none;
+    max-height: 250px;
+    overflow-y: auto;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 10px;
+    -webkit-animation: cubic-bezier(0.075, 0.82, 0.165, 1);
+    animation: cubic-bezier(0.075, 0.82, 0.165, 1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.175);
+}
+
+.autocomplete-results div {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.autocomplete-results div:hover {
+    background-color: #f0f0f0;
+}
+

@@ -378,7 +378,7 @@ button:hover {
 
     z-index: 1000;
     width: 400px;
-    box-shadow: 2px 9px 49px -17px rgba(0, 0, 0, 0.1); 
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
 }
 
 .user-main{
@@ -394,13 +394,15 @@ button:hover {
     top: 50%;
     transform: translate(-50%, -50%);
     border: 1px solid #ccc;
+    border-radius: 10px;
+    border-top: green 5px solid;
+    border-bottom: green 5px solid;
     background-color: white;
    
     z-index: 1000;
     min-height:600px;
-    min-width: 1000px;
-    box-shadow: 5px 5px;
-
+    min-width: 1200px;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
 }
 
 #tablesList {
@@ -409,7 +411,7 @@ button:hover {
     height: 600px;
     overflow-y: auto;
     border-right: 1px solid #ddd;
-}
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);}
 #tableDetails {
     float: left;
     width: 80%;
@@ -601,7 +603,7 @@ a.brand-logo {
 
 .login {
     border-radius: 5px;
-    box-shadow: 2px 9px 49px -17px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
     height: auto;
     max-width: 400px;
     padding: 40px 15px;
@@ -948,7 +950,7 @@ a.brand-logo {
     background-color: white;   
     z-index: 1000;    
     min-width: 1000px;
-    box-shadow: 5px 5px;        
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
     padding: 20px;
     border-radius: 5px;
     display: none;
@@ -981,204 +983,96 @@ a.brand-logo {
     padding: 20px;
     box-sizing: border-box;    
 }
-
-/* Style for the Gantt chart table */
-.gantt-table {
-    border-collapse: collapse;
-    
-   margin: auto;
-    display: block; 
-}
-
-/* Style for the Gantt chart header */
-.gantt-header {
-    background-color: #f5f5f5;
-    color: #333;
-}
-
-/* Style for the Gantt chart header cells */
-.gantt-header-cell {
-    padding: 10px;
-    text-align: center;
-    border: 1px solid #ddd;
-}
-/* style for the Gantt chart cells */
-.gantt-cell {
-    padding: 10px;
-    text-align: center;
-    border: 1px solid #ddd;
-}
-/* Style for the Gantt chart week of the year cells */
-.gantt-week-of-year-cell {
-    background-color: #f5f5f5;
-    color: #333;
-    text-align: center;
-    border: 1px solid #ddd;
-}
-
-/* Style for the Gantt chart weekend days */
-.gantt-weekend {
-    background-color: #ff0010;
-    border: 1px solid #ddd;
-    padding: 10px;
-    text-align: center;
-}
-
-/* Style for the Gantt chart holidays */
-.gantt-holiday {
-    background-color: #fa8072;
-    border: 1px solid #ddd;
-    padding: 10px;
-    text-align: center;
-}
-
-/* Style for the Gantt chart company holidays */
-.gantt-company-holiday {
-    background-color: #ff8c00;
-    border: 1px solid #ddd;
-    padding: 10px;
-    text-align: center;
-}
-.gantt-scheduled {
-    text-align: center;
-    border: 1px solid #ddd;
-}
-
-/* style for seach */
-/* Style the search field */
-.search input[type=text] {
-    padding: 10px;
-    font-size: 17px;
-    border: 1px solid grey;
-    float: left;
-    width: 80%;
-    background: #f1f1f1;
-    margin-top: -5px;
-  }
-  
-  /* Style the submit button */
- .search button {
-    float: left;
-    width: 20%;
-    padding: 10px;
-    background: #2196F3;
-    color: white;
-    font-size: 17px;
-    border: 1px solid grey;
-    border-left: none; /* Prevent double borders */
-    cursor: pointer;
-    
-  }
-  
-  .search button:hover {
-    background: #0b7dda;
-  }
-  
-  /* Clear floats */
-  .search::after {
-    content: "";
-    clear: both;
-    display: table;
-  }
-
-  .autocomplete-results {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    border: 1px solid #ccc;
-    background: white;
-    z-index: 1000;
-    display: none;
-}
-
-.autocomplete-results div {
-    padding: 8px;
-    cursor: pointer;
-}
-
-.autocomplete-results div:hover {
-    background-color: #f0f0f0;
-}
-
-
-/**********************************************************************************/
-
-.fileExplorerTable {
-    border-collapse: collapse;
+.portal-container{
+    display: inline-block;;   
+    vertical-align: top;        
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 20px;
+    background-color: white;
     width: 100%;
-    border: 1px solid #ddd;
-    font-size: 17px;
-    height: 400px;
-    overflow-y: none;
+}
+
+.portal-path-container {
+    display: flex;
+    padding: 20px;
+    background-color: white;
+    border-bottom: #4d61fc 1px dashed;
+    width: 100%;
+    padding: 20px;
 }
 
 
-
-
-.fileExplorerTbody{
-    height: 400px;
-    overflow-y: auto;
-
-}
-
-.fileExplorerTbody::-webkit-scrollbar {
-    width: 10px;
-}
-
-.fileExplorerTbody::-webkit-scrollbar-track {
-    background: #f1f1f1; 
-}
-
-.fileExplorerTbody::-webkit-scrollbar-thumb {
-    background: #888; 
-}
-
-.fileExplorerTbody tr {
+.portal-list-item{
+    margin: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-left: #4d61fc 7px solid;
+    padding: 20px;
+    border-radius: 5px;
     cursor: pointer;
+    transition: 0.5s;
+    width: 300px;
+    height: 60px;
+    text-align: center;      
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle !important;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
 }
 
-.fileExplorerTbody tr:hover {
+.portal-container div:hover{
     background-color: #f0f0f0;
-}
-
-.fileExplorerTbody td {
-    padding: 10px;
-    width: auto;
-}
-
-.fileExplorerTbody td:first-child {
-    width: 30px;
-}
-
-.fileExplorerTbody td:last-child {
-    width: 25%;
-}
-
-.fileExplorerTbody td:nth-child(2) {
-    width: auto;
-}
-
-.fileExplorerThead {
-    background-color: #f5f5f5;
-    color: #333;
-
 }   
 
-.fileExplorerThead th {
-    padding: 10px;
-    text-align: center;
-    border: 1px solid #ddd;
+
+.portal-delete-button {
+    background-color: #f44336;
+    color: white;
+    box-shadow: inset gray 0px 0px 60px -12px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;   
+    width: 30px;
+    height: 30px;
+    float: right;
+    align-items: center;
+    margin-left: 5px;
 }   
 
-.fileExplorerThead th:first-child {
+.portal-delete-button :hover {
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+}
+
+.portal-edit-button{
+   
+    background-color: greenyellow;
+    color: white;
+    border: none;
+    cursor: hand;
+    box-shadow: inset gray 0px 0px 60px -12px;
     width: 30px;
+    height: 30px;
+    float: right;
+    align-items: center;
+    border-radius: 5px;
+    margin-left: 5px;
 }
 
-.fileExplorerThead th:last-child {
-    width: 25%;
-}
+.portal-show-button{
+   
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: hand;   
+    width: 30px;
+    height: 30px;
+    float: right;
+    align-items: center;
+    border-radius: 5px;
+    margin-left: 5px;
+    box-shadow: inset gray 0px 0px 60px -12px;
 
-.fileExplorerThead th:nth-child(2) {
-    width: auto;
+    animation: alternate 1s infinite;
+    
 }

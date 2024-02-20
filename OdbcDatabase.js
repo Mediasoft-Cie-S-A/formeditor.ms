@@ -71,6 +71,26 @@ class OdbcDatabase {
         }
     }
 
+    async selectDistinctIdValue(tableName,columnId, columnName, filter) {
+        try {
+            // Construct the SQL statement
+            // if filter is not empty, add it to the query
+
+            var sql = `SELECT DISTINCT "${columnId}","${columnName}" FROM PUB.${tableName} `;	
+            if (filter && filter.length > 0) {
+                sql+=` WHERE ${filter} `;
+            }
+            console.log(sql);
+            // Execute the query
+            const result = await this.connection.query(sql);
+
+            return result;
+        } catch (err) {
+            console.log('Error selecting distinct values:', err);
+            throw err;
+        }
+    }
+
     // count records
     async count(tableName, filter) {
         try {

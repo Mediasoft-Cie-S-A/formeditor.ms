@@ -1,0 +1,81 @@
+
+/**********************************************************************************/
+
+.fileExplorerTable {
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid #ddd;
+    font-size: 17px;
+    height: 400px;
+    overflow-y: none;
+}
+
+
+
+
+.fileExplorerTbody{
+    height: 400px;
+    overflow-y: auto;
+
+}
+
+.fileExplorerTbody::-webkit-scrollbar {
+    width: 10px;
+}
+
+.fileExplorerTbody::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+}
+
+.fileExplorerTbody::-webkit-scrollbar-thumb {
+    background: #888; 
+}
+
+.fileExplorerTbody tr {
+    cursor: pointer;
+}
+
+.fileExplorerTbody tr:hover {
+    background-color: #f0f0f0;
+}
+
+.fileExplorerTbody td {
+    padding: 10px;
+    width: auto;
+}
+
+.fileExplorerTbody td:first-child {
+    width: 30px;
+}
+
+.fileExplorerTbody td:last-child {
+    width: 25%;
+}
+
+.fileExplorerTbody td:nth-child(2) {
+    width: auto;
+}
+
+.fileExplorerThead {
+    background-color: #f5f5f5;
+    color: #333;
+
+}   
+
+.fileExplorerThead th {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+}   
+
+.fileExplorerThead th:first-child {
+    width: 30px;
+}
+
+.fileExplorerThead th:last-child {
+    width: 25%;
+}
+
+.fileExplorerThead th:nth-child(2) {
+    width: auto;
+}

@@ -65,18 +65,52 @@ function insertGrid()
     var datasetFields=[];
     var datasetFieldsTypes=[];
     datasetFields.push('rowid');
+  
     fieldsList.forEach(field => { 
         fieldName=field.getAttribute("dataset-field-name");
         fieldType=field.getAttribute("dataset-field-type");
         datasetFields.push(fieldName);   
         datasetFieldsTypes.push(fieldType);    
+        
+       
+  
     });
+    // invert the position based on the order
+    var pos=1;
+    fieldsList.forEach(field => {
+        // get field order
+        var row=field.parentElement.parentElement;
+        // get select with name order
+        var select=row.querySelector('select[name="order"]');
+        // get selected value
+        var order=select.options[select.selectedIndex].value;
+        // check if the position is correct
+        if (order!=pos)
+        {
+            if (order<fieldsList.length)
+             {
+                // get the field in the old position$
+                var oldField=datasetFields[pos];
+                var oldFieldType=datasetFieldsTypes[pos];
+                // get the field in the new position
+                var newField=datasetFields[order];
+                var newFieldType=datasetFieldsTypes[order];
+                // swap the fields
+                datasetFields[pos]=newField;
+                datasetFieldsTypes[pos]=newFieldType;
+                datasetFields[order]=oldField;
+                datasetFieldsTypes[order]=oldFieldType;
+             }
+        }
+        pos++;
+    });
+
 
     const modal = document.getElementById('tableDetailsModal');
     const overl = document.getElementById('overlayModal');
     modal.style.display = 'none';
     overl.style.display = 'none';
-    const tableName = document.getElementById('TableDetails_TableName').innerText;
+    const tableName = document.getElementById('TableDetails_TableName').getAttribute('table-name');
     const gridContainer = document.getElementById(modal.getAttribute("data-main-id"));
     gridContainer.innerHTML="";
     gridContainer.style.padding="10px";
@@ -136,7 +170,8 @@ function insertGrid()
   
     var html=`<table id="DataGrid_${tableName}" style="min-height: 400px; overflow-y: auto; vertical-align: top;"></table>`;
     html+=`<div style='display:flex;flex-direction:row;width:50%;align-items:right;float:right; padding: 10px;'>`;
-    html+=`<span>Page Size:</span><select onchange='grid_page_size(event,"${tableName}")' style='width:80px'>`;
+    html+=`<span>Page Size:</span><select id="gridPage" onchange='grid_page_size(event,"${gridContainer.id}")' style='width:80px'>`;
+    html+=`<option value='5'>5</option>`;
     html+=`<option value='10'>10</option>`;
     html+=`<option value='20'>20</option>`;
     html+=`<option value='50'>50</option>`;
@@ -167,7 +202,7 @@ function createGrid(gridContainer,tableName,datasetFields,datasetFieldsTypes)
     //header
     grid.setAttribute("dataset-table-name",tableName);
     grid.setAttribute("current_page",1);
-    grid.setAttribute("page_size",10);
+    grid.setAttribute("page_size",5);
     grid.setAttribute("Table-Name",tableName);
    
     // table header
@@ -198,6 +233,8 @@ function createGrid(gridContainer,tableName,datasetFields,datasetFieldsTypes)
             }
     });
     header.appendChild(row);
+// 
+
     grid.appendChild(header);
     // search inputs
    
@@ -210,9 +247,18 @@ function createGrid(gridContainer,tableName,datasetFields,datasetFieldsTypes)
     gridFetchData(grid) ; 
 }
 
-function grid_page_size(e,tableName) {
+function grid_page_size(e,dataGridId) {
     e.preventDefault();
-    // get parent grid n
+    // get selected page size
+    var pageSize=e.target[e.target.selectedIndex].value;
+    console.log(pageSize);
+    // get parent grid 
+    const grid=document.getElementById(dataGridId);
+    const gridTable=grid.querySelector('table');
+
+    gridTable.setAttribute("page_size",pageSize);
+    gridTable.setAttribute("current_page",1);
+    searchGrid("",grid);
 }
 
 function gridPrev(e,tableName) {
@@ -252,14 +298,15 @@ function gridNext(e,tableName) {
     }
 }
 
-function searchGrid(filter){
-    const grid = document.getElementById('Data-Grid');
-    grid.setAttribute("current_page",1);
-    var tableName=grid.getAttribute("Table-Name");
-    var datasetFields=grid.getAttribute("Dataset-Fields-Names");
-    var datasetFieldsTypes=grid.getAttribute("Dataset-Fields-Types");
-    removeAllChildRows(grid);
-    gridGetData(grid,tableName,1,10,datasetFields,datasetFieldsTypes,filter );
+function searchGrid(filter,grid){
+    const tableGrid = grid.querySelector('table');
+    tableGrid.setAttribute("current_page",1);
+    var tableName=tableGrid.getAttribute("Table-Name");
+    var datasetFields=tableGrid.getAttribute("Dataset-Fields-Names");
+    var datasetFieldsTypes=tableGrid.getAttribute("Dataset-Fields-Types");
+    removeAllChildRows(tableGrid);
+    var pageSize=parseInt(tableGrid.getAttribute("page_size"));
+    gridGetData(tableGrid,tableName,1,pageSize,datasetFields,filter );
 
 }
 
@@ -340,6 +387,7 @@ async function gridGetData(grid,tableName,page,pageSize,datasetFields,filter)
 {    
     //get body form the table
     const body = grid.querySelector('tbody');
+    console.log(body);
     // Prepare the URL
     const url = `/table-data/${tableName}/${page}/${pageSize}?fields=${datasetFields}&filter=${filter}`;
     // Fetch the data from the web service
@@ -364,14 +412,19 @@ async function gridGetData(grid,tableName,page,pageSize,datasetFields,filter)
             rowDiv.addEventListener("click", function (event) {
                 event.preventDefault();
                 // find div in dataset 
-                const datasetDivs = document.querySelectorAll('#DataSet_' + tableName);
+               /* var datasetDivs = document.querySelectorAll('#DataSet_' + tableName);
+                console.log(".----"+datasetDivs + " - " + tableName);
                 // get the datasetFieldsLink
                 datasetDivs.forEach(datasetDiv => {
                     const datasetFieldsLink = datasetDiv.getAttribute("Dataset-Fields-List");
                     console.log(datasetFieldsLink + " " + row.rowid + " " + j + page * pageSize);
                     linkRecordToGrid(tableName, datasetFieldsLink, row.rowid, j + page * pageSize);
                 });
-
+                */
+                var datasetDiv =document.getElementById('DataSet_' + tableName);
+                const datasetFieldsLink = datasetDiv.getAttribute("Dataset-Fields-List");
+                    console.log(datasetFieldsLink + " " + row.rowid + " " + j + page * pageSize);
+                    linkRecordToGrid(tableName, datasetFieldsLink, row.rowid, j + page * pageSize);
             });
             var i = 0;
             Object.values(row).forEach(field => {

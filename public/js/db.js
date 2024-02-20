@@ -96,7 +96,7 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
     ])
     .then(([fields]) => {
       
-        detailsDiv.innerHTML = `<h2 id='TableDetails_TableName' table-name='${tableName}'>${tableName}</h2><h3>${tableLabel}</h3>`;
+        detailsDiv.innerHTML = `<h3 id='TableDetails_TableName' table-name='${tableName}'>Table Name:${tableName} Description:${tableLabel}</h3>`;
         // align the content to top
         detailsDiv.style.verticalAlign = 'top';
         detailsDiv.style.padding = '10px';
@@ -104,12 +104,14 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
         // Display fields
         const table=  document.createElement('table');
         table.style.padding='10px';
+
         
         const isNotSearch=document.getElementById('_insertSearch').style.display == 'none';   
-        const header=['x','NAME','TYPE','LABEL' ,'FORMAT','*',  'WIDTH','TYPE','TABLE','FIELD'];
+        const header=['<i class="bi bi-check-lg></i>"','NAME','TYPE','LABEL' ,'FORMAT','*',  'WIDTH','TYPE','TABLE','FIELD','ORDER'];
         // create table header with th elements base on the foreach
         const thead = document.createElement('thead');
         thead.style.padding='10px';
+
         table.appendChild(thead);
         const tr = document.createElement('tr');
         tr.classList.add('table-header');
@@ -117,13 +119,18 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
         tr.style.backgroundColor='#0056b3';
         tr.style.color='white';
         tr.id='TableFieldsList';
+        tr.style.borderbottom='1px solid #ddd';
         header.forEach(prop => {
             const th = document.createElement('th');
-            th.innerText =prop  ;
+            th.innerHTML =prop  ;
+            th.style.padding='10px';
+            th.style.alignContent='center';
+            th.style.borderRight='1px solid #ddd';
             tr.appendChild(th);
         }); 
         thead.appendChild(tr);
         const tbody = document.createElement('tbody');
+        tbody.style.padding='10px';
         table.appendChild(tbody);
         var i=0;
         fields.forEach(field => {
@@ -149,13 +156,15 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
                                 
                                     { name: 'td7', innerHTML: `<select name="inputType" onchange="activateSelect('${field.NAME}')"><option value="input">input</option><option value="select">select</option><option value="checkbox">checkbox</option></select>` },
                                     { name: 'td8', innerHTML: `<select name="tableName" onchange="loadFieldsList('${field.NAME}')" disabled=true><option></option>#TABLELIST#</select>`	 },
-                                    { name: 'td9', innerHTML: '<select name="fieldName" disabled=true></select>' }
+                                    { name: 'td9', innerHTML: '<select name="fieldName" disabled=true></select>' },
+                                    { name: 'td10', innerHTML: '<select name="order" ></select>' }
                                 ];
 
                                 // Create table row and elements dynamically based on the configuration array
                                 const tr = document.createElement('tr');
                                 tr.classList.add('grid-row');
                                 tr.style.padding='10px';
+                                tr.style.borderbottom='1px solid #ddd';
                                 if (i%2==0) 
                                 {
                                     tr.style.backgroundColor='#f2f2f2';
@@ -172,6 +181,20 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
                                         for (const key in field.attributes) {
                                             input.setAttribute(key, field.attributes[key]);
                                         }
+                                        input.addEventListener('change', function(event) {
+                                            // get the order select in the line
+                                            var selects= tr.querySelector('select[name="order"]');
+                                            // get all the checkboxes cheecked
+                                            var checkboxes= table.querySelectorAll('input[name="fieldItem"]:checked');
+                                            if (event.target.checked) {
+                                                selects.selectedIndex=checkboxes.length-1;
+                                            }
+                                            else
+                                            {
+                                                selects.selectedIndex=0;
+                                            }
+                                        });
+
                                         element.appendChild(input);
                                     } else if (field.innerHTML) {
                                         element.innerHTML = field.innerHTML;
@@ -190,6 +213,18 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
            
        });
         detailsDiv.appendChild(table);       
+        // insert in order select the options and select the current row
+        var selects= table.querySelectorAll('select[name="order"]');
+        for (var i = 0; i < selects.length; i++) {
+            for (var j = 0; j < selects.length; j++) {
+                    var option = document.createElement('option');
+                    option.value = j+1;
+                    option.text = j+1;
+                    selects[i].appendChild(option);
+            }
+            selects[i].selectedIndex=0;
+        }
+
     })
     .catch(error => console.error('Error:', error));
 }
@@ -248,29 +283,42 @@ async function editTableDetails(tableName, tableLabel, detailsDiv) {
         const response = await fetch(`/table-fields/${tableName}`);
         const fields = await response.json();
         // Set innerHTML
-        detailsDiv.innerHTML = `<h2 id='TableDetails_TableName' table-name='${tableName}'>${tableName}</h2><h3>${tableLabel}</h3>`;
+        detailsDiv.innerHTML = `<h3 id='TableDetails_TableName' table-name='${tableName}'>Table Name:${tableName} Description:${tableLabel}</h3>`;
         detailsDiv.style.padding = '10px';
         // Create and append table
         const table = document.createElement('table');
         table.style.padding='10px';
 
         detailsDiv.appendChild(table);
+        // Add header to table
+        const thead = document.createElement('thead');
+        thead.style.padding='10px';
+        thead.style.backgroundColor='#0056b3';
+        thead.style.color='white';
+        thead.style.alignContent='center';
+        table.appendChild(thead);
         var tr = document.createElement('tr');
         header.forEach(prop => {
             const td = document.createElement('td');
             td.innerText =prop  ;
             tr.appendChild(td);
         });
-        table.appendChild(tr);
+        thead.appendChild(tr);
         // Add fields to table
+        const tbody = document.createElement('tbody');
+        tbody.style.padding='10px';
+        table.appendChild(tbody);
+        
         fields.forEach(field => {
             const tr = document.createElement('tr');
+            tr.style.padding='10px';
+            
            header.forEach(prop => {
                 const td = document.createElement('td');
                 td.innerHTML =`<input name='${prop}' value='${field[prop]}' readonly/>`  ;
                 tr.appendChild(td);
             });
-            table.appendChild(tr);
+            tbody.appendChild(tr);
         });
         const buttonContainer = document.createElement('div');
         buttonContainer.className   = 'button-container';
@@ -280,7 +328,7 @@ async function editTableDetails(tableName, tableLabel, detailsDiv) {
         addButton.className   = 'button';
         addButton.onclick = function(event) {
             event.preventDefault();
-            addTableColumn(table);
+            addTableColumn(tbody);
         };
         buttonContainer.appendChild(addButton);
        

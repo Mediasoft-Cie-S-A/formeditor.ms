@@ -32,7 +32,7 @@ function createElementInput(type) {
         input.className = "input-element textarea-element";   
             input.id=main.id+"Textarea";
             input.tagName="textarea";
-            input.placeholder = type;
+            input.placeholder = "";
             main.appendChild(input)
         } else {
             var input = document.createElement('input');
@@ -40,7 +40,7 @@ function createElementInput(type) {
             input.className = "input-element";
             input.id=main.id+"Input";
             input.tagName="input";
-            input.placeholder = type;
+            input.placeholder = "";
             main.appendChild(input)
         }
 

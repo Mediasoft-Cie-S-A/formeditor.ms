@@ -33,7 +33,14 @@ function createDatabaseSearch(type) {
 function editDatabaseSearch(type,element,content)
 {
     // Create and append the elements
-   
+    content.appendChild(createInputItem("ID Table Name", "dataset-id-table-name", "dataset-id-table-name",element.getAttribute('dataset-id-table-name'),"text",true));
+    content.appendChild(createInputItem("ID Field Name", "dataset-id-field-name", "dataset-id-field-name",element.getAttribute('dataset-id-field-name'),"text",true));
+    content.appendChild(createInputItem("ID Field Type", "dataset-id-field-type", "dataset-id-field-type",element.getAttribute('dataset-id-field-type'),"text",true));
+    content.appendChild(createInputItem("Value Field Name", "dataset-values-field-name", "dataset-value-field-name",element.getAttribute('dataset-value-field-name'),"text",true));
+    content.appendChild(createInputItem("Value Field Type", "dataset-values-field-type", "dataset-value-field-type",element.getAttribute('dataset-value-field-type'),"text",true));
+    content.appendChild(createInputItem("Dest Table Name", "dataset-dest-table-name", "dataset-dest-table-name",element.getAttribute('dataset-dest-table-name'),"text",true));
+    content.appendChild(createInputItem("Dest Field Name", "dataset-dest-field-name", "dataset-dest-field-name",element.getAttribute('dataset-dest-field-name'),"text",true));
+  
    
 
 }
@@ -51,21 +58,28 @@ function insertSearch()
     overl.style.display = 'none';
     console.log("dbitem");
 
-    const tableName = document.getElementById('TableDetails_TableName');
+    const tableName = document.getElementById('TableDetails_TableName').getAttribute('table-name');
     element = document.createElement('div');
     element.className =  'form-container';
     
-   // createFormElementsFromStructure(tableName.innerText,element);
+ 
     const formContainer = document.getElementById(modal.getAttribute('data-main-id'));
     
     fieldsList=document.querySelectorAll('#tableDetails table input:checked')
     var field=fieldsList[0];
     // create serach form with input and button and autocomplete
+    var div = document.createElement('div');
+    div.className = 'search';
+    div.id=element.id+"searchDiv";
+    div.tagName="searchDiv";
+    div.style.display="inline-block";
+    div.style.width="100%";
+    element.appendChild(div);
     var label=document.createElement('label');
     label.innerHTML="Search";
     label.id=element.id+"Label";
     label.tagName="label";
-    element.appendChild(label);
+    div.appendChild(label);
 
     // create search input div
     var searchDiv = document.createElement('div');
@@ -76,27 +90,27 @@ function insertSearch()
     var searchInput = document.createElement('input');
     searchInput.type = 'text';
     searchInput.id=element.id+"search";
-    searchInput.tagName="search";
-    
+    searchInput.tagName="search";    
     searchInput.setAttribute("list", "searchList");
     searchInput.setAttribute("autocomplete", "off");
     searchInput.setAttribute("oninput", "searchAutoComplete(event,this)");
     searchInput.setAttribute("onfocus", "searchAutoComplete(event,this)");
-    searchInput.setAttribute("data-table-name",tableName.innerText);
-    searchInput.setAttribute("data-field-name",field.getAttribute("dataset-field-name"));
-    searchInput.setAttribute("data-field-type",field.getAttribute("dataset-field-type"));
+    searchInput.setAttribute("data-id-table-name",tableName);
+    searchInput.setAttribute("data-id-field-name",field.getAttribute("dataset-field-name"));
+    searchInput.setAttribute("data-id-field-type",field.getAttribute("dataset-field-type"));
+    searchInput.setAttribute("data-value-field-name",field.getAttribute("dataset-field-name"));
+    searchInput.setAttribute("data-value-field-type",field.getAttribute("dataset-field-type"));
+    const autocomplete = document.createElement('div');
+    autocomplete.id = element.id+'autocomplete';
+    autocomplete.className = 'autocomplete-results';
+    searchDiv.appendChild(autocomplete);
     searchInput.placeholder="Search";
     const searchButton = document.createElement('button');
     searchDiv.appendChild(searchInput)
-    searchButton.type = 'button';
-    
+    searchButton.type = 'button';    
     searchButton.innerHTML = '<i class="search-icon">&#128269;</i> ';
     searchButton.setAttribute("onclick", "gridSearch(event,'"+searchInput.id+"')");
     searchDiv.appendChild(searchButton);
-    const autocomplete = document.createElement('div');
-    autocomplete.id = 'autocomplete';
-    autocomplete.className = 'autocomplete-results';
-    searchDiv.appendChild(autocomplete);
     
     formContainer.appendChild(element);
 
@@ -108,39 +122,40 @@ function gridSearch(event,id)
 {
     console.log("gridSearch");
     element = document.getElementById(id);
-    const filedName = element.getAttribute("data-field-name");
-    const searchValue = filedName+"|"+element.value;
+    const filedName = element.getAttribute("data-dest-field-name");
+    const searchValue = filedName+"|"+element.id;
    
     searchGrid(searchValue);
 }
 // searchAutoComplete that call the search function "/select-distinct/:tableName/:fieldName" and display the result in the autocomplete div
 function searchAutoComplete(event,element)
 {
-    const tableName = element.getAttribute("data-table-name");
-    const fieldName = element.getAttribute("data-field-name");
-    const fieldType = element.getAttribute("data-field-type");
-    const autocomplete = document.getElementById('autocomplete');
+    const tableName = element.getAttribute("data-id-table-name");
+    const fieldName = element.getAttribute("data-value-field-name");
+    const fieldType = element.getAttribute("data-value-field-type");
+    const fieldId   = element.getAttribute("data-id-field-name");
+    const autocomplete = element.parentElement.querySelector('.autocomplete-results');
     const searchValue = element.value;
     
-        var url = "/select-distinct/"+tableName+"/"+fieldName;
+        var url = "/select-distinct-idvalue/"+tableName+"/"+fieldName+"?id="+fieldId;
         // generate filter from searchValue if fieldType is text with openedge syntax
         if (searchValue.length>2)
             {
                 switch (fieldType) {
                     case "character":
-                        url=url+"?filter="+fieldName+" like '%"+searchValue+"%'";
+                        url=url+"&filter="+fieldName+" like '%"+searchValue+"%'";
                         break;
                     case "integer":
-                        url=url+"?filter="+fieldName+"="+searchValue;
+                        url=url+"&filter="+fieldName+"="+searchValue;
                         break;
                     case "date":
-                        url=url+"?filter="+fieldName+"="+searchValue;
+                        url=url+"&filter="+fieldName+"="+searchValue;
                         break;
                     case "logical":
-                        url=url+"?filter="+fieldName+"="+searchValue;
+                        url=url+"&filter="+fieldName+"="+searchValue;
                         break;
                     default:
-                        url=url+"?filter="+fieldName+" like '%"+searchValue+"%'";;
+                        url=url+"&filter="+fieldName+" like '%"+searchValue+"%'";;
                 }
             }
         fetch(url)
@@ -148,26 +163,40 @@ function searchAutoComplete(event,element)
         .then(data => {
             autocomplete.innerHTML="";
             autocomplete.style.display="block";
+            autocomplete.style.top = (getAbsoluteOffset(element) + element.offsetTop+ element.offsetHeight) + 'px';
             data.forEach(row => {
-                console.log(row);
+                
                 var rowDiv = document.createElement('div');
                 rowDiv.className = 'autocomplete-row';
                 rowDiv.setAttribute("rowid",row.rowid);
-                rowDiv.setAttribute("data-table-name",tableName);
-                rowDiv.setAttribute("data-field-name",fieldName);
-                rowDiv.setAttribute("data-field-type",fieldType);
-                rowDiv.setAttribute("data-search-value",searchValue);
+                rowDiv.setAttribute("data-id-table-name",tableName);
+                rowDiv.setAttribute("data-value-field-name",fieldName);
+                rowDiv.setAttribute("data-value-field-type",fieldType);
+                rowDiv.setAttribute("data-id-field-name",fieldId);
+                rowDiv.setAttribute("data-id-search-value",searchValue);
                 rowDiv.addEventListener("click", function(event) {
                     event.preventDefault();
+                    element.id=row[fieldId];
                     element.value=row[fieldName];
                     autocomplete.style.display="none";
                   });
                 var i=0;
                 rowDiv.innerHTML=row[fieldName];
                 autocomplete.appendChild(rowDiv);
+                console.log(row);
             });
         })
         .catch(error => {
             console.error(error);
         });
+}
+
+function getAbsoluteOffset(element) {
+    let top = 0, left = 0;
+    do {
+        top += element.offsetTop || 0;
+        left += element.offsetLeft || 0;
+        element = element.offsetParent;
+    } while(element);
+    return { top,left };
 }

@@ -69,6 +69,12 @@ function jsonToDom(json, parent) {
         console.log("planning:"+planningElements[i]);
         gantrender(planningElements[i]);
     }
+    // grids
+    gridElements = parent.querySelectorAll('div[tagname="dataGrid"]');
+    for (var i = 0; i < gridElements.length; i++) {
+        console.log("grid:"+gridElements[i]);
+       searchGrid("",gridElements[i])
+    }
 }
 // Function to create DOM element from JSON
 function createDomElement(json, parent) {
@@ -122,8 +128,20 @@ function exportJson() {
     // Function to handle tab switch
     function onTabSwitch(event) {
         var target = event.target.getAttribute("href");
+        console.log(target);
         removeSelection();
         hideEditMenu();
+        if (target === '#formsList') {
+        console.log("formsList");   
+            // Load forms
+            loadForms();
+        }
+
+        if (target === '#editForm') {
+            console.log("editForm");   
+                // Load forms
+               
+        }
 
         if (target === '#renderForm') {
             var formContainer = document.getElementById('formContainer');

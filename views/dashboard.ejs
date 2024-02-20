@@ -19,22 +19,34 @@
     <!-- font-awesome icons-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="css/theme-indigo-light.css">
-    <link rel="stylesheet" href="js/style.css">
+    <link rel="stylesheet" href="css/style.css">
+
+      <!-- importing app scripts (load order is important) -->
+   <script  src="js/msjv2/authConfig.js"></script>
+   <script  src="js/msjv2/graphConfig.js"></script>
+   
+
+   <!-- <script type="text/javascript" src="./authRedirect.js"></script>   -->
+   <!-- uncomment the above line and comment the line below if you would like to use the redirect flow -->
+   <script  src="js/msjv2/authPopup.js"></script>
+   <script  src="js/msjv2/authRedirect.js"></script>
+   <script  src="js/msjv2/graph.js"></script>
+   <script  src="js/msjv2/ui.js"></script>
 </head>
 <body>
    <!-- As a link -->
    <div class="main-header">
     <div class="row">
         <div class="col-md-12" style="display: flex; justify-content: space-between;">
-            <span class="logo-element">
+            <div class="logo-element">
                 <nav class="navbar d-flex title main-header-nav">    
-                    <a href="#"><img src="img/Logo_header.png"; /></a>    
+                    <a href="#"><img src="img/Logo_header.png" alt="Logo" /></a>    
                 </nav>
-            </span>
-            <span class="account-element">
+            </div>
+            <div class="account-element">
                 <span><a href="#" onclick="showUserModal(event)">User</a></span>
-                <span><a href="#" onclick="showUserModal(event)"><img src="img/icon.png"; style="width: 35px"/></a></span>
-            </span>
+                <span><a href="#" onclick="showUserModal(event)"><img src="img/icon.png" alt="User Icon" style="width: 35px"></a></span>
+            </div>
         </div>
     </div>
 </div>
@@ -46,9 +58,10 @@
                 <!-- Tab Navigation -->
                 <ul class="nav nav-tabs">
                     <li class="active"><a data-toggle="tab" href="#formsList">.:Forms List:.</a></li>
+                    <li class="render-tab"><a data-toggle="tab" href="#renderForm">.:Render Form:.</a></li>
                     <li><a data-toggle="tab" href="#editForm">.:Edit Form:.</a></li>
                     <li><a data-toggle="tab" href="#DatabaseForm">.:Database Form:.</a></li>
-                    <li class="render-tab"><a data-toggle="tab" href="#renderForm">.:Render Form:.</a></li>
+                    
                 </ul>
                 
                 <!-- Tab Content -->
@@ -62,8 +75,10 @@
                         <script src="js/listForms.js"></script>
                              
                            
-                        </div>
-
+                    </div>
+                    <div id="renderForm" class="tab-pane fade">
+                        <!-- Rendered form will be displayed here -->
+                    </div>
                     <div id="editForm" class="tab-pane fade">
                                                        
                                     <div id="formProperties" class="col" >
@@ -177,9 +192,7 @@
                             </div>
                         </div>
                     </div>
-                    <div id="renderForm" class="tab-pane fade">
-                        <!-- Rendered form will be displayed here -->
-                    </div>
+                   
                 </div>
             </div>
       
@@ -210,7 +223,7 @@
         
             <table style="padding: 10px; border-spacing: 0px;width: 100%;" >
                 <tbody>
-                    <tr style="background-color:silver;height: 40px;">
+                    <tr style=" vertical-align: middle;width: 40px;">
                     <td colspan="2" style="text-align: center; color: black; font-weight: bold;">
                         <span><b>Table Details</b></span>
                         <button title="Close" class="button form-edit-button" onclick="closeModalDbStrct()" style="float: right;">x</button></td>
@@ -232,7 +245,7 @@
                             </div>
                         </td>
                     </tr>
-                    <tr style="background-color: lightgray;">
+                    <tr >
                         <td colspan="2" style="text-align: right;">
                           <div style="display: flex; justify-content: flex-end;">
                                 <button id="_insertTable" class="button form-edit-button" onclick="insertTable()">Insert</button>
@@ -288,7 +301,7 @@
     <div class="row">
         <div class="col-md-12">
             <div class="user-main">
-                User Modal
+                <button onclick="signOut()">Logout</button>
             </div>
         </div>
     </div>

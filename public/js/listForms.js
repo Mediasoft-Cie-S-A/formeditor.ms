@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-document.addEventListener('DOMContentLoaded', function() {
+
+function loadForms(){
+    console.log('Loading forms...');
     fetch('/list-forms')
         .then(response => {
             if (!response.ok) {
@@ -24,41 +26,94 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(forms => {
             const list = document.getElementById('formsList');
-            forms.forEach(form => {
-                const listItem = document.createElement('li');
-                listItem.classList.add('form-item');
-                listItem.textContent = `Form ID: ${form.formId}, Name: ${form.name}`; // Adjust according to your form object structure
-                listItem.setAttribute('data-form-id', form.formId); // Set the form ID as a data attribute
+            list.innerHTML = ''; // Clear the list
+            const container = document.createElement('div');
+            list.appendChild(container);
+            container.className = 'portal-container';
+// generate the list of path
+   var pathList = forms.map(form => form.formPath);
+// remove duplicates
+    pathList = pathList.filter((value, index, self) => self.indexOf(value) === index);
+    // create the div container for each path with the id
+    pathList.forEach(path => {
+        const pathContainer = document.createElement('div');
+        pathContainer.className = 'portal-path-container';
+        pathContainer.innerHTML = `<span style="float:left;position:absolute;margin-top:-10px"><b>${path}</b></span>`;
+        pathContainer.setAttribute('data-path', path); // Set the path as a data attribute
+        pathContainer.id = path;
+        container.appendChild(pathContainer);
+        // create the div container for each form with the id
+    });
 
+            forms.forEach(form => {
+                const listItem = document.createElement('div');                
+                listItem.innerHTML = `<b>${form.formName}</b>`; // Adjust according to your form object structure
+                listItem.className = 'portal-list-item';                
+                listItem.setAttribute('data-form-id', form.formId); // Set the form ID as a data attribute
+                listItem.setAttribute('title', `double click to view form`);
                 // Create delete button
                 const deleteButton = document.createElement('button');
-                deleteButton.textContent = 'Delete';
-                deleteButton.classList.add('button ');
-               
+                deleteButton.innerHTML='<i class="fa fa-trash" style="margin-left:-5px"></i>'
+                deleteButton.className = 'portal-delete-button';        
                 deleteButton.onclick = function() {
                     deleteForm(form.formId, listItem);
                 };
 
-                listItem.appendChild(deleteButton);
+                // create edit button
+                const editButton = document.createElement('button');
+                editButton.innerHTML='<i class="fa fa-edit" style="margin-left:-5px"></i>'
+                editButton.className = 'portal-edit-button';
+                editButton.onclick = function() {
+                    event.preventDefault();
+                    loadFormData(form.formId,document.getElementById('formContainer'));
+                    const editTab = document.querySelector('.nav-tabs a[href="#editForm"]');
+                    if (editTab) {
+                        editTab.click(); // Simulate click
+                    }
+                   
+                };
+                // create show button
+                const showButton = document.createElement('button');
+                showButton.innerHTML='<i class="fa fa-eye" style="margin-left:-5px"></i>'
+                showButton.className = 'portal-show-button';
+                showButton.onclick = function() {
+                    event.preventDefault();
+                    loadFormData(form.formId);
+                    const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
+                    if (showTab) {
+                        showTab.click(); // Simulate click
+                    }
+                   
+                };
 
-                // Click event listener for each list item
-                listItem.addEventListener('click', function(event) {
-                    if (event.target !== deleteButton) {
-                        const editTab = document.querySelector('.nav-tabs a[href="#editForm"]');
-                        if (editTab) {
-                            editTab.click(); // Simulate click
-                        }
-                        loadFormData(this.getAttribute('data-form-id'));
+                //append the delete button to the list item
+                listItem.appendChild(deleteButton);
+                listItem.appendChild(showButton);                
+                listItem.appendChild(editButton);
+                listItem.addEventListener('dblclick', function() {
+                    loadFormData(form.formId);
+                    const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
+                    if (showTab) {
+                        showTab.click(); // Simulate click
+                    }
+                });
+                listItem.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // check if the event is a click on the delete,show or edit button
+                    if (e.target.className === 'portal-list-item'){
+                    showHint(`ID:${form.formId}<br>User:${form.userCreated}<br>Last mod:${form.modificationDate}`, 5000, event);
                     }
                 });
 
-                list.appendChild(listItem);
+                // get the path container
+                const pathContainer = document.getElementById(form.formPath);
+                pathContainer.appendChild(listItem);
             });
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
-});
+}
 
 function deleteForm(formId, listItem) {
     fetch(`/delete-form/${formId}`, { method: 'DELETE' })
@@ -79,7 +134,8 @@ function deleteForm(formId, listItem) {
 
 
 
-function loadFormData(formId) {
+function loadFormData(formId,renderContainer=document.getElementById('renderForm'))
+ {
     fetch(`/get-form/${formId}`)
         .then(response => {
             if (!response.ok) {
@@ -104,7 +160,7 @@ function loadFormData(formId) {
             userCreated.value=form.userCreated;
             
 
-            var renderContainer = document.getElementById('formContainer');
+           
             renderContainer.innerHTML = '';
 
             // Convert JSON back to DOM and append
@@ -118,3 +174,5 @@ function loadFormData(formId) {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
+
+

@@ -30,10 +30,31 @@ loadJson('/elementsConfig')
         console.error(err);
     });
 
+// load css
+function loadCssIfNotLoaded(cssUrl,csslist) {
+    // Check if the css is already loaded
+    if (csslist.indexOf(cssUrl) === -1) {
+        // The css is not loaded, check if it exists and load it
+        fetch(cssUrl)
+            .then(response => {
+                if (response.ok) {
+                    // The css exists, load it
+                    var link = document.createElement('link');
+                    link.rel = 'stylesheet';
+                    link.type = 'text/css';
+                    link.href = cssUrl;
+                    document.head.appendChild(link);
+                    csslist.push(cssUrl);
+                } else {
+                    console.log('CSS not found: ' + cssUrl);
+                }
+            });
+    }
+}
+
 // js script
     function loadScriptIfNotLoaded(scriptUrl,scriptslist) {
-        // Check if the script is already loaded
-     
+        // Check if the script is already loaded    
        
         // The script is not loaded, check if it exists and load it
         try {
@@ -59,6 +80,7 @@ function createSidebar(elementsData) {
     const sidebar = document.getElementById('componentsSidebar');
     const categories = {};
     var scriptslist = [];
+    var csslist = [];
 
     // Group elements by category
     for (const elementId in elementsData) {
@@ -119,7 +141,18 @@ function createSidebar(elementsData) {
                     });
                     divContainer.appendChild(itemDiv);	                    
 
-                    // Check if the script exists
+                    // Check if the css exists
+                    var cssUrl = "/css/components/" + elementData.styles;
+                    console.log("cssUrl:"+cssUrl);
+                    var existingCss = csslist.find(css => css === cssUrl);
+                    if (!existingCss) {
+                        console.log("cssUrl in:"+cssUrl);
+                        loadCssIfNotLoaded(cssUrl,csslist);
+                        csslist.push(cssUrl);
+                    }
+
+
+
                     // Check if the script exists
                     // Use the function
                     var scriptUrl = "/js/components/" + elementData.scriptName;

@@ -543,6 +543,27 @@ app.get('/select-distinct/:tableName/:fieldName', checkAuthenticated, async (req
     }
 });
 
+//select distinct values for a field
+app.get('/select-distinct-idvalue/:tableName/:fieldName', checkAuthenticated, async (req, res) => {
+    try {
+        await db.connect();
+        const tableName = req.params.tableName;
+        const fieldName = req.params.fieldName;
+       
+        // convert html code to special characters
+        const fieldid= req.query.id;
+        const filter = req.query.filter ?  decodeSpecialChars(req.query.filter) : null;
+       
+        const result = await db.selectDistinctIdValue(tableName,fieldid, fieldName,filter);
+        res.json(result);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error selecting distinct values');
+    } finally {
+        await db.close();
+    }
+});
+
 
 // export table to csv
 // set html mime type in header
