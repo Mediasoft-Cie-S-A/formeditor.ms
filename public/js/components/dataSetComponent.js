@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-const e = require("express");
-
 function createElementDateSet(type) {
     var main= document.createElement('div');
     main.className = 'form-container';
@@ -25,243 +23,199 @@ function createElementDateSet(type) {
     
     const list = document.getElementById('ContentTableList');
     const detailsDiv = document.getElementById('tableDetails');
-    fetchTablesList(list,detailsDiv,"");
-    showModalDbStrc(main,type);
+   
     return main;
 }
 
 function editElementDataSet(type,element,content)
 {
+    const button = document.createElement('button');
+    button.textContent = 'update';
+    button.onclick = function() {
+        const propertiesBar = document.getElementById('propertiesBar');
+        const gridID=propertiesBar.querySelector('label').textContent;
+                 
+        const main = document.getElementById(gridID);  
+        updateDataSet(main,content);
+    };
+    content.appendChild(button);
+    content.appendChild(createMultiSelectItem("Data", "data", "data",element.getAttribute('data'),"text",true));
+    content.appendChild(createSelectItem("Filter", "filter", "filter",element.getAttribute('filter'),"text",true));  
+
+    // load the data
+    // check if jsonData is not empty
+    if (element.getAttribute('dataSet')!=null)
+    {
+        var target=content.querySelector('#Data');
+        var jsonData=JSON.parse(element.getAttribute('dataSet'));
+        jsonData.forEach(fieldJson => {
+            if (fieldJson.fieldType!=="rowid") 
+                addFieldToPropertiesBar(target,fieldJson);
+        });
+    }
+
 }
+
+function updateDataSet(main,content)
+{
+    console.log("updateDataSet");
+  
+    // get all the span elements from data 
+    var data=content.querySelectorAll('span[name="dataContainer"]');
+    if (data.length==0) return; // no data to update
+    // get the first span element 
+    var firstJson=JSON.parse(data[0].getAttribute("data-field"));
+    // generate the json of all the data
+    var jsonData=[{"tableName":firstJson.tableName,"fieldName":"rowid","fieldType":"rowid","fieldDataType":"rowid","fieldLabel":"rowid","fieldMandatory":"0","fieldWidth":"0","fieldDefaultValue":"0"}];
+    data.forEach(span => {
+        console.log(span.getAttribute("data-field"));
+       // get the json data from the span
+         var json=JSON.parse(span.getAttribute("data-field"));
+        // add the field to the json
+          jsonData.push(json);
+    });
+    main.setAttribute("dataSet",JSON.stringify(jsonData));
+    renderDataSet(main);
+}
+
+function renderDataSet(main)
+{
+    main.innerHTML="";
+    main.style.height="200px";
+    console.log("renderGrid");
+    // get the data from the main
+    var jsonData=JSON.parse(main.getAttribute("dataSet"));
+    console.log(jsonData);
+    // generate the div for the dataset
+    var dataset=document.createElement("div");
+    dataset.id="DataSet_"+jsonData[0].tableName;
+    dataset.setAttribute('data-table-name', jsonData[0].tableName);
+    dataset.className = "dataSetContainer";
+    var datasetFields=[];
+    jsonData.forEach(fieldJson => {
+        var createField=createFieldFromJson(fieldJson);
+        dataset.appendChild(createField);
+        datasetFields.push(fieldJson.fieldName);
+    });
+    dataset.setAttribute("DataSet-Fields-List",datasetFields);
+    main.appendChild(dataset);
+    main.appendChild(createNavigationBar(jsonData[0].tableName,datasetFields));
+    moveFirst(jsonData[0].tableName,datasetFields);
+}
+
+function createFieldFromJson(fieldJson)
+{
+    var element=null;
+    switch(fieldJson.fieldType) {
+        case 'character':
+        case 'varchar':
+        case 'text':
+        case 'fixchar':
+            element = createElementInput('text');
+            einput=element.querySelector('input');
+            break;
+        case 'rowid':
+            console.log("rowid");
+            element = createElementInput('hidden');
+            einput=element.querySelector('input');
+            element.style.display="none";
+            break;
+        case 'INT':
+        case 'integer':
+        case 'bigint':
+        case 'float':
+        case 'double':
+        case 'decimal':
+            element = createElementInput('number');
+            einput=element.querySelector('input');
+            break;
+        case 'date':
+        case 'datetime':
+            element = createElementInput('date');
+            einput=element.querySelector('input');
+            break;
+        case 'time':
+            element = createElementInput('time');
+            einput=element.querySelector('input');
+            break;
+        case 'boolean':
+        case 'bool':
+        case 'bit':
+            element = createElementInput('checkbox');
+            einput=element.querySelector('input');
+            einput.className = "apple-switch";
+            break;
+
+        default:
+            // Handle default case or unknown types
+            element = createElementInput('text');
+            einput=element.querySelector('input');
+            break;
+    }
+    if (element !== undefined && element !== null) {
+
+        element.style.maxWidth = "500px";
+        
+        // get label from the element
+        var label=element.querySelector('label');
+        // if the label exists set the text
+        if (label!==null) label.textContent = fieldJson.fieldLabel==='' || fieldJson.fieldLabel==='null' ?fieldJson.fieldName:fieldJson.fieldLabel; // Set label to column name
+        // set the input attributes
+        einput.id=fieldJson.tableName+"_"+fieldJson.fieldName;
+        einput.setAttribute('dataset-table-name', fieldJson.tableName);
+        einput.setAttribute('dataset-field-name', fieldJson.fieldName);        
+        einput.setAttribute('dataset-field-type', fieldJson.fieldType);
+        einput.setAttribute('dataset-field-size', fieldJson.fieldSize);
+        einput.setAttribute('dataset-field-mandatory', fieldJson.fieldMandatory);
+        einput.setAttribute('dataset-field-format', fieldJson.fieldFormat);
+        if (fieldJson.fieldMandatory)
+        {
+            einput.required=true;
+        }
+    }
+    return element;
+}
+
+
 
 // --- internal functions ---
 function createNavigationBar(tableName,datasetFields) {
+
+    console.log("createNavigationBar");
+    console.log(tableName);
+    console.log(datasetFields);
     // Create the navigation bar div
     var navigationBar = document.createElement('div');
     navigationBar.id = 'navigationBar_'+tableName;
     navigationBar.type = 'navigation-bar';
+    navigationBar.className = 'navigation-bar';
     navigationBar.setAttribute('data-table-name', tableName);
     navigationBar.setAttribute('data-current-row', '0');
-
+    navigationBar.setAttribute('data-dataset-fields', datasetFields);
+    navigationBar.innerHTML = '<div class="navigation-bar-title">record: </div>';
     // Create buttons and append them to the navigation bar
     var buttons = [
-        { id: 'firstRecordBtn', title: 'First',  text: '<i class="bi bi-arrow-up-circle-fill"></i>', event:"moveFirst('"+tableName+"','"+datasetFields+"')" },
-        { id: 'previousRecordBtn',title: 'Previus',  text: '<i class="bi bi-arrow-left-circle-fill"></i>', event: "movePrev('"+tableName+"','"+datasetFields+"')" },
-        { id: 'nextRecordBtn',title: 'Next',  text: '<i class="bi bi-arrow-right-circle-fill"></i>', event: "moveNext('"+tableName+"','"+datasetFields+"')" },
-        { id: 'lastRecordBtn',title: 'Last', text: '<i class="bi bi-arrow-down-square-fill"></i>', event: "moveLast('"+tableName+"','"+datasetFields+"')" },
-        { id: 'EditRecordBtn', title: 'Edit Record',text: '<i class="bi bi-credit-card-2-front"></i>', event: "EditRecord('"+tableName+"','"+datasetFields+"')" },
-        { id: 'InsertRecordBtn',title: 'Insert Record', text: '<i class="bi bi-sticky-fill"></i>', event: "InsertRecord('"+tableName+"','"+datasetFields+"')" },
-        { id: 'SaveRecordBtn', title: 'Save Record', text: '<i class="bi bi-sim-fill"></i>', event: "SaveRecord('"+tableName+"')" },
-        { id: 'RefreshBtn', title: 'Refresh Data',text: '<i class="bi bi-arrow-clockwise"></i>', event: "RefreshRecord('"+tableName+"')" }
+        { name:'firstDSBtn',   title: 'First',  text: '<i class="bi bi-arrow-up-circle-fill" style="color:green;margin-left:-6px"></i>', event:"moveFirst('"+tableName+"','"+datasetFields+"')" },
+        { name:'PreviusDSBtn',  title: 'Previus',  text: '<i class="bi bi-arrow-left-circle-fill" style="color:green;margin-left:-6px"></i>', event: "movePrev('"+tableName+"','"+datasetFields+"')" },
+        { name:'NextDSBtn',  title: 'Next',  text: '<i class="bi bi-arrow-right-circle-fill" style="color:green;margin-left:-6px"></i>', event: "moveNext('"+tableName+"','"+datasetFields+"')" },
+        { name:'LastDSBtn',  title: 'Last', text: '<i class="bi bi-arrow-down-circle-fill" style="color:green;margin-left:-6px"></i>', event: "moveLast('"+tableName+"','"+datasetFields+"')" },
+        { name:'EditDSBtn', title: 'Edit Record',text: '<i class="bi bi-credit-card-2-front" style="color:blue;margin-left:-6px"></i>', event: "EditRecord('"+tableName+"','"+datasetFields+"')" },
+        { name:'InsertDSBtn', title: 'Insert Record', text: '<i class="bi bi-sticky-fill" style="color:green;margin-left:-6px"></i>', event: "InsertRecord('"+tableName+"','"+datasetFields+"')" },
+        { name: 'SaveDSBtn', title: 'Save Record', text: '<i class="bi bi-sim-fill" style="color:red;margin-left:-6px"></i>', event: "SaveRecord('"+tableName+"')" },
+        { name: 'RefreshDSBtn', title: 'Refresh Data',text: '<i class="bi bi-arrow-clockwise" style="color:green;margin-left:-6px"></i>', event: "RefreshRecord('"+tableName+"')" }
        
     ];
-
+    var htm="";
     //for the dom2json is mandatory to create a html for the events
     buttons.forEach(buttonInfo => {
-        const htm='<button id="'+buttonInfo.id+'" onclick="'+buttonInfo.event.trim()+'">'+buttonInfo.text+"</button>";
+        htm+=`<button name='${buttonInfo.name}'  title="${buttonInfo.title}" onclick="${buttonInfo.event.trim()}" style="width:30px;">${buttonInfo.text}</button>`
 
-        navigationBar.innerHTML+=htm;
     });
-    
+    navigationBar.innerHTML+='<div class="navigation-bar-buttons">'+htm+'</div>';
     // Append the navigation bar to the body or another element in your document
     return navigationBar;
 }
 
-async function createFormElementsFromStructure(tableName,container) {
-    try {
-                    const dataset=document.createElement("div");
-                    dataset.id="DataSet_"+tableName;
-                    dataset.setAttribute('data-table-name', tableName);
-
-                    fieldsList=document.querySelectorAll('#tableDetails table input:checked')
-                    
-                    var datasetFields=['rowid'];
-                    var datasetFieldsTypes=['rowid'];
-                    var datasetFieldsLabels=['rowid'];
-                    var datasetFieldsSize=[100];
-                    var datasetFieldsMandatory=[false];
-                    var datasetFieldsFormat=[''];
-                    const input=document.createElement('input');
-                            input.setAttribute('dataset-table-name', tableName);
-                            input.setAttribute('dataset-field-name', 'rowid');
-                            input.id="dataset-rowid";
-                            input.type='hidden';
-                            dataset.appendChild(input); 
-                        //  console.log(fieldsList);
-                    fieldsList.forEach(field => { 
-                       
-                                           
-                                            datasetFields.push(field.getAttribute("dataset-field-name"));
-                                            datasetFieldsTypes.push(field.getAttribute("dataset-field-type"));
-                                            datasetFieldsLabels.push(field.getAttribute("dataset-field-label"));
-                                            datasetFieldsSize.push(field.getAttribute("dataset-field-size"));
-                                            datasetFieldsMandatory.push(field.getAttribute("dataset-field-mandatory"));
-                                            datasetFieldsFormat.push(field.getAttribute("dataset-field-format"));
-                                            //console.log(field.getAttribute("dataset-field-type"));
-                         
-                    });
-                
-
-                        // invert the position based on the order
-                        var pos=1;
-                        fieldsList.forEach(field => {
-                            // get field order
-                            var row=field.parentElement.parentElement;
-                            // get select with name order
-                            var select=row.querySelector('select[name="order"]');
-                            // get selected value
-                            var order=select.options[select.selectedIndex].value;
-                            // check if the position is correct
-                            if (order!=pos)
-                            {
-                                if (order<fieldsList.length)
-                                {
-                                    // get the field in the old position$
-                                    var oldField=datasetFields[pos];
-                                    var oldFieldType=datasetFieldsTypes[pos];
-                                    var oldFieldLabel=datasetFieldsLabels[pos];
-                                    var oldFieldSize=datasetFieldsSize[pos];
-                                    var oldFieldMandatory=datasetFieldsMandatory[pos];
-                                    var oldFieldFormat=datasetFieldsFormat[pos];
-
-                                    // get the field in the new position
-                                    var newField=datasetFields[order];
-                                    var newFieldType=datasetFieldsTypes[order];
-                                    var newFieldLabel=datasetFieldsLabels[order];
-                                    var newFieldSize=datasetFieldsSize[order];
-                                    var newFieldMandatory=datasetFieldsMandatory[order];
-                                    var newFieldFormat=datasetFieldsFormat[order];
-
-                                    // swap the fields
-                                    datasetFields[pos]=newField;
-                                    datasetFieldsTypes[pos]=newFieldType;
-                                    datasetFieldsLabels[pos]=newFieldLabel;
-                                    datasetFieldsSize[pos]=newFieldSize;
-                                    datasetFieldsMandatory[pos]=newFieldMandatory;
-                                    datasetFieldsFormat[pos]=newFieldFormat;
-
-                                    datasetFields[order]=oldField;
-                                    datasetFieldsTypes[order]=oldFieldType;
-                                    datasetFieldsLabels[order]=oldFieldLabel;
-                                    datasetFieldsSize[order]=oldFieldSize;
-                                    datasetFieldsMandatory[order]=oldFieldMandatory;
-                                    datasetFieldsFormat[order]=oldFieldFormat;
-                                }
-                            }
-                            pos++;
-                        });
-                    var i=0;
-                    datasetFields.forEach(fieldName => {
-                        var element=null;
-                        switch(datasetFieldsTypes[i]) {
-                            case 'character':
-                            case 'varchar':
-                            case 'text':                                              
-                            case 'fixchar':
-                            case 'rowid':
-                                // Get the select value 
-                            
-                            // get option value from the select
-                             /*   switch( inputType)
-                                {
-                                    case "input":
-                                        element = createElementInput('text');
-                                        einput=element.querySelector('input');
-                                    break;
-                                    case "select":
-                                        element = createElementSelect('select');
-                                        einput=element.querySelector('select');
-                                    break;
-                                    case "checkbox":
-                                        element = createElementInput('checkbox');
-                                        einput=element.querySelector('input');
-                                        break; 
-                                }  */
-                                if (fieldName!='rowid')
-                                {
-                                element = createElementInput('text');
-                                einput=element.querySelector('input');
-                                }
-                                else
-                                {
-                                    element = document.createElement('input');
-                                    element.type='hidden';
-                                    element.id=tableName+"_"+fieldName;
-                                    einput=element;
-                                }
-                                break;
-                            case 'INT':
-                            case 'integer':
-                            case 'bigint':
-                            case 'float':
-                            case 'double':
-                            case 'decimal':
-                                element = createElementInput('number');
-                                einput=element.querySelector('input');
-                                break;
-                            case 'date':
-                            case 'datetime':
-                                element = createElementInput('date');
-                                einput=element.querySelector('input');
-                                break;
-                            case 'time':
-                                element = createElementInput('time');
-                                einput=element.querySelector('input');
-                                break;
-                            case 'boolean':
-                            case 'bool':
-                            case 'bit':
-                                element = createElementInput('checkbox');
-                                einput=element.querySelector('input');
-                                break;
-                            
-                            default:
-                                // Handle default case or unknown types
-                                element = createElementInput('text');
-                                einput=element.querySelector('input');
-                                break;
-                        }
-                        
-                    console.log(element);
-                    
-                        if (element !== undefined && element !== null) {
-                            // get label from the element   
-                            var label=element.querySelector('label');
-                            // if the label exists set the text
-                            if (label!==null) label.textContent = datasetFieldsLabels[i]==='' || datasetFieldsLabels==='null' ?fieldName:datasetFieldsLabels[i]; // Set label to column name
-                            // set the input attributes
-                            
-                            
-                            einput.setAttribute('dataset-table-name', tableName);
-                            einput.setAttribute('dataset-field-name', fieldName);
-                            einput.id=tableName+"_"+fieldName;
-                            einput.setAttribute('dataset-field-type', datasetFieldsTypes[i]);
-                            einput.setAttribute('dataset-field-size', datasetFieldsSize[i]);
-                            einput.setAttribute('dataset-field-mandatory', datasetFieldsMandatory[i]);
-                            einput.setAttribute('dataset-field-format', datasetFieldsFormat[i]);
-                            
-
-                            if (datasetFieldsMandatory[i])
-                            {
-                                einput.required=true;
-                            }
-
-                        }
-                    //console.log(element);
-                        i++;
-                    dataset.appendChild(element); // Append to the desired container
-                    });
-
-
-                    dataset.appendChild(createNavigationBar(tableName,datasetFields));
-                    dataset.setAttribute("DataSet-Fields-List",datasetFields);
-                    dataset.setAttribute("DataSet-Fields-Types",datasetFieldsTypes);
-                    console.log(dataset);
-                    container.appendChild(dataset);
-            } catch (error) {
-                    console.error('Error:', error);
-            }
-}
 
 
 function insertTable()
@@ -370,18 +324,17 @@ function updateInputs(data,tableName) {
             // console.log(input);
                 const fieldLabel = input.getAttribute('dataset-field-name');
             //  console.log(fieldLabel+":"+data[0][fieldLabel]);
+            input.value = '';
+            input.readOnly = true;
                 if (data[0][fieldLabel] !== undefined && data[0][fieldLabel] !== '')
                  {
-                    input.value = data[0][fieldLabel];
-                    input.readOnly = true;
+                    input.value = data[0][fieldLabel].toString().trim();
+                  
                 }
-                else
-                {
-                    input.value = '';
-                    input.readOnly = true;
-                }
-            // disable save record button
-             document.getElementById("SaveRecordBtn").disabled = true;        
+               
+            // disable save record button with name SaveRecordBtn
+            dataset.parentElement.querySelector('[name=SaveDSBtn]').disabled = true;
+            
             });
         }
     });
@@ -392,6 +345,10 @@ function setRowNum(tabelName,Num)
 {
 navbar=document.getElementById("navigationBar_"+tabelName);
 navbar.setAttribute("dataset-current-row",Num);
+// get the div with the name navigation-bar-title
+var title=navbar.querySelector('.navigation-bar-title');
+// set the text of the div with the row number
+title.textContent="record: "+Num;
 }
 
 function getRowNum(tabelName)
@@ -410,6 +367,7 @@ function EditRecord(tableName)
         console.log(tableLabel);
         if (tableLabel == tableName) {           
             input.readOnly = false;
+           
         }
     });     
 
@@ -424,7 +382,8 @@ function InsertRecord(tableName)
         const tableLabel = input.getAttribute('dataset-table-name');
         if (tableLabel == tableName) {           
             input.readOnly = false;
-            if (input.type==='hidden')
+            const field = inputs[i].getAttribute('dataset-field-name');
+            if (field!==null && field!=='rowid') 
             {
                 input.value="new";
             }
@@ -444,12 +403,14 @@ function CreateUpdated(tableName)
    var updateFields="";
    for (i=0;i<inputs.length;i++)
     {
-        if (inputs[i].type!='hidden') 
+        const field = inputs[i].getAttribute('dataset-field-name');
+        if (field!==null && field!=='rowid') 
         {
-            const field = inputs[i].getAttribute('dataset-field-name');
+            
             console.log(field);
             updateFields+=`"${field}" = '${inputs[i].value}'`;
             if (i<inputs.length-1) updateFields+=',';
+            inputs[i].readOnly = true;
         }
     };     
     console.log(updateFields);
@@ -458,8 +419,10 @@ function CreateUpdated(tableName)
 //update record 
 async function SaveRecord(tableName) {
     try {
+        console.log("SaveRecord");
         // Get the next row id from the navigation bar
-        const nextRowIds = document.querySelectorAll('#dataset-rowid'); 
+        const nextRowIds = document.querySelectorAll('#'+tableName+'_rowid'); 
+        console.log(nextRowIds);
         nextRowIds.forEach(nextRowId => {
             // get table name from the dataset
             datasetTableName=nextRowId.getAttribute("dataset-table-name");
@@ -515,6 +478,7 @@ function CreateInsert(tableName)
                 insertFields+=',';
                 insertValues+=',';
             }
+            inputs[i].readOnly = true;
         }
     };
 
@@ -569,9 +533,3 @@ async function insertRecordDB(tableName, data) {
 }
 
 
-function closeModalEdit() {
-    const modal = document.getElementById('modalDialogText');
-    const overl = document.getElementById('overlayModal');
-    modal.style.display = 'none';
-    overl.style.display = 'none';
-}

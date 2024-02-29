@@ -1,0 +1,51 @@
+.dataSetContainer {
+  float: left;
+  display: flex;
+  flex-direction: row;
+    width: 90%;
+    height: 100%;
+    align-items: left;
+    flex-wrap: wrap;
+    padding: 10px;
+  
+}
+
+.navigation-bar{
+   float: right;
+    
+    width:10%;
+    height: 100%;
+    align-items: right;
+    vertical-align: top;
+  
+    border: none;
+    border-left: 1px solid silver;
+    inset: 2px 0px 0px 0px;
+
+}
+
+.navigation-bar-title{
+    font-size: 8px;
+    font-weight: bold;
+    
+    text-align: center;
+    border-bottom: 1px solid silver;
+   
+    width: 100%;
+   
+    
+}
+
+.navigation-bar-buttons{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    padding: 10px;
+    border: none;
+
+    vertical-align: top;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}

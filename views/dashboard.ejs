@@ -149,6 +149,17 @@
                                     </div>
                                 </div>
                             </td>
+                            <td style="width: 200px;">
+                                <div >
+                                    <div  >
+                                        <input type="text" placeholder="filter.. table" name="searchtable" onchange="searchtable(this.value,'drageDroptablesList')">
+                                        
+                                    </div>
+                                    <div id="drageDroptablesList" style="overflow: auto;" ></div>
+                                <!-- Tables will be listed here -->
+                                </div>
+                              
+                            </td>
                                 </tr>
                               </table>
                             
@@ -230,16 +241,9 @@
                     </tr>
                     <tr>
                         <td>
-                             <div id="tablesList" style="width: 250px;">
-                                <div  >
-                                    <input type="text" placeholder="filter.. table" name="searchtable" onchange="searchtable(this.value,'ContentTableList')">
-                                    
-                                </div>
-                                <div id="ContentTableList" style="overflow: auto;" ></div>
-                            <!-- Tables will be listed here -->
-                            </div>
+                             
                         </td>
-                        <td>
+                        <td style="vertical-align: top;">
                             <div id="tableDetails" style="width: 100%;max-height: 600px; overflow: auto; vertical-align: top; ">
                             <!-- Table details will be displayed here -->
                             </div>
@@ -341,6 +345,7 @@
    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/lint/javascript-lint.min.js"></script>
   
    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/edit/closebrackets.min.js"></script>
+
    <script src="/js/components/qrcode.js"></script>
    <script src="https://unpkg.com/html5-qrcode"></script>
 

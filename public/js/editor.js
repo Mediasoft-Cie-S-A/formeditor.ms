@@ -327,4 +327,188 @@ const codeEditor = CodeMirror.fromTextArea(document.getElementById('jsCodeEditor
     textarea.value=codeEditor.getValue();*/
   });
 
+  function drag(ev) {
+    ev.dataTransfer.setData("text", ev.target.id);
+  }
+
+  function dropInput(event) {
+    
+    event.preventDefault();
+
+    console.log("dropInput");
+    //  console.log( event.dataTransfer);
+    var elementId = event.dataTransfer.getData("text");
   
+  
+    // get the element target
+    var target = event.target;
+    // get the element type
+
+    var source = document.getElementById(elementId);
+    var tableName = source.getAttribute("data-table-name");
+    var fieldName= source.getAttribute("data-field-name");  
+    var fieldType= source.getAttribute("data-field-type");
+    var fieldDataType= source.getAttribute("data-field-type");
+    var fieldLabel= source.getAttribute("data-field-label");
+    var fieldMandatory= source.getAttribute("data-field-mandatory");  
+    var fieldWidth= source.getAttribute("data-field-width");
+    var fieldDefaultValue= source.getAttribute("data-field-default");
+    // generate the json of all the fields attributes
+    var fieldJson = {
+        "tableName": tableName,
+        "fieldName": fieldName,
+        "fieldType": fieldType,
+        "fieldDataType": fieldDataType,
+        "fieldLabel": fieldLabel,
+        "fieldMandatory": fieldMandatory,
+        "fieldWidth": fieldWidth,
+        "fieldDefaultValue": fieldDefaultValue
+    };
+    addFieldToPropertiesBar(target,fieldJson);
+
+    // dispatch the input event
+  //  event.target.dispatchEvent(new InputEvent("input"));
+     
+}
+
+function createSelectItem(id, label, styleProperty,text,type,attribute)
+ {
+    console.log(text);
+    
+    var div = document.createElement("div");
+    div.id = id;
+    var lbl = document.createElement("label");
+    lbl.setAttribute("for", id);
+    lbl.textContent = label;
+    
+    var select = document.createElement("select");   
+    select.id = id+"select";
+
+    
+    const input = document.createElement("input");
+    input.setAttribute("ondragover", "allowDrop(event)");
+    input.setAttribute("ondrop", "dropInput(event)");
+    input.setAttribute("readonly", "true");
+    input.setAttribute("ObjectType","labels");
+
+   
+
+    input.addEventListener('input', function(event) {
+       
+        // get type of the field
+        var dataType = this.getAttribute('dataType');
+        // empty the select
+        console.log("dataType:"+dataType);
+        console.log("select:"+select);
+        setOptionsByType(select,dataType);
+   
+    // get the object by id
+    });
+
+    div.appendChild(lbl);
+    div.appendChild(input);
+    div.appendChild(select);
+
+    return div;
+}
+
+// function get options by type
+function setOptionsByType(select,type)
+{
+    // empty the select
+    select.innerHTML = '';
+    // create the options
+    var options=['text','number','date','password','image','time','color'];
+    
+    // add the options
+    options.forEach(option => {
+      
+        var opt = document.createElement('option');
+        opt.value = option;
+        opt.innerHTML = option;
+        select.appendChild(opt);
+    });
+    
+}
+
+function createMultiSelectItem(id, label, styleProperty,text,type,attribute)
+ {
+    console.log(text);
+    var div = document.createElement("div");
+    div.style.display = 'flex';
+    div.style.flexDirection = 'column';
+    div.style.padding='5px';
+    div.style.minHeight = '100px';
+    div.style.border = '1px solid #ccc';
+    // rounded corners
+    div.style.borderRadius = '5px';
+    div.id = id;
+    div.style.className = 'multi-select';
+    div.setAttribute("ObjectType","data")
+    // set draggable attribute
+    div.setAttribute("draggable", "true");
+
+    div.id = id;
+    var lbl = document.createElement("span");
+  
+    lbl.innerText   = label;
+    
+    
+
+  
+    div.setAttribute("ondragover", "allowDrop(event)");
+    div.setAttribute("ondrop", "dropInput(event)");
+ 
+    // get the object by id
+
+
+    div.appendChild(lbl);
+    //div.appendChild(multi);
+    //div.appendChild(select);
+
+    
+
+
+    return div;
+}
+
+// function to adding new fileds to the properties bar
+function addFieldToPropertiesBar(target,fieldJson)
+{
+    var dataObjet=target;
+    // create the div
+    var div = document.createElement("div");
+    div.classList.add("tables-list-item");
+    const elementId=fieldJson.fieldName+"-"+fieldJson.ta
+    div.id=elementId;
+    // get field name
+    
+    div.innerHTML=`<button class='remove-item' onclick='removeItem(event)'>x</button><span name='dataContainer' data-field='${JSON.stringify(fieldJson)}' >${fieldJson.fieldName}</span>`;
+    dataObjet.appendChild(div);
+  
+    // generate the select
+    var select = document.createElement("select");
+    div.appendChild(select);
+    // get the datatype
+    
+    setOptionsByType(select,fieldJson.fieldDataType);
+    // select the functionName in the function
+    
+      
+      // get the parent div height
+      var height=dataObjet.clientHeight + div.clientHeight;
+      // set the height of the parent div
+      dataObjet.style.height=height+30+"px";  
+}
+
+// function to remove the item
+function removeItem(event)
+{
+    var item = event.target.parentNode;
+    var dataObjet=item.parentNode;
+    // get the parent div height
+    var height=dataObjet.clientHeight - item.clientHeight;
+    // set the height of the parent div
+    dataObjet.style.height=height+30+"px";  
+    item.remove();
+}

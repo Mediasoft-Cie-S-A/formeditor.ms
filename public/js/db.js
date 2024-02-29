@@ -85,8 +85,75 @@ function createEditableTableList(list,tableDetails) {
 }   
 
 
+// called when you change the tab to create a new table
+function drageDroptableTableList(list) {
+    fetch('/tables-list')
+        .then(response => response.json())
+        .then(tables => {
+            // Clear the list
+            
+            list.innerHTML = '';
+             // add new table button
+             tableList=[];
+             var i=0;
+            tables.forEach(table => {
+               
+                        var listItem = document.createElement('div');
+                        
+                        listItem.className='tables-list-item';
+                      
+                        listItem.textContent = table.NAME; // Adjust based on your API response
+                        listItem.setAttribute('data-table-name', table.NAME);
+                        listItem.setAttribute('data-table-label', table.LABEL);
+                        listItem.setAttribute('title', table.LABEL);
+                        var tableDetailsDiv=document.createElement('div');
+                        listItem.appendChild(tableDetailsDiv);
+                        listItem.ondragstart = function(event) { drag(event); };
+                        listItem.onclick = function(event) {
+                                    event.preventDefault();
+                                    const tableName = event.target.getAttribute('data-table-name');                                    
+                                    fetchTableFields(tableName,tableDetailsDiv);
+                        }
+                        list.appendChild(listItem);
+                        tableList.push(table.NAME);
+                        i++;
+                
+            });
+        })
+        .catch(error => console.error('Error:', error));
+}   
 
 
+
+
+function fetchTableFields(tableName,detailsDiv) {
+    removeAllChildNodes(detailsDiv);
+    fetch(`/table-fields/${tableName}`)
+        .then(response => response.json())
+        .then(fields => {
+           fields.forEach(field => {
+                const fieldDiv = document.createElement('div');
+                fieldDiv.className='field-item';
+                fieldDiv.id=field.NAME+'_'+tableName+'_Editor';
+                fieldDiv.draggable=true;
+                fieldDiv.ondragstart = function(event) { drag(event); };
+                fieldDiv.textContent = field.NAME; // Adjust based on your API response
+                fieldDiv.setAttribute('data-table-name', tableName);
+                fieldDiv.setAttribute('data-field-name', field.NAME);
+                fieldDiv.setAttribute('data-field-type', field.TYPE);
+                fieldDiv.setAttribute('data-field-label', field.LABEL);
+                fieldDiv.setAttribute('data-field-format', field.FORMAT);
+                fieldDiv.setAttribute('data-field-mandatory', field.MANDATORY);
+                fieldDiv.setAttribute('data-field-decimal', field.DECIMAL);
+                fieldDiv.setAttribute('data-field-width', field.WIDTH);
+                fieldDiv.setAttribute('data-field-default', field.DEFAULT);
+                fieldDiv.setAttribute('title', field.LABEL);
+                detailsDiv.appendChild(fieldDiv);
+            });
+            
+        })
+        .catch(error => console.error('Error:', error));
+}
 
 // table structure
 function fetchTableDetails(tableName,tableLabel,detailsDiv) {
@@ -104,10 +171,11 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
         // Display fields
         const table=  document.createElement('table');
         table.style.padding='10px';
+        table.style.cellpadding='10px';
 
         
         const isNotSearch=document.getElementById('_insertSearch').style.display == 'none';   
-        const header=['<i class="bi bi-check-lg></i>"','NAME','TYPE','LABEL' ,'FORMAT','*',  'WIDTH','TYPE','TABLE','FIELD','ORDER'];
+        const header=['X','NAME','TYPE','LABEL' ,'FORMAT','*',  'WIDTH','TYPE','TABLE','FIELD','ORDER'];
         // create table header with th elements base on the foreach
         const thead = document.createElement('thead');
         thead.style.padding='10px';
@@ -122,7 +190,22 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
         tr.style.borderbottom='1px solid #ddd';
         header.forEach(prop => {
             const th = document.createElement('th');
+            if (prop === 'X') {
+                // genereate the checkbox
+                var selectAll = document.createElement('input');
+                selectAll.type = 'checkbox';
+                selectAll.name = 'selectAll';
+                selectAll.className= 'apple-switch';
+                selectAll.addEventListener('change', function(event) {
+                    var checkboxes= table.querySelectorAll('input[name="fieldItem"]');
+                    checkboxes.forEach(checkbox => {
+                        checkbox.checked = selectAll.checked;
+                    });
+                });
+                th.appendChild(selectAll);
+            } else {
             th.innerHTML =prop  ;
+            }
             th.style.padding='10px';
             th.style.alignContent='center';
             th.style.borderRight='1px solid #ddd';
@@ -151,13 +234,13 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
                                     { name: 'td2', innerHTML: field.TYPE },
                                     { name: 'td3', innerHTML: field.LABEL },
                                     { name: 'td4', innerHTML: field.FORMAT },
-                                    { name: 'td5', innerHTML: field.MANDATORY==1?'Yes':'No' },
+                                    { name: 'td5', innerHTML: `<input type='checkbox' class='apple-switch' ${field.MANDATORY=="1"?"checked":""} readonly/>` } ,
                                     { name: 'td6', innerHTML: field.WIDTH },
                                 
-                                    { name: 'td7', innerHTML: `<select name="inputType" onchange="activateSelect('${field.NAME}')"><option value="input">input</option><option value="select">select</option><option value="checkbox">checkbox</option></select>` },
-                                    { name: 'td8', innerHTML: `<select name="tableName" onchange="loadFieldsList('${field.NAME}')" disabled=true><option></option>#TABLELIST#</select>`	 },
-                                    { name: 'td9', innerHTML: '<select name="fieldName" disabled=true></select>' },
-                                    { name: 'td10', innerHTML: '<select name="order" ></select>' }
+                                    { name: 'td7', innerHTML: `<select name="inputType" class="input-element" onchange="activateSelect('${field.NAME}')"><option value="input">input</option><option value="select">select</option><option value="checkbox">checkbox</option></select>` },
+                                    { name: 'td8', innerHTML: `<select name="tableName" class="input-element" onchange="loadFieldsList('${field.NAME}')" disabled=true><option></option>#TABLELIST#</select>`	 },
+                                    { name: 'td9', innerHTML: '<select name="fieldName" class="input-element" disabled=true></select>' },
+                                    { name: 'td10', innerHTML: '<select name="order" class="input-element"></select>' }
                                 ];
 
                                 // Create table row and elements dynamically based on the configuration array
@@ -178,6 +261,7 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
                                         input.type = field.type;
                                         input.name = field.name;
                                         input.checked = false;
+                                        input.className= 'apple-switch';
                                         for (const key in field.attributes) {
                                             input.setAttribute(key, field.attributes[key]);
                                         }
@@ -298,9 +382,14 @@ async function editTableDetails(tableName, tableLabel, detailsDiv) {
         thead.style.alignContent='center';
         table.appendChild(thead);
         var tr = document.createElement('tr');
+        tr.style.padding='10px';
+        tr.style.borderbottom='1px solid #ddd';
         header.forEach(prop => {
             const td = document.createElement('td');
             td.innerText =prop  ;
+            td.style.padding='10px';
+            td.style.alignContent='center';
+            td.style.borderRight='1px solid #aaa';
             tr.appendChild(td);
         });
         thead.appendChild(tr);
@@ -312,10 +401,15 @@ async function editTableDetails(tableName, tableLabel, detailsDiv) {
         fields.forEach(field => {
             const tr = document.createElement('tr');
             tr.style.padding='10px';
-            
+            tr.style.borderbottom='1px solid #eee';
            header.forEach(prop => {
                 const td = document.createElement('td');
-                td.innerHTML =`<input name='${prop}' value='${field[prop]}' readonly/>`  ;
+                if (prop === 'MANDATORY') {
+                    // checkbox
+                    td.innerHTML =`<input name='${prop}' value='${field[prop]}' class="apple-switch" type='checkbox' readonly/>`  ;
+                } else {
+                    td.innerHTML =`<input name='${prop}' class="input-element" value='${field[prop]}' readonly/>`  ;
+                }
                 tr.appendChild(td);
             });
             tbody.appendChild(tr);
@@ -655,9 +749,9 @@ function searchtable(search,contentDivID)
 {
     var filter=search.toUpperCase();
     var list=document.getElementById(contentDivID);
-    var items = list.getElementsByClassName('table-item');
+    var items = list.getElementsByClassName('tables-list-item');
     for (var i = 0; i < items.length; i++) {
-        var txtValue = items[i].textContent || items[i].innerText;
+        var txtValue = items[i].getAttribute('data-table-name');
         if (txtValue.toUpperCase().indexOf(filter) > -1) {
             items[i].style.display = "";
         } else {

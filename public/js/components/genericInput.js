@@ -37,7 +37,11 @@ function createElementInput(type) {
         } else {
             var input = document.createElement('input');
             input.type = type;
-            input.className = "input-element";
+            if (type === 'checkbox') {
+                input.className = "apple-switch";
+            } else {
+                input.className = "input-element";
+            }
             input.id=main.id+"Input";
             input.tagName="input";
             input.placeholder = "";

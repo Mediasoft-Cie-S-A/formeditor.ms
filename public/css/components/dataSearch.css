@@ -11,25 +11,32 @@
 .search input[type=text] {
     padding: 10px;
     font-size: 17px;
-    border: 1px solid grey;
+    border: 1px solid silver;
     float: left;
     width: 80%;
-    background: #f1f1f1;
+    background: white;
+    border-right: none; /* Prevent double borders */
+    border-radius: 5px 0 0 5px;
   
   }
   
+  .search input[type=text]:hover {
+    box-shadow: 0 0 2px 5px #48abe0;
+  }
+
   /* Style the submit button */
  .search button {
     float: left;
     width: 20%;
     padding: 10px;
-    background: #2196F3;
+    background: #4d61fc;
     color: white;
     font-size: 17px;
-    border: 1px solid grey;
+    
     border-left: none; /* Prevent double borders */
-    cursor: pointer;
+    cursor: hand;
     margin-top: 5px  ;
+    border-radius: 0 5px 5px 0;
   }
   
   .search button:hover {
@@ -45,11 +52,11 @@
 
   .autocomplete-results {
     position: absolute;
-  
     border: 1px solid #ccc;
     background: white;
     z-index: 1000;
     display: none;
+    width: 100%;
     max-height: 250px;
     overflow-y: auto;
     box-sizing: border-box;
@@ -57,8 +64,14 @@
     padding: 10px;
     -webkit-animation: cubic-bezier(0.075, 0.82, 0.165, 1);
     animation: cubic-bezier(0.075, 0.82, 0.165, 1);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.175);
-}
+    -webkit-animation-duration: 0.5s;
+    animation-duration: 0.5s;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+    -webkit-animation-name: fadeIn;
+    animation-name: fadeIn;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
 
 .autocomplete-results div {
     padding: 8px;

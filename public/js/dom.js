@@ -64,16 +64,23 @@ function jsonToDom(json, parent) {
 
     // planning
  
-    planningElements = parent.querySelectorAll('div[tagname="planning"]');
+    var planningElements = parent.querySelectorAll('div[tagname="planning"]');
     for (var i = 0; i < planningElements.length; i++) {
         console.log("planning:"+planningElements[i]);
         gantrender(planningElements[i]);
     }
     // grids
-    gridElements = parent.querySelectorAll('div[tagname="dataGrid"]');
+    var gridElements = parent.querySelectorAll('div[tagname="dataGrid"]');
     for (var i = 0; i < gridElements.length; i++) {
         console.log("grid:"+gridElements[i]);
-       searchGrid("",gridElements[i])
+     //  searchGrid("",gridElements[i])
+     renderGrid(gridElements[i]);
+    }
+
+    var datasetElements = parent.querySelectorAll('div[tagname="dataSet"]');
+    for (var i = 0; i < datasetElements.length; i++) {
+        console.log("dataset:"+datasetElements[i]);
+        renderDataSet(datasetElements[i]);
     }
 }
 // Function to create DOM element from JSON
@@ -140,7 +147,7 @@ function exportJson() {
         if (target === '#editForm') {
             console.log("editForm");   
                 // Load forms
-               
+            drageDroptableTableList(document.getElementById('drageDroptablesList'));
         }
 
         if (target === '#renderForm') {

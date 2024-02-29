@@ -14,121 +14,112 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 function createDatabaseGrid(type) {
     var main= document.createElement('div');
     main.className = 'form-container';
     main.id=type+ Date.now(); // Unique ID for each new element
     main.draggable = true;
     main.tagName=type;
+    main.style.height = '450px';
 
-    const list = document.getElementById('ContentTableList');
-    const detailsDiv = document.getElementById('tableDetails');
-    fetchTablesList(list,detailsDiv,"");
-    showModalDbStrc(main,type);
     return main;
 }
 
 function editDatabaseGrid(type,element,content)
 {
-  /*  // create attribute to store the datasetid
-     // generate the list of options
-     var DataSetID = document.createElement('div');
-     // generate a label for the list
-     var label=document.createElement('label');
-     label.innerHTML="DataSetID";
-     DataSetID.appendChild(label);
-     // generate a textarea for the list
-     var input=document.createElement('input');
-     input.id=element.id+"inputDatasetId";
-     // locate Data-Grid
-        var grid=element.querySelector('#Data-Grid');
-        if (grid)
-        {
-            input.value=grid.getAttribute("datasetid");
-        }
-     
-     // adding to the textarea onchage event to update the options
-     input.onchange=function(){
-        grid.setAttribute("datasetid",input.value);
+    const button = document.createElement('button');
+    button.textContent = 'update';
+    button.onclick = function() {
+        const propertiesBar = document.getElementById('propertiesBar');
+        const gridID=propertiesBar.querySelector('label').textContent;
+                 
+        const main = document.getElementById(gridID);  
+        updateGridData(main,content);
     };
-    
-     DataSetID.appendChild(input);
-     content.appendChild(DataSetID);
-     */
+    content.appendChild(button);
+    content.appendChild(createMultiSelectItem("Data", "data", "data",element.getAttribute('data'),"text",true));
+    content.appendChild(createSelectItem("Filter", "filter", "filter",element.getAttribute('filter'),"text",true));  
+
+    // load the data
+    // check if jsonData is not empty
+    if (element.getAttribute('datasetgrid')!=null)
+    {
+        var target=content.querySelector('#Data');
+        var jsonData=JSON.parse(element.getAttribute('datasetgrid'));
+        jsonData.forEach(fieldJson => {
+            addFieldToPropertiesBar(target,fieldJson);
+        });
+    }
+
 }
 
 
-function insertGrid()
+function updateGridData(main,content)
 {
-    // get fields list
-    fieldsList=document.querySelectorAll('#tableDetails table input:checked')
-    var datasetFields=[];
-    var datasetFieldsTypes=[];
-    datasetFields.push('rowid');
+    console.log("updateGridData");
   
-    fieldsList.forEach(field => { 
-        fieldName=field.getAttribute("dataset-field-name");
-        fieldType=field.getAttribute("dataset-field-type");
-        datasetFields.push(fieldName);   
-        datasetFieldsTypes.push(fieldType);    
-        
-       
-  
+    // get all the span elements from data 
+    var data=content.querySelectorAll('span[name="dataContainer"]');
+    // generate the json of all the data
+    var jsonData=[];
+    data.forEach(span => {
+        console.log(span.getAttribute("data-field"));
+       // get the json data from the span
+         var json=JSON.parse(span.getAttribute("data-field"));
+        // add the field to the json
+          jsonData.push(json);
     });
-    // invert the position based on the order
-    var pos=1;
-    fieldsList.forEach(field => {
-        // get field order
-        var row=field.parentElement.parentElement;
-        // get select with name order
-        var select=row.querySelector('select[name="order"]');
-        // get selected value
-        var order=select.options[select.selectedIndex].value;
-        // check if the position is correct
-        if (order!=pos)
-        {
-            if (order<fieldsList.length)
-             {
-                // get the field in the old position$
-                var oldField=datasetFields[pos];
-                var oldFieldType=datasetFieldsTypes[pos];
-                // get the field in the new position
-                var newField=datasetFields[order];
-                var newFieldType=datasetFieldsTypes[order];
-                // swap the fields
-                datasetFields[pos]=newField;
-                datasetFieldsTypes[pos]=newFieldType;
-                datasetFields[order]=oldField;
-                datasetFieldsTypes[order]=oldFieldType;
-             }
-        }
-        pos++;
+    main.setAttribute("dataSetGrid",JSON.stringify(jsonData));
+    renderGrid(main);
+}
+
+function renderGrid(element)
+{
+    // get the data from the element
+    var data=element.getAttribute("dataSetGrid");
+    // parse the json
+    var jsonData=JSON.parse(data);
+    console.log(jsonData);
+    // get the main div
+    var datasetFields=['rowid'];
+    var datasetFieldsTypes=['rowid'];
+    jsonData.forEach(field => {
+        datasetFields.push(field.fieldName);
+        datasetFieldsTypes.push(field.fieldType);
     });
 
+    element.innerHTML="";
+    element.style.padding="10px";
+   
+    var div = document.createElement('div');
+    div.className = 'table-container';
+    div.id="Data-Grid_"+element.id;
+    
+    createGrid(div,jsonData[0].tableName,datasetFields,datasetFieldsTypes);
+    element.appendChild(div);
+    // generate div for the dataset
+    var datasetDiv = document.createElement('div');
+    datasetDiv.className = 'dataset-container';
+    datasetDiv.id="DataSet_"+jsonData[0].tableName;
+    datasetDiv.setAttribute("grid-id",div.id);
+    insertNavBar(datasetDiv,jsonData[0].tableName,datasetFields,datasetFieldsTypes);
+    element.appendChild(datasetDiv);
+    
+}
 
-    const modal = document.getElementById('tableDetailsModal');
-    const overl = document.getElementById('overlayModal');
-    modal.style.display = 'none';
-    overl.style.display = 'none';
-    const tableName = document.getElementById('TableDetails_TableName').getAttribute('table-name');
-    const gridContainer = document.getElementById(modal.getAttribute("data-main-id"));
-    gridContainer.innerHTML="";
-    gridContainer.style.padding="10px";
-    gridContainer.style.display="flex";
-    gridContainer.style.flexDirection="column";
-    gridContainer.style.justifyContent="space-between";
-    gridContainer.style.width="100%";
-    gridContainer.style.height="100%";
-    gridContainer.style.alignItems="flex-start";
-    gridContainer.style.overflow="auto";
+function insertNavBar(gridContainer,tableName,datasetFields,datasetFieldsTypes)
+{
+   
+   
 
     
-    
+    // create search structure
       // search header
       var search = document.createElement('div');
-      search.style="display:flex;flex-direction:row;justify-content:space-between;width:50%;align-items:right;float:right; padding: 10px;";      
-      gridContainer.appendChild(search);
+      search.style.display="inline-block";
       var searchfields=document.createElement('select');
+      searchfields.className="input-element";
       searchfields.setAttribute("id","searchfields");
       search.appendChild(searchfields);
       for (var i=0;i<datasetFields.length;i++)
@@ -144,6 +135,7 @@ function insertGrid()
               searchfields.appendChild(cell);
       }
       searchOperator=document.createElement('select');
+      searchOperator.className="input-element";
       searchOperator.setAttribute("id","searchOperator");
       search.appendChild(searchOperator);
       const operators=["like","eq","gt","lt","gte","lte"];
@@ -156,6 +148,7 @@ function insertGrid()
           }
       var  input=document.createElement('input');
           input.type="text";
+            input.className="input-element";
           input.setAttribute("id","searchValue");
           // set search event on keyup
           input.addEventListener("keyup", function(event) {
@@ -168,36 +161,38 @@ function insertGrid()
           });
           search.appendChild(input);
   
-    var html=`<table id="DataGrid_${tableName}" style="min-height: 400px; overflow-y: auto; vertical-align: top;"></table>`;
-    html+=`<div style='display:flex;flex-direction:row;width:50%;align-items:right;float:right; padding: 10px;'>`;
-    html+=`<span>Page Size:</span><select id="gridPage" onchange='grid_page_size(event,"${gridContainer.id}")' style='width:80px'>`;
+    
+    var html=`<div class="right-panel">`;
+    html+=`<div class="navigation-bar-title">Record: </div>`;
+    html+=search.outerHTML;
+ 
+    html+=`<span style='font-size:8px'>Page Size:</span><select id="gridPage" class="input-element" onchange='grid_page_size(event,"${gridContainer.id}")' style='width:60px;font-size:8px'>`;
     html+=`<option value='5'>5</option>`;
     html+=`<option value='10'>10</option>`;
     html+=`<option value='20'>20</option>`;
     html+=`<option value='50'>50</option>`;
     html+=`<option value='100'>100</option>`;
-    html+=`</select>`;
-    // record count
-    html+=`<div style='padding: 10px;'>Record Count:<span id="recordCount_${tableName}">0</span></div>`;
-    html+=`<button title='Previus'  onclick='gridPrev(event,"${tableName}")'><i class="bi bi-arrow-left-circle-fill"  style='color:blue;'></i></button>`;
-    html+=`<button title='Next' onclick='gridNext(event,"${tableName}")'><i class="bi bi-arrow-right-circle-fill"  style='color:blue;'></i></button>`;
-    html+=`<button  title='Refresh' onclick='refresh(event,"${tableName}")'><i class="bi bi-arrow-repeat"  style='color:green;'></i></button>`;
-    html+=`<button  title='Postit' onclick='postit(event,"${tableName}")'><i class="bi bi-card-text" style='color:#aa0;'></i></button>`;
-    html+=`<button  title='Export Data' onclick='export2CSV(event,"${tableName}")'><i class="bi bi-file-spreadsheet" style='color:green;'></i></button></div>`;
+    html+=`</select>`;   // record count
+    
+    html+=`<button name='revGRIDBtn'  title='Previus Page'  onclick='gridPrev(event,"${tableName}")'><i class='bi bi-arrow-left-circle-fill'  style='color:blue;'></i></button>`;
+    html+=`<button name='NextGRIDBtn' title='Next Page' onclick='gridNext(event,"${tableName}")'><i class='bi bi-arrow-right-circle-fill'  style='color:blue;'></i></button>`;
+    html+=`<button name='RefreshGRIDBtn' title='Refresh' onclick='refresh(event,"${tableName}")'><i class='bi bi-arrow-repeat'  style='color:green;'></i></button>`;
+    html+=`<button name='PostitGRIDBtn' title='Postit' onclick='postit(event,"${tableName}")'><i class='bi bi-card-text' style='color:#aa0;'></i></button>`;
+    html+=`<button name='ExportGRIDBtn' title='Export Data' onclick='export2CSV(event,"${tableName}")'><i class='bi bi-file-spreadsheet' style='color:green;'></i></button></div>`;
     html+=`<div id="Data-Grid-Postit" style="display:none;position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.5); z-index: 1000;"></div>`;    
     html+="</div>";
+
     gridContainer.innerHTML+=html;
     
 
-    createGrid(gridContainer,tableName,datasetFields,datasetFieldsTypes);
+  
     
 }
 
 //Grid code
-function createGrid(gridContainer,tableName,datasetFields,datasetFieldsTypes)
+function createGrid(grid,tableName,datasetFields,datasetFieldsTypes)
 {
-    console.log(gridContainer.id + " " + tableName + " " + datasetFields + " " + datasetFieldsTypes);
-   const grid = gridContainer.querySelector('#DataGrid_'+tableName);
+   
    console.log(grid);
     //header
     grid.setAttribute("dataset-table-name",tableName);
@@ -264,7 +259,10 @@ function grid_page_size(e,dataGridId) {
 function gridPrev(e,tableName) {
     e.preventDefault();
     // get parent grid n
-    const grid=e.target.parentElement.parentElement.parentElement.querySelector('table');
+    const gridID=e.target.parentElement.parentElement.parentElement.parentElement.getAttribute("grid-id");
+    const grid=document.getElementById(gridID);
+    console.log(grid);
+    
     const gtableName=grid.getAttribute("table-name"); 
 
     if (tableName==gtableName)
@@ -284,8 +282,8 @@ function gridPrev(e,tableName) {
 function gridNext(e,tableName) {
     e.preventDefault();
     // get parent grid n
-    const grid=e.target.parentElement.parentElement.parentElement.querySelector('table');
-    console.log(grid);
+    const gridID=e.target.parentElement.parentElement.parentElement.parentElement.getAttribute("grid-id");
+    const grid=document.getElementById(gridID);
     const gtableName=grid.getAttribute("table-name"); 
     console.log(tableName + " " + gtableName);
     if (tableName==gtableName)
