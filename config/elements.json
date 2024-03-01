@@ -6,7 +6,7 @@
         "scriptName": "dataSetComponent.js",
         "createFunction": "createElementDateSet",
         "editFunction": "editElementDataSet",
-        "styles": "dataSet.css",
+        "styles": "dataSetComponent.css",
         "icon": "fa fa-database"
     },
     "dataGrid": {
@@ -16,7 +16,7 @@
         "scriptName": "databaseGrid.js",
         "createFunction": "createDatabaseGrid",
         "editFunction": "editDatabaseGrid",
-        "styles": "dataGrid.css",
+        "styles": "databaseGrid.css",
         "icon": "fa fa-table"
     },
     "dataSearch": {

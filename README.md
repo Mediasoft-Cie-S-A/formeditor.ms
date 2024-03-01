@@ -55,5 +55,44 @@ JSON elements.json, in the config folder, is a configuration file for component 
 - `"scriptName"`: The name of the JavaScript file that contains the functions for creating and editing the element.
 - `"createFunction"`: The name of the function that creates the  element. This function is expected to be defined in the JavaScript file specified by `"scriptName"`.
 - `"editFunction"`: The name of the function that edits the  element. This function is also expected to be defined in the JavaScript file specified by `"scriptName"`.
+- `styles: The name of the CSS file that contains styles for the component`.
 
-This structure allows you to dynamically create and edit HTML elements based on the JSON data. By changing the JSON data, you can control which HTML elements are available, how they are created and edited, and so on.
+- `icon: The name of the icon that represents the component in the UI`.
+
+To add a new component to your project, you need to follow these steps:
+
+Define the new component in the elements.json file located in the config directory. Here is an example of how a component is defined:
+
+```
+"newComponent": {
+    "type": "newComponent",
+    "description": "New Component",
+    "category": "HTML",
+    "scriptName": "newComponent.js",
+    "createFunction": "createNewComponent",
+    "editFunction": "editNewComponent",
+    "styles": "newComponent.css",
+    "icon": "fa fa-icon"
+}
+```
+
+
+Create a new JavaScript file for the component in the public/js/components directory. The name of this file should match the scriptName property in the elements.json file. This file should define the createNewComponent and editNewComponent functions (or whatever you named them in the elements.json file).
+Here is an example of what this file might look like:
+
+```
+function createNewComponent(type) {
+    // Code to create the component goes here
+}
+
+function editNewComponent(type, element, content) {
+    // Code to edit the component goes here
+}
+```
+
+Create a new CSS file for the component in the public/css/components directory. The name of this file should match the styles property in the elements.json file.
+
+After you've added the new component, you may need to restart your server to see the changes.
+
+Please note that the exact steps may vary depending on the specifics of your project.
+
