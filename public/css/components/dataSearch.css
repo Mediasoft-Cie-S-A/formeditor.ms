@@ -7,6 +7,10 @@
 
 }
 
+.search label{
+  vertical-align: bottom  ;
+  
+}
 
 .search input[type=text] {
     padding: 10px;

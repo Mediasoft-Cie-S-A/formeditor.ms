@@ -19,7 +19,11 @@
     height: 100%;
     align-items: left;
     overflow: auto;
+    justify-content: start;
+    vertical-align: top;
 }
+
+    
 
 .dataset-container{
     float: right;
@@ -59,7 +63,8 @@
 }
 
 .grid-row {
-    
+    height: 30px;
+
     border-bottom: 1px solid #ccc;
 }
 .grid-row:hover {
@@ -70,7 +75,7 @@
 
 .grid-cell {
     padding: 5px;
-  
+    height: 30px;
 }
 
 .grid-body {

@@ -364,16 +364,22 @@ const codeEditor = CodeMirror.fromTextArea(document.getElementById('jsCodeEditor
         "fieldWidth": fieldWidth,
         "fieldDefaultValue": fieldDefaultValue
     };
-    addFieldToPropertiesBar(target,fieldJson);
+
+    if(target.type=='text')
+    {
+        target.setAttribute('data-field',JSON.stringify(fieldJson));
+        target.value=fieldName;
+    }
+    else addFieldToPropertiesBar(target,fieldJson);
 
     // dispatch the input event
   //  event.target.dispatchEvent(new InputEvent("input"));
      
 }
 
-function createSelectItem(id, label, styleProperty,text,type,attribute)
+function createSelectItem(id, label, styleProperty)
  {
-    console.log(text);
+
     
     var div = document.createElement("div");
     div.id = id;
@@ -431,9 +437,9 @@ function setOptionsByType(select,type)
     
 }
 
-function createMultiSelectItem(id, label, styleProperty,text,type,attribute)
+function createMultiSelectItem(id, label, styleProperty)
  {
-    console.log(text);
+
     var div = document.createElement("div");
     div.style.display = 'flex';
     div.style.flexDirection = 'column';

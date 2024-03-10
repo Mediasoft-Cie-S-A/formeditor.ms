@@ -17,12 +17,11 @@
 
 function createDatabaseGrid(type) {
     var main= document.createElement('div');
-    main.className = 'form-container';
+    main.className = 'grid-container';
     main.id=type+ Date.now(); // Unique ID for each new element
     main.draggable = true;
     main.tagName=type;
     main.style.height = '450px';
-
     return main;
 }
 
@@ -38,7 +37,9 @@ function editDatabaseGrid(type,element,content)
         updateGridData(main,content);
     };
     content.appendChild(button);
-    content.appendChild(createMultiSelectItem("Data", "data", "data",element.getAttribute('data'),"text",true));
+    content.appendChild(createMultiSelectItem("Data", "data", "data"));
+    content.appendChild(createMultiSelectItem("Link", "link", "link")); 
+
     content.appendChild(createSelectItem("Filter", "filter", "filter",element.getAttribute('filter'),"text",true));  
 
     // load the data
@@ -47,6 +48,15 @@ function editDatabaseGrid(type,element,content)
     {
         var target=content.querySelector('#Data');
         var jsonData=JSON.parse(element.getAttribute('datasetgrid'));
+        jsonData.forEach(fieldJson => {
+            addFieldToPropertiesBar(target,fieldJson);
+        });
+    }
+
+    if (element.getAttribute('datalink')!=null)
+    {
+        var target=content.querySelector('#Link');
+        var jsonData=JSON.parse(element.getAttribute('datalink'));
         jsonData.forEach(fieldJson => {
             addFieldToPropertiesBar(target,fieldJson);
         });
@@ -71,13 +81,15 @@ function updateGridData(main,content)
           jsonData.push(json);
     });
     main.setAttribute("dataSetGrid",JSON.stringify(jsonData));
+    // create intermedite div container
+ 
     renderGrid(main);
 }
 
-function renderGrid(element)
+function renderGrid(main)
 {
     // get the data from the element
-    var data=element.getAttribute("dataSetGrid");
+    var data=main.getAttribute("dataSetGrid");
     // parse the json
     var jsonData=JSON.parse(data);
     console.log(jsonData);
@@ -88,33 +100,28 @@ function renderGrid(element)
         datasetFields.push(field.fieldName);
         datasetFieldsTypes.push(field.fieldType);
     });
-
-    element.innerHTML="";
-    element.style.padding="10px";
+    main.innerHTML="";
+    main.style.padding="10px";
    
-    var div = document.createElement('div');
-    div.className = 'table-container';
-    div.id="Data-Grid_"+element.id;
+    var table = document.createElement('table');
+    table.className = 'table-container';
+    table.id="Data-Grid_"+jsonData[0].tableName;
     
-    createGrid(div,jsonData[0].tableName,datasetFields,datasetFieldsTypes);
-    element.appendChild(div);
+    createGrid(table,jsonData[0].tableName,datasetFields,datasetFieldsTypes);
+    main.appendChild(table);
     // generate div for the dataset
     var datasetDiv = document.createElement('div');
     datasetDiv.className = 'dataset-container';
     datasetDiv.id="DataSet_"+jsonData[0].tableName;
-    datasetDiv.setAttribute("grid-id",div.id);
+    datasetDiv.setAttribute("grid-id",table.id);
+    main.appendChild(datasetDiv);
     insertNavBar(datasetDiv,jsonData[0].tableName,datasetFields,datasetFieldsTypes);
-    element.appendChild(datasetDiv);
+   
     
 }
 
 function insertNavBar(gridContainer,tableName,datasetFields,datasetFieldsTypes)
-{
-   
-   
-
-    
-    // create search structure
+{  // create search structure
       // search header
       var search = document.createElement('div');
       search.style.display="inline-block";
@@ -151,14 +158,10 @@ function insertNavBar(gridContainer,tableName,datasetFields,datasetFieldsTypes)
             input.className="input-element";
           input.setAttribute("id","searchValue");
           // set search event on keyup
-          input.addEventListener("keyup", function(event) {
-              if (event.keyCode === 13) {
-                      event.preventDefault();
-                      grid.setAttribute("current_page",1);
-                      removeAllChildRows(grid);
-                      gridFetchData(grid) ;
-              }
-          });
+          //get the search fields by options index
+
+          input.setAttribute("onkeyup",`searchGrid(searchfields.options[searchfields.options.selectedIndex].value,searchOperator.value,this.value,"${gridContainer.parentElement.id}")`);
+         
           search.appendChild(input);
   
     
@@ -253,7 +256,7 @@ function grid_page_size(e,dataGridId) {
 
     gridTable.setAttribute("page_size",pageSize);
     gridTable.setAttribute("current_page",1);
-    searchGrid("",grid);
+    searchGrid("","","",grid);
 }
 
 function gridPrev(e,tableName) {
@@ -296,7 +299,10 @@ function gridNext(e,tableName) {
     }
 }
 
-function searchGrid(filter,grid){
+function searchGrid(filterName,FilterOp,filterValue,gridID){
+    console.log(filterName + " " + FilterOp + " " + filterValue);
+    const grid=document.getElementById(gridID);
+  //  console.log(grid);
     const tableGrid = grid.querySelector('table');
     tableGrid.setAttribute("current_page",1);
     var tableName=tableGrid.getAttribute("Table-Name");
@@ -304,7 +310,10 @@ function searchGrid(filter,grid){
     var datasetFieldsTypes=tableGrid.getAttribute("Dataset-Fields-Types");
     removeAllChildRows(tableGrid);
     var pageSize=parseInt(tableGrid.getAttribute("page_size"));
-    gridGetData(tableGrid,tableName,1,pageSize,datasetFields,filter );
+    var filter=filterName+'|'+FilterOp+'|'+filterValue;
+    console.log(filter + " " + tableName + " " + pageSize + " " + datasetFields);
+
+    gridGetData(tableGrid,tableName,1,pageSize,datasetFields, filter);
 
 }
 

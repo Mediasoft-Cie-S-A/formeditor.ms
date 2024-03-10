@@ -462,7 +462,7 @@ app.get('/table-data/:tableName/:page/:pageSize', checkAuthenticated,  async (re
          // Get the fields from the query string. It's a comma-separated string.
          const fields = req.query.fields ? req.query.fields.split(',') : null;
         const filter = req.query.filter ? req.query.filter : null;
-       
+        console.log("filter",filter);
         const data = await db.queryDataWithPagination(tableName, pageNum, pageSizeNum,fields,filter);
         res.json(data);
     } catch (err) {

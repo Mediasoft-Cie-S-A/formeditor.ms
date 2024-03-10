@@ -44,35 +44,85 @@ function createElementCombox(type) {
 function editElementCombox(type,element,content)
 {
    // adding tableName property to the element
-  
+   const button = document.createElement('button');
+   button.textContent = 'update';
+   button.onclick = function() {
+       const propertiesBar = document.getElementById('propertiesBar');
+       const gridID=propertiesBar.querySelector('label').textContent;
+                
+       const main = document.getElementById(gridID);  
+       updateComboBoxData(main,content);
+   };
+   content.appendChild(button);
+   content.appendChild(createMultiSelectItem("Data", "data", "data"));
+   content.appendChild(createMultiSelectItem("Link", "link", "link")); 
+
+   content.appendChild(createSelectItem("Filter", "filter", "filter",element.getAttribute('filter'),"text",true));  
+
+   // load the data
+   // check if jsonData is not empty
+   if (element.getAttribute('datasetgrid')!=null)
+   {
+       var target=content.querySelector('#Data');
+       var jsonData=JSON.parse(element.getAttribute('datasetgrid'));
+       jsonData.forEach(fieldJson => {
+           addFieldToPropertiesBar(target,fieldJson);
+       });
+   }
+
+   if (element.getAttribute('datalink')!=null)
+   {
+       var target=content.querySelector('#Link');
+       var jsonData=JSON.parse(element.getAttribute('datalink'));
+       jsonData.forEach(fieldJson => {
+           addFieldToPropertiesBar(target,fieldJson);
+       });
+   }
 }
 
+function updateComboBoxData(main,content)
+{
+   // get all the span elements from data 
+ var data=content.querySelectorAll('#Data span[name="dataContainer"]');
+ // generate the json of all the data
+ var jsonData=[];
+ data.forEach(span => {
+     console.log(span.getAttribute("data-field"));
+    // get the json data from the span
+      var json=JSON.parse(span.getAttribute("data-field"));
+     // add the field to the json
+       jsonData.push(json);
+ });
+ main.setAttribute("datasearch",JSON.stringify(jsonData));
+
+// get all the span elements from data 
+var link=content.querySelectorAll('#Link span[name="dataContainer"]');
+// generate the json of all the data
+var jsonData=[];
+link.forEach(span => {
+    console.log(span.getAttribute("data-field"));
+   // get the json data from the span
+     var json=JSON.parse(span.getAttribute("data-field"));
+    // add the field to the json
+      jsonData.push(json);
+});
+main.setAttribute("datalink",JSON.stringify(jsonData));
+
+refreshCombox(main);
+}
 
 function refreshCombox(element) {
-    const tableName = element.getAttribute("data-table-name");
-    const fieldName = element.getAttribute("data-field-name");
-   
-    // qeurry the database
-    fetch('/get-distinct-data/?tableName=' + tableName)
-        .then(response => {
-            if (!response.ok) {
-                showToast('Error: ' + response.statusText);
-            }
-            return response.json();
-        })
-        .then(data => {
-            // create the options
-            var select = element.getElementsByTagName('select')[0];
-            select.innerHTML = '';
-            data.forEach(function (item) {
-                var option = document.createElement('option');
-                option.value = item[fieldName];
-                option.text = item[fieldName];
-                select.appendChild(option);
-            });
-        })
-        .catch(error => {
-           showToast('Error: ' + error);
-        });
-
+  // get the data from the element
+  var data=main.getAttribute("dataSetGrid");
+  // parse the json
+  var jsonData=JSON.parse(data);
+  console.log(jsonData);
+  // get the main div
+  var datasetFields=['rowid'];
+  var datasetFieldsTypes=['rowid'];
+  jsonData.forEach(field => {
+      datasetFields.push(field.fieldName);
+      datasetFieldsTypes.push(field.fieldType);
+  });
+    console.log(datasetFields);
 }
