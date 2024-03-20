@@ -94,5 +94,5 @@ Create a new CSS file for the component in the public/css/components directory. 
 
 After you've added the new component, you may need to restart your server to see the changes.
 
-Please note that the exact steps may vary depending on the specifics of your project.
+
 
