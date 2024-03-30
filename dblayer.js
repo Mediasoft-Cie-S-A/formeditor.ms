@@ -325,7 +325,7 @@ app.get('/get-record-by-rowid/:tableName/:rowID', checkAuthenticated, async (req
         const tableName = req.params.tableName;
         const rowID = req.params.rowID;
          // Get the fields from the query string. It's a comma-separated string.
-         const fields = req.query.fields ? req.query.fields.split(',') : null;
+         const fields = req.query.fields ? req.query.fields.split(',') : 'ROWID';
 
         const record = await db.getRecordByRowID(tableName,fields, rowID);
         res.json(record);

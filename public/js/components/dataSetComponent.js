@@ -289,15 +289,30 @@ function navigateRecords(action, tableName,datasetFields, rowNum = '') {
 // use the fetch function to call the web service and update the inputs with the data
 // use the updateInputs function to update the inputs with the data
 // use the setRowID function to set the current row id in the navigation bar
-async function linkRecordToGrid(tableName,datasetFields, rowId,rowNum) {
+async function linkRecordToGrid(tableName,rowId,rowNum) {
     try {
- 
-        const url = `/get-record-by-rowid/${tableName}/${rowId}?fields=${datasetFields}`;
-        fetch(url).then(response => response.json()).then(data => {
-            updateInputs(data,tableName);
-            setRowNum(tableName,rowNum); // Assuming the data includes ROWID to-do check if the data includes ROWID
-        }).catch(error => showToast('Error:'+ error));
-        
+            // get all the datasets
+    const datasets = document.querySelectorAll("#DataSet_"+tableName);    
+        console.log(datasets);
+    // for all the datasets check the div with name DataSet
+    datasets.forEach(dataset => {
+                    console.log(dataset);
+                    // get table name from the dataset
+                    datasetTableName=dataset.getAttribute("data-table-name");
+                    // if the table name is the same as the table name of the record
+                    if (datasetTableName==tableName)
+                    {
+                    // get the fields from the dataset
+                    const datasetFields = dataset.getAttribute('dataset-fields-list');
+                    console.log(datasetFields);
+                
+                    const url = `/get-record-by-rowid/${tableName}/${rowId}?fields=${datasetFields}`;
+                    fetch(url).then(response => response.json()).then(data => {
+                        updateInputs(data,tableName);
+                        setRowNum(tableName,rowNum); // Assuming the data includes ROWID to-do check if the data includes ROWID
+                    }).catch(error => showToast('Error:'+ error));
+                }
+      });
     } catch (error) {
         console.error('Error:', error);
     }

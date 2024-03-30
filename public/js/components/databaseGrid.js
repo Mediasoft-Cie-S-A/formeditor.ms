@@ -103,8 +103,9 @@ function renderGrid(main)
     main.innerHTML="";
     main.style.padding="10px";
    
-    var table = document.createElement('table');
+    var table = document.createElement('div');
     table.className = 'table-container';
+    table.setAttribute("tag-Name","dataTable");
     table.id="Data-Grid_"+jsonData[0].tableName;
     
     createGrid(table,jsonData[0].tableName,datasetFields,datasetFieldsTypes);
@@ -124,7 +125,7 @@ function insertNavBar(gridContainer,tableName,datasetFields,datasetFieldsTypes)
 {  // create search structure
       // search header
       var search = document.createElement('div');
-      search.style.display="inline-block";
+      search.style.display="table";
       var searchfields=document.createElement('select');
       searchfields.className="input-element";
       searchfields.setAttribute("id","searchfields");
@@ -169,7 +170,7 @@ function insertNavBar(gridContainer,tableName,datasetFields,datasetFieldsTypes)
     html+=`<div class="navigation-bar-title">Record: </div>`;
     html+=search.outerHTML;
  
-    html+=`<span style='font-size:8px'>Page Size:</span><select id="gridPage" class="input-element" onchange='grid_page_size(event,"${gridContainer.id}")' style='width:60px;font-size:8px'>`;
+    html+=`<span style='font-size:8px'>Page Size:</span><select id="gridPage" class="input-element" onchange='grid_page_size(event,"${gridContainer.parentElement.id}")' style='width:60px;font-size:8px'>`;
     html+=`<option value='5'>5</option>`;
     html+=`<option value='10'>10</option>`;
     html+=`<option value='20'>20</option>`;
@@ -177,11 +178,11 @@ function insertNavBar(gridContainer,tableName,datasetFields,datasetFieldsTypes)
     html+=`<option value='100'>100</option>`;
     html+=`</select>`;   // record count
     
-    html+=`<button name='revGRIDBtn'  title='Previus Page'  onclick='gridPrev(event,"${tableName}")'><i class='bi bi-arrow-left-circle-fill'  style='color:blue;'></i></button>`;
-    html+=`<button name='NextGRIDBtn' title='Next Page' onclick='gridNext(event,"${tableName}")'><i class='bi bi-arrow-right-circle-fill'  style='color:blue;'></i></button>`;
-    html+=`<button name='RefreshGRIDBtn' title='Refresh' onclick='refresh(event,"${tableName}")'><i class='bi bi-arrow-repeat'  style='color:green;'></i></button>`;
-    html+=`<button name='PostitGRIDBtn' title='Postit' onclick='postit(event,"${tableName}")'><i class='bi bi-card-text' style='color:#aa0;'></i></button>`;
-    html+=`<button name='ExportGRIDBtn' title='Export Data' onclick='export2CSV(event,"${tableName}")'><i class='bi bi-file-spreadsheet' style='color:green;'></i></button></div>`;
+    html+=`<button name='revGRIDBtn'  title='Previus Page'  grid-id='${gridContainer.parentElement.id}' onclick='gridPrev(event,"${tableName}")'><i class='bi bi-arrow-left-circle-fill' grid-id='${gridContainer.parentElement.id}'  style='color:blue;'></i></button>`;
+    html+=`<button name='NextGRIDBtn' title='Next Page'  grid-id='${gridContainer.parentElement.id}' onclick='gridNext(event,"${tableName}")'><i class='bi bi-arrow-right-circle-fill' grid-id='${gridContainer.parentElement.id}' style='color:blue;'></i></button>`;
+    html+=`<button name='RefreshGRIDBtn' title='Refresh'  grid-id='${gridContainer.parentElement.id}' onclick='refresh(event,"${tableName}")'><i class='bi bi-arrow-repeat' grid-id='${gridContainer.parentElement.id}'  style='color:green;'></i></button>`;
+    html+=`<button name='PostitGRIDBtn' title='Postit'  grid-id='${gridContainer.parentElement.id}' onclick='postit(event,"${tableName}")'><i class='bi bi-card-text' grid-id='${gridContainer.parentElement.id}' style='color:#aa0;'></i></button>`;
+    html+=`<button name='ExportGRIDBtn' title='Export Data'  grid-id='${gridContainer.parentElement.id}' onclick='export2CSV(event,"${tableName}")'><i class='bi bi-file-spreadsheet' grid-id='${gridContainer.parentElement.id}' style='color:green;'></i></button></div>`;
     html+=`<div id="Data-Grid-Postit" style="display:none;position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.5); z-index: 1000;"></div>`;    
     html+="</div>";
 
@@ -204,27 +205,27 @@ function createGrid(grid,tableName,datasetFields,datasetFieldsTypes)
     grid.setAttribute("Table-Name",tableName);
    
     // table header
-    var header = document.createElement('thead');
-    header.className = 'grid-row';
+    var header = document.createElement('div');
+    header.className = 'grid-header';
   
     // header
 
 
-    var row = document.createElement('tr');
+    var row = document.createElement('div');
     row.className = 'grid-row';
 
     datasetFields.forEach(field => {
         if (field!=='rowid')
             {
-                const cell = document.createElement('td');
+                const cell = document.createElement('div');
                 cell.className = 'grid-cell-header';        
                 cell.textContent = field!=='rowid'?field:'';
                 row.appendChild(cell);
             }
             else
             {
-                const cell = document.createElement('td');
-                cell.style.width = '1px';
+                const cell = document.createElement('div');
+                cell.style.display="none";
                 cell.className = '';        
                 cell.textContent = '';
                 row.appendChild(cell);
@@ -238,7 +239,7 @@ function createGrid(grid,tableName,datasetFields,datasetFieldsTypes)
    
     grid.setAttribute("Dataset-Fields-Names",datasetFields);
     grid.setAttribute("Dataset-Fields-Types",datasetFieldsTypes);
-    const body = document.createElement('tbody');
+    const body = document.createElement('div');
     body.className = 'grid-body';
     grid.appendChild(body);
     //set search inputs
@@ -252,23 +253,22 @@ function grid_page_size(e,dataGridId) {
     console.log(pageSize);
     // get parent grid 
     const grid=document.getElementById(dataGridId);
-    const gridTable=grid.querySelector('table');
+    console.log(grid);
+    const gridTable=grid.querySelector('[tag-Name="dataTable"]');
 
     gridTable.setAttribute("page_size",pageSize);
     gridTable.setAttribute("current_page",1);
-    searchGrid("","","",grid);
+    searchGrid("","","",dataGridId);
 }
 
 function gridPrev(e,tableName) {
     e.preventDefault();
     // get parent grid n
-    const gridID=e.target.parentElement.parentElement.parentElement.parentElement.getAttribute("grid-id");
-    const grid=document.getElementById(gridID);
+    const mainID=e.target.getAttribute("grid-id");
+    const grid=document.getElementById(mainID).querySelector('[dataset-table-name="'+tableName+'"]');
     console.log(grid);
     
-    const gtableName=grid.getAttribute("table-name"); 
-
-    if (tableName==gtableName)
+    if (grid)
     {             
         var currentPage=parseInt(grid.getAttribute("current_page"));
         if (currentPage>1)
@@ -285,11 +285,14 @@ function gridPrev(e,tableName) {
 function gridNext(e,tableName) {
     e.preventDefault();
     // get parent grid n
-    const gridID=e.target.parentElement.parentElement.parentElement.parentElement.getAttribute("grid-id");
-    const grid=document.getElementById(gridID);
-    const gtableName=grid.getAttribute("table-name"); 
-    console.log(tableName + " " + gtableName);
-    if (tableName==gtableName)
+    console.log(e.target);
+    const mainID=e.target.getAttribute("grid-id");
+    console.log(mainID);
+    const grid=document.getElementById(mainID).querySelector('[dataset-table-name="'+tableName+'"]');
+    console.log(grid);
+    // get the json 
+   
+    if (grid)
     {             
         var currentPage=parseInt(grid.getAttribute("current_page"));
         currentPage++;
@@ -302,15 +305,20 @@ function gridNext(e,tableName) {
 function searchGrid(filterName,FilterOp,filterValue,gridID){
     console.log(filterName + " " + FilterOp + " " + filterValue);
     const grid=document.getElementById(gridID);
-  //  console.log(grid);
-    const tableGrid = grid.querySelector('table');
+    
+    const tableGrid = grid.querySelector('[tag-name="dataTable"]');
     tableGrid.setAttribute("current_page",1);
     var tableName=tableGrid.getAttribute("Table-Name");
     var datasetFields=tableGrid.getAttribute("Dataset-Fields-Names");
     var datasetFieldsTypes=tableGrid.getAttribute("Dataset-Fields-Types");
     removeAllChildRows(tableGrid);
     var pageSize=parseInt(tableGrid.getAttribute("page_size"));
+    // check if filter is empty
     var filter=filterName+'|'+FilterOp+'|'+filterValue;
+    if (filterValue=="" )
+    {
+        filter="";
+    }
     console.log(filter + " " + tableName + " " + pageSize + " " + datasetFields);
 
     gridGetData(tableGrid,tableName,1,pageSize,datasetFields, filter);
@@ -332,7 +340,7 @@ function export2CSV(e,tabelName) {
 //remove all rows except the row get have the header attribute  
 function removeAllChildRows(grid) {
     // get body form the table
-    const body = grid.querySelector('tbody');
+    const body = grid.querySelector('.grid-body');
   //remove all rows in the body
     while (body.firstChild) {
         body.removeChild(body.firstChild);
@@ -393,7 +401,7 @@ function getFilterType(fieldType)
 async function gridGetData(grid,tableName,page,pageSize,datasetFields,filter)
 {    
     //get body form the table
-    const body = grid.querySelector('tbody');
+    const body = grid.querySelector('.grid-body');
     console.log(body);
     // Prepare the URL
     const url = `/table-data/${tableName}/${page}/${pageSize}?fields=${datasetFields}&filter=${filter}`;
@@ -405,16 +413,16 @@ async function gridGetData(grid,tableName,page,pageSize,datasetFields,filter)
         }
         const data = await response.json();
         // The data is now available
-        for (var j = 0; data.length; j++) {
-            const row = data[j];
-            // console.log(Object.values(row));
-            var rowDiv = document.createElement('tr');
+        for (var j = 0; j<data.length; j++) {
+            const row = Object.values(data[j]);
+            console.log(row);
+            var rowDiv = document.createElement('div');
             if (j % 2 == 0)
               rowDiv.style.backgroundColor = "#f2f2f2";
             else
                 rowDiv.style.backgroundColor = "#ffffff";
             rowDiv.className = 'grid-row';
-            rowDiv.setAttribute("rowid", row.rowid);
+            rowDiv.setAttribute("rowid", row[0]);
             // add click event to row to call linkRecordToGrid(tableName, rowId)
             rowDiv.addEventListener("click", function (event) {
                 event.preventDefault();
@@ -430,24 +438,31 @@ async function gridGetData(grid,tableName,page,pageSize,datasetFields,filter)
                 */
                 var datasetDiv =document.getElementById('DataSet_' + tableName);
                 const datasetFieldsLink = datasetDiv.getAttribute("Dataset-Fields-List");
-                    console.log(datasetFieldsLink + " " + row.rowid + " " + j + page * pageSize);
-                    linkRecordToGrid(tableName, datasetFieldsLink, row.rowid, j + page * pageSize);
+                    console.log(datasetFieldsLink + " " + row[0] + " " + j + page * pageSize);
+                    linkRecordToGrid(tableName,  row[0], j + page * pageSize);
             });
             var i = 0;
-            Object.values(row).forEach(field => {
+            row.forEach(field => {
 
-                const cell = document.createElement('td');
+                const cell = document.createElement('div');
                 cell.className = 'grid-cell';
 
                 rowDiv.appendChild(cell);
                 // skip rowid field
-                if (i > 0) {
+                if (i == 0) {
+                   cell.style.display="none";
+                   cell.textContent = field;
+                }else
+                {
                     cell.textContent = field;
                 }
                 i++;
             });
             body.appendChild(rowDiv);
         }
+       let row = document.createElement('div');
+       row.style.height="100%";
+         body.appendChild(row);
     } catch (error) {
         console.error('Error:', error);
     }

@@ -21,6 +21,7 @@
     overflow: auto;
     justify-content: start;
     vertical-align: top;
+    display: table;
 }
 
     
@@ -44,7 +45,7 @@
 }
 
 .grid-table {
-    min-height: 400px; 
+    display: flex;
     overflow-y: auto; 
     vertical-align: top;
    
@@ -63,24 +64,29 @@
 }
 
 .grid-row {
-    height: 30px;
-
+    height: 35px;
     border-bottom: 1px solid #ccc;
+    display: table-row;
+    vertical-align: top;
 }
 .grid-row:hover {
     
     color:  #6d7fcc;
+    
 }
 
 
 .grid-cell {
     padding: 5px;
-    height: 30px;
+    display: table-cell;
+    overflow: hidden;
+    
 }
 
 .grid-body {
    vertical-align: top;
-   
+   display: table-row-group;
+   align-items: top;
 }
 
 
@@ -89,4 +95,15 @@
  
     background-color: #6d7fcc;
     color: white;
+    display: table-cell;
+
+}
+
+.grid-header{
+    display: table-header-group;
+    background-color: #6d7fcc;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    padding: 5px;
 }

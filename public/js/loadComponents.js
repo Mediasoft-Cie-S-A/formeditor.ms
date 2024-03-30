@@ -190,7 +190,10 @@ function drop(event) {
     var elementId = event.dataTransfer.getData("text");
     console.log("elementId:"+elementId);
             var newElement = createFormElement(elementId);
+            if(event.target.childElementCount)
+            {
             newElement.setAttribute("position", event.target.childElementCount);
+            }
             if (newElement) {
                 event.target.appendChild(newElement);
             }

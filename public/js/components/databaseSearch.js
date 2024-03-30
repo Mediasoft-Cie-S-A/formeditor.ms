@@ -103,19 +103,18 @@ function RenderDataSearch(main)
     var i=0;
     jsonData.forEach(field => {
             // generate the search html
-            var html="<div class='form-container'><div class='search' id='search_"+field.tableName+ Date.now()+"'>";
-            html+="<label id='search_"+field.tableName+ Date.now()+"Label'>"+field.fieldLabel+"</label>";
+            var html="<div class='searchMain' id='search_"+field.tableName+ Date.now()+"' >";
             html+="<div class='search' id='search_"+field.tableName+"_searchDiv'>";
-            html+="<input type='text' id='search_"+field.tableName+"_input' list='searchList' autocomplete='off' ";
+            html+="<input type='text' id='search_"+field.tableName+"_input' list='searchList' placeholder='"+field.fieldLabel+"'  autocomplete='off' ";
             html+="oninput='searchAutoComplete(event,this)' ";
             html+=" data-value-table-name='"+field.tableName+"'";   
             html+=" data-value-field-name='"+field.fieldName+"'"; 
             html+=" data-value-field-type='"+field.fieldType+"'"; 
             html+=" onclick='this.parentElement.querySelector(\".autocomplete-results\").style.display=\"none\"'>";
             html+=" <button type='button' onclick='gridSearch(event)'>";
-            html+="<i class='search-icon'>&#128269;</i> </button>";
+            html+="<i class='fas fa-search'></i> </button>";
             html+="<div id='search_"+field.tableName+ Date.now()+"_autocomplete' class='autocomplete-results'>";
-            html+="</div></div></div></div>";
+            html+="</div></div></div>";
             searchMainDiv.innerHTML+=html;
             i++;
     });
@@ -126,10 +125,15 @@ function RenderDataSearch(main)
 function gridSearch(event)
 {
     event.preventDefault();
+    const maindiv=event.target.parentElement.parentElement;
+    // get autocomplete div¨
+
+    const autocomplete = maindiv.querySelector('.autocomplete-results');
+    //hide autocomplete div
+    autocomplete.style.display="none";
     // get the input element
-    let button = event.target;
-    console.log(button);    
-    const element = button.parentElement.querySelector('input');
+       
+    const element = maindiv.querySelector('input');
     console.log(element);
     const filedName = element.getAttribute("data-value-field-name");
     const searchValue =element.value;
@@ -202,25 +206,24 @@ function searchAutoComplete(event,element)
                 (parseInt( getAbsoluteOffset(element).top) + 
                  parseInt(element.offsetHeight))+
                  'px;width:'+element.offsetWidth+'px;');
+                 
             data.forEach(row => {
                 
                 var rowDiv = document.createElement('div');
                 rowDiv.className = 'autocomplete-row';
-                
                 rowDiv.setAttribute("data-value-table-name",tableName);
                 rowDiv.setAttribute("data-value-field-name",fieldName);
                 rowDiv.setAttribute("data-value-field-type",fieldType);
-             
                 rowDiv.addEventListener("click", function(event) {
                     event.preventDefault();
                    
                     element.value=row[fieldName];
                     autocomplete.style.display="none";
                   });
-                var i=0;
+                
                 rowDiv.innerHTML=row[fieldName];
                 autocomplete.appendChild(rowDiv);
-                console.log(row);
+              //  console.log(row);
             });
         })
         .catch(error => {

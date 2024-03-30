@@ -311,6 +311,7 @@ async getRecordByRowID(tableName, fields, rowID) {
     // Assuming 'rowID' is the ROWID of the record to move to
     if (fields && fields.length > 0) {
         const fieldList = fields.map(field => `"${field}"`).join(', ').replace("\"rowid\"","rowid");
+        console.log(fieldList);
         const query = `SELECT ${fieldList} FROM PUB.${tableName} WHERE ROWID = '${rowID}'`;
         console.log(query);
         return this.queryData(query);
