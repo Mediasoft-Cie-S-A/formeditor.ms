@@ -1,4 +1,14 @@
 {
+    "dataSetWeb": {
+        "type": "dataSetWeb",
+        "description": "Data Set Web",
+        "category": "Web Server",
+        "scriptName": "dataSetComponentWeb.js",
+        "createFunction": "createElementDataSetWeb",
+        "editFunction": "editElementDataSetWeb",
+        "styles": "dataSetComponentWeb.css",
+        "icon": "fa fa-database"
+    },
     "dataSet": {
         "type": "dataSet",
         "description": "Data Set",

@@ -148,6 +148,8 @@ function exportJson() {
             console.log("editForm");   
                 // Load forms
             drageDroptableTableList(document.getElementById('drageDroptablesList'));
+            dragDropApiList(document.getElementById("dragDropApiList"));
+
         }
 
         if (target === '#renderForm') {

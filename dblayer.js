@@ -16,7 +16,7 @@
 
 const { query } = require('express');
 const OdbcDatabase = require('./OdbcDatabase'); 
-const he = require('he');
+// const he = require('he');
 
 module.exports = function(app,session, passport) {
     const checkAuthenticated = (req, res, next) => {

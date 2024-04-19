@@ -1148,3 +1148,72 @@ input.apple-switch:checked:after {
     
 
 }
+
+.web-controller {
+    padding: 10px;
+    width: 800px;
+  }
+  
+  .web-method {
+    font-weight: bold;
+    color: #007bff;
+  }
+  
+  .web-api {
+    padding: 10px;
+    border: 1px solid grey;
+  }
+  
+  #web-controller-split {
+    padding: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two columns with equal width */
+    grid-gap: 20px; /* Gap between grid items */
+    border: 1px solid grey;
+    margin-bottom: 10px;
+  }
+  .web-api-bold {
+    font-weight: bold;
+  }
+  
+  .input-output-table {
+    margin-top: 5px;
+  }
+  
+  .api-list-item {
+    margin: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-top: #4d61fc 7px solid;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.5s;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    vertical-align: top !important;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  
+  .api-list-item::-webkit-scrollbar {
+    width: 10px;
+  }
+  
+  .api-list-item::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  .api-list-item::-webkit-scrollbar-thumb {
+    background: #3b97e3;
+    border-radius: 3px;
+  }
+  
+  .api-list-item::-webkit-scrollbar-thumb:hover {
+    background: #4d61fc;
+    border-radius: 3px;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  }
+  
