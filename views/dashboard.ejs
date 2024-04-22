@@ -61,6 +61,8 @@
                     <li class="render-tab"><a data-toggle="tab" href="#renderForm">.:Render Form:.</a></li>
                     <li><a data-toggle="tab" href="#editForm">.:Edit Form:.</a></li>
                     <li><a data-toggle="tab" href="#DatabaseForm">.:Database Form:.</a></li>
+                    <li><a data-toggle="tab" href="#WebServer">.:Web Server:.</a></li>
+
                     
                 </ul>
                 
@@ -149,6 +151,20 @@
                                     </div>
                                 </div>
                             </td>
+                            <td style="width: 200px">
+                                <div>
+                                  <div>
+                                    <input
+                                      type="text"
+                                      placeholder="filter.. API"
+                                      name="searchApi"
+                                      onchange="searchApi(this.value,'dragDropApiList')"
+                                    />
+                                  </div>
+                                  <div id="dragDropApiList" style="overflow: auto"></div>
+                                  <!-- Web Server will be listed here -->
+                                </div>
+                            </td>
                             <td style="width: 200px;">
                                 <div >
                                     <div  >
@@ -201,6 +217,23 @@
                                     </tr>
                                 </table>
                             </div>
+                        </div>
+                    </div>
+                    <div id="WebServer" class="tab-pane fade">
+                        <!-- Rendered form will be displayed here -->
+                        <div class="container-fluid">
+                          <div class="row">
+                            <div class="title-element">
+                              <h2>Web Server</h2>
+                            </div>
+                            <button
+                              class="button database-header-button"
+                              onclick="loadWebServer()"
+                            >
+                              Load Web Server
+                            </button>
+                            <div id="web-api-container"></div>
+                          </div>
                         </div>
                     </div>
                    
@@ -320,6 +353,8 @@
     <script src="js/editor.js"></script>
     <script src="js/dom.js"></script>
     <script src="js/formSubmit.js"></script>
+    <script src="js/webserver.js"></script>
+
     
 
 </body>

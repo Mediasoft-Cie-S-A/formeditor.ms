@@ -478,6 +478,129 @@ function createMultiSelectItem(id, label, styleProperty)
     return div;
 }
 
+
+function createMultiSelectItemWeb(id, label, styleProperty) {
+    var div = document.createElement("div");
+    div.style.display = "flex";
+    div.style.flexDirection = "column";
+    div.style.padding = "5px";
+    div.style.minHeight = "100px";
+    div.style.border = "1px solid #ccc";
+    // rounded corners
+    div.style.borderRadius = "5px";
+    div.id = id;
+    div.style.className = "multi-select";
+    div.setAttribute("ObjectType", "data");
+    // set draggable attribute
+    div.setAttribute("draggable", "true");
+  
+    div.id = id;
+    var lbl = document.createElement("span");
+  
+    lbl.innerText = label;
+  
+    div.setAttribute("ondragover", "allowDrop(event)");
+    div.setAttribute("ondrop", "dropInputWeb(event)");
+  
+    div.appendChild(lbl);
+  
+    return div;
+  }
+  
+  function dropInputWeb(event) {
+    event.preventDefault();
+  
+    console.log("dropInputWeb");
+    //  console.log( event.dataTransfer);
+    var elementId = event.dataTransfer.getData("text");
+  
+    // get the element target
+    var target = event.target;
+    // get the element type
+  
+    var source = document.getElementById(elementId);
+    var fieldKind = source.getAttribute("data-field-kind");
+    if (fieldKind !== "outputs") return;
+    var isArray = source.getAttribute("data-field-array");
+    if (!isArray || isArray === "false") return;
+  
+    var controllerControllerName = source.getAttribute(
+      "data-controller-controllerName"
+    );
+    var controllerServerUrl = source.getAttribute("data-controller-serverUrl");
+    var apiId = source.getAttribute("data-api-id");
+    var apiName = source.getAttribute("data-api-name");
+    var apiMethod = source.getAttribute("data-api-method");
+    var apiPath = source.getAttribute("data-api-path");
+    var fieldName = source.getAttribute("data-field-name");
+    var fieldType = source.getAttribute("data-field-type");
+    var fieldFormat = source.getAttribute("data-field-format");
+    var fieldCode = source.getAttribute("data-field-code");
+    var fieldObject = source.getAttribute("data-field-object");
+    var fieldObjectName = source.getAttribute("data-field-objectName");
+    var fieldArray = source.getAttribute("data-field-array");
+    var fieldArrayName = source.getAttribute("data-field-arrayName");
+    var fieldId = source.getAttribute("data-field-id");
+  
+    // generate the json of all the fields attributes
+    var fieldJson = {
+      controllerControllerName: controllerControllerName,
+      controllerServerUrl: controllerServerUrl,
+      apiId: apiId,
+      apiName: apiName,
+      apiMethod: apiMethod,
+      apiPath: apiPath,
+      fieldName: fieldName,
+      fieldType: fieldType,
+      fieldFormat: fieldFormat,
+      fieldCode: fieldCode,
+      fieldObject: fieldObject,
+      fieldObjectName: fieldObjectName,
+      fieldArray: fieldArray,
+      fieldArrayName: fieldArrayName,
+      fieldId: fieldId,
+    };
+  
+    console.log('fieldJson')
+    console.log(fieldJson)
+  
+    if (target.type == "text") {
+      target.setAttribute("data-field", JSON.stringify(fieldJson));
+      target.value = fieldName;
+    } else addFieldToPropertiesBarWeb(target, fieldJson);
+  
+  }
+  
+  // function to adding new fileds to the properties bar
+  function addFieldToPropertiesBarWeb(target,fieldJson)
+  {
+      var dataObjet=target;
+      // create the div
+      var div = document.createElement("div");
+      div.classList.add("tables-list-item");
+      const elementId=fieldJson.fieldName+"_"+fieldJson.fieldId
+      div.id=elementId;
+      // get field name
+      
+      div.innerHTML=`<button class='remove-item' onclick='removeItem(event)'>x</button><span name='dataContainer' data-field='${JSON.stringify(fieldJson)}' >${fieldJson.fieldName}</span>`;
+      dataObjet.appendChild(div);
+    
+      // generate the select
+      var select = document.createElement("select");
+      div.appendChild(select);
+      // get the datatype
+      
+      setOptionsByType(select,fieldJson.fieldDataType);
+      // select the functionName in the function
+      
+        
+        // get the parent div height
+        var height=dataObjet.clientHeight + div.clientHeight;
+        // set the height of the parent div
+        dataObjet.style.height=height+30+"px";  
+  }
+  
+
 // function to adding new fileds to the properties bar
 function addFieldToPropertiesBar(target,fieldJson)
 {
