@@ -560,9 +560,15 @@ function dragDropApiList(list) {
         controller.apis.forEach((api) => {
           var listItem = document.createElement("div");
 
+          listItem.id = `API_${api.id}`;
+
           listItem.className = "api-list-item";
 
           listItem.textContent = api.name;
+          const apiDataInputs = getApiDataInputs(api);
+          const apiDataOutputs = getApiDataOutputs(api);
+          listItem.setAttribute('api-data-inputs',JSON.stringify(apiDataInputs));
+          listItem.setAttribute('api-data-outputs',JSON.stringify(apiDataOutputs));
           listItem.setAttribute(
             "data-controller-controllerName",
             controller.controllerName
@@ -578,12 +584,12 @@ function dragDropApiList(list) {
           var apiDetailsDiv = document.createElement("div");
 
           listItem.appendChild(apiDetailsDiv);
+          listItem.draggable = true;
           listItem.ondragstart = function (event) {
             drag(event);
           };
           listItem.onclick = function (event) {
             event.preventDefault();
-
             fetchApiFields(controller, api, apiDetailsDiv);
           };
           if (c === 0) list.appendChild(h5);

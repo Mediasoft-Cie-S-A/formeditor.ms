@@ -478,8 +478,81 @@ function createMultiSelectItem(id, label, styleProperty)
     return div;
 }
 
+function createSelectApiWeb(id, type="") {
+    var div = document.createElement("div");
+    div.style.display = "flex";
+    div.style.flexDirection = "column";
+    div.style.padding = "5px";
+    div.style.minHeight = "100px";
+    div.style.border = "1px solid #ccc";
+    // rounded corners
+    div.style.borderRadius = "5px";
+    div.id = id;
+    div.style.className = "multi-select";
+    div.setAttribute("ObjectType", "data");
+    // set draggable attribute
+    div.setAttribute("draggable", "true");
+  
+    div.id = id;
+    var lbl = document.createElement("span");
+  
+    lbl.innerText = type;
+  
+    div.setAttribute("ondragover", "allowDrop(event)");
+    div.setAttribute("ondrop", "dropSelectApiWeb(event, '" + type + "')");
+  
+    div.appendChild(lbl);
+  
+    return div;
+  }
 
-function createMultiSelectItemWeb(id, label, styleProperty) {
+  function dropSelectApiWeb(event, type) {
+    event.preventDefault();
+
+    console.log('type')
+    console.log(type)
+  
+    console.log("dropGetByIdWeb");
+    var elementId = event.dataTransfer.getData("text");
+  
+    // get the element target
+    var target = event.target;
+    // get the element type
+  
+    var source = document.getElementById(elementId);
+  
+    var apiDataInputs = JSON.parse(source.getAttribute("api-data-inputs"))  
+    var apiDataOutputs = JSON.parse(source.getAttribute("api-data-outputs"))  
+    var controllerControllerName = source.getAttribute("data-controller-controllerName");
+    var controllerServerUrl = source.getAttribute("data-controller-serverUrl");
+    var apiName = source.getAttribute("data-api-name");
+    var apiMethod = source.getAttribute("data-api-method");
+    var apiPath = source.getAttribute("data-api-path");
+    var apiId = source.getAttribute("data-api-id");
+  
+    var apiJSON = {
+      controllerControllerName: controllerControllerName,
+      controllerServerUrl: controllerServerUrl,
+      apiId: apiId,
+      apiName: apiName,
+      apiMethod: apiMethod,
+      apiPath: apiPath,
+      apiDataInputs: apiDataInputs,
+      apiDataOutputs: apiDataOutputs,
+    };
+  
+    var dataObjete=target;
+      // create the div
+      var div = document.createElement("div");
+      div.classList.add("tables-list-item");
+      const divId=type+"_"+apiJSON.apiId;
+      div.id=divId;
+      div.innerHTML=`<span name='dataContainer${type}' data-field='${JSON.stringify(apiJSON)}' >${apiJSON.apiName}</span>`;
+      dataObjete.appendChild(div);
+  
+  }
+
+function createMultiSelectItemWeb(id, label, styleProperty, isId=false) {
     var div = document.createElement("div");
     div.style.display = "flex";
     div.style.flexDirection = "column";
@@ -500,18 +573,17 @@ function createMultiSelectItemWeb(id, label, styleProperty) {
     lbl.innerText = label;
   
     div.setAttribute("ondragover", "allowDrop(event)");
-    div.setAttribute("ondrop", "dropInputWeb(event)");
+    div.setAttribute("ondrop", "dropInputWeb(event,"+ isId+")");
   
     div.appendChild(lbl);
   
     return div;
   }
   
-  function dropInputWeb(event) {
+  function dropInputWeb(event, isId) {
     event.preventDefault();
   
     console.log("dropInputWeb");
-    //  console.log( event.dataTransfer);
     var elementId = event.dataTransfer.getData("text");
   
     // get the element target
@@ -567,12 +639,12 @@ function createMultiSelectItemWeb(id, label, styleProperty) {
     if (target.type == "text") {
       target.setAttribute("data-field", JSON.stringify(fieldJson));
       target.value = fieldName;
-    } else addFieldToPropertiesBarWeb(target, fieldJson);
+    } else addFieldToPropertiesBarWeb(target, fieldJson, isId);
   
   }
   
   // function to adding new fileds to the properties bar
-  function addFieldToPropertiesBarWeb(target,fieldJson)
+  function addFieldToPropertiesBarWeb(target,fieldJson,isId)
   {
       var dataObjet=target;
       // create the div
@@ -581,7 +653,9 @@ function createMultiSelectItemWeb(id, label, styleProperty) {
       const elementId=fieldJson.fieldName+"_"+fieldJson.fieldId
       div.id=elementId;
       // get field name
-      
+      if(isId)
+      div.innerHTML=`<button class='remove-item' onclick='removeItem(event)'>x</button><span name='dataContainerId' data-field='${JSON.stringify(fieldJson)}' >${fieldJson.fieldName}</span>`;
+      else 
       div.innerHTML=`<button class='remove-item' onclick='removeItem(event)'>x</button><span name='dataContainer' data-field='${JSON.stringify(fieldJson)}' >${fieldJson.fieldName}</span>`;
       dataObjet.appendChild(div);
     

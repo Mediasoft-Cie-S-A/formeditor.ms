@@ -40,7 +40,16 @@ function createElementDataSetWeb(type) {
     };
     content.appendChild(button);
     content.appendChild(
-      createMultiSelectItemWeb("Data", "Array-Outputs", "data")
+      createMultiSelectItemWeb("Data", "Array-Outputs", "data", false)
+    );
+    content.appendChild(
+      createMultiSelectItemWeb("Data", "Id", "data",true)
+    );
+    content.appendChild(
+      createSelectApiWeb("Data", 'GetById')
+    );
+    content.appendChild(
+      createSelectApiWeb("Data", 'UpdateById')
     );
     // load the data
     // check if jsonData is not empty
@@ -60,14 +69,37 @@ function createElementDataSetWeb(type) {
     // get all the span elements from data
     var data = content.querySelectorAll('span[name="dataContainer"]');
     if (data.length == 0) return; // no data to update
+    //get id for Update
+    var dataId = content.querySelectorAll('span[name="dataContainerId"]');
+
+    var dataGetById = content.querySelectorAll('span[name="dataContainerGetById"]');
+    var dataUpdateById = content.querySelectorAll('span[name="dataContainerUpdateById"]');
+    var getById={};
+    var updateById={};
+    try{
+     getById = JSON.parse(dataGetById[0].getAttribute("data-field"));
+     updateById = JSON.parse(dataUpdateById[0].getAttribute("data-field"));
+    }catch{
+     getById = {};
+     updateById = {};
+    }
+    
+    var firstJson;
     // get the first span element
-    var firstJson = JSON.parse(data[0].getAttribute("data-field"));
+    if(dataId.length > 0)
+     firstJson = JSON.parse(dataId[0].getAttribute("data-field"));
+    else
+     firstJson = JSON.parse(data[0].getAttribute("data-field"));
+     
     // generate the json of all the data
     var jsonData = [
       {
         controllerControllerName: firstJson.controllerControllerName,
         apiId: firstJson.apiId,
-        fieldName: "rowid",
+        fieldId: `${main.id}_${firstJson.fieldId}`,
+        fieldName: firstJson.fieldName,
+        fieldArrayName: firstJson.fieldArrayName,
+        fieldArray: firstJson.fieldArray,
         fieldType: "rowid",
         fieldDataType: "rowid",
         fieldLabel: "rowid",
@@ -91,10 +123,10 @@ function createElementDataSetWeb(type) {
     );
     main.setAttribute("data-api-method", firstJson.apiMethod);
     main.setAttribute("data-api-id", firstJson.apiId);
-    renderDataSetWeb(main);
+    renderDataSetWeb(main, getById, updateById);
   }
   
-  function renderDataSetWeb(main) {
+  function renderDataSetWeb(main, getById, updateById) {
     main.innerHTML = "";
     main.style.height = "200px";
     console.log("renderDataSetWeb");
@@ -112,7 +144,7 @@ function createElementDataSetWeb(type) {
       dataset.appendChild(createField);
     });
     main.appendChild(dataset);
-    main.appendChild(createNavigationBarWeb(apiUrl, apiMethod, jsonData, apiId));
+    main.appendChild(createNavigationBarWeb(apiUrl, apiMethod, jsonData, apiId, getById, updateById));
     moveFirstWeb(apiUrl, apiMethod, apiId);
   }
   
@@ -183,7 +215,7 @@ function createElementDataSetWeb(type) {
   }
   
   // --- internal functions ---
-  function createNavigationBarWeb(apiUrl, apiMethod, jsonData, apiId) {
+  function createNavigationBarWeb(apiUrl, apiMethod, jsonData, apiId,getById, updateById) {
     console.log("createNavigationBarWeb");
     // Create the navigation bar div
     var navigationBar = document.createElement("div");
@@ -196,6 +228,9 @@ function createElementDataSetWeb(type) {
     navigationBar.setAttribute("data-api-url", apiUrl);
     navigationBar.setAttribute("data-api-method", apiMethod);
     navigationBar.setAttribute("data-api-id", apiId);
+    navigationBar.setAttribute("get-by-id", JSON.stringify(getById));
+    navigationBar.setAttribute("update-by-id", JSON.stringify(updateById));
+
     navigationBar.innerHTML = '<div class="navigation-bar-title">record: </div>';
     // Create buttons and append them to the navigation bar
     var buttons = [
@@ -224,6 +259,9 @@ function createElementDataSetWeb(type) {
         text: '<i class="bi bi-arrow-down-circle-fill" style="color:green;margin-left:-6px"></i>',
         event: "moveLastWeb('" + apiUrl + "','" + apiMethod + "','" + apiId + "')",
       },
+      { name:'EditDSBtn', title: 'Edit Record',text: '<i class="bi bi-credit-card-2-front" style="color:blue;margin-left:-6px"></i>', event: "EditRecordWeb('" + apiId + "')" },
+      { name: 'SaveDSBtn', title: 'Save Record', text: '<i class="bi bi-sim-fill" style="color:red;margin-left:-6px"></i>', event: "SaveRecordWeb('" + apiId + "')" },
+      
     ];
     var htm = "";
     //for the dom2json is mandatory to create a html for the events
@@ -271,6 +309,7 @@ function createElementDataSetWeb(type) {
     if (!response || response.status !== 200) return;
     const data = await response.json();
     if (!data) return;
+
     const length = getDataLength(apiId);
     updateInputsWeb(data, jsonData, apiId, length - 1);
     setRowNumWeb(apiId, length - 1);
@@ -319,6 +358,100 @@ function createElementDataSetWeb(type) {
     setRowNumWeb(apiId, row + 1);
     setDataLength(apiId, data[jsonData[1].fieldArrayName].length);
   }
+
+  function EditRecordWeb(apiId, handle=false)
+{
+  console.log('Edit Input')
+  const dataSetId = "#DataSetWeb_" + apiId;
+  const escapedDateSetId = dataSetId.replace(/\//g, "\\/");
+  const datasets = document.querySelectorAll(escapedDateSetId);
+  datasets.forEach((dataset) => {
+    const inputs = dataset.querySelectorAll("input");
+    inputs.forEach((input) => {
+      input.readOnly = handle;
+    });
+  });
+}
+  
+async  function SaveRecordWeb(apiId)
+{
+    console.log("DataSetWeb Update");
+  
+    const dataSetId = "DataSetWeb_" + apiId;
+    const dataSet = document.getElementById(dataSetId);
+    const main = dataSet.parentNode;
+    const jsonData = JSON.parse(main.getAttribute("dataSet"));
+    const input = document.getElementById(jsonData[0].fieldId);
+
+    const rowId = input.value;
+    if(!rowId) return;
+
+    const navBar = document.getElementById("navigationBar_"+apiId);
+    const getById=JSON.parse(navBar.getAttribute('get-by-id'));
+    const apiMethod= getById.apiMethod;
+    var apiUrl= getById.controllerServerUrl+getById.apiPath.slice(1);
+
+    const replaceString = "{"+getById.apiDataInputs[0].Name+"}";
+    apiUrl = apiUrl.replace(replaceString, rowId);
+
+    if (!apiUrl) return;
+    const responseGetById = await callApi(apiUrl, apiMethod);
+    if (!responseGetById || responseGetById.status !== 200) return;
+    let dataGetById = await responseGetById.json();
+
+    jsonData.map((field,index) => {
+      if(index === 0) return;
+      const input = document.getElementById(field.fieldId);
+      const val = input.value;
+      if(!val) return;
+      dataGetById[field.fieldArrayName][field.fieldName]=val;
+    }
+    );
+
+    const updateById=JSON.parse(navBar.getAttribute('update-by-id'));
+    const apiMethodUpdate= updateById.apiMethod;
+
+    var apiUrlUpdate= updateById.controllerServerUrl+updateById.apiPath.slice(1);
+    const replaceStringUpdate = "{"+updateById.apiDataInputs[0].Name+"}";
+    apiUrlUpdate = apiUrlUpdate.replace(replaceStringUpdate, rowId);
+
+    const filteredBody=updateById.apiDataInputs.filter((item) => item.Location==='Body');
+
+    let payload ={};
+
+    filteredBody.map((item) => {
+      const val= findValue(dataGetById, item.Name)
+      if(val) payload[item.Name]=val
+    });
+
+    if (!apiUrlUpdate) return;
+    const responseUpdateById = await callApi(apiUrlUpdate, apiMethodUpdate, payload);
+    if (!responseUpdateById || responseUpdateById.status !== 200) return;
+    let dataUpdateById = await responseUpdateById.json();
+
+    EditRecordWeb(apiId, true);
+}
+
+function findValue(obj, key) {
+  if (typeof obj !== "object" || obj === null) {
+    return undefined; 
+  }
+
+  if (key in obj) {
+    return obj[key]; 
+  }
+
+  for (const prop in obj) {
+    if (obj.hasOwnProperty(prop)) {
+      const value = findValue(obj[prop], key);
+      if (value !== undefined) {
+        return value;
+      }
+    }
+  }
+
+  return undefined; 
+}
   
   function updateInputsWeb(data, jsonData, apiId, row) {
     // get all the datasets
@@ -339,7 +472,6 @@ function createElementDataSetWeb(type) {
         if (fieldData[0].fieldFormat === "date-time") {
           fieldValue = fieldValue.split("T")[0];
         }
-  
         input.value = "";
         input.readOnly = true;
         if (!fieldValue) return;
