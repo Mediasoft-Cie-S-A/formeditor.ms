@@ -404,7 +404,12 @@ async  function InsertRecordWeb(apiId)
 
   jsonData.map((field,index) => {
     if(index === 0) return;
-    const input = document.getElementById(field.fieldId);
+    const fieldIdTemp = "#"+field.fieldId;
+    let escapedFieldId = fieldIdTemp.replace(/\//g, "\\/");
+    escapedFieldId = escapedFieldId.replace(/\ /g, "\\ ");
+    const inputs = document.querySelectorAll(escapedFieldId);
+    let input = inputs[0];
+    if (inputs.length>1) input = inputs[1];
     const name=field.fieldName
     const fieldValue = input.value;
     fieldData[name]=fieldValue
