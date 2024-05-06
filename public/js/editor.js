@@ -547,7 +547,7 @@ function createSelectApiWeb(id, type="") {
       div.classList.add("tables-list-item");
       const divId=type+"_"+apiJSON.apiId;
       div.id=divId;
-      div.innerHTML=`<span name='dataContainer${type}' data-field='${JSON.stringify(apiJSON)}' >${apiJSON.apiName}</span>`;
+      div.innerHTML=`<button class='remove-item' onclick='removeItem(event)'>x</button><span name='dataContainer${type}' data-field='${JSON.stringify(apiJSON)}' >${apiJSON.apiName}</span>`;
       dataObjete.appendChild(div);
   
   }
@@ -660,8 +660,10 @@ function createMultiSelectItemWeb(id, label, styleProperty, isId=false) {
       dataObjet.appendChild(div);
     
       // generate the select
+      if(!isId){
       var select = document.createElement("select");
       div.appendChild(select);
+      }
       // get the datatype
       
       setOptionsByType(select,fieldJson.fieldDataType);
