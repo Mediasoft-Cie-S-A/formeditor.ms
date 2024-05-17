@@ -94,5 +94,456 @@ Create a new CSS file for the component in the public/css/components directory. 
 
 After you've added the new component, you may need to restart your server to see the changes.
 
+## Webserver
+
+The file webserver.js, located in the js folder, serves as the configuration file for the web server. It initializes the web server and converts Swagger documentation into a draggable and droppable API list.
+
+```
+const apiUrl = "http://localhost:8080/docs.json"
+```
+
+The constant apiUrl is set to "http://localhost:8080/docs.json". This hardcoded string represents the URL for the deployed web server file. During development, we utilize the following demo web server, which must be running for the web server to connect and function properly.
+
+```
+DemoWebServerLink = https://drive.google.com/file/d/1_RQkyKHcw-VINnu0-bS_nh5ktUp4mM9J/view?usp=sharing
+```
+
+```
+function fetchAndParseOpenApiJson(apiUrl) {
+    // Code to Fetch and Parse OpenApi Json
+    // return parsedControllers
+}
+parsedControllers: [
+    {
+      controllerName: "Controller Name",
+      serverUrl: "Server Url",
+      apis: [
+        {
+          id: "Api ID",
+          method: "Api Method",
+          path: "Api Path",
+          name: "Path Name",
+          queryParameters: false,
+          pathParameters: false,
+          requestBody: false,
+          response: {
+            200: {
+              content: {
+                type: "object",
+                properties: [
+                  {
+                    name: "property name",
+                    type: "string",
+                    format: false,
+                  },
+                  {
+                    name: "array name",
+                    type: "array",
+                    properties: [
+                      {
+                        name: "property name",
+                        type: "string",
+                        format: false,
+                      },
+                      {
+                        name: "property name",
+                        type: "string",
+                        format: "date-time",
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+        },
+      ],
+    },
+  ]
+```
+
+The function "fetchAndParseOpenApiJson" currently fetches and parses OpenAPI version 3.0.0. It retrieves the entire Swagger JSON file and then converts it into parsedControllers. These parsedControllers are utilized to create form components and make API calls accordingly, facilitating the mapping of data back and forth. This function holds significant importance as it is the first and foremost import function of the web server.
+
+```
+function dragDropApiList(list) {
+    // Code to create the component goes here
+    // Calls fetchAndParseOpenApiJson()
+    // Creates APIs based on parsedControllers
+}
+```
+
+The function "dragDropApiList" is tasked with calling the "fetchAndParseOpenApiJson" function and utilizing the parsed controllers to create API list components containing api data fields.
+
+```
+function fetchApiFields() {
+    // Code to feach field of API
+    // Calls apiDataInputs()
+    // Calls apiDataOutputs()
+}
+```
+
+The "fetchApiFields" function is responsible for invoking the "dragDropApiList" function and using the apiDataInputs and apiDataOutputs to generate components for field lists containing API data fields.
+
+```
+async function callApi(apiUrl, apiMethod, body = {}) {
+  try {
+    let response;
+    switch (apiMethod) {
+      case "GET":
+        response = await fetch(apiUrl, {
+          method: "GET",
+        });
+        break;
+
+      case "POST":
+        response = await fetch(apiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        });
+        break;
+
+      case "PUT":
+        response = await fetch(apiUrl, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        });
+        break;
+
+      case "PATCH":
+        response = await fetch(apiUrl, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        });
+        break;
+
+      case "Delete":
+        response = await fetch(apiUrl, {
+          method: "DELETE",
+        });
+        break;
+    }
+    if (!response) return;
+    return response;
+  } catch (error) {
+    console.error("Error during calling an API:", error);
+    return null;
+  }
+}
+```
+
+The "callApi" function is a generic function that takes three parameters: apiUrl, apiMethod, and body. By using this function, we can make API calls in our project by passing these three arguments.
+
+## dataSetConponenetWeb
+
+The file dataSetConponenetWeb.js, located in the js/components folder, serves as the configuration file for the web server. It initializes the web server and converts Swagger documentation into a draggable and droppable API list.
+
+The constant apiUrl is set to "http://localhost:8080/docs.json". This hardcoded string represents the URL for the deployed web server file. During development, we utilize the following demo web server, which must be running for the web server to connect and function properly.
+
+```
+DemoWebServerLink = https://drive.google.com/file/d/1_RQkyKHcw-VINnu0-bS_nh5ktUp4mM9J/view?usp=sharing
+```
+
+```
+function fetchAndParseOpenApiJson(apiUrl) {
+    // Code to Fetch and Parse OpenApi Json
+    // return parsedControllers
+}
+parsedControllers: [
+    {
+      controllerName: "Controller Name",
+      serverUrl: "Server Url",
+      apis: [
+        {
+          id: "Api ID",
+          method: "Api Method",
+          path: "Api Path",
+          name: "Path Name",
+          queryParameters: false,
+          pathParameters: false,
+          requestBody: false,
+          response: {
+            200: {
+              content: {
+                type: "object",
+                properties: [
+                  {
+                    name: "property name",
+                    type: "string",
+                    format: false,
+                  },
+                  {
+                    name: "array name",
+                    type: "array",
+                    properties: [
+                      {
+                        name: "property name",
+                        type: "string",
+                        format: false,
+                      },
+                      {
+                        name: "property name",
+                        type: "string",
+                        format: "date-time",
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+        },
+      ],
+    },
+  ]
+```
+
+The function "fetchAndParseOpenApiJson" currently fetches and parses OpenAPI version 3.0.0. It retrieves the entire Swagger JSON file and then converts it into parsedControllers. These parsedControllers are utilized to create form components and make API calls accordingly, facilitating the mapping of data back and forth. This function holds significant importance as it is the first and foremost import function of the web server.
+
+```
+function dragDropApiList(list) {
+    // Code to create the component goes here
+    // Calls fetchAndParseOpenApiJson()
+    // Creates APIs based on parsedControllers
+}
+```
+
+The function "dragDropApiList" is tasked with calling the "fetchAndParseOpenApiJson" function and utilizing the parsed controllers to create API list components containing api data fields.
+
+```
+function fetchApiFields() {
+    // Code to feach field of API
+    // Calls apiDataInputs()
+    // Calls apiDataOutputs()
+}
+```
+
+The "fetchApiFields" function is responsible for invoking the "dragDropApiList" function and using the apiDataInputs and apiDataOutputs to generate components for field lists containing API data fields.
+
+```
+async function callApi(apiUrl, apiMethod, body = {}) {
+  try {
+    let response;
+    switch (apiMethod) {
+      case "GET":
+        response = await fetch(apiUrl, {
+          method: "GET",
+        });
+        break;
+
+      case "POST":
+        response = await fetch(apiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        });
+        break;
+
+      case "PUT":
+        response = await fetch(apiUrl, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        });
+        break;
+
+      case "PATCH":
+        response = await fetch(apiUrl, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        });
+        break;
+
+      case "Delete":
+        response = await fetch(apiUrl, {
+          method: "DELETE",
+        });
+        break;
+    }
+    if (!response) return;
+    return response;
+  } catch (error) {
+    console.error("Error during calling an API:", error);
+    return null;
+  }
+}
+```
+
+The "callApi" function is a generic function that takes three parameters: apiUrl, apiMethod, and body. By using this function, we can make API calls in our project by passing these three arguments.
+
+## dataSetComponenetWeb
+
+The file dataSetComponentWeb.js, found in the js/components folder, allows dropping API endpoints and their fields. This section includes various components for interacting with the data and is designed to manage CRUD operations.
+
+```
+function createMultiSelectItemWeb("Data", "Array-Outputs", "data", id=false)
+    // Code to create the component goes here
+    // Calls allowDrop(event)
+    // drop the field which exist in outputArray list
+}
+```
+
+This function creates a section in dataSetComponentWeb named "array-outputs". In this section, only fields that exist in the "array-output" list can be dropped.
+
+```
+function createMultiSelectItemWeb("Data", "Array-Outputs", "data", id=true)
+ {
+    // Code to create the component goes here
+    // Calls allowDrop(event)
+    // drop the field which exist in outputArray list
+}
+```
+
+This function creates a section in dataSetComponentWeb named "Id". In this section, only a single field can be dropped, which is the primary key of that API. Operations such as getById, delete, and update will be performed based on this field.
+
+```
+function createSelectApiWeb("Data", 'CreateApi')
+ {
+    // Code to create the component goes here
+    // Calls dropSelectApiWeb()
+    // drop the API endpoint for creating the record and save in database
+}
+```
+
+This function creates a section in dataSetComponentWeb named "CreateApi". In this section, the createApi endpoint should be dropped, which inserts a new record into the database web. In this section, fields cannot be dropped.
+
+```
+function createSelectApiWeb("Data", 'GetById')
+ {
+    // Code to create the component goes here
+    // Calls dropSelectApiWeb()
+    // drop the API endpoint for GetById the record from database
+}
+```
+
+This function creates a section in dataSetComponentWeb named "GetById". In this section, the GetById endpoint should be dropped, which returns a record depending on the ID.
+
+```
+function     createSelectApiWeb("Data", 'UpdateById')
+ {
+    // Code to create the component goes here
+    // Calls dropSelectApiWeb()
+    // drop the API endpoint for update the record and save in database
+}
+```
+
+This function creates a section in dataSetComponentWeb named "UpdateById". In this section, the UpdateById endpoint should be dropped, which updates a record depending on the ID.
+
+```
+function moveFirstWeb() {
+    //This function is located in the dataSetComponentWeb.js file.
+    //calls updateInputsWeb()
+}
+```
+
+The function "moveFirstWeb" is invoked when the "First" button is pressed. It retrieves the first record and displays it on the screen.
+
+```
+function moveLastWeb() {
+    //This function is located in the dataSetComponentWeb.js file.
+    //calls updateInputsWeb()
+}
+```
+
+The function "moveLastWeb" is invoked when the "Last" button is pressed. It retrieves the last record and displays it on the screen.
+
+```
+function movePrevWeb() {
+    //This function is located in the dataSetComponentWeb.js file.
+    //calls updateInputsWeb()
+}
+```
+
+The function "movePrevtWeb" is invoked when the "Previous" button is pressed. It retrieves the Previous record and displays it on the screen.
+
+```
+function moveNextWeb() {
+    //This function is located in the dataSetComponentWeb.js file.
+    //calls updateInputsWeb()
+}
+```
+
+The function "moveNextWeb" is invoked when the "Next" button is pressed. It retrieves the Next record and displays it on the screen.
+
+function is responsible for making the field editable.
+
+```
+function EditRecordWeb() {
+    //This function is located in the dataSetComponentWeb.js file.
+}
+```
+
+"EditRecordWeb" function enables users to modify specific fields within a dataset via a web server. On clicking Edit button UpdateRecordWeb() function is called.
+
+```
+function InsertRecordWeb() {
+    //This function is located in the dataSetComponentWeb.js file.
+}
+```
+
+"InsertRecordWeb" function enables users to add new records to a dataset. On clicking create button UpdateRecordWeb() function is called.
+
+```
+function UpdateRecordWeb() {
+    //This function is located in the dataSetComponentWeb.js file.
+}
+```
+
+"UpdateRecordWeb" function provides an efficient way to update existing records in a dataset via a web server. On clicking Update Record button UpdateRecordWeb() function is called.
+
+## dataGridWeb
+
+The file databaseGridWeb.js, located in the js/components folder, enables the dropping of API endpoints. This section contains various components for interacting with the data and is designed to manage and display records from the database.
+
+```
+function createMultiSelectItemWeb("Data", "data", "data", false){
+    // Code to create the component goes here
+    // Calls dropSelectApiWeb()
+    // drop the API endpoint for getting record from database
+}
+```
+
+"createMultiSelectItemWeb" function creates a section in dataSetComponentWeb named "data". In this section, the getAll endpoint fields should be dropped.
+
+```
+function renderGridWeb(){
+    // Code to create the grid goes here
+    // Calls createGridWeb()
+    // Calls insertNavBarWeb()
+}
+```
+
+"renderGridWeb" function creates two sections of the grid web: one for displaying records in the form of a table and the other for the navigation bar.
+
+```
+function insertNavBarWeb(){
+// Code to create the navbar component goes here
+//This function is located in the dataSetComponentWeb.js file.
+}
+```
+
+The function "renderGridWeb" is responsible for invoking the "insertNavBarWeb" function. This function creates a navigation bar section containing options for page size, filters, navigation to the next or previous page and refresh.
+
+- `"searchGridWeb"`:This function is executed when a value is entered into the search input field.
+- `"grid_page_sizeWeb"`: This function is executed when a value is selected for the page size.
+- `"gridPrevWeb"`: This function is executed when a button is clicked. It is responsible for navigating to the previous page.
+- `"gridNextWeb"`: This function is executed when a button is clicked. It is responsible for navigating to the next page.
+- `"refreshWeb"`: This function is executed when a button is clicked. It is responsible for navigating to the first page.
+
 
 

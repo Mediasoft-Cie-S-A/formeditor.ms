@@ -9,6 +9,16 @@
         "styles": "dataSetComponentWeb.css",
         "icon": "fa fa-database"
     },
+    "dataGridWeb": {
+        "type": "dataGridWeb",
+        "description": "Data Grid Web",
+        "category": "Web Server",
+        "scriptName": "databaseGridWeb.js",
+        "createFunction": "createDatabaseGridWeb",
+        "editFunction": "editDatabaseGridWeb",
+        "styles": "databaseGridWeb.css",
+        "icon": "fa fa-table"
+    },
     "dataSet": {
         "type": "dataSet",
         "description": "Data Set",
