@@ -36,7 +36,7 @@ function editDatabaseGridWeb(type,element,content)
         updateGridDataWeb(main,content);
     };
     content.appendChild(button);
-    content.appendChild(createMultiSelectItemWeb("Data", "data", "data", false));
+    content.appendChild(createMultiSelectItemWeb("DataGrid", "data", "data", false));
     
     content.appendChild(createMultiSelectItem("Link", "link", "link")); 
 
@@ -46,7 +46,7 @@ function editDatabaseGridWeb(type,element,content)
     // check if jsonData is not empty
     if (element.getAttribute('datasetgrid')!=null)
     {
-        var target=content.querySelector('#Data');
+        var target=content.querySelector('#DataGrid');
         var jsonData=JSON.parse(element.getAttribute('datasetgrid'));
         jsonData.forEach(fieldJson => {
             addFieldToPropertiesBar(target,fieldJson);
@@ -134,7 +134,7 @@ function renderGridWeb(main)
     insertNavBarWeb(datasetDiv,jsonData[0].apiName,datasetFields,datasetFieldsTypes);
 }
 
-function insertNavBarWeb(gridContainer,tableName,datasetFields,datasetFieldsTypes)
+function insertNavBarWeb(gridContainer,apiName,datasetFields,datasetFieldsTypes)
 {  // create search structure
       // search header
       var search = document.createElement('div');
@@ -146,8 +146,7 @@ function insertNavBarWeb(gridContainer,tableName,datasetFields,datasetFieldsType
       for (var i=0;i<datasetFields.length;i++)
        {       
               field=datasetFields[i];
-              const cell = document.createElement('option');
-              
+              const cell = document.createElement('option');           
               if (field!=='rowid')
               {
                   cell.textContent = field;
@@ -176,50 +175,43 @@ function insertNavBarWeb(gridContainer,tableName,datasetFields,datasetFieldsType
           //get the search fields by options index
           input.setAttribute("onkeyup",`searchGridWeb(searchfields.options[searchfields.options.selectedIndex].value,searchOperator.options[searchOperator.options.selectedIndex].value,this.value,"${gridContainer.parentElement.id}")`);
           search.appendChild(input);
-        
 
-  
-    
-    var html=`<div class="right-panel">`;
-    html+=`<div class="navigation-bar-title">Record: </div>`;
-    html+=search.outerHTML;
- 
-    html+=`<span style='font-size:8px'>Page Size:</span><select id="gridPage" class="input-element" onchange='grid_page_sizeWeb(event,"${gridContainer.parentElement.id}",searchfields.options[searchfields.options.selectedIndex].value,searchOperator.value)' style='width:60px;font-size:8px'>`;
-    html+=`<option value='5'>5</option>`;
-    html+=`<option value='10'>10</option>`;
-    html+=`<option value='20'>20</option>`;
-    html+=`<option value='50'>50</option>`;
-    html+=`<option value='100'>100</option>`;
-    html+=`</select>`;   // record count
-    
-    html+=`<button name='revGRIDBtn'  title='Previus Page'  grid-id='${gridContainer.parentElement.id}' onclick='gridPrevWeb(event,"${tableName}",searchfields.options[searchfields.options.selectedIndex].value,searchOperator.value)'><i class='bi bi-arrow-left-circle-fill' grid-id='${gridContainer.parentElement.id}'  style='color:blue;'></i></button>`;
-    html+=`<button name='NextGRIDBtn' title='Next Page'  grid-id='${gridContainer.parentElement.id}' onclick='gridNextWeb(event,"${tableName}",searchfields.options[searchfields.options.selectedIndex].value,searchOperator.value)'><i class='bi bi-arrow-right-circle-fill' grid-id='${gridContainer.parentElement.id}' style='color:blue;'></i></button>`;
-    html+=`<button name='RefreshGRIDBtn' title='Refresh'  grid-id='${gridContainer.parentElement.id}' onclick='refreshWeb(event,"${tableName}")'><i class='bi bi-arrow-repeat' grid-id='${gridContainer.parentElement.id}'  style='color:green;'></i></button>`;
-    html+=`<button name='PostitGRIDBtn' title='Postit'  grid-id='${gridContainer.parentElement.id}' onclick='postitWeb(event,"${tableName}")'><i class='bi bi-card-text' grid-id='${gridContainer.parentElement.id}' style='color:#aa0;'></i></button>`;
-    html+=`<button name='ExportGRIDBtn' title='Export Data'  grid-id='${gridContainer.parentElement.id}' onclick='export2CSVWeb(event,"${tableName}")'><i class='bi bi-file-spreadsheet' grid-id='${gridContainer.parentElement.id}' style='color:green;'></i></button></div>`;
-    html+=`<div id="Data-Grid-Postit" style="display:none;position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.5); z-index: 1000;"></div>`;    
-    html+="</div>";
+          var html=`<div class="right-panel">`;
+          html+=`<div class="navigation-bar-title">Record: </div>`;
+          html+=search.outerHTML;
+          html+=`<span style='font-size:8px'>Page Size:</span><select id="gridPage" class="input-element" onchange='grid_page_sizeWeb(event,"${gridContainer.parentElement.id}",searchfields.options[searchfields.options.selectedIndex].value,searchOperator.value)' style='width:60px;font-size:8px'>`;
+          html+=`<option value='5'>5</option>`;
+          html+=`<option value='10'>10</option>`;
+          html+=`<option value='20'>20</option>`;
+          html+=`<option value='50'>50</option>`;
+          html+=`<option value='100'>100</option>`;
+          html+=`</select>`;   // record count
+          html+=`<button name='revGRIDBtn'  title='Previus Page'  grid-id='${gridContainer.parentElement.id}' onclick='gridPrevWeb(event,"${apiName}",searchfields.options[searchfields.options.selectedIndex].value,searchOperator.value)'><i class='bi bi-arrow-left-circle-fill' grid-id='${gridContainer.parentElement.id}'  style='color:blue;'></i></button>`;
+          html+=`<button name='NextGRIDBtn' title='Next Page'  grid-id='${gridContainer.parentElement.id}' onclick='gridNextWeb(event,"${apiName}",searchfields.options[searchfields.options.selectedIndex].value,searchOperator.value)'><i class='bi bi-arrow-right-circle-fill' grid-id='${gridContainer.parentElement.id}' style='color:blue;'></i></button>`;
+          html+=`<button name='RefreshGRIDBtn' title='Refresh'  grid-id='${gridContainer.parentElement.id}' onclick='refreshWeb(event,"${apiName}")'><i class='bi bi-arrow-repeat' grid-id='${gridContainer.parentElement.id}'  style='color:green;'></i></button>`;
+          html+=`<button name='PostitGRIDBtn' title='Postit'  grid-id='${gridContainer.parentElement.id}' onclick='postitWeb(event,"${apiName}")'><i class='bi bi-card-text' grid-id='${gridContainer.parentElement.id}' style='color:#aa0;'></i></button>`;
+          html+=`<button name='ExportGRIDBtn' title='Export Data'  grid-id='${gridContainer.parentElement.id}' onclick='export2CSVWeb(event,"${apiName}")'><i class='bi bi-file-spreadsheet' grid-id='${gridContainer.parentElement.id}' style='color:green;'></i></button></div>`;
+          html+=`<div id="Data-Grid-Postit" style="display:none;position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.5); z-index: 1000;"></div>`;    
+          html+="</div>";
 
-    gridContainer.innerHTML+=html;  
+          gridContainer.innerHTML+=html;  
 }
 
 //Grid code
-function createGridWeb(grid,tableName,datasetFields,datasetFieldsTypes)
+function createGridWeb(grid,apiName,datasetFields,datasetFieldsTypes)
 { 
     //header
-    grid.setAttribute("dataset-table-name",tableName);
+    grid.setAttribute("dataset-api-table-name",apiName);
     grid.setAttribute("current_page",1);
     grid.setAttribute("page_size",5);
-    grid.setAttribute("Table-Name",tableName);
+    grid.setAttribute("api-name",apiName);
    
     // table header
     var header = document.createElement('div');
     header.className = 'grid-header';
-  
     // header
     var row = document.createElement('div');
     row.className = 'grid-row';
-
     datasetFields.forEach(field => {
         if (field!=='rowid')
             {
@@ -239,8 +231,7 @@ function createGridWeb(grid,tableName,datasetFields,datasetFieldsTypes)
     });
     header.appendChild(row);
     grid.appendChild(header);
-    // search inputs
-   
+    // search inputs 
     grid.setAttribute("Dataset-Fields-Names",datasetFields);
     grid.setAttribute("Dataset-Fields-Types",datasetFieldsTypes);
     const body = document.createElement('div');
@@ -263,49 +254,45 @@ function grid_page_sizeWeb(e,dataGridId, fieldName, operator,) {
     searchGridWeb(fieldName, operator,searchValue,dataGridId);
 }
 
-function gridPrevWeb(e,tableName, fieldName, operator, ) {
+function gridPrevWeb(e,apiName, fieldName, operator, ) {
     e.preventDefault();
     let searchValue = document.getElementById("searchValue").value;
     const mainID=e.target.getAttribute("grid-id");
-    const grid=document.getElementById(mainID).querySelector('[dataset-table-name="'+tableName+'"]');    
+    const grid=document.getElementById(mainID).querySelector('[dataset-api-table-name="'+apiName+'"]');    
     if (grid)
     {             
         var currentPage=parseInt(grid.getAttribute("current_page"));
         if (currentPage>1)
         {
             currentPage--;
-        }
-      
+        }    
         grid.setAttribute("current_page",currentPage);
         removeAllChildRows(grid);
         gridFetchDataWeb(grid, fieldName, operator, searchValue) ;
     }
 }
 
-function gridNextWeb(e,tableName, fieldName, operator, ) {
+function gridNextWeb(e,apiName, fieldName, operator, ) {
     e.preventDefault();
     let searchValue = document.getElementById("searchValue").value;
     const mainID=e.target.getAttribute("grid-id");
-    const grid=document.getElementById(mainID).querySelector('[dataset-table-name="'+tableName+'"]');  
- 
+    const grid=document.getElementById(mainID).querySelector('[dataset-api-table-name="'+apiName+'"]');  
     if (grid)
     {             
         var currentPage=parseInt(grid.getAttribute("current_page"));
         var pageSize=parseInt(grid.getAttribute("page_size"));
         grid.setAttribute("lastStartValue",(currentPage-1)*pageSize);
-
         currentPage++;
         grid.setAttribute("current_page",currentPage);
         removeAllChildRows(grid);
         gridFetchDataWeb(grid, fieldName, operator, searchValue) ;
     }
 }
-function refreshWeb(e,tableName) {
+function refreshWeb(e,apiName) {
     e.preventDefault();
     const mainID=e.target.getAttribute("grid-id");
-    const grid=document.getElementById(mainID).querySelector('[dataset-table-name="'+tableName+'"]');  
+    const grid=document.getElementById(mainID).querySelector('[dataset-api-table-name="'+apiName+'"]');  
     document.getElementById("searchValue").value = ''
- 
     if (grid)
     {             
         grid.setAttribute("current_page", 1)
@@ -315,12 +302,10 @@ function refreshWeb(e,tableName) {
 }
 
 function searchGridWeb(filterName,FilterOp,filterValue,gridID){
-
-    const grid=document.getElementById(gridID);
-    
+    const grid=document.getElementById(gridID);    
     const tableGrid = grid.querySelector('[tag-name="dataTable"]');
     tableGrid.setAttribute("current_page",1);
-    var tableName=tableGrid.getAttribute("Table-Name");
+    var apiName=tableGrid.getAttribute("api-name");
     var datasetFields=tableGrid.getAttribute("Dataset-Fields-Names");
     var datasetFieldsTypes=tableGrid.getAttribute("Dataset-Fields-Types");
     removeAllChildRows(tableGrid);
@@ -330,7 +315,7 @@ function searchGridWeb(filterName,FilterOp,filterValue,gridID){
     {
         filter="";
     }
-    gridGetDataWeb(tableGrid,tableName,1,pageSize,datasetFields, filter);
+    gridGetDataWeb(tableGrid,apiName,1,pageSize,datasetFields, filter);
 }
 
 function export2CSVWeb(e, tabelName) {
@@ -387,16 +372,15 @@ function removeAllChildRows(grid) {
 }
 
 function gridFetchDataWeb(grid,fieldName=null, operator=null, searchValue=null) {
-    var tableName=grid.getAttribute("Table-Name");
+    var apiName=grid.getAttribute("api-name");
     var currentPage=parseInt(grid.getAttribute("current_page"));
     var pageSize=parseInt(grid.getAttribute("page_size"));
     var datasetFields=grid.getAttribute("dataset-fields-names");
     var currentPage=parseInt(currentPage);
-
-    fetchTableDataWeb(grid,tableName,currentPage,pageSize,datasetFields, fieldName, operator, searchValue);   
+    fetchTableDataWeb(grid,apiName,currentPage,pageSize,datasetFields, fieldName, operator, searchValue);   
 }
 
-function fetchTableDataWeb(grid,tableName, page, pageSize, datasetFields, fieldName=null, operator=null, searchValue=null) {
+function fetchTableDataWeb(grid,apiName, page, pageSize, datasetFields, fieldName=null, operator=null, searchValue=null) {
     var filter="";
     var i=0;
     if (searchValue)
@@ -407,21 +391,7 @@ function fetchTableDataWeb(grid,tableName, page, pageSize, datasetFields, fieldN
         filter+="|";
         filter+=searchValue;
     }
-    gridGetDataWeb(grid,tableName,page,pageSize,datasetFields,filter );
-}
-
-function getFilterTypeWeb(fieldType)
-{
-    switch (fieldType) {
-        case "string":
-            return "like";
-        case "number":
-            return "eq";
-        case "date":
-            return "eq";
-        default:
-            return "like";
-    }
+    gridGetDataWeb(grid,apiName,page,pageSize,datasetFields,filter );
 }
 
 const filterKeys = (data, keys) => {
@@ -435,7 +405,7 @@ const filterKeys = (data, keys) => {
     });
   };
 
-async function gridGetDataWeb(grid,tableName,page,pageSize,datasetFields,filter)
+async function gridGetDataWeb(grid,apiName,page,pageSize,datasetFields,filter)
 {    
     //get body form the table
     const body = grid.querySelector('.grid-body');
@@ -452,10 +422,7 @@ async function gridGetDataWeb(grid,tableName,page,pageSize,datasetFields,filter)
         let data;
         const response = await callApi(apiUrl, apiMethod);
         if (!response || response.status !== 200) return;
-        data = await response.json();
-         
-        
-
+        data = await response.json();  
         if (filter && data?.data) {
             const searchFilter = filter.split("|");
             if (searchFilter.length < 3) {
@@ -506,15 +473,12 @@ async function gridGetDataWeb(grid,tableName,page,pageSize,datasetFields,filter)
         let jsonData=data.data
         const filteredData = filterKeys(jsonData, fields);
         grid.setAttribute("jsonData", JSON.stringify(filteredData));
-
         if(fieldIndex>data.data.length){
             fieldIndex=lastStartValue
             grid.setAttribute("current_page",page-1);
-        }
-        
+        } 
         // The data is now available
-        for (var j = fieldIndex; j<fieldIndex+pageSize; j++) {
-            
+        for (var j = fieldIndex; j<fieldIndex+pageSize; j++) {     
             const rowData = data.data[j];
             let row=[];
             fields.forEach((val)=>{
@@ -526,34 +490,19 @@ async function gridGetDataWeb(grid,tableName,page,pageSize,datasetFields,filter)
             else
                 rowDiv.style.backgroundColor = "#ffffff";
             rowDiv.className = 'grid-row';
-
             rowDiv.setAttribute("rowid", row[0]);
-            
-
-            // add click event to row to call linkRecordToGrid(tableName, rowId)
+            // add click event to row to call linkRecordToGrid(apiName, rowId)
             rowDiv.addEventListener("click", function (event) {
-                event.preventDefault();
-                // find div in dataset 
-               /* var datasetDivs = document.querySelectorAll('#DataSet_' + tableName);
-                console.log(".----"+datasetDivs + " - " + tableName);
-                // get the datasetFieldsLink
-                datasetDivs.forEach(datasetDiv => {
-                    const datasetFieldsLink = datasetDiv.getAttribute("Dataset-Fields-List");
-                    console.log(datasetFieldsLink + " " + row.rowid + " " + j + page * pageSize);
-                    linkRecordToGrid(tableName, datasetFieldsLink, row.rowid, j + page * pageSize);
-                });
-                */
-                var datasetDiv =document.getElementById('DataSet_' + tableName);
+                event.preventDefault();           
+                var datasetDiv =document.getElementById('DataSet_' + apiName);
                 const datasetFieldsLink = datasetDiv.getAttribute("Dataset-Fields-List");
-                    linkRecordToGrid(tableName,  row[0], j + page * pageSize);
+                    linkRecordToGrid(apiName,  row[0], j + page * pageSize);
             });
             var i = 0;
             
             row.forEach(field => {
-
                 const cell = document.createElement('div');
                 cell.className = 'grid-cell';
-
                 rowDiv.appendChild(cell);
                 // skip rowid field
                 if (i == 0) {
@@ -569,9 +518,7 @@ async function gridGetDataWeb(grid,tableName,page,pageSize,datasetFields,filter)
         }
        let row = document.createElement('div');
        row.style.height="100%";
-         body.appendChild(row);
-       
-    
+         body.appendChild(row);   
     } catch (error) {
         console.error('Error:', error);
     }

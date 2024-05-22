@@ -552,6 +552,21 @@ function createSelectApiWeb(id, type="") {
   
   }
 
+  function addApiToPropertiesBarWeb(target,apiJSON, type)
+  {
+      var dataObjete=target;
+      // create the div
+      var div = document.createElement("div");
+      div.classList.add("tables-list-item");
+      const divId=type
+      +"_"+apiJSON.apiId;
+      div.id=divId;
+      div.innerHTML=`<button class='remove-item' onclick='removeItem(event)'>x</button><span name='dataContainer${type}' data-field='${JSON.stringify(apiJSON)}' >${apiJSON.apiName}</span>`;
+      dataObjete.appendChild(div);
+     
+  }
+  
+
 function createMultiSelectItemWeb(id, label, styleProperty, isId=false) {
     var div = document.createElement("div");
     div.style.display = "flex";

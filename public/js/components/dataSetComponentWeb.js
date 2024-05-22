@@ -56,17 +56,42 @@ function editElementDataSetWeb(type, element, content) {
   // load the data
   // check if jsonData is not empty
   if (element.getAttribute("dataSet") != null) {
-    var target = content.querySelector("#Data");
+    var target = content.querySelectorAll("#Data")[0];
     var jsonData = JSON.parse(element.getAttribute("dataSet"));
     jsonData.forEach((fieldJson) => {
       if (fieldJson.fieldType !== "rowid")
         addFieldToPropertiesBarWeb(target, fieldJson);
     });
+  
+  var target1 = content.querySelectorAll("#Data")[1];
+  var jsonData = JSON.parse(element.getAttribute("dataSet"));
+    jsonData.forEach((fieldJson) => {
+      if (fieldJson.fieldType == "rowid")
+        addFieldToPropertiesBarWeb(target1, fieldJson);
+    });
+
+  var target2 = content.querySelectorAll("#Data")[2];
+  const createApiDiv = element.querySelector('div[create-api]');
+  var createApi = JSON.parse(createApiDiv.getAttribute("create-api"));
+  if(createApi!=null){
+    addApiToPropertiesBarWeb(target2, createApi, "CreateApi");
+  }
+  var target3 = content.querySelectorAll("#Data")[3];
+  const getByIdDiv = element.querySelector('div[get-by-id]');
+  var getById = JSON.parse(getByIdDiv.getAttribute("get-by-id"));
+  if(getById!=null){
+    addApiToPropertiesBarWeb(target3, getById, "GetById");
+  }
+  var target4 = content.querySelectorAll("#Data")[4];
+  const updateByIdDiv = element.querySelector('div[update-by-id]');
+  var getById = JSON.parse(updateByIdDiv.getAttribute("update-by-id"));
+  if(getById!=null){
+    addApiToPropertiesBarWeb(target4, getById, "UpdateById");
+  }
   }
 }
 
 function updateDataSetWeb(main, content) {
-  console.log("updateDataSetWeb");
 
   // get all the span elements from data
   var data = content.querySelectorAll('span[name="dataContainer"]');
@@ -137,7 +162,6 @@ function updateDataSetWeb(main, content) {
 function renderDataSetWeb(main, getById, updateById, createApi) {
   main.innerHTML = "";
   main.style.height = "200px";
-  console.log("renderDataSetWeb");
   // get the data from the main
   var jsonData = JSON.parse(main.getAttribute("dataSet"));
   var apiUrl = main.getAttribute("data-api-url");
@@ -224,7 +248,6 @@ function createFieldFromJsonWeb(fieldJson, mainId) {
 
 // --- internal functions ---
 function createNavigationBarWeb(apiUrl, apiMethod, jsonData, apiId,getById, updateById, createApi) {
-  console.log("createNavigationBarWeb");
   // Create the navigation bar div
   var navigationBar = document.createElement("div");
   navigationBar.id = "navigationBar_" + apiId;
