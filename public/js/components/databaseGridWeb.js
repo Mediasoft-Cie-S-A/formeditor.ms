@@ -407,11 +407,12 @@ const filterKeys = (data, keys) => {
 
 async function gridGetDataWeb(grid,apiName,page,pageSize,datasetFields,filter)
 {    
+ 
+
     //get body form the table
     const body = grid.querySelector('.grid-body');
     var apiUrl=grid.getAttribute("apiUrl");
     var apiMethod=grid.getAttribute("apiMethod");
-
     let fields=datasetFields.split(",")
     // Fetch the data from the web service
     let fieldIndex=page-1
@@ -473,6 +474,10 @@ async function gridGetDataWeb(grid,apiName,page,pageSize,datasetFields,filter)
         let jsonData=data.data
         const filteredData = filterKeys(jsonData, fields);
         grid.setAttribute("jsonData", JSON.stringify(filteredData));
+        grid.setAttribute("datasetFields", datasetFields);
+        grid.setAttribute("apiName", apiName);
+        grid.setAttribute("page", page);
+        grid.setAttribute("pageSize", pageSize);
         if(fieldIndex>data.data.length){
             fieldIndex=lastStartValue
             grid.setAttribute("current_page",page-1);

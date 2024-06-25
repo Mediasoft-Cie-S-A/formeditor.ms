@@ -256,54 +256,115 @@ class OdbcDatabase {
 // CURSOR
 
  // Move to the first record
- async moveToFirst(tableName, fields) {
+//  async moveToFirst(tableName, fields) {
+//     // Construct the SQL query based on the fields provided
+//     let query;
+//     if (fields && fields.length > 0) {
+//         const fieldList = fields.map(field => `"${field}"`).join(', ').replace("\"rowid\"","rowid");
+//         console.log(fieldList);
+//         const query = `SELECT TOP 1 ${fieldList} FROM PUB.${tableName} `;
+//         return this.queryData(query);
+//     }
+//     return null;
+// }
+
+async moveToFirst(tableName, fields, filter) {
     // Construct the SQL query based on the fields provided
-    let query;
+    let query = 'SELECT TOP 1 ';
+    
     if (fields && fields.length > 0) {
-        const fieldList = fields.map(field => `"${field}"`).join(', ').replace("\"rowid\"","rowid");
-        console.log(fieldList);
-        const query = `SELECT TOP 1 ${fieldList} FROM PUB.${tableName} `;
-        return this.queryData(query);
+        const fieldList = fields.map(field => `"${field}"`).join(', ').replace("\"rowid\"", "rowid");
+        query += `${fieldList} `;
+    } else {
+        query += '* ';
     }
-    return null;
+
+    query += `FROM PUB.${tableName} `;
+
+    if (filter) {
+        query += `WHERE "${filter.column}" ${filter.operator} '${filter.value}' `;
+    }
+
+    return this.queryData(query);
 }
+
 
 // Move to the last record
-async moveToLast(tableName , fields) {
-    // OpenEdge doesn't have a direct way to select the last record, so you might need to use an ORDER BY clause
-    // with DESC and then select the TOP 1 record. This assumes you have a column to order by.
+// async moveToLast(tableName , fields) {
+//     // OpenEdge doesn't have a direct way to select the last record, so you might need to use an ORDER BY clause
+//     // with DESC and then select the TOP 1 record. This assumes you have a column to order by.
+//     if (fields && fields.length > 0) {
+//         const fieldList = fields.map(field => `"${field}"`).join(', ').replace("\"rowid\"","rowid");
+//         const query = `SELECT ${fieldList} FROM PUB.${tableName} ORDER BY 1 desc `;    
+//         return this.queryData(query);
+//     }
+//     return null;
+// }
+
+async moveToLast(tableName, fields, filter) {
+    let fieldList = '*';
     if (fields && fields.length > 0) {
-        const fieldList = fields.map(field => `"${field}"`).join(', ').replace("\"rowid\"","rowid");
-        const query = `SELECT ${fieldList} FROM PUB.${tableName} ORDER BY 1 desc `;    
-        return this.queryData(query);
+        fieldList = fields.map(field => `"${field}"`).join(', ').replace("\"rowid\"", "rowid");
     }
-    return null;
+    let query = `SELECT ${fieldList} FROM PUB.${tableName} `;
+    let whereClause = '';
+    if (filter) {
+        whereClause += `WHERE "${filter.column}" ${filter.operator} '${filter.value}' `;
+    }
+    query += `
+        ${whereClause}
+        ORDER BY 1 desc 
+    `;
+    console.log(query);  
+    return this.queryData(query);
+}
+async moveToNext(tableName, fields, currentRowId, filter) {
+    let fieldList = '*';
+    if (fields && fields.length > 0) {
+        fieldList = fields.map(field => `"${field}"`).join(', ').replace("\"rowid\"", "rowid");
+    }
+    let query = `SELECT ${fieldList} FROM PUB.${tableName} `;
+    let whereClause = '';
+    if (filter) {
+        whereClause += `WHERE "${filter.column}" ${filter.operator} '${filter.value}' `;
+    }
+    query += `
+        ${whereClause}
+        OFFSET ${currentRowId} ROWS FETCH NEXT 1 ROWS ONLY
+    `;
+    console.log(query);  
+    return this.queryData(query);
 }
 
-// Move to the next record
-async moveToNext(tableName, fields, currentRowId) {
-    if (fields && fields.length > 0) {
-        const fieldList = fields.map(field => `"${field}"`).join(', ').replace("\"rowid\"","rowid");
-        // Assuming 'currentRowId' is the ROWID of the current record
-        const query = `SELECT ${fieldList} FROM PUB.${tableName}  OFFSET ${currentRowId} ROWS FETCH NEXT 1 ROWS ONLY`;
-        console.log(query);
-        return this.queryData(query);
-    }
-    return null;
-    
-}
 
 // Move to the previous record
-async moveToPrevious(tableName, fields, currentRowId) {
-    // This is a bit tricky as OpenEdge doesn't support fetching the previous record directly
-    // You might need to fetch all records with ROWID less than the current one and then take the last one
+// async moveToPrevious(tableName, fields, currentRowId) {
+//     // This is a bit tricky as OpenEdge doesn't support fetching the previous record directly
+//     // You might need to fetch all records with ROWID less than the current one and then take the last one
+//     if (fields && fields.length > 0) {
+//         const fieldList = fields.map(field => `"${field}"`).join(', ').replace("\"rowid\"","rowid");
+//             const query = `SELECT ${fieldList} FROM PUB.${tableName} OFFSET ${currentRowId} ROWS FETCH NEXT 1 ROWS ONLY`;
+//             console.log(query);
+//             return this.queryData(query);
+//         }
+//         return null;
+// }
+async moveToPrevious(tableName, fields, currentRowId, filter) {
+    let fieldList = '*';
     if (fields && fields.length > 0) {
-        const fieldList = fields.map(field => `"${field}"`).join(', ').replace("\"rowid\"","rowid");
-            const query = `SELECT ${fieldList} FROM PUB.${tableName} OFFSET ${currentRowId} ROWS FETCH NEXT 1 ROWS ONLY`;
-            console.log(query);
-            return this.queryData(query);
-        }
-        return null;
+        fieldList = fields.map(field => `"${field}"`).join(', ').replace("\"rowid\"", "rowid");
+    }
+    let query = `SELECT ${fieldList} FROM PUB.${tableName} `;
+    let whereClause = '';
+    if (filter) {
+        whereClause += `WHERE "${filter.column}" ${filter.operator} '${filter.value}' `;
+    }
+    query += `
+        ${whereClause}
+        OFFSET ${currentRowId} ROWS FETCH NEXT 1 ROWS ONLY
+    `;
+    console.log(query);  
+    return this.queryData(query);
 }
 
 // Move to the row with the specified ROWID

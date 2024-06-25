@@ -19,6 +19,16 @@
         "styles": "databaseGridWeb.css",
         "icon": "fa fa-table"
     },
+    "dataSearchWeb": {
+        "type": "dataSearchWeb",
+        "description": "Search field Web",
+        "category": "Web Server",
+        "scriptName": "databaseSearchWeb.js",
+        "createFunction": "createDatabaseSearchWeb",
+        "editFunction": "editDatabaseSearchWeb",
+        "styles": "dataSearch.css",
+        "icon": "fa fa-search"
+    },
     "dataSet": {
         "type": "dataSet",
         "description": "Data Set",

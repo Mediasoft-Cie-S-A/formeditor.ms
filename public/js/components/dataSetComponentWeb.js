@@ -162,6 +162,7 @@ function updateDataSetWeb(main, content) {
 function renderDataSetWeb(main, getById, updateById, createApi) {
   main.innerHTML = "";
   main.style.height = "200px";
+  console.log("renderDataSetWeb");
   // get the data from the main
   var jsonData = JSON.parse(main.getAttribute("dataSet"));
   var apiUrl = main.getAttribute("data-api-url");
@@ -248,6 +249,7 @@ function createFieldFromJsonWeb(fieldJson, mainId) {
 
 // --- internal functions ---
 function createNavigationBarWeb(apiUrl, apiMethod, jsonData, apiId,getById, updateById, createApi) {
+  console.log("createNavigationBarWeb");
   // Create the navigation bar div
   var navigationBar = document.createElement("div");
   navigationBar.id = "navigationBar_" + apiId;
@@ -320,33 +322,36 @@ async function moveFirstWeb(apiUrl, apiMethod, apiId) {
   const dataSetId = "DataSetWeb_" + apiId;
   const dataSet = document.getElementById(dataSetId);
   const main = dataSet.parentNode;
+  const apiFilter=main.getAttribute("apiFilter")
   const jsonData = JSON.parse(main.getAttribute("dataSet"));
-
   if (!apiUrl) return;
-  const response = await callApi(apiUrl, apiMethod);
-  if (!response || response.status !== 200) return;
-  const data = await response.json();
+  const data = await apiData(apiUrl, apiMethod, apiFilter);
   if (!data) return;
   updateInputsWeb(data, jsonData, apiId, 0);
   setDataLength(apiId, data[jsonData[1].fieldArrayName].length);
   setRowNumWeb(apiId, 0);
 }
 
-async function moveLastWeb(apiUrl, apiMethod, apiId, fromInsertRecord = false) {
+async function moveLastWeb(apiUrl, apiMethod, apiId) {
   console.log("DataSetWeb Move Last");
   const dataSetId = "DataSetWeb_" + apiId;
   const dataSet = document.getElementById(dataSetId);
   const main = dataSet.parentNode;
+  const apiFilter=main.getAttribute("apiFilter")
   const jsonData = JSON.parse(main.getAttribute("dataSet"));
-
   if (!apiUrl) return;
-  const response = await callApi(apiUrl, apiMethod);
-  if (!response || response.status !== 200) return;
-  const data = await response.json();
+  const data = await apiData(apiUrl, apiMethod, apiFilter);
+  console.log(data)
   if (!data) return;
-
-  let length = getDataLength(apiId);
-  if(fromInsertRecord) length = data[jsonData[1].fieldArrayName].length;
+  console.log(data)
+  let length;
+  const searchFilter = apiFilter?.split("|");
+  if (searchFilter?.length < 3 || apiFilter==false) {
+    length = getDataLength(apiId);
+  }else{
+    length=data?.data?.length
+  }
+  // if(fromInsertRecord) length = data[jsonData[1].fieldArrayName].length;
   updateInputsWeb(data, jsonData, apiId, length - 1);
   setRowNumWeb(apiId, length - 1);
   setDataLength(apiId, data[jsonData[1].fieldArrayName].length);
@@ -354,19 +359,16 @@ async function moveLastWeb(apiUrl, apiMethod, apiId, fromInsertRecord = false) {
 
 async function movePrevWeb(apiUrl, apiMethod, apiId) {
   console.log("DataSetWeb Move Prev");
-
+  console.log("apiId", apiId)
   const row = getRowNumWeb(apiId);
   if (row === 0) return;
-
   const dataSetId = "DataSetWeb_" + apiId;
   const dataSet = document.getElementById(dataSetId);
   const main = dataSet.parentNode;
+  const apiFilter=main.getAttribute("apiFilter")
   const jsonData = JSON.parse(main.getAttribute("dataSet"));
-
   if (!apiUrl) return;
-  const response = await callApi(apiUrl, apiMethod);
-  if (!response || response.status !== 200) return;
-  const data = await response.json();
+  const data = await apiData(apiUrl, apiMethod, apiFilter);
   if (!data) return;
   updateInputsWeb(data, jsonData, apiId, row - 1);
   setRowNumWeb(apiId, row - 1);
@@ -375,24 +377,77 @@ async function movePrevWeb(apiUrl, apiMethod, apiId) {
 
 async function moveNextWeb(apiUrl, apiMethod, apiId) {
   console.log("DataSetWeb Move Next");
-
   const row = getRowNumWeb(apiId);
   const length = getDataLength(apiId);
   if (row === length - 1) return;
-
   const dataSetId = "DataSetWeb_" + apiId;
   const dataSet = document.getElementById(dataSetId);
   const main = dataSet.parentNode;
+  const apiFilter=main.getAttribute("apiFilter")
   const jsonData = JSON.parse(main.getAttribute("dataSet"));
-
   if (!apiUrl) return;
-  const response = await callApi(apiUrl, apiMethod);
-  if (!response || response.status !== 200) return;
-  const data = await response.json();
+  const data = await apiData(apiUrl, apiMethod, apiFilter);
   if (!data) return;
   updateInputsWeb(data, jsonData, apiId, row + 1);
   setRowNumWeb(apiId, row + 1);
   setDataLength(apiId, data[jsonData[1].fieldArrayName].length);
+}
+
+
+async function apiData(apiUrl, apiMethod, apiFilter=false){
+  const response = await callApi(apiUrl, apiMethod);
+  if (!response || response.status !== 200) return;
+  const data = await response.json();
+  if (apiFilter!=false && data?.data) {
+    try{
+      
+    const searchFilter = apiFilter.split("|");
+    if (searchFilter.length < 3) {
+        throw new Error("Invalid filter format. Expected format: 'field|operator|value'.");
+    }
+    const [field, operator, value] = searchFilter;
+    const operatorMap = {
+        'eq': (a, b) => a === b,
+        'lt': (a, b) => a < b,
+        'lte': (a, b) => a <= b,
+        'gt': (a, b) => a > b,
+        'gte': (a, b) => a >= b,
+        'like': (a, b) => a.toString().toLowerCase().includes(b.toString().toLowerCase()),
+    };
+    if (!operatorMap.hasOwnProperty(operator)) {
+        throw new Error(`Invalid operator: ${operator}`);
+    }
+    data.data = data.data.filter((item) => {
+        const fieldValue = item[field];
+        if (fieldValue == null) {
+            return false;
+        }
+        let processedFieldValue;
+        let processedValue;
+        const isFieldDate = !isNaN(Date.parse(fieldValue));
+        const isValueDate = !isNaN(Date.parse(value));
+        if (isFieldDate && isValueDate) {
+            processedFieldValue = new Date(fieldValue);
+            processedValue = new Date(value);
+            return operatorMap[operator](processedFieldValue.getTime(), processedValue.getTime());
+        } else if (!isNaN(fieldValue) && !isNaN(value)) {
+            processedFieldValue = parseFloat(fieldValue);
+            processedValue = parseFloat(value);
+            return operatorMap[operator](processedFieldValue, processedValue);
+        } else if (typeof fieldValue === 'string' && typeof value === 'string') {
+            processedFieldValue = fieldValue.toString();
+            processedValue = value.toString();
+            return operatorMap[operator](processedFieldValue, processedValue);
+        } else if (operator === 'like') {
+            processedFieldValue = fieldValue.toString();
+            processedValue = value.toString();
+            return operatorMap[operator](processedFieldValue, processedValue);
+        }
+        return false;
+    });
+    }catch{}
+}
+return data
 }
 
 function EditRecordWeb(apiId, handle=false)
@@ -586,6 +641,7 @@ function updateInputsWeb(data, jsonData, apiId, row) {
 
 function getFieldValue(fieldData, data, row) {
   if (fieldData.fieldArray === "true") {
+    console.log(data[fieldData.fieldArrayName][row][fieldData.fieldName])
     return data[fieldData.fieldArrayName][row][fieldData.fieldName];
   }
 }

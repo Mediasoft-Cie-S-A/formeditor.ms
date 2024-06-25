@@ -98,6 +98,7 @@ function renderDataSet(main)
         datasetFields.push(fieldJson.fieldName);
     });
     dataset.setAttribute("DataSet-Fields-List",datasetFields);
+    main.setAttribute("DataSet-Fields-List",datasetFields);
     main.appendChild(dataset);
     main.appendChild(createNavigationBar(jsonData[0].tableName,datasetFields));
     moveFirst(jsonData[0].tableName,datasetFields);
@@ -273,8 +274,28 @@ function RefreshRecord(tableName)
     }
 }
 
-function navigateRecords(action, tableName,datasetFields, rowNum = '') {
-    const url = `/${action}/${tableName}` + (rowNum ? `/${rowNum}` : '')+`?fields=${datasetFields}`;
+function navigateRecords(action, tableName,datasetFields, rowNum = '', filter="") {
+
+    console.log("..............row no:", rowNum)
+
+    if(!filter){
+    const formContainer = document.getElementById("formContainer");
+    var childElements = formContainer.children;
+     var idObject = {};
+     for (var i = 0; i < childElements.length; i++) {
+         var fullId = childElements[i].id;
+         var name = fullId.match(/[a-zA-Z]+/)[0]; 
+         idObject[name] = fullId;
+     }
+     if(idObject.dataSet){
+        const main = document.getElementById(idObject.dataSet);
+        let filterData=main.getAttribute("filter")
+        if(filterData){
+            filter= filterData
+        }
+     }
+    }
+    const url = `/${action}/${tableName}` + (rowNum>=0 ? `/${rowNum}` : "")+`?fields=${datasetFields}&filter=${filter}`;
     fetch(url)
         .then(response => response.json())
         .then(data => {
