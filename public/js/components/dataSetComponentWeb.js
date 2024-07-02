@@ -315,8 +315,21 @@ function createNavigationBarWeb(apiUrl, apiMethod, jsonData, apiId,getById, upda
   return navigationBar;
 }
 
-//--- data set navigation ---
+async function linkRecordToGridWeb(selectedData, record){
+  try{
+   
+     let idObject=getIdObject()
+     const main = document.getElementById(idObject.dataSetWeb);
+     const jsonData = JSON.parse(main.getAttribute("dataSet"));
+     const apiId=jsonData[0].apiId
+     const data={data:[selectedData]}
+     updateInputsWeb(data, jsonData, apiId, 0);
+    //  setDataLength(apiId, 32);
+     setRowNumWeb(apiId, record);
+  }catch{}
+}
 
+//--- data set navigation ---
 async function moveFirstWeb(apiUrl, apiMethod, apiId) {
   console.log("DataSetWeb Move First");
   const dataSetId = "DataSetWeb_" + apiId;
@@ -328,7 +341,15 @@ async function moveFirstWeb(apiUrl, apiMethod, apiId) {
   const data = await apiData(apiUrl, apiMethod, apiFilter);
   if (!data) return;
   updateInputsWeb(data, jsonData, apiId, 0);
+  console.log("data")
+  console.log(data)
+  console.log("jsonData")
+  console.log(jsonData)
   setDataLength(apiId, data[jsonData[1].fieldArrayName].length);
+  console.log("apiId")
+  console.log(apiId)
+  console.log("data[jsonData[1].fieldArrayName].length")
+  console.log(data[jsonData[1].fieldArrayName].length)
   setRowNumWeb(apiId, 0);
 }
 
@@ -564,6 +585,23 @@ async  function SaveRecordWeb(apiId)
   let dataUpdateById = await responseUpdateById.json();
 
   EditRecordWeb(apiId, true);
+
+  let idObject=getIdObject()
+  if(idObject?.dataGridWeb){
+    let filedName= "";
+    let operator= "";
+    let searchValue="";
+    if(idObject?.dataSearchWeb){
+      const grid=document.getElementById(idObject?.dataSearchWeb);
+      const filter= grid.getAttribute("filter")?.split("|")
+      if(filter){
+      filedName=filter[0]
+      operator=filter[1]
+      searchValue=filter[2]}
+    }
+      searchGridWeb(filedName,operator,searchValue,idObject.dataGridWeb)
+
+ }
 }
 
 async function RefreshRecordWeb(apiId) {

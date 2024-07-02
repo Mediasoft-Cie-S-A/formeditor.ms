@@ -21,6 +21,18 @@ function removeAllChildNodes(parent) {
     }
 }
 
+function getIdObject(){
+    const formContainer = document.getElementById("formContainer");
+    var childElements = formContainer.children;
+     var idObject = {};
+     for (var i = 0; i < childElements.length; i++) {
+         var fullId = childElements[i].id;
+         var name = fullId.match(/[a-zA-Z]+/)[0]; 
+         idObject[name] = fullId;
+     }
+     return idObject;
+}
+
 
 function createInputItem(id, label, styleProperty,text,type,attribute) {
  //   console.log(text);

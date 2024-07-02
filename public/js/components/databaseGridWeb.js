@@ -311,6 +311,8 @@ function searchGridWeb(filterName,FilterOp,filterValue,gridID){
     removeAllChildRows(tableGrid);
     var pageSize=parseInt(tableGrid.getAttribute("page_size"));
     var filter=filterName+'|'+FilterOp+'|'+filterValue;
+    grid.setAttribute("filter",filter);
+
     if (filterValue=="" )
     {
         filter="";
@@ -483,7 +485,8 @@ async function gridGetDataWeb(grid,apiName,page,pageSize,datasetFields,filter)
             grid.setAttribute("current_page",page-1);
         } 
         // The data is now available
-        for (var j = fieldIndex; j<fieldIndex+pageSize; j++) {     
+        for (var j = fieldIndex; j<fieldIndex+pageSize; j++) {   
+            let record=j  
             const rowData = data.data[j];
             let row=[];
             fields.forEach((val)=>{
@@ -498,10 +501,9 @@ async function gridGetDataWeb(grid,apiName,page,pageSize,datasetFields,filter)
             rowDiv.setAttribute("rowid", row[0]);
             // add click event to row to call linkRecordToGrid(apiName, rowId)
             rowDiv.addEventListener("click", function (event) {
-                event.preventDefault();           
-                var datasetDiv =document.getElementById('DataSet_' + apiName);
-                const datasetFieldsLink = datasetDiv.getAttribute("Dataset-Fields-List");
-                    linkRecordToGrid(apiName,  row[0], j + page * pageSize);
+                event.preventDefault();   
+                console.log(rowData)
+                linkRecordToGridWeb(rowData, record);
             });
             var i = 0;
             

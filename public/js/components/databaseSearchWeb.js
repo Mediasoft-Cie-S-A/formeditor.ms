@@ -134,16 +134,15 @@ function gridSearchWeb(event)
     }
     const propertiesBar = document.getElementById('propertiesBar');
     const gridID=propertiesBar.querySelector('label').textContent; 
-    const formContainer = document.getElementById("formContainer");
-    var childElements = formContainer.children;
-     var idObject = {};
-     for (var i = 0; i < childElements.length; i++) {
-         var fullId = childElements[i].id;
-         var name = fullId.match(/[a-zA-Z]+/)[0]; 
-         idObject[name] = fullId;
-     }
-
     const filter=filedName+"|"+operator+"|"+searchValue
+
+    let idObject=getIdObject()
+
+    if(idObject.dataSearchWeb){
+        const search = document.getElementById(idObject.dataSearchWeb);
+        search.setAttribute("filter", filter)
+    }
+
     if(idObject.dataGridWeb){
     try{
         searchGridWeb(filedName,operator,searchValue,idObject.dataGridWeb)
