@@ -1,4 +1,4 @@
-const apiUrl = "http://localhost:8080/docs.json";
+var apiUrl;
 
 function parseOpenApiJson(openApiJson) {
   const controllers = [];
@@ -529,6 +529,24 @@ function loadData(data) {
 
 // Function load web server and populate tables when button is clicked
 function loadWebServer() {
+  apiUrl=document.getElementById("apiUrlLink").value
+  const fileInput = document.getElementById("fileInput");
+  const file = fileInput.files[0]; 
+
+  if (file) {
+    const reader = new FileReader();
+    reader.onload =async function(event) {
+      const fileContent = JSON.parse(event.target.result);
+      const parseApiJson= parseOpenApiJson(fileContent);
+      if(parseApiJson){
+        loadData(parseApiJson);
+      } else{
+        console.error("Failed to fetch or parse OpenAPI JSON.");
+      }
+
+    };
+    reader.readAsText(file);
+  }else{
   fetchAndParseOpenApiJson(apiUrl)
     .then((parsedControllers) => {
       if (parsedControllers) {
@@ -540,12 +558,38 @@ function loadWebServer() {
     .catch((error) => {
       console.error("Error fetching or parsing OpenAPI JSON:", error);
     });
+  }
+}
+
+async function readFile(file) {
+  const reader = new FileReader();
+
+  return new Promise((resolve, reject) => {
+    reader.onload = event => resolve(event.target.result);
+    reader.onerror = error => reject(error);
+    reader.readAsText(file);
+  });
 }
 
 // function to create the api selection list on editor screen
-function dragDropApiList(list) {
-  fetchAndParseOpenApiJson(apiUrl)
-    .then((parsedControllers) => {
+async function dragDropApiList(list) {
+  var parsedControllers;
+  const fileInput = document.getElementById("fileInput");
+  const file = fileInput?.files[0];
+  if (file) {
+    try {
+      const fileContent = await readFile(file);
+      const parsedJson = JSON.parse(fileContent);
+      parsedControllers = parseOpenApiJson(parsedJson);
+    } catch (error) {
+      console.error("Error reading file:", error);
+    }
+  } else {
+    try {
+      parsedControllers = await fetchAndParseOpenApiJson(apiUrl);
+    } catch (error) {
+      console.error("Error fetching and parsing OpenAPI JSON:", error);
+    }}          
       list.innerHTML = "";
 
       apiList = [];
@@ -560,9 +604,15 @@ function dragDropApiList(list) {
         controller.apis.forEach((api) => {
           var listItem = document.createElement("div");
 
+          listItem.id = `API_${api.id}`;
+
           listItem.className = "api-list-item";
 
           listItem.textContent = api.name;
+          const apiDataInputs = getApiDataInputs(api);
+          const apiDataOutputs = getApiDataOutputs(api);
+          listItem.setAttribute('api-data-inputs',JSON.stringify(apiDataInputs));
+          listItem.setAttribute('api-data-outputs',JSON.stringify(apiDataOutputs));
           listItem.setAttribute(
             "data-controller-controllerName",
             controller.controllerName
@@ -578,12 +628,12 @@ function dragDropApiList(list) {
           var apiDetailsDiv = document.createElement("div");
 
           listItem.appendChild(apiDetailsDiv);
+          listItem.draggable = true;
           listItem.ondragstart = function (event) {
             drag(event);
           };
           listItem.onclick = function (event) {
             event.preventDefault();
-
             fetchApiFields(controller, api, apiDetailsDiv);
           };
           if (c === 0) list.appendChild(h5);
@@ -593,8 +643,8 @@ function dragDropApiList(list) {
           c++;
         });
       });
-    })
-    .catch((error) => console.error("Error:", error));
+    // })
+    // .catch((error) => console.error("Error:", error));
 }
 
 function fetchApiFields(controller, api, detailsDiv) {

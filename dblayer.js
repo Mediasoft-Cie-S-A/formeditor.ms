@@ -179,22 +179,22 @@ app.get('/table-indexes/:tableName',checkAuthenticated, async (req, res) => {
  *         description: Error moving to first record
  */
 
- app.get('/move-to-first/:tableName', checkAuthenticated, async (req, res) => {
-    try {
-        await db.connect();
-        const tableName = req.params.tableName;
-         // Get the fields from the query string. It's a comma-separated string.
-         const fields = req.query.fields ? req.query.fields.split(',') : null;
+//  app.get('/move-to-first/:tableName', checkAuthenticated, async (req, res) => {
+//     try {
+//         await db.connect();
+//         const tableName = req.params.tableName;
+//          // Get the fields from the query string. It's a comma-separated string.
+//          const fields = req.query.fields ? req.query.fields.split(',') : null;
 
-        const firstRecord = await db.moveToFirst(tableName,fields);
-        res.json(firstRecord);
-    } catch (err) {
-        console.error('Error:', err);
-        res.status(500).send('Error moving to first record');
-    } finally {
-        await db.close();
-    }
-});
+//         const firstRecord = await db.moveToFirst(tableName,fields);
+//         res.json(firstRecord);
+//     } catch (err) {
+//         console.error('Error:', err);
+//         res.status(500).send('Error moving to first record');
+//     } finally {
+//         await db.close();
+//     }
+// });
 
 
 /**
@@ -222,8 +222,14 @@ app.get('/move-to-last/:tableName', checkAuthenticated, async (req, res) => {
         const tableName = req.params.tableName;
          // Get the fields from the query string. It's a comma-separated string.
          const fields = req.query.fields ? req.query.fields.split(',') : null;
+         const filter = req.query.filter ? req.query.filter.split('|') : null;
+         const filterObj = filter ? {
+             column: filter[0],
+             operator: filter[1],
+             value: filter[2]
+         } : null;
 
-        const lastRecord = await db.moveToLast(tableName,fields);
+        const lastRecord = await db.moveToLast(tableName,fields, filterObj);
         res.json(lastRecord);
     } catch (err) {
         console.error('Error:', err);
@@ -232,6 +238,34 @@ app.get('/move-to-last/:tableName', checkAuthenticated, async (req, res) => {
         await db.close();
     }
 });
+
+app.get('/move-to-first/:tableName', checkAuthenticated, async (req, res) => {
+    try {
+        await db.connect();
+        const tableName = req.params.tableName;
+        
+        // Get the fields from the query string. It's a comma-separated string.
+        const fields = req.query.fields ? req.query.fields.split(',') : null;
+        
+        // Parse the filter from the query string.
+        const filter = req.query.filter ? req.query.filter.split('|') : null;
+        const filterObj = filter ? {
+            column: filter[0],
+            operator: filter[1],
+            value: filter[2]
+        } : null;
+        
+
+        const firstRecord = await db.moveToFirst(tableName, fields, filterObj);
+        res.json(firstRecord);
+    } catch (err) {
+        console.error('Error:', err);
+        res.status(500).send('Error moving to first record');
+    } finally {
+        await db.close();
+    }
+});
+
 
 /**
  * @swagger
@@ -258,15 +292,43 @@ app.get('/move-to-last/:tableName', checkAuthenticated, async (req, res) => {
  *       500:
  *         description: Error moving to next record
  */
+// app.get('/move-to-next/:tableName/:currentRowId', checkAuthenticated, async (req, res) => {
+//     try {
+//         await db.connect();
+//         const tableName = req.params.tableName;
+//         const currentRowId = req.params.currentRowId;
+//          // Get the fields from the query string. It's a comma-separated string.
+//          const fields = req.query.fields ? req.query.fields.split(',') : null;
+         
+
+//         const nextRecord = await db.moveToNext(tableName, fields, currentRowId);
+//         res.json(nextRecord);
+//     } catch (err) {
+//         console.error('Error:', err);
+//         res.status(500).send('Error moving to next record');
+//     } finally {
+//         await db.close();
+//     }
+// });
+
 app.get('/move-to-next/:tableName/:currentRowId', checkAuthenticated, async (req, res) => {
     try {
         await db.connect();
         const tableName = req.params.tableName;
-        const currentRowId = req.params.currentRowId;
-         // Get the fields from the query string. It's a comma-separated string.
-         const fields = req.query.fields ? req.query.fields.split(',') : null;
+        const currentRowId = parseInt(req.params.currentRowId, 10); // Ensure currentRowId is an integer
 
-        const nextRecord = await db.moveToNext(tableName, fields, currentRowId);
+        // Get the fields from the query string. It's a comma-separated string.
+        const fields = req.query.fields ? req.query.fields.split(',') : null;
+        
+        // Parse the filter from the query string.
+        const filter = req.query.filter ? req.query.filter.split('|') : null;
+        const filterObj = filter ? {
+            column: filter[0],
+            operator: filter[1],
+            value: filter[2]
+        } : null;
+
+        const nextRecord = await db.moveToNext(tableName, fields, currentRowId, filterObj);
         res.json(nextRecord);
     } catch (err) {
         console.error('Error:', err);
@@ -275,6 +337,8 @@ app.get('/move-to-next/:tableName/:currentRowId', checkAuthenticated, async (req
         await db.close();
     }
 });
+
+
 
 /**
  * @swagger
@@ -308,8 +372,15 @@ app.get('/move-to-previous/:tableName/:currentRowId', checkAuthenticated, async 
         const currentRowId = req.params.currentRowId;
          // Get the fields from the query string. It's a comma-separated string.
          const fields = req.query.fields ? req.query.fields.split(',') : null;
+          // Parse the filter from the query string.
+        const filter = req.query.filter ? req.query.filter.split('|') : null;
+        const filterObj = filter ? {
+            column: filter[0],
+            operator: filter[1],
+            value: filter[2]
+        } : null;
 
-        const previousRecord = await db.moveToPrevious(tableName,fields, currentRowId);
+        const previousRecord = await db.moveToPrevious(tableName,fields, currentRowId, filterObj);
         res.json(previousRecord);
     } catch (err) {
         console.error('Error:', err);
