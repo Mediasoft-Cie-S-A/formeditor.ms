@@ -1217,3 +1217,41 @@ input.apple-switch:checked:after {
     box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   }
   
+  select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-bottom:#FFC300 3px solid;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.5s;
+   
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  option{
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-top: #F1948A  3px solid;
+    border-bottom:#F1948A  3px solid;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.5s;
+  
+
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  input{
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-bottom:#D35400  3px solid;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.5s;
+ 
+   
+    
+    overflow-y: auto;
+  }

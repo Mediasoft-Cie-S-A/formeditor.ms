@@ -371,7 +371,7 @@ const codeEditor = CodeMirror.fromTextArea(document.getElementById('jsCodeEditor
         "fieldName": fieldName,
         "fieldType": fieldType,
         "fieldDataType": fieldDataType,
-        "fieldLabel": fieldLabel,
+        "fieldLabel": fieldLabel.replace("'","`"),
         "fieldMandatory": fieldMandatory,
         "fieldWidth": fieldWidth,
         "fieldDefaultValue": fieldDefaultValue
@@ -470,10 +470,7 @@ function createMultiSelectItem(id, label, styleProperty)
     var lbl = document.createElement("span");
   
     lbl.innerText   = label;
-    
-    
 
-  
     div.setAttribute("ondragover", "allowDrop(event)");
     div.setAttribute("ondrop", "dropInput(event)");
  
@@ -715,7 +712,8 @@ function addFieldToPropertiesBar(target,fieldJson)
     div.id=elementId;
     // get field name
     
-    div.innerHTML=`<button class='remove-item' onclick='removeItem(event)'>x</button><span name='dataContainer' data-field='${JSON.stringify(fieldJson)}' >${fieldJson.fieldName}</span>`;
+    div.innerHTML=`<span name='dataContainer' data-field='${JSON.stringify(fieldJson)}' >${fieldJson.fieldName}</span>`;
+    div.innerHTML+=`<button class='remove-item' onclick='removeItem(event)' style='background:#800;float:right;color:white;border-radius:5px;width:30px;height:30px'>x</button>`;
     dataObjet.appendChild(div);
   
     // generate the select
