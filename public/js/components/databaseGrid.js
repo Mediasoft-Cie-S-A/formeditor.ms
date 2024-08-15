@@ -31,7 +31,6 @@ function editDatabaseGrid(type, element, content) {
   button.onclick = function () {
     const propertiesBar = document.getElementById("propertiesBar");
     const gridID = propertiesBar.querySelector("label").textContent;
-
     const main = document.getElementById(gridID);
     updateGridData(main, content);
   };
@@ -77,7 +76,6 @@ function updateGridData(main, content) {
   // generate the json of all the data
   var jsonData = [];
   data.forEach((span) => {
-    console.log(span.getAttribute("data-field"));
     // get the json data from the span
     var json = JSON.parse(span.getAttribute("data-field"));
     // add the field to the json
@@ -94,7 +92,6 @@ function renderGrid(main) {
   var data = main.getAttribute("dataSetGrid");
   // parse the json
   var jsonData = JSON.parse(data);
-  console.log(jsonData);
   // get the main div
   var datasetFields = ["rowid"];
   var datasetFieldsTypes = ["rowid"];
@@ -200,7 +197,6 @@ function insertNavBar(
 
 //Grid code
 function createGrid(grid, tableName, datasetFields, datasetFieldsTypes) {
-  console.log(grid);
   //header
   grid.setAttribute("dataset-table-name", tableName);
   grid.setAttribute("current_page", 1);
@@ -212,7 +208,6 @@ function createGrid(grid, tableName, datasetFields, datasetFieldsTypes) {
   header.className = "grid-header";
 
   // header
-
   var row = document.createElement("div");
   row.className = "grid-row";
 
@@ -231,8 +226,6 @@ function createGrid(grid, tableName, datasetFields, datasetFieldsTypes) {
     }
   });
   header.appendChild(row);
-  //
-
   grid.appendChild(header);
   // search inputs
 
@@ -249,10 +242,8 @@ function grid_page_size(e, dataGridId) {
   e.preventDefault();
   // get selected page size
   var pageSize = e.target[e.target.selectedIndex].value;
-  console.log(pageSize);
   // get parent grid
   const grid = document.getElementById(dataGridId);
-  console.log(grid);
   const gridTable = grid.querySelector('[tag-Name="dataTable"]');
 
   gridTable.setAttribute("page_size", pageSize);
@@ -267,8 +258,6 @@ function gridPrev(e, tableName) {
   const grid = document
     .getElementById(mainID)
     .querySelector('[dataset-table-name="' + tableName + '"]');
-  console.log(grid);
-
   if (grid) {
     var currentPage = parseInt(grid.getAttribute("current_page"));
     if (currentPage > 1) {
@@ -284,13 +273,10 @@ function gridPrev(e, tableName) {
 function gridNext(e, tableName) {
   e.preventDefault();
   // get parent grid n
-  console.log(e.target);
   const mainID = e.target.getAttribute("grid-id");
-  console.log(mainID);
   const grid = document
     .getElementById(mainID)
     .querySelector('[dataset-table-name="' + tableName + '"]');
-  console.log(grid);
   // get the json
 
   if (grid) {
@@ -303,9 +289,7 @@ function gridNext(e, tableName) {
 }
 
 function searchGrid(filterName, FilterOp, filterValue, gridID) {
-  console.log(filterName + " " + FilterOp + " " + filterValue);
   const grid = document.getElementById(gridID);
-
   const tableGrid = grid.querySelector('[tag-name="dataTable"]');
   tableGrid.setAttribute("current_page", 1);
   var tableName = tableGrid.getAttribute("Table-Name");
@@ -318,8 +302,6 @@ function searchGrid(filterName, FilterOp, filterValue, gridID) {
   if (filterValue == "") {
     filter = "";
   }
-  console.log(filter + " " + tableName + " " + pageSize + " " + datasetFields);
-
   gridGetData(tableGrid, tableName, 1, pageSize, datasetFields, filter);
 }
 
@@ -349,9 +331,7 @@ function gridFetchData(grid, body) {
   var currentPage = parseInt(grid.getAttribute("current_page"));
   var pageSize = parseInt(grid.getAttribute("page_size"));
   var datasetFields = grid.getAttribute("dataset-fields-names");
-
   var currentPage = parseInt(currentPage);
-
   fetchTableData(grid, tableName, currentPage, pageSize, datasetFields);
 }
 
@@ -398,7 +378,6 @@ async function gridGetData(
 ) {
   //get body form the table
   const body = grid.querySelector(".grid-body");
-  console.log(body);
   // Prepare the URL
   const url = `/table-data/${tableName}/${page}/${pageSize}?fields=${datasetFields}&filter=${filter}`;
   // Fetch the data from the web service
@@ -435,9 +414,6 @@ async function gridGetData(
         var datasetDiv = document.getElementById("DataSet_" + tableName);
         const datasetFieldsLink = datasetDiv.getAttribute(
           "Dataset-Fields-List"
-        );
-        console.log(
-          datasetFieldsLink + " " + row[0] + " " + j + page * pageSize
         );
         linkRecordToGrid(tableName, row[0], record + (page - 1) * pageSize);
       });

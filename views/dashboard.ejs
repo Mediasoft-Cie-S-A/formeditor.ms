@@ -1,354 +1,522 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="" />
     <title>Form Editor</title>
-    <link rel="icon" type="image/x-icon" href="img/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="img/favicon.ico" />
     <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-      <!-- Option 1: Include in HTML -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/hint/show-hint.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/lint/lint.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/lint/lint.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/lint/lint.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+      integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+      crossorigin="anonymous"
+    />
+    <!-- Option 1: Include in HTML -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/hint/show-hint.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/lint/lint.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/lint/lint.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/lint/lint.min.css"
+    />
     <!-- Load icon library -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
     <!-- font-awesome icons-->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link rel="stylesheet" href="css/theme-indigo-light.css">
-    <link rel="stylesheet" href="css/style.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <link rel="stylesheet" href="css/theme-indigo-light.css" />
+    <link rel="stylesheet" href="css/style.css" />
 
-      <!-- importing app scripts (load order is important) -->
-   <script  src="js/msjv2/authConfig.js"></script>
-   <script  src="js/msjv2/graphConfig.js"></script>
-   
+    <!-- importing app scripts (load order is important) -->
+    <script src="js/msjv2/authConfig.js"></script>
+    <script src="js/msjv2/graphConfig.js"></script>
 
-   <!-- <script type="text/javascript" src="./authRedirect.js"></script>   -->
-   <!-- uncomment the above line and comment the line below if you would like to use the redirect flow -->
-   <script  src="js/msjv2/authPopup.js"></script>
-   <script  src="js/msjv2/authRedirect.js"></script>
-   <script  src="js/msjv2/graph.js"></script>
-   <script  src="js/msjv2/ui.js"></script>
-</head>
-<body>
-   <!-- As a link -->
-   <div class="main-header">
-    <div class="row">
-        <div class="col-md-12" style="display: flex; justify-content: space-between;">
-            <div class="logo-element">
-                <nav class="navbar d-flex title main-header-nav">    
-                    <a href="#"><img src="img/Logo_header.png" alt="Logo" /></a>    
-                </nav>
-            </div>
-            <div class="account-element">
-                <span><a href="#" onclick="showUserModal(event)">User</a></span>
-                <span><a href="#" onclick="showUserModal(event)"><img src="img/icon.png" alt="User Icon" style="width: 35px"></a></span>
-            </div>
+    <!-- <script type="text/javascript" src="./authRedirect.js"></script>   -->
+    <!-- uncomment the above line and comment the line below if you would like to use the redirect flow -->
+    <script src="js/msjv2/authPopup.js"></script>
+    <script src="js/msjv2/authRedirect.js"></script>
+    <script src="js/msjv2/graph.js"></script>
+    <script src="js/msjv2/ui.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+  </head>
+  <body>
+    <!-- As a link -->
+    <div class="main-header">
+      <div class="row">
+        <div
+          class="col-md-12"
+          style="display: flex; justify-content: space-between"
+        >
+          <div class="logo-element">
+            <nav class="navbar d-flex title main-header-nav">
+              <a href="#"><img src="img/Logo_header.png" alt="Logo" /></a>
+            </nav>
+          </div>
+          <div class="account-element">
+            <span><a href="#" onclick="showUserModal(event)">User</a></span>
+            <span
+              ><a href="#" onclick="showUserModal(event)"
+                ><img
+                  src="img/icon.png"
+                  alt="User Icon"
+                  style="width: 35px" /></a
+            ></span>
+          </div>
         </div>
+      </div>
     </div>
-</div>
-   
-           
 
-            <!-- Main Content -->
-            <div >
-                <!-- Tab Navigation -->
-                <ul class="nav nav-tabs">
-                    <li class="active"><a data-toggle="tab" href="#formsList">.:Forms List:.</a></li>
-                    <li class="render-tab"><a data-toggle="tab" href="#renderForm">.:Render Form:.</a></li>
-                    <li><a data-toggle="tab" href="#editForm">.:Edit Form:.</a></li>
-                    <li><a data-toggle="tab" href="#DatabaseForm">.:Database Form:.</a></li>
-                    <li><a data-toggle="tab" href="#WebServer">.:Web Server:.</a></li>
+    <!-- Main Content -->
+    <div>
+      <!-- Tab Navigation -->
+      <ul class="nav nav-tabs">
+        <li class="active">
+          <a data-toggle="tab" href="#formsList">.:Forms List:.</a>
+        </li>
+        <li class="render-tab">
+          <a data-toggle="tab" href="#renderForm">.:Render Form:.</a>
+        </li>
+        <li><a data-toggle="tab" href="#editForm">.:Edit Form:.</a></li>
+        <li><a data-toggle="tab" href="#DatabaseForm">.:Database Form:.</a></li>
+        <li><a data-toggle="tab" href="#WebServer">.:Web Server:.</a></li>
+      </ul>
 
-                    
-                </ul>
-                
-                <!-- Tab Content -->
-                <div class="tab-content">
-                    <div id="formsList" class="tab-pane fade in active" style="min-height: 500px;">                      
-                         
-                        <div class="title-element">
-                            <h2>Forms List</h2>
-                        </div>
-                        <ul class="form-list"></ul>
-                        <script src="js/listForms.js"></script>
-                             
-                           
-                    </div>
-                    <div id="renderForm" class="tab-pane fade">
-                        <!-- Rendered form will be displayed here -->
-                    </div>
-                    <div id="editForm" class="tab-pane fade">
-                                                       
-                                    <div id="formProperties" class="col" >
-                                        <!-- Form properties will be added here -->
-                                        <form id="formDataForm" class="container-fluid">
-                                            <div class="row table-hover table-condensed editor-fields" style="display: flex; align-items: center; justify-content: center;">
-                                            <div class="col" style="display: inline-block;">
-                                                <label for="formId">Form ID:</label><br>
-                                                <input class="input-element" type="text" id="formId" name="formId" placeholder="Form ID" value="" required><br>
-                                            </div>
-                                            
-                                            <div class="col" style="display: inline-block;">
-                                                <label for="formName">Form Name:</label><br>
-                                                <input class="input-element" type="text" id="formName" name="formName" placeholder="Form Name" value="" required><br>
-                                            </div>
-                                        
-                                            <div class="col" style="display: inline-block;">
-                                                <label for="formPath">Form Path:</label><br>
-                                                <input class="input-element" type="text" id="formPath" name="formPath" placeholder="Form Path" value="" required><br>
-                                            </div>
-                                     
-
-                                            <div class="col" style="display: inline-block;">
-                                                <label for="userCreated">User Created:</label><br>
-                                                <input class="input-element" type="text" id="userCreated" name="userCreated" placeholder="User Created" value=" <%= name %> " required><br>
-                                            </div>
-                                        
-                                            <div class="col" style="display: inline-block;">
-                                                <label for="userModified">User Modified:</label><br>
-                                                <input class="input-element" type="text" id="userModified" name="userModified" placeholder="User Modified" value=" <%= name %> " required><br>
-                                            </div>
-                                        
-                                       
-                                             <div class="col" style="display: inline-block;">
-                                                <button class="button form-edit-button success" type="submit" ><i class="bi bi-check-lg"></i></button>
-                                          </div>
-                                            <div class="col" >
-                                                <button class="button form-edit-button" type="button" onclick="document.getElementById('formContainer').innerHTML=''">Clear</button>
-                                            </div>
-                                        
-                                            <div class="col" >
-                                                <button  class="button form-edit-button" type="button" onclick="exportJson()">Export</button>
-                                            </div>
-                                        </div>
-                                        </form>
-                                        
-                                 
-                                
-                                 </div>
-                                <div class="row">
-                            <!-- Sidebar -->
-                              <table id="componentsList" class="table table-striped table-bordered table-hover table-condensed">
-                                <tr>
-                                <td  style="width: 120px;">
-                                <div id="componentsSidebar" >
-                                
-                                </div>
-                            </td>
-                            <td  style="width: 100%;">
-                                <div id="formContainer" ondrop="drop(event)" ondragover="allowDrop(event)">
-                                    <!-- Form elements will be added here -->
-                                </div>
-                            </td>
-                            <td  style="width: 200px;">
-                                <div  id="propertiesBar" >
-                                    <div >
-                                        <!-- Edit -->
-                                    </div>
-                                </div>
-                            </td>
-                            <td style="width: 200px">
-                                <div>
-                                  <div>
-                                    <input
-                                      type="text"
-                                      placeholder="filter.. API"
-                                      name="searchApi"
-                                      onchange="searchApi(this.value,'dragDropApiList')"
-                                    />
-                                  </div>
-                                  <div id="dragDropApiList" style="overflow: auto"></div>
-                                  <!-- Web Server will be listed here -->
-                                </div>
-                            </td>
-                            <td style="width: 200px;">
-                                <div >
-                                    <div  >
-                                        <input type="text" placeholder="filter.. table" name="searchtable" onchange="searchtable(this.value,'drageDroptablesList')">
-                                        
-                                    </div>
-                                    <div id="drageDroptablesList" style="overflow: auto;" ></div>
-                                <!-- Tables will be listed here -->
-                                </div>
-                              
-                            </td>
-                                </tr>
-                              </table>
-                            
-                            
-                             
-                        </div>
-                    </div>
-                    <div id="DatabaseForm" class="tab-pane fade">
-                        <!-- Rendered form will be displayed here -->
-                        <div class="container-fluid">
-
-                            <div class="row">
-                                <div class="title-element">
-                                    <h2>Database Structure</h2>                             
-                                    </div>
-                                <button class="button database-header-button" onclick="newTable()">Add Table</button>
-                            </div>
-                            <div class="row">
-                      
-                                <table id="componentsList_database" class="table">
-                                    <tr>
-                                    <td style="width: 200px; max-height: 2000px; overflow: auto;">
-                                        <!-- Sidebar -->
-                                        <div id="tableListBar" class="col table-bordered" >
-                                            <!-- Tables will be listed here -->
-                                            <div  >
-                                                <input type="text" placeholder="filter.. table" name="searchtable" onchange="searchtable(this.value,'ContentTableListBar')">
-                                                
-                                            </div>
-                                            <div id="ContentTableListBar" style="overflow: auto;" ></div>
-                                        </div>
-                                    </td>
-                                    <td style="width: 100%;">
-                                        <div id="mtableDetails" class="col"   >
-                                    
-                                        </div>
-
-                                    </td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="WebServer" class="tab-pane fade">
-                        <!-- Rendered form will be displayed here -->
-                        <div class="container-fluid">
-                          <div class="row">
-                              <div class="title-element">
-                                <h2>Web Server</h2>
-                              </div>
-                              <div>
-                              <div  style="display: inline-block; margin: 10px">
-                                <input class="input-element" type="link" id="apiUrlLink" name="apiUrlLink" placeholder="http://localhost:3000" value="" required><br>
-                                <input style="display: inline-block" type="file" id="fileInput" name="fileInput" accept="*/*">
-                              </div>
-                              </div>
-                              <button class="button database-header-button" onclick="loadWebServer()">
-                                Load Web Server
-                              </button>
-                            <div id="web-api-container"></div>
-                          </div>
-                        </div>
-                    </div>
-                   
+      <!-- Tab Content -->
+      <div class="tab-content">
+        <div
+          id="formsList"
+          class="tab-pane fade in active"
+          style="min-height: 500px"
+        >
+          <div class="title-element">
+            <h2>Forms List</h2>
+          </div>
+          <ul class="form-list"></ul>
+          <script src="js/listForms.js"></script>
+        </div>
+        <div id="renderForm" class="tab-pane fade">
+          <!-- Rendered form will be displayed here -->
+        </div>
+        <div id="editForm" class="tab-pane fade">
+          <div id="formProperties" class="col">
+            <!-- Form properties will be added here -->
+            <form id="formDataForm" class="container-fluid">
+              <div
+                class="row table-hover table-condensed editor-fields"
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <div class="col" style="display: inline-block">
+                  <label for="formId">Form ID:</label><br />
+                  <input
+                    class="input-element"
+                    type="text"
+                    id="formId"
+                    name="formId"
+                    placeholder="Form ID"
+                    value=""
+                    required
+                  /><br />
                 </div>
-            </div>
-      
 
-    
-    <div id="editorFloatMenu" class="gjs-toolbar" style="pointer-events: all; top: 200px; left: 545.438px;">
-        <input type="hidden" id="editorElementSelected" value="">
-        <div class="gjs-toolbar-items">
-            <div class="gjs-toolbar-item">
-                <svg viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M13,20H11V8L5.5,13.5L4.08,12.08L12,4.16L19.92,12.08L18.5,13.5L13,8V20Z"></path>
-                </svg>
-            </div>
-            <div class="gjs-no-touch-actions gjs-toolbar-item" draggable="true">
-                <svg viewBox="0 0 24 24"><path fill="currentColor" d="M13,6V11H18V7.75L22.25,12L18,16.25V13H13V18H16.25L12,22.25L7.75,18H11V13H6V16.25L1.75,12L6,7.75V11H11V6H7.75L12,1.75L16.25,6H13Z"></path></svg>
-            </div>
-            <div class="gjs-toolbar-item" onclick="showProperties()"><svg viewBox="0 0 24 24" ><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg>
-            </div>
-            <div class="gjs-toolbar-item" onclick="deleteElement()"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"></path></svg>
-            </div>
+                <div class="col" style="display: inline-block">
+                  <label for="formName">Form Name:</label><br />
+                  <input
+                    class="input-element"
+                    type="text"
+                    id="formName"
+                    name="formName"
+                    placeholder="Form Name"
+                    value=""
+                    required
+                  /><br />
+                </div>
+
+                <div class="col" style="display: inline-block">
+                  <label for="formPath">Form Path:</label><br />
+                  <input
+                    class="input-element"
+                    type="text"
+                    id="formPath"
+                    name="formPath"
+                    placeholder="Form Path"
+                    value=""
+                    required
+                  /><br />
+                </div>
+
+                <div class="col" style="display: inline-block">
+                  <label for="userCreated">User Created:</label><br />
+                  <input
+                    class="input-element"
+                    type="text"
+                    id="userCreated"
+                    name="userCreated"
+                    placeholder="User Created"
+                    value=" <%= name %> "
+                    required
+                  /><br />
+                </div>
+
+                <div class="col" style="display: inline-block">
+                  <label for="userModified">User Modified:</label><br />
+                  <input
+                    class="input-element"
+                    type="text"
+                    id="userModified"
+                    name="userModified"
+                    placeholder="User Modified"
+                    value=" <%= name %> "
+                    required
+                  /><br />
+                </div>
+
+                <div class="col" style="display: inline-block">
+                  <button class="button form-edit-button success" type="submit">
+                    <i class="bi bi-check-lg"></i>
+                  </button>
+                </div>
+                <div class="col">
+                  <button
+                    class="button form-edit-button"
+                    type="button"
+                    onclick="document.getElementById('formContainer').innerHTML=''"
+                  >
+                    Clear
+                  </button>
+                </div>
+
+                <div class="col">
+                  <button
+                    class="button form-edit-button"
+                    type="button"
+                    onclick="exportJson()"
+                  >
+                    Export
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="row">
+            <!-- Sidebar -->
+            <table
+              id="componentsList"
+              class="table table-striped table-bordered table-hover table-condensed"
+            >
+              <tr>
+                <td style="width: 120px">
+                  <div id="componentsSidebar"></div>
+                </td>
+                <td style="width: 100%">
+                  <div
+                    id="formContainer"
+                    ondrop="drop(event)"
+                    ondragover="allowDrop(event)"
+                  >
+                    <!-- Form elements will be added here -->
+                  </div>
+                </td>
+                <td style="width: 200px">
+                  <div id="propertiesBar">
+                    <div>
+                      <!-- Edit -->
+                    </div>
+                  </div>
+                </td>
+                <td style="width: 200px">
+                  <div>
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="filter.. API"
+                        name="searchApi"
+                        onchange="searchApi(this.value,'dragDropApiList')"
+                      />
+                    </div>
+                    <div id="dragDropApiList" style="overflow: auto"></div>
+                    <!-- Web Server will be listed here -->
+                  </div>
+                </td>
+                <td style="width: 200px">
+                  <div>
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="filter.. table"
+                        name="searchtable"
+                        onchange="searchtable(this.value,'drageDroptablesList')"
+                      />
+                    </div>
+                    <div id="drageDroptablesList" style="overflow: auto"></div>
+                    <!-- Tables will be listed here -->
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </div>
         </div>
+        <div id="DatabaseForm" class="tab-pane fade">
+          <!-- Rendered form will be displayed here -->
+          <div class="container-fluid">
+            <div class="row">
+              <div class="title-element">
+                <h2>Database Structure</h2>
+              </div>
+              <button
+                class="button database-header-button"
+                onclick="newTable()"
+              >
+                Add Table
+              </button>
+            </div>
+            <div class="row">
+              <table id="componentsList_database" class="table">
+                <tr>
+                  <td style="width: 200px; max-height: 2000px; overflow: auto">
+                    <!-- Sidebar -->
+                    <div id="tableListBar" class="col table-bordered">
+                      <!-- Tables will be listed here -->
+                      <div>
+                        <input
+                          type="text"
+                          placeholder="filter.. table"
+                          name="searchtable"
+                          onchange="searchtable(this.value,'ContentTableListBar')"
+                        />
+                      </div>
+                      <div
+                        id="ContentTableListBar"
+                        style="overflow: auto"
+                      ></div>
+                    </div>
+                  </td>
+                  <td style="width: 100%">
+                    <div id="mtableDetails" class="col"></div>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div id="WebServer" class="tab-pane fade">
+          <!-- Rendered form will be displayed here -->
+          <div class="container-fluid">
+            <div class="row">
+              <div class="title-element">
+                <h2>Web Server</h2>
+              </div>
+              <div>
+                <div style="display: inline-block; margin: 10px">
+                  <input
+                    class="input-element"
+                    type="link"
+                    id="apiUrlLink"
+                    name="apiUrlLink"
+                    placeholder="http://localhost:3000"
+                    value=""
+                    required
+                  /><br />
+
+                  <input
+                    style="display: inline-block"
+                    type="file"
+                    id="fileInput"
+                    name="fileInput"
+                    accept=".yaml,.yml,.json"
+                  />
+                </div>
+              </div>
+              <button
+                class="button database-header-button"
+                onclick="loadWebServer()"
+              >
+                Load Web Server
+              </button>
+              <div id="web-api-container"></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    
+
+    <div
+      id="editorFloatMenu"
+      class="gjs-toolbar"
+      style="pointer-events: all; top: 200px; left: 545.438px"
+    >
+      <input type="hidden" id="editorElementSelected" value="" />
+      <div class="gjs-toolbar-items">
+        <div class="gjs-toolbar-item">
+          <svg viewBox="0 0 24 24">
+            <path
+              fill="currentColor"
+              d="M13,20H11V8L5.5,13.5L4.08,12.08L12,4.16L19.92,12.08L18.5,13.5L13,8V20Z"
+            ></path>
+          </svg>
+        </div>
+        <div class="gjs-no-touch-actions gjs-toolbar-item" draggable="true">
+          <svg viewBox="0 0 24 24">
+            <path
+              fill="currentColor"
+              d="M13,6V11H18V7.75L22.25,12L18,16.25V13H13V18H16.25L12,22.25L7.75,18H11V13H6V16.25L1.75,12L6,7.75V11H11V6H7.75L12,1.75L16.25,6H13Z"
+            ></path>
+          </svg>
+        </div>
+        <div class="gjs-toolbar-item" onclick="showProperties()">
+          <svg viewBox="0 0 24 24">
+            <path
+              fill="currentColor"
+              d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"
+            ></path>
+          </svg>
+        </div>
+        <div class="gjs-toolbar-item" onclick="deleteElement()">
+          <svg viewBox="0 0 24 24">
+            <path
+              fill="currentColor"
+              d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"
+            ></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+
     <div id="toast-container"></div>
     <div id="hint-container"></div>
 
-   
-<dialog id="jsCodeDialog" >
-    <div>JSCODE Editor</div>   
-    <div style="border: 1px solid black;">
-   <textarea id="jsCodeEditor" name="jsCodeEditor" style="width: 100%; height: 100%"></textarea>
-    </div>
-    <button class="button" onclick="executejsCodeCode()">Run Code</button>
-    <button class="button" onclick="savejsCodeCode()">Save Code</button>
-    <button class="button" onclick="hidejsCodeEditor()">Close Editor</button>
-</dialog>
-<div id="htmlGridModal">
-    <div id="htmlGridOptions">
+    <dialog id="jsCodeDialog">
+      <div>JSCODE Editor</div>
+      <div style="border: 1px solid black">
+        <textarea
+          id="jsCodeEditor"
+          name="jsCodeEditor"
+          style="width: 100%; height: 100%"
+        ></textarea>
+      </div>
+      <button class="button" onclick="executejsCodeCode()">Run Code</button>
+      <button class="button" onclick="savejsCodeCode()">Save Code</button>
+      <button class="button" onclick="hidejsCodeEditor()">Close Editor</button>
+    </dialog>
+    <div id="htmlGridModal">
+      <div id="htmlGridOptions">
         <div class="row">
-            <div class="col-md-12 img-grid">
-                <a href="#" onclick="insertHtmlGrid(event)"><img src="img/grid/66.png" id="66" alt="66"></a>
-            </div>
-            <div class="col-md-12 img-grid">
-                <a href="#" onclick="insertHtmlGrid(event)"><img src="img/grid/48.png" id="48" alt="48"></a>
-            </div>
-            <div class="col-md-12 img-grid">
-                <a href="#" onclick="insertHtmlGrid(event)"><img src="img/grid/84.png" id="84" alt="84"></a>
-            </div>
-            <div class="col-md-12 img-grid">
-                <a href="#" onclick="insertHtmlGrid(event)"><img src="img/grid/633.png" id="633" alt="633"></a>
-            </div>
-            <div class="col-md-12 img-grid">
-                <a href="#" onclick="insertHtmlGrid(event)"><img src="img/grid/336.png" id="336" alt="336"></a>
-            </div>
-            <div class="col-md-12 img-grid">
-                <a href="#" onclick="insertHtmlGrid(event)"><img src="img/grid/444.png" id="444" alt="444"></a>
-            </div>
+          <div class="col-md-12 img-grid">
+            <a href="#" onclick="insertHtmlGrid(event)"
+              ><img src="img/grid/66.png" id="66" alt="66"
+            /></a>
+          </div>
+          <div class="col-md-12 img-grid">
+            <a href="#" onclick="insertHtmlGrid(event)"
+              ><img src="img/grid/48.png" id="48" alt="48"
+            /></a>
+          </div>
+          <div class="col-md-12 img-grid">
+            <a href="#" onclick="insertHtmlGrid(event)"
+              ><img src="img/grid/84.png" id="84" alt="84"
+            /></a>
+          </div>
+          <div class="col-md-12 img-grid">
+            <a href="#" onclick="insertHtmlGrid(event)"
+              ><img src="img/grid/633.png" id="633" alt="633"
+            /></a>
+          </div>
+          <div class="col-md-12 img-grid">
+            <a href="#" onclick="insertHtmlGrid(event)"
+              ><img src="img/grid/336.png" id="336" alt="336"
+            /></a>
+          </div>
+          <div class="col-md-12 img-grid">
+            <a href="#" onclick="insertHtmlGrid(event)"
+              ><img src="img/grid/444.png" id="444" alt="444"
+            /></a>
+          </div>
         </div>
+      </div>
+      <button class="button float-right" onclick="closeHtmlGridModal()">
+        Close
+      </button>
     </div>
-    <button class="button float-right" onclick="closeHtmlGridModal()">Close</button>
-</div>
 
-<div id="userModal">
-    <div class="row">
+    <div id="userModal">
+      <div class="row">
         <div class="col-md-12">
-            <div class="user-main">
-                <button onclick="signOut()">Logout</button>
-            </div>
+          <div class="user-main">
+            <button onclick="signOut()">Logout</button>
+          </div>
         </div>
+      </div>
     </div>
-</div>
-<!-- Footer -->
-<footer class="fixed-bottom mt-auto">
-    <!-- Grid container -->
-    <div class="container p-4 pb-0">
+    <!-- Footer -->
+    <footer class="fixed-bottom mt-auto">
+      <!-- Grid container -->
+      <div class="container p-4 pb-0">
         <!-- Section: Social media -->
         <section class="mb-4">
-                       <!-- Github -->
-            <a class="btn btn-outline-light btn-floating m-1" href="#!" role="button"><i class="fab fa-github"></i></a>
+          <!-- Github -->
+          <a
+            class="btn btn-outline-light btn-floating m-1"
+            href="#!"
+            role="button"
+            ><i class="fab fa-github"></i
+          ></a>
         </section>
         <!-- Section: Social media -->
-    </div>
-    <!-- Grid container -->
+      </div>
+      <!-- Grid container -->
 
-    <!-- Copyright -->
-    <div class="text-center p-3" >
-            <a class="text-white" href="https://www.mediasoft-group.com//">Mediasoft Group</a>
-    </div>
-    <!-- Copyright -->
-</footer>
-<!-- Footer -->
-
+      <!-- Copyright -->
+      <div class="text-center p-3">
+        <a class="text-white" href="https://www.mediasoft-group.com//"
+          >Mediasoft Group</a
+        >
+      </div>
+      <!-- Copyright -->
+    </footer>
+    <!-- Footer -->
 
     <div onclick="closeModalEdit()" class="overlay" id="overlayModal"></div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
-  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.1/mode/javascript/javascript.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/meta.min.js"></script>
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/hint/javascript-hint.min.js"></script>
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/hint/show-hint.js"></script>
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/lint/javascript-lint.min.js"></script>
-  
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/edit/closebrackets.min.js"></script>
 
-   <script src="/js/components/qrcode.js"></script>
-   <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.1/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/meta.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/hint/javascript-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/hint/show-hint.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/lint/javascript-lint.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/edit/closebrackets.min.js"></script>
+
+    <script src="/js/components/qrcode.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
 
     <script src="js/db.js"></script>
     <script src="js/loadComponents.js"></script>
@@ -357,8 +525,6 @@
     <script src="js/dom.js"></script>
     <script src="js/formSubmit.js"></script>
     <script src="js/webserver.js"></script>
-
-    
-
-</body>
+    <script src="js/constant/index.js"></script>
+  </body>
 </html>

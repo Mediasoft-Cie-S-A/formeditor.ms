@@ -13,122 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const droit = [
-  "Almond",
-  "Amaranth",
-  "Amber",
-  "Amethyst",
-  "Apricot",
-  "Aquamarine",
-  "Azure",
-  "Baby Blue",
-  "Beige",
-  "Black",
-  "Blue",
-  "Blue-green",
-  "Blue-violet",
-  "Blush",
-  "Bronze",
-  "Brown",
-  "Burgundy",
-  "Byzantine",
-  "Carmine",
-  "Cerise",
-  "Cerulean",
-  "Champagne",
-  "Chartreuse",
-  "Chocolate",
-  "Cobalt Blue",
-  "Coffee",
-  "Copper",
-  "Coral",
-  "Crimson",
-  "Cyan",
-  "Desert Sand",
-  "Electric Blue",
-  "Emerald",
-  "Erin",
-  "Gold",
-  "Gray",
-  "Green",
-  "Harlequin",
-  "Indigo",
-  "Ivory",
-  "Jade",
-  "Jungle Green",
-  "Lavender",
-  "Lemon",
-  "Lilac",
-  "Lime",
-  "Magenta",
-  "Maroon",
-  "Mauve",
-  "Midnight Blue",
-  "Mint Green",
-  "Misty Rose",
-  "Moss Green",
-  "Navy Blue",
-  "Ochre",
-  "Olive",
-  "Orange",
-  "Orchid",
-  "Peach",
-  "Pear",
-  "Periwinkle",
-  "Persimmon",
-  "Pink",
-  "Plum",
-  "Poppy",
-  "Powder Blue",
-  "Prussian Blue",
-  "Puce",
-  "Purple",
-  "Raspberry",
-  "Red",
-  "Red-violet",
-  "Rose",
-  "Ruby",
-  "Salmon",
-  "Sapphire",
-  "Scarlet",
-  "Silver",
-  "Sky Blue",
-  "Slate Gray",
-  "Spring Green",
-  "Steel Blue",
-  "Tan",
-  "Tangerine",
-  "Taupe",
-  "Teal",
-  "Thistle",
-  "Tomato",
-  "Turquoise",
-  "Ultramarine",
-  "Vermilion",
-  "Violet",
-  "Viridian",
-  "Wheat",
-  "White",
-  "Wisteria",
-  "Yellow",
-  "Yellow-green",
-  "Zaffre",
-  "Zinnwaldite",
-  "Turquoise",
-  "Ultramarine",
-  "Vermilion",
-  "Violet",
-  "Viridian",
-  "Wheat",
-  "White",
-  "Wisteria",
-  "Yellow",
-  "Yellow-green",
-  "Zaffre",
-  "Zinnwaldite",
-];
-
-console.log(colorSwatches);
 
 function createElementDateSet(type) {
   var main = document.createElement("div");
@@ -136,7 +20,6 @@ function createElementDateSet(type) {
   main.id = type + Date.now(); // Unique ID for each new element
   main.draggable = true;
   main.tagName = type;
-
   const list = document.getElementById("ContentTableList");
   const detailsDiv = document.getElementById("tableDetails");
 
@@ -149,7 +32,6 @@ function editElementDataSet(type, element, content) {
   button.onclick = function () {
     const propertiesBar = document.getElementById("propertiesBar");
     const gridID = propertiesBar.querySelector("label").textContent;
-
     const main = document.getElementById(gridID);
     updateDataSet(main, content);
   };
@@ -410,7 +292,6 @@ function insertTable() {
 }
 
 //--- data set navigation ---
-
 function moveFirst(tableName, datasetFields) {
   if (tableName) {
     navigateRecords("move-to-first", tableName, datasetFields);
@@ -778,7 +659,6 @@ function CreateInsert(tableName) {
       inputs[i].readOnly = true;
     }
   }
-
   return { fields: insertFields, values: insertValues };
 }
 
@@ -831,7 +711,6 @@ async function insertRecordDB(tableName, data) {
     }
 
     const result = await response.json();
-    console.log("Record inserted successfully:", result);
     showToast("Record inserted successfully", 5000); // Show toast for 5 seconds
     return result;
   } catch (error) {

@@ -21,7 +21,6 @@ function createElementDataSetWeb(type) {
   main.style.minHeight = "50px";
   main.draggable = true;
   main.tagName = type;
-
   const list = document.getElementById("ContentTableList");
   const detailsDiv = document.getElementById("tableDetails");
 
@@ -33,7 +32,7 @@ function editElementDataSetWeb(type, element, content) {
   button.textContent = "update";
   button.onclick = function () {
     const propertiesBar = document.getElementById("propertiesBar");
-    const gridID = propertiesBar.querySelector("label").textContent;  
+    const gridID = propertiesBar.querySelector("label").textContent;
     const main = document.getElementById(gridID);
     updateDataSetWeb(main, content);
   };
@@ -41,18 +40,10 @@ function editElementDataSetWeb(type, element, content) {
   content.appendChild(
     createMultiSelectItemWeb("Data", "Array-Outputs", "data", false)
   );
-  content.appendChild(
-    createMultiSelectItemWeb("Data", "Id", "data",true)
-  );
-  content.appendChild(
-    createSelectApiWeb("Data", 'CreateApi')
-  );
-  content.appendChild(
-    createSelectApiWeb("Data", 'GetById')
-  );
-  content.appendChild(
-    createSelectApiWeb("Data", 'UpdateById')
-  );
+  content.appendChild(createMultiSelectItemWeb("Data", "Id", "data", true));
+  content.appendChild(createSelectApiWeb("Data", "CreateApi"));
+  content.appendChild(createSelectApiWeb("Data", "GetById"));
+  content.appendChild(createSelectApiWeb("Data", "UpdateById"));
   // load the data
   // check if jsonData is not empty
   if (element.getAttribute("dataSet") != null) {
@@ -62,68 +53,72 @@ function editElementDataSetWeb(type, element, content) {
       if (fieldJson.fieldType !== "rowid")
         addFieldToPropertiesBarWeb(target, fieldJson);
     });
-  
-  var target1 = content.querySelectorAll("#Data")[1];
-  var jsonData = JSON.parse(element.getAttribute("dataSet"));
+
+    var target1 = content.querySelectorAll("#Data")[1];
+    var jsonData = JSON.parse(element.getAttribute("dataSet"));
     jsonData.forEach((fieldJson) => {
       if (fieldJson.fieldType == "rowid")
         addFieldToPropertiesBarWeb(target1, fieldJson);
     });
 
-  var target2 = content.querySelectorAll("#Data")[2];
-  const createApiDiv = element.querySelector('div[create-api]');
-  var createApi = JSON.parse(createApiDiv.getAttribute("create-api"));
-  if(createApi!=null){
-    addApiToPropertiesBarWeb(target2, createApi, "CreateApi");
-  }
-  var target3 = content.querySelectorAll("#Data")[3];
-  const getByIdDiv = element.querySelector('div[get-by-id]');
-  var getById = JSON.parse(getByIdDiv.getAttribute("get-by-id"));
-  if(getById!=null){
-    addApiToPropertiesBarWeb(target3, getById, "GetById");
-  }
-  var target4 = content.querySelectorAll("#Data")[4];
-  const updateByIdDiv = element.querySelector('div[update-by-id]');
-  var getById = JSON.parse(updateByIdDiv.getAttribute("update-by-id"));
-  if(getById!=null){
-    addApiToPropertiesBarWeb(target4, getById, "UpdateById");
-  }
+    var target2 = content.querySelectorAll("#Data")[2];
+    const createApiDiv = element.querySelector("div[create-api]");
+    var createApi = JSON.parse(createApiDiv.getAttribute("create-api"));
+    if (createApi != null) {
+      addApiToPropertiesBarWeb(target2, createApi, "CreateApi");
+    }
+    var target3 = content.querySelectorAll("#Data")[3];
+    const getByIdDiv = element.querySelector("div[get-by-id]");
+    var getById = JSON.parse(getByIdDiv.getAttribute("get-by-id"));
+    if (getById != null) {
+      addApiToPropertiesBarWeb(target3, getById, "GetById");
+    }
+    var target4 = content.querySelectorAll("#Data")[4];
+    const updateByIdDiv = element.querySelector("div[update-by-id]");
+    var getById = JSON.parse(updateByIdDiv.getAttribute("update-by-id"));
+    if (getById != null) {
+      addApiToPropertiesBarWeb(target4, getById, "UpdateById");
+    }
   }
 }
 
 function updateDataSetWeb(main, content) {
-
   // get all the span elements from data
   var data = content.querySelectorAll('span[name="dataContainer"]');
   if (data.length == 0) return; // no data to update
   //get id for Update
   var dataId = content.querySelectorAll('span[name="dataContainerId"]');
 
-  var dataGetById = content.querySelectorAll('span[name="dataContainerGetById"]');
-  var dataUpdateById = content.querySelectorAll('span[name="dataContainerUpdateById"]');
-  var dataCreateApi = content.querySelectorAll('span[name="dataContainerCreateApi"]');
-  var getById={};
-  var updateById={};
-  var createApi={};
+  var dataGetById = content.querySelectorAll(
+    'span[name="dataContainerGetById"]'
+  );
+  var dataUpdateById = content.querySelectorAll(
+    'span[name="dataContainerUpdateById"]'
+  );
+  var dataCreateApi = content.querySelectorAll(
+    'span[name="dataContainerCreateApi"]'
+  );
+  var getById = {};
+  var updateById = {};
+  var createApi = {};
 
-  try{
+  try {
     createApi = JSON.parse(dataCreateApi[0].getAttribute("data-field"));
-  }catch{}
-  try{
-   getById = JSON.parse(dataGetById[0].getAttribute("data-field"));
-   updateById = JSON.parse(dataUpdateById[0].getAttribute("data-field"));
-  }catch{
-   getById = {};
-   updateById = {};
+  } catch {}
+  try {
+    getById = JSON.parse(dataGetById[0].getAttribute("data-field"));
+    updateById = JSON.parse(dataUpdateById[0].getAttribute("data-field"));
+  } catch {
+    getById = {};
+    updateById = {};
   }
-  
+
   var firstJson;
   // get the first span element
-  if(dataId.length > 0)
-   firstJson = JSON.parse(dataId[0].getAttribute("data-field"));
-  else
-   firstJson = JSON.parse(data[0].getAttribute("data-field"));
-   
+  if (dataId.length > 0)
+    firstJson = JSON.parse(dataId[0].getAttribute("data-field"));
+  else firstJson = JSON.parse(data[0].getAttribute("data-field"));
+
   // generate the json of all the data
   var jsonData = [
     {
@@ -162,7 +157,6 @@ function updateDataSetWeb(main, content) {
 function renderDataSetWeb(main, getById, updateById, createApi) {
   main.innerHTML = "";
   main.style.height = "200px";
-  console.log("renderDataSetWeb");
   // get the data from the main
   var jsonData = JSON.parse(main.getAttribute("dataSet"));
   var apiUrl = main.getAttribute("data-api-url");
@@ -177,7 +171,17 @@ function renderDataSetWeb(main, getById, updateById, createApi) {
     dataset.appendChild(createField);
   });
   main.appendChild(dataset);
-  main.appendChild(createNavigationBarWeb(apiUrl, apiMethod, jsonData, apiId, getById, updateById, createApi));
+  main.appendChild(
+    createNavigationBarWeb(
+      apiUrl,
+      apiMethod,
+      jsonData,
+      apiId,
+      getById,
+      updateById,
+      createApi
+    )
+  );
   moveFirstWeb(apiUrl, apiMethod, apiId);
 }
 
@@ -230,7 +234,6 @@ function createFieldFromJsonWeb(fieldJson, mainId) {
 
   if (element !== undefined && element !== null) {
     element.style.maxWidth = "500px";
-
     // get label from the element
     var label = element.querySelector("label");
     // if the label exists set the text
@@ -248,7 +251,15 @@ function createFieldFromJsonWeb(fieldJson, mainId) {
 }
 
 // --- internal functions ---
-function createNavigationBarWeb(apiUrl, apiMethod, jsonData, apiId,getById, updateById, createApi) {
+function createNavigationBarWeb(
+  apiUrl,
+  apiMethod,
+  jsonData,
+  apiId,
+  getById,
+  updateById,
+  createApi
+) {
   console.log("createNavigationBarWeb");
   // Create the navigation bar div
   var navigationBar = document.createElement("div");
@@ -257,7 +268,6 @@ function createNavigationBarWeb(apiUrl, apiMethod, jsonData, apiId,getById, upda
   navigationBar.className = "navigation-bar";
   navigationBar.setAttribute("data-current-row", "0");
   navigationBar.setAttribute("data-current-length", "0");
-  // navigationBar.setAttribute("data-api", "");
   navigationBar.setAttribute("data-api-url", apiUrl);
   navigationBar.setAttribute("data-api-method", apiMethod);
   navigationBar.setAttribute("data-api-id", apiId);
@@ -279,26 +289,47 @@ function createNavigationBarWeb(apiUrl, apiMethod, jsonData, apiId,getById, upda
       name: "PreviusDSBtn",
       title: "Previus",
       text: '<i class="bi bi-arrow-left-circle-fill" style="color:green;margin-left:-6px"></i>',
-      event: "movePrevWeb('" + apiUrl + "','" + apiMethod + "','" + apiId + "')",
+      event:
+        "movePrevWeb('" + apiUrl + "','" + apiMethod + "','" + apiId + "')",
     },
     {
       name: "NextDSBtn",
       title: "Next",
       text: '<i class="bi bi-arrow-right-circle-fill" style="color:green;margin-left:-6px"></i>',
-      event: "moveNextWeb('" + apiUrl + "','" + apiMethod + "','" + apiId + "')",
+      event:
+        "moveNextWeb('" + apiUrl + "','" + apiMethod + "','" + apiId + "')",
     },
     {
       name: "LastDSBtn",
       title: "Last",
       text: '<i class="bi bi-arrow-down-circle-fill" style="color:green;margin-left:-6px"></i>',
-      event: "moveLastWeb('" + apiUrl + "','" + apiMethod + "','" + apiId + "')",
+      event:
+        "moveLastWeb('" + apiUrl + "','" + apiMethod + "','" + apiId + "')",
     },
-    { name:'EditDSBtn', title: 'Edit Record',text: '<i class="bi bi-credit-card-2-front" style="color:blue;margin-left:-6px"></i>', event: "EditRecordWeb('" + apiId + "')" },
-    { name:'InsertDSBtn', title: 'Create Record', text: '<i class="bi bi-sticky-fill" style="color:green;margin-left:-6px"></i>', event: "InsertRecordWeb('" + apiId + "')" },
-    { name: 'SaveDSBtn', title: 'Save Record', text: '<i class="bi bi-sim-fill" style="color:red;margin-left:-6px"></i>', event: "SaveRecordWeb('" + apiId + "')" },
-    { name: 'RefreshDSBtn', title: 'Refresh Data',text: '<i class="bi bi-arrow-clockwise" style="color:green;margin-left:-6px"></i>', event: "RefreshRecordWeb('" + apiId + "')" }
-
-    
+    {
+      name: "EditDSBtn",
+      title: "Edit Record",
+      text: '<i class="bi bi-credit-card-2-front" style="color:blue;margin-left:-6px"></i>',
+      event: "EditRecordWeb('" + apiId + "')",
+    },
+    {
+      name: "InsertDSBtn",
+      title: "Create Record",
+      text: '<i class="bi bi-sticky-fill" style="color:green;margin-left:-6px"></i>',
+      event: "InsertRecordWeb('" + apiId + "')",
+    },
+    {
+      name: "SaveDSBtn",
+      title: "Save Record",
+      text: '<i class="bi bi-sim-fill" style="color:red;margin-left:-6px"></i>',
+      event: "SaveRecordWeb('" + apiId + "')",
+    },
+    {
+      name: "RefreshDSBtn",
+      title: "Refresh Data",
+      text: '<i class="bi bi-arrow-clockwise" style="color:green;margin-left:-6px"></i>',
+      event: "RefreshRecordWeb('" + apiId + "')",
+    },
   ];
   var htm = "";
   //for the dom2json is mandatory to create a html for the events
@@ -315,18 +346,16 @@ function createNavigationBarWeb(apiUrl, apiMethod, jsonData, apiId,getById, upda
   return navigationBar;
 }
 
-async function linkRecordToGridWeb(selectedData, record){
-  try{
-   
-     let idObject=getIdObject()
-     const main = document.getElementById(idObject.dataSetWeb);
-     const jsonData = JSON.parse(main.getAttribute("dataSet"));
-     const apiId=jsonData[0].apiId
-     const data={data:[selectedData]}
-     updateInputsWeb(data, jsonData, apiId, 0);
-    //  setDataLength(apiId, 32);
-     setRowNumWeb(apiId, record);
-  }catch{}
+async function linkRecordToGridWeb(selectedData, record) {
+  try {
+    let idObject = getIdObject();
+    const main = document.getElementById(idObject.dataSetWeb);
+    const jsonData = JSON.parse(main.getAttribute("dataSet"));
+    const apiId = jsonData[0].apiId;
+    const data = { data: [selectedData] };
+    updateInputsWeb(data, jsonData, apiId, 0);
+    setRowNumWeb(apiId, record);
+  } catch {}
 }
 
 //--- data set navigation ---
@@ -335,21 +364,13 @@ async function moveFirstWeb(apiUrl, apiMethod, apiId) {
   const dataSetId = "DataSetWeb_" + apiId;
   const dataSet = document.getElementById(dataSetId);
   const main = dataSet.parentNode;
-  const apiFilter=main.getAttribute("apiFilter")
+  const apiFilter = main.getAttribute("apiFilter");
   const jsonData = JSON.parse(main.getAttribute("dataSet"));
   if (!apiUrl) return;
   const data = await apiData(apiUrl, apiMethod, apiFilter);
   if (!data) return;
   updateInputsWeb(data, jsonData, apiId, 0);
-  console.log("data")
-  console.log(data)
-  console.log("jsonData")
-  console.log(jsonData)
   setDataLength(apiId, data[jsonData[1].fieldArrayName].length);
-  console.log("apiId")
-  console.log(apiId)
-  console.log("data[jsonData[1].fieldArrayName].length")
-  console.log(data[jsonData[1].fieldArrayName].length)
   setRowNumWeb(apiId, 0);
 }
 
@@ -358,19 +379,17 @@ async function moveLastWeb(apiUrl, apiMethod, apiId) {
   const dataSetId = "DataSetWeb_" + apiId;
   const dataSet = document.getElementById(dataSetId);
   const main = dataSet.parentNode;
-  const apiFilter=main.getAttribute("apiFilter")
+  const apiFilter = main.getAttribute("apiFilter");
   const jsonData = JSON.parse(main.getAttribute("dataSet"));
   if (!apiUrl) return;
   const data = await apiData(apiUrl, apiMethod, apiFilter);
-  console.log(data)
   if (!data) return;
-  console.log(data)
   let length;
   const searchFilter = apiFilter?.split("|");
-  if (searchFilter?.length < 3 || apiFilter==false) {
+  if (searchFilter?.length < 3 || apiFilter == false) {
     length = getDataLength(apiId);
-  }else{
-    length=data?.data?.length
+  } else {
+    length = data?.data?.length;
   }
   // if(fromInsertRecord) length = data[jsonData[1].fieldArrayName].length;
   updateInputsWeb(data, jsonData, apiId, length - 1);
@@ -379,14 +398,12 @@ async function moveLastWeb(apiUrl, apiMethod, apiId) {
 }
 
 async function movePrevWeb(apiUrl, apiMethod, apiId) {
-  console.log("DataSetWeb Move Prev");
-  console.log("apiId", apiId)
   const row = getRowNumWeb(apiId);
   if (row === 0) return;
   const dataSetId = "DataSetWeb_" + apiId;
   const dataSet = document.getElementById(dataSetId);
   const main = dataSet.parentNode;
-  const apiFilter=main.getAttribute("apiFilter")
+  const apiFilter = main.getAttribute("apiFilter");
   const jsonData = JSON.parse(main.getAttribute("dataSet"));
   if (!apiUrl) return;
   const data = await apiData(apiUrl, apiMethod, apiFilter);
@@ -404,7 +421,7 @@ async function moveNextWeb(apiUrl, apiMethod, apiId) {
   const dataSetId = "DataSetWeb_" + apiId;
   const dataSet = document.getElementById(dataSetId);
   const main = dataSet.parentNode;
-  const apiFilter=main.getAttribute("apiFilter")
+  const apiFilter = main.getAttribute("apiFilter");
   const jsonData = JSON.parse(main.getAttribute("dataSet"));
   if (!apiUrl) return;
   const data = await apiData(apiUrl, apiMethod, apiFilter);
@@ -414,243 +431,243 @@ async function moveNextWeb(apiUrl, apiMethod, apiId) {
   setDataLength(apiId, data[jsonData[1].fieldArrayName].length);
 }
 
-
-async function apiData(apiUrl, apiMethod, apiFilter=false){
+async function apiData(apiUrl, apiMethod, apiFilter = false) {
   const response = await callApi(apiUrl, apiMethod);
   if (!response || response.status !== 200) return;
   const data = await response.json();
-  if (apiFilter!=false && data?.data) {
-    try{
-      
-    const searchFilter = apiFilter.split("|");
-    if (searchFilter.length < 3) {
-        throw new Error("Invalid filter format. Expected format: 'field|operator|value'.");
-    }
-    const [field, operator, value] = searchFilter;
-    const operatorMap = {
-        'eq': (a, b) => a === b,
-        'lt': (a, b) => a < b,
-        'lte': (a, b) => a <= b,
-        'gt': (a, b) => a > b,
-        'gte': (a, b) => a >= b,
-        'like': (a, b) => a.toString().toLowerCase().includes(b.toString().toLowerCase()),
-    };
-    if (!operatorMap.hasOwnProperty(operator)) {
+  if (apiFilter != false && data?.data) {
+    try {
+      const searchFilter = apiFilter.split("|");
+      if (searchFilter.length < 3) {
+        throw new Error(
+          "Invalid filter format. Expected format: 'field|operator|value'."
+        );
+      }
+      const [field, operator, value] = searchFilter;
+      const operatorMap = {
+        eq: (a, b) => a === b,
+        lt: (a, b) => a < b,
+        lte: (a, b) => a <= b,
+        gt: (a, b) => a > b,
+        gte: (a, b) => a >= b,
+        like: (a, b) =>
+          a.toString().toLowerCase().includes(b.toString().toLowerCase()),
+      };
+      if (!operatorMap.hasOwnProperty(operator)) {
         throw new Error(`Invalid operator: ${operator}`);
-    }
-    data.data = data.data.filter((item) => {
+      }
+      data.data = data.data.filter((item) => {
         const fieldValue = item[field];
         if (fieldValue == null) {
-            return false;
+          return false;
         }
         let processedFieldValue;
         let processedValue;
         const isFieldDate = !isNaN(Date.parse(fieldValue));
         const isValueDate = !isNaN(Date.parse(value));
         if (isFieldDate && isValueDate) {
-            processedFieldValue = new Date(fieldValue);
-            processedValue = new Date(value);
-            return operatorMap[operator](processedFieldValue.getTime(), processedValue.getTime());
+          processedFieldValue = new Date(fieldValue);
+          processedValue = new Date(value);
+          return operatorMap[operator](
+            processedFieldValue.getTime(),
+            processedValue.getTime()
+          );
         } else if (!isNaN(fieldValue) && !isNaN(value)) {
-            processedFieldValue = parseFloat(fieldValue);
-            processedValue = parseFloat(value);
-            return operatorMap[operator](processedFieldValue, processedValue);
-        } else if (typeof fieldValue === 'string' && typeof value === 'string') {
-            processedFieldValue = fieldValue.toString();
-            processedValue = value.toString();
-            return operatorMap[operator](processedFieldValue, processedValue);
-        } else if (operator === 'like') {
-            processedFieldValue = fieldValue.toString();
-            processedValue = value.toString();
-            return operatorMap[operator](processedFieldValue, processedValue);
+          processedFieldValue = parseFloat(fieldValue);
+          processedValue = parseFloat(value);
+          return operatorMap[operator](processedFieldValue, processedValue);
+        } else if (
+          typeof fieldValue === "string" &&
+          typeof value === "string"
+        ) {
+          processedFieldValue = fieldValue.toString();
+          processedValue = value.toString();
+          return operatorMap[operator](processedFieldValue, processedValue);
+        } else if (operator === "like") {
+          processedFieldValue = fieldValue.toString();
+          processedValue = value.toString();
+          return operatorMap[operator](processedFieldValue, processedValue);
         }
         return false;
+      });
+    } catch {}
+  }
+  return data;
+}
+
+function EditRecordWeb(apiId, handle = false) {
+  console.log("Edit Input");
+  const dataSetId = "#DataSetWeb_" + apiId;
+  const escapedDateSetId = dataSetId.replace(/\//g, "\\/");
+  const datasets = document.querySelectorAll(escapedDateSetId);
+  datasets.forEach((dataset) => {
+    const inputs = dataset.querySelectorAll("input");
+    inputs.forEach((input) => {
+      input.readOnly = handle;
     });
-    }catch{}
-}
-return data
-}
-
-function EditRecordWeb(apiId, handle=false)
-{
-console.log('Edit Input')
-const dataSetId = "#DataSetWeb_" + apiId;
-const escapedDateSetId = dataSetId.replace(/\//g, "\\/");
-const datasets = document.querySelectorAll(escapedDateSetId);
-datasets.forEach((dataset) => {
-  const inputs = dataset.querySelectorAll("input");
-  inputs.forEach((input) => {
-    input.readOnly = handle;
   });
-});
 }
 
-async  function InsertRecordWeb(apiId)
-{
+async function InsertRecordWeb(apiId) {
   console.log("Create new Record Web");
   const dataSetId = "DataSetWeb_" + apiId;
   const dataSet = document.getElementById(dataSetId);
   const main = dataSet.parentNode;
   const jsonData = JSON.parse(main.getAttribute("dataSet"));
-  
-  const navBar = document.getElementById("navigationBar_"+apiId);
-  const createApi=JSON.parse(navBar.getAttribute('create-api'));
-  const apiMethod= createApi.apiMethod;
-  var apiUrl= createApi.controllerServerUrl+createApi.apiPath.slice(1);
 
-  let fieldData={}
-  let payload={}
+  const navBar = document.getElementById("navigationBar_" + apiId);
+  const createApi = JSON.parse(navBar.getAttribute("create-api"));
+  const apiMethod = createApi.apiMethod;
+  var apiUrl = createApi.controllerServerUrl + createApi.apiPath.slice(1);
 
-  jsonData.map((field,index) => {
-    if(index === 0) return;
-    const fieldIdTemp = "#"+field.fieldId;
+  let fieldData = {};
+  let payload = {};
+
+  jsonData.map((field, index) => {
+    if (index === 0) return;
+    const fieldIdTemp = "#" + field.fieldId;
     let escapedFieldId = fieldIdTemp.replace(/\//g, "\\/");
     escapedFieldId = escapedFieldId.replace(/\ /g, "\\ ");
     const inputs = document.querySelectorAll(escapedFieldId);
     let input = inputs[0];
-    if (inputs.length>1) input = inputs[1];
-    const name=field.fieldName
+    if (inputs.length > 1) input = inputs[1];
+    const name = field.fieldName;
     const fieldValue = input.value;
-    fieldData[name]=fieldValue
-  }
+    fieldData[name] = fieldValue;
+  });
+  const filteredBody = createApi.apiDataInputs.filter(
+    (item) => item.Location === "Body"
   );
-  const filteredBody=createApi.apiDataInputs.filter((item) => item.Location==='Body');
   filteredBody.map((item) => {
-    const val= findValue(fieldData, item.Name)
-    if(val) payload[item.Name]=val
+    const val = findValue(fieldData, item.Name);
+    if (val) payload[item.Name] = val;
   });
 
   const responseCreateApi = await callApi(apiUrl, apiMethod, payload);
   if (!responseCreateApi || responseCreateApi.status !== 200) return;
 
-  const getAllApiUrl=navBar.getAttribute('data-api-url');
-  const getAllApiMethod=navBar.getAttribute('data-api-method');
-  moveLastWeb(getAllApiUrl, getAllApiMethod, apiId, true)
-
+  const getAllApiUrl = navBar.getAttribute("data-api-url");
+  const getAllApiMethod = navBar.getAttribute("data-api-method");
+  moveLastWeb(getAllApiUrl, getAllApiMethod, apiId, true);
 }
-async  function SaveRecordWeb(apiId)
-{
+async function SaveRecordWeb(apiId) {
   console.log("DataSetWeb Update");
-
   const dataSetId = "DataSetWeb_" + apiId;
   const dataSet = document.getElementById(dataSetId);
   const main = dataSet.parentNode;
   const jsonData = JSON.parse(main.getAttribute("dataSet"));
   const input = document.getElementById(jsonData[0].fieldId);
-
   const rowId = input.value;
-  if(!rowId) return;
-
-  const navBar = document.getElementById("navigationBar_"+apiId);
-  const getById=JSON.parse(navBar.getAttribute('get-by-id'));
-  const apiMethod= getById.apiMethod;
-  var apiUrl= getById.controllerServerUrl+getById.apiPath.slice(1);
-
-  const replaceString = "{"+getById.apiDataInputs[0].Name+"}";
+  if (!rowId) return;
+  const navBar = document.getElementById("navigationBar_" + apiId);
+  const getById = JSON.parse(navBar.getAttribute("get-by-id"));
+  const apiMethod = getById.apiMethod;
+  var apiUrl = getById.controllerServerUrl + getById.apiPath.slice(1);
+  const replaceString = "{" + getById.apiDataInputs[0].Name + "}";
   apiUrl = apiUrl.replace(replaceString, rowId);
-
   if (!apiUrl) return;
   const responseGetById = await callApi(apiUrl, apiMethod);
   if (!responseGetById || responseGetById.status !== 200) return;
   let dataGetById = await responseGetById.json();
-
-  jsonData.map((field,index) => {
-    if(index === 0) return;
+  jsonData.map((field, index) => {
+    if (index === 0) return;
     const input = document.getElementById(field.fieldId);
     const val = input.value;
-    if(!val) return;
-    dataGetById[field.fieldArrayName][field.fieldName]=val;
-  }
-  );
+    if (!val) return;
+    dataGetById[field.fieldArrayName][field.fieldName] = val;
+  });
 
-  const updateById=JSON.parse(navBar.getAttribute('update-by-id'));
-  const apiMethodUpdate= updateById.apiMethod;
+  const updateById = JSON.parse(navBar.getAttribute("update-by-id"));
+  const apiMethodUpdate = updateById.apiMethod;
 
-  var apiUrlUpdate= updateById.controllerServerUrl+updateById.apiPath.slice(1);
-  const replaceStringUpdate = "{"+updateById.apiDataInputs[0].Name+"}";
+  var apiUrlUpdate =
+    updateById.controllerServerUrl + updateById.apiPath.slice(1);
+  const replaceStringUpdate = "{" + updateById.apiDataInputs[0].Name + "}";
   apiUrlUpdate = apiUrlUpdate.replace(replaceStringUpdate, rowId);
 
-  const filteredBody=updateById.apiDataInputs.filter((item) => item.Location==='Body');
+  const filteredBody = updateById.apiDataInputs.filter(
+    (item) => item.Location === "Body"
+  );
 
-  let payload ={};
+  let payload = {};
 
   filteredBody.map((item) => {
-    const val= findValue(dataGetById, item.Name)
-    if(val) payload[item.Name]=val
+    const val = findValue(dataGetById, item.Name);
+    if (val) payload[item.Name] = val;
   });
 
   if (!apiUrlUpdate) return;
-  const responseUpdateById = await callApi(apiUrlUpdate, apiMethodUpdate, payload);
+  const responseUpdateById = await callApi(
+    apiUrlUpdate,
+    apiMethodUpdate,
+    payload
+  );
   if (!responseUpdateById || responseUpdateById.status !== 200) return;
   let dataUpdateById = await responseUpdateById.json();
 
   EditRecordWeb(apiId, true);
 
-  let idObject=getIdObject()
-  if(idObject?.dataGridWeb){
-    let filedName= "";
-    let operator= "";
-    let searchValue="";
-    if(idObject?.dataSearchWeb){
-      const grid=document.getElementById(idObject?.dataSearchWeb);
-      const filter= grid.getAttribute("filter")?.split("|")
-      if(filter){
-      filedName=filter[0]
-      operator=filter[1]
-      searchValue=filter[2]}
+  let idObject = getIdObject();
+  if (idObject?.dataGridWeb) {
+    let filedName = "";
+    let operator = "";
+    let searchValue = "";
+    if (idObject?.dataSearchWeb) {
+      const grid = document.getElementById(idObject?.dataSearchWeb);
+      const filter = grid.getAttribute("filter")?.split("|");
+      if (filter) {
+        filedName = filter[0];
+        operator = filter[1];
+        searchValue = filter[2];
+      }
     }
-      searchGridWeb(filedName,operator,searchValue,idObject.dataGridWeb)
-
- }
-}
-
-async function RefreshRecordWeb(apiId) {
-console.log("DataSetWeb Refresh ");
-
-const row = getRowNumWeb(apiId);
-const dataSetId = "DataSetWeb_" + apiId;
-const dataSet = document.getElementById(dataSetId);
-const main = dataSet.parentNode;
-const jsonData = JSON.parse(main.getAttribute("dataSet"));
-
-const navBar = document.getElementById("navigationBar_"+apiId);
-const apiUrl=navBar.getAttribute('data-api-url');
-const apiMethod=navBar.getAttribute('data-api-method');
-const response = await callApi(apiUrl, apiMethod);
-if (!response || response.status !== 200) return;
-const data = await response.json();
-if (!data) return;
-updateInputsWeb(data, jsonData, apiId, row );
-
-}
-
-
-function findValue(obj, key) {
-if (typeof obj !== "object" || obj === null) {
-  return undefined; 
-}
-
-if (key in obj) {
-  return obj[key]; 
-}
-
-for (const prop in obj) {
-  if (obj.hasOwnProperty(prop)) {
-    const value = findValue(obj[prop], key);
-    if (value !== undefined) {
-      return value;
-    }
+    searchGridWeb(filedName, operator, searchValue, idObject.dataGridWeb);
   }
 }
 
-return undefined; 
+async function RefreshRecordWeb(apiId) {
+  console.log("DataSetWeb Refresh ");
+  const row = getRowNumWeb(apiId);
+  const dataSetId = "DataSetWeb_" + apiId;
+  const dataSet = document.getElementById(dataSetId);
+  const main = dataSet.parentNode;
+  const jsonData = JSON.parse(main.getAttribute("dataSet"));
+
+  const navBar = document.getElementById("navigationBar_" + apiId);
+  const apiUrl = navBar.getAttribute("data-api-url");
+  const apiMethod = navBar.getAttribute("data-api-method");
+  const response = await callApi(apiUrl, apiMethod);
+  if (!response || response.status !== 200) return;
+  const data = await response.json();
+  if (!data) return;
+  updateInputsWeb(data, jsonData, apiId, row);
+}
+
+function findValue(obj, key) {
+  if (typeof obj !== "object" || obj === null) {
+    return undefined;
+  }
+
+  if (key in obj) {
+    return obj[key];
+  }
+
+  for (const prop in obj) {
+    if (obj.hasOwnProperty(prop)) {
+      const value = findValue(obj[prop], key);
+      if (value !== undefined) {
+        return value;
+      }
+    }
+  }
+
+  return undefined;
 }
 
 function updateInputsWeb(data, jsonData, apiId, row) {
   // get all the datasets
   console.log("Update Inputs");
   const dataSetId = "#DataSetWeb_" + apiId;
-
   const escapedDateSetId = dataSetId.replace(/\//g, "\\/");
   const datasets = document.querySelectorAll(escapedDateSetId);
   // for all the datasets check the div with name DataSet
@@ -669,7 +686,7 @@ function updateInputsWeb(data, jsonData, apiId, row) {
       input.readOnly = true;
       if (!fieldValue) return;
       input.value = fieldValue.toString().trim();
-    
+
       // currently we do not have save button on this component
       // disable save record button with name SaveRecordBtn
       // dataset.parentElement.querySelector("[name=SaveDSBtn]").disabled = true;
@@ -679,7 +696,6 @@ function updateInputsWeb(data, jsonData, apiId, row) {
 
 function getFieldValue(fieldData, data, row) {
   if (fieldData.fieldArray === "true") {
-    console.log(data[fieldData.fieldArrayName][row][fieldData.fieldName])
     return data[fieldData.fieldArrayName][row][fieldData.fieldName];
   }
 }
