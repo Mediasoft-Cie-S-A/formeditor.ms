@@ -398,7 +398,7 @@ function drag(ev) {
   ev.dataTransfer.setData("text", ev.target.id);
 }
 
-function dropInput(event) {
+function dropInput(event, id) {
   event.preventDefault();
 
   console.log("dropInput");
@@ -423,6 +423,7 @@ function dropInput(event) {
     tableName: tableName,
     fieldName: fieldName,
     fieldType: fieldType,
+    copyType: id,
     fieldDataType: fieldDataType,
     fieldLabel: fieldLabel.replace("'", "`"),
     fieldMandatory: fieldMandatory,
@@ -508,7 +509,7 @@ function createMultiSelectItem(id, label, styleProperty) {
   div.style.borderRadius = "5px";
   div.id = id;
   div.style.className = "multi-select";
-  div.setAttribute("ObjectType", "data");
+  div.setAttribute("ObjectType", id);
   // set draggable attribute
   div.setAttribute("draggable", "true");
 
@@ -518,7 +519,10 @@ function createMultiSelectItem(id, label, styleProperty) {
   lbl.innerText = label;
 
   div.setAttribute("ondragover", "allowDrop(event)");
-  div.setAttribute("ondrop", "dropInput(event)");
+  // div.setAttribute("ondrop", "dropInput(event,'${id}')");
+  div.addEventListener("drop", function (event) {
+    dropInput(event, id);
+  });
 
   // get the object by id
 

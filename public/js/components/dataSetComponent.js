@@ -47,6 +47,16 @@ function editElementDataSet(type, element, content) {
     )
   );
   content.appendChild(
+    createMultiSelectItem(
+      "exception",
+      "exception",
+      "exception",
+      element.getAttribute("exception"),
+      "text",
+      true
+    )
+  );
+  content.appendChild(
     createSelectItem(
       "Filter",
       "filter",
@@ -71,13 +81,11 @@ function editElementDataSet(type, element, content) {
 
 function updateDataSet(main, content) {
   console.log("updateDataSet");
-
-  // get all the span elements from data
   var data = content.querySelectorAll('span[name="dataContainer"]');
-  if (data.length == 0) return; // no data to update
-  // get the first span element
+  var exception = Array.from(data).filter((span) => span.closest("#exception"));
+  data = Array.from(data).filter((span) => !span.closest("#exception"));
+  if (data.length == 0) return;
   var firstJson = JSON.parse(data[0].getAttribute("data-field"));
-  // generate the json of all the data
   var jsonData = [
     {
       tableName: firstJson.tableName,
@@ -90,13 +98,29 @@ function updateDataSet(main, content) {
       fieldDefaultValue: "0",
     },
   ];
+  var exceptionData = [
+    {
+      tableName: firstJson.tableName,
+      fieldName: "rowid",
+      fieldType: "rowid",
+      fieldDataType: "rowid",
+      fieldLabel: "rowid",
+      fieldMandatory: "0",
+      fieldWidth: "0",
+      fieldDefaultValue: "0",
+    },
+  ];
   data.forEach((span) => {
-    // get the json data from the span
     var json = JSON.parse(span.getAttribute("data-field"));
-    // add the field to the json
     jsonData.push(json);
   });
+  exception.forEach((span) => {
+    var json = JSON.parse(span.getAttribute("data-field"));
+    exceptionData.push(json);
+  });
+
   main.setAttribute("dataSet", JSON.stringify(jsonData));
+  main.setAttribute("exceptionSet", JSON.stringify(exceptionData));
   renderDataSet(main);
 }
 
@@ -208,6 +232,7 @@ function createNavigationBar(tableName, datasetFields) {
   navigationBar.setAttribute("data-current-row", "0");
   navigationBar.setAttribute("data-dataset-fields", datasetFields);
   navigationBar.innerHTML = '<div class="navigation-bar-title">record: </div>';
+  const sequenceName = "droit";
   // Create buttons and append them to the navigation bar
   var buttons = [
     {
@@ -245,6 +270,12 @@ function createNavigationBar(tableName, datasetFields) {
       title: "Insert Record",
       text: '<i class="bi bi-sticky-fill" style="color:green;margin-left:-6px"></i>',
       event: "InsertRecord('" + tableName + "','" + datasetFields + "')",
+    },
+    {
+      name: "CopyDSBtn",
+      title: "Copy",
+      text: '<i class="bi bi-clipboard" style="color:red;margin-left:-6px"></i>',
+      event: "CopyRecord('" + tableName + "', '" + datasetFields + "')",
     },
     {
       name: "SaveDSBtn",
@@ -334,7 +365,7 @@ function RefreshRecord(tableName) {
   }
 }
 
-function navigateRecords(
+async function navigateRecords(
   action,
   tableName,
   datasetFields,
@@ -378,6 +409,68 @@ function navigateRecords(
     })
     .catch((error) => console.error("Error:", error));
 }
+async function getRecords(action, tableName, datasetFields) {
+  const url = `/${action}/${tableName}?fields=${datasetFields}`;
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error:", error);
+    return null;
+  }
+}
+
+function CopyRecord(tableName, datasetFields) {
+  const inputs = document.querySelectorAll(`#DataSet_${tableName} input`);
+  const selects = document.querySelectorAll(`#DataSet_${tableName} select`);
+  const idObject = getIdObject();
+  const main = document.getElementById(idObject.dataSet);
+
+  // Get exceptionData and extract the exceptionFieldNames
+  const exceptionData = JSON.parse(main.getAttribute("exceptionSet"));
+  const exceptionFieldNames = exceptionData.map((field) => field.fieldName);
+
+  // Process all input fields
+  inputs.forEach((input) => {
+    input.readOnly = false; // Make input editable
+    const field = input.getAttribute("dataset-field-name");
+    input.setAttribute("value", "new"); // Set all non-exception inputs to "new"
+
+    if (exceptionFieldNames.includes(field) && field !== "rowid") {
+      input.value = ""; // Clear the value for exception fields
+    }
+  });
+
+  // Process all select fields
+  selects.forEach((select) => {
+    const field = select.getAttribute("dataset-field-name");
+
+    // If the select field is in the exception list and not "rowid"
+    if (exceptionFieldNames.includes(field) && field !== "rowid") {
+      select.selectedIndex = -1; // Clear the selection for exception fields
+    } else {
+      select.selectedIndex; // Set to the first option or a default value
+    }
+  });
+}
+
+async function navigateSequence(action) {
+  console.log("Step two is called");
+  const url = `/${action}`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  } catch (error) {
+    console.error("Error:", error);
+    throw error;
+  }
+}
 
 // link record to grid using this web service /get-record-by-rowid/:tableName/:rowID and update the inputs with the data
 // use the fetch function to call the web service and update the inputs with the data
@@ -411,93 +504,177 @@ async function linkRecordToGrid(tableName, rowId, rowNum) {
   }
 }
 
-function updateInputs(data, tableName) {
-  // get all the datasets
+async function updateInputs(data, tableName) {
   const datasets = document.querySelectorAll("#DataSet_" + tableName);
-
-  // for all the datasets check the div with name DataSet
-  datasets.forEach((dataset) => {
-    // get table name from the dataset
+  datasets.forEach(async (dataset) => {
     const datasetTableName = dataset.getAttribute("data-table-name");
-    // if the table name is the same as the table name of the record
+
     if (datasetTableName === tableName) {
-      const inputs = dataset.querySelectorAll("input");
-      inputs.forEach((input) => {
+      const inputs = dataset.querySelectorAll("input, select");
+
+      inputs.forEach(async (input) => {
         const fieldLabel = input.getAttribute("dataset-field-name");
+        const fieldType = input.tagName.toLowerCase();
 
         input.value = "";
-        input.readOnly = true;
-        if (data[0][fieldLabel] !== undefined && data[0][fieldLabel] !== "") {
-          let subField = data[0][fieldLabel].toString().trim().split(";");
+        input.disabled = true;
 
-          if (subField.length > 1) {
-            // Hide the original input field
-            input.style.display = "none";
+        let subField = data[0][fieldLabel]?.toString().trim().split(";");
 
-            // Retrieve the dataset field name
-            let fieldId = input.getAttribute("data-field-name");
+        if (subField.length > 1) {
+          input.style.display = "none";
+          let fieldId = input.getAttribute("data-field-name");
+          let existingFieldContainer = document.getElementById(fieldId);
+          if (existingFieldContainer) {
+            existingFieldContainer.parentElement.removeChild(
+              existingFieldContainer
+            );
+          }
 
-            // Check if an element with the same ID already exists and remove it if it does
-            let existingFieldContainer = document.getElementById(fieldId);
-            if (existingFieldContainer) {
-              existingFieldContainer.parentElement.removeChild(
-                existingFieldContainer
-              );
+          let fieldContainer = document.createElement("div");
+          fieldContainer.style.height = "600px";
+          fieldContainer.style.maxWidth = "400%";
+          fieldContainer.style.overflowX = "scroll";
+
+          fieldContainer.style.display = "flex";
+          fieldContainer.style.flexDirection = "column";
+          fieldContainer.style.flexWrap = "wrap";
+          fieldContainer.className = "subFieldContainer";
+          fieldContainer.id = fieldId;
+          input.parentElement.appendChild(fieldContainer);
+          subField.forEach((val, index) => {
+            let fieldJson = {
+              fieldDataType: input.getAttribute("data-field-type"), // fixed typo: "dataset-field-type" to "data-field-type"
+              fieldDefaultValue: val,
+              fieldLabel:
+                input.getAttribute("dataset-field-name") == "droit"
+                  ? droit[index]
+                  : "gama",
+              fieldMandatory: "0",
+              fieldName:
+                input.getAttribute("dataset-field-name") + "__" + index,
+              fieldWidth: "1",
+              tableName: input.getAttribute("data-table-name"), // fixed typo: "dataset-table-name" to "data-table-name"
+            };
+
+            let createField = createFieldFromJson(fieldJson);
+            createField.style.display = "flex";
+            createField.style.maxWidth = "180px";
+            createField.style.alignItems = "center";
+            createField.style.justifyContent = "space-between";
+            let childInput = createField.querySelector("input");
+
+            if (childInput) {
+              childInput.value = val;
+              childInput.style.maxWidth = "60px";
+              childInput.style.marginLeft = "8px";
+              childInput.readOnly = true;
             }
-
-            // Create a new fieldContainer
-            let fieldContainer = document.createElement("div");
-            fieldContainer.style.height = "600px";
-            fieldContainer.style.maxWidth = "400%";
-            fieldContainer.style.overflowX = "scroll";
-
-            fieldContainer.style.display = "flex";
-            fieldContainer.style.flexDirection = "column";
-            fieldContainer.style.flexWrap = "wrap";
-            fieldContainer.className = "subFieldContainer";
-            fieldContainer.id = fieldId;
-            input.parentElement.appendChild(fieldContainer);
-            // Create and append subfields to the container
-            subField.forEach((val, index) => {
-              let fieldJson = {
-                fieldDataType: input.getAttribute("data-field-type"), // fixed typo: "dataset-field-type" to "data-field-type"
-                fieldDefaultValue: val,
-                fieldLabel:
-                  input.getAttribute("dataset-field-name") == "droit"
-                    ? droit[index]
-                    : "gama", // corrected the fieldLabel assignment
-                fieldMandatory: "0",
-                fieldName:
-                  input.getAttribute("dataset-field-name") + "__" + index,
-                fieldWidth: "1",
-                tableName: input.getAttribute("data-table-name"), // fixed typo: "dataset-table-name" to "data-table-name"
-              };
-
-              let createField = createFieldFromJson(fieldJson);
-              createField.style.display = "flex";
-              createField.style.maxWidth = "180px";
-              createField.style.alignItems = "center";
-              createField.style.justifyContent = "space-between";
-              let childInput = createField.querySelector("input");
-
-              if (childInput) {
-                childInput.value = val;
-                childInput.style.maxWidth = "60px";
-                childInput.style.marginLeft = "8px";
-                childInput.readOnly = true;
+            fieldContainer.appendChild(createField);
+          });
+        } else {
+          // Handle specific cases based on fieldLabel for select fields
+          if (fieldLabel === "la") {
+            handleSelectField(input, ["F", "I", "D", "E"], data[0][fieldLabel]);
+          } else if (fieldLabel === "typAcces") {
+            handleSelectField(
+              input,
+              [
+                { value: "1", text: "MS" },
+                { value: "2", text: "WEB" },
+                { value: "3", text: "MS+WEB" },
+              ],
+              data[0][fieldLabel]
+            );
+          } else if (fieldLabel === "groupe") {
+            try {
+              if (fieldType === "input") {
+                // Only make API call if no existing select options are found
+                const datasetFields = "groupe,desi";
+                const dataGroupe = await getRecords(
+                  "get-all-groupe",
+                  "groupes",
+                  datasetFields
+                );
+                const options = dataGroupe.map((item) => ({
+                  value: item.groupe,
+                  text: item.desi,
+                }));
+                handleSelectField(input, options, data[0][fieldLabel]);
+              } else {
+                console.log("Using existing select options");
+                handleSelectField(input, null, data[0][fieldLabel]);
               }
-              fieldContainer.appendChild(createField);
-            });
+            } catch (error) {
+              console.error("Error fetching groupe data:", error);
+            }
           } else {
-            input.value = data[0][fieldLabel].toString().trim();
+            if (fieldType === "input") {
+              input.value = data[0][fieldLabel]?.toString().trim() || "";
+              input.disabled = false;
+            }
           }
         }
 
-        // Disable save record button with name SaveDSBtn
-        dataset.parentElement.querySelector("[name=SaveDSBtn]").disabled = true;
+        // Enable the save button for the dataset
+        dataset.parentElement.querySelector(
+          "[name=SaveDSBtn]"
+        ).disabled = false;
       });
     }
   });
+}
+
+// Helper function to handle select fields
+// Helper function to handle select fields and sync with input field
+
+function handleSelectField(input, options, selectedValue) {
+  if (!input) return;
+
+  // Check if a select element already exists, else create it
+  let selectElement = input.parentElement.querySelector("select");
+  if (!selectElement) {
+    selectElement = document.createElement("select");
+
+    // Add options to the select element
+    options.forEach((option) => {
+      const optionElement = document.createElement("option");
+      if (typeof option === "object") {
+        optionElement.value = option.value;
+        optionElement.text = option.text;
+      } else {
+        optionElement.value = option;
+        optionElement.text = option;
+      }
+      selectElement.appendChild(optionElement);
+    });
+
+    // Assign the same attributes from the input to the new select element
+    selectElement.setAttribute(
+      "dataset-field-name",
+      input.getAttribute("dataset-field-name")
+    );
+    selectElement.name = input.name;
+    selectElement.className = input.className;
+
+    // Append the new select element to the input's parent
+    input.parentElement.appendChild(selectElement);
+    input.style.display = "none"; // Hide the original input
+  }
+
+  // Set the value of the select element
+  selectElement.value = selectedValue || "";
+  selectElement.disabled = false; // Enable the select field
+
+  // Add an event listener to sync the select value with the hidden input field
+  selectElement.addEventListener("change", () => {
+    input.value = selectElement.value; // Update the hidden input with the select's value
+    input.dispatchEvent(new Event("input")); // Trigger input event for change detection
+  });
+
+  // Initially sync the input field with the selected value
+  input.value = selectElement.value || "";
+  input.dispatchEvent(new Event("input")); // Trigger input event for change detection
 }
 
 function setRowNum(tabelName, Num) {
@@ -525,7 +702,6 @@ function EditRecord(tableName) {
     // }
   });
 
-  // document.getElementById("SaveRecordBtn").disabled = false;
   document.querySelector("[name=SaveDSBtn]").disabled = false;
 }
 
@@ -604,37 +780,90 @@ function CreateUpdated(tableName) {
 }
 
 //update record
+// async function SaveRecord(tableName) {
+//   try {
+//     console.log("SaveRecord");
+//     // Get the next row id from the navigation bar
+//     const nextRowIds = document.querySelectorAll("#" + tableName + "_rowid");
+//     nextRowIds.forEach((nextRowId) => {
+//       // get table name from the dataset
+//       datasetTableName = nextRowId.getAttribute("dataset-table-name");
+//       // if the table name is the same as the table name of the record
+//       if (datasetTableName == tableName) {
+//         nextRowId = nextRowId.value;
+//         let result;
+//         if (nextRowId === "new") {
+//           // create data for insert
+//           const data = CreateInsert(tableName);
+//           console.log("data");
+//           console.log(data);
+//           // If nextRowId is 'new', call insertRecord
+//           if (tableName === "util") {
+//             const id = await navigateSequence("next-sequence");
+//             console.log("id");
+//             console.log(id);
+//           }
+//           result = insertRecordDB(tableName, data);
+//         } else {
+//           // Otherwise, call updateRecord
+//           const data = {
+//             body: CreateUpdated(tableName),
+//           };
+//           result = updateRecordDB(tableName, nextRowId, data);
+//         }
+//         document.querySelector("[name=SaveDSBtn]").disabled = true;
+
+//         return result;
+//       }
+//     });
+//   } catch (error) {
+//     showToast("Error:" + error);
+//   }
+// }
+
+function addIdToData(data, id, value) {
+  let fieldsArray = data.fields.replace(/"/g, "").split(",");
+  let valuesArray = data.values.replace(/'/g, "").split(",");
+  const idIndex = fieldsArray.indexOf("id");
+  if (idIndex !== -1) {
+    const valueIndex = idIndex;
+    valuesArray[valueIndex] = value;
+  } else {
+    fieldsArray.push("id");
+    valuesArray.push(value);
+  }
+  data.fields = fieldsArray.map((f) => `"${f}"`).join(",");
+  data.values = valuesArray.map((v) => `'${v}'`).join(",");
+  return data;
+}
+
 async function SaveRecord(tableName) {
   try {
     console.log("SaveRecord");
-    // Get the next row id from the navigation bar
     const nextRowIds = document.querySelectorAll("#" + tableName + "_rowid");
-    nextRowIds.forEach((nextRowId) => {
-      // get table name from the dataset
-      datasetTableName = nextRowId.getAttribute("dataset-table-name");
-      // if the table name is the same as the table name of the record
-      if (datasetTableName == tableName) {
-        nextRowId = nextRowId.value;
-
+    for (const nextRowId of nextRowIds) {
+      const datasetTableName = nextRowId.getAttribute("dataset-table-name");
+      if (datasetTableName === tableName) {
+        const rowIdValue = nextRowId.value;
         let result;
-        if (nextRowId === "new") {
-          // create data for insert
-          const data = CreateInsert(tableName);
-          // If nextRowId is 'new', call insertRecord
-          result = insertRecordDB(tableName, data);
+        if (rowIdValue === "new") {
+          let data = CreateInsert(tableName);
+          if (tableName === "util") {
+            const val = await navigateSequence("next-sequence");
+            const id = val[0].sequence_next;
+            data = addIdToData(data, "id", id);
+          }
+          result = await insertRecordDB(tableName, data);
         } else {
-          // Otherwise, call updateRecord
           const data = {
             body: CreateUpdated(tableName),
           };
-
-          result = updateRecordDB(tableName, nextRowId, data);
+          result = await updateRecordDB(tableName, rowIdValue, data);
         }
         document.querySelector("[name=SaveDSBtn]").disabled = true;
-
         return result;
       }
-    });
+    }
   } catch (error) {
     showToast("Error:" + error);
   }
@@ -697,13 +926,15 @@ async function updateRecordDB(tableName, nextRowId, updateData) {
 
 async function insertRecordDB(tableName, data) {
   try {
+    const payload = JSON.stringify(data);
+
     const response = await fetch(`/insert-record/${tableName}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         // Include other headers as needed, like authentication tokens
       },
-      body: JSON.stringify(data),
+      body: payload,
     });
 
     if (!response.ok) {

@@ -14,687 +14,847 @@
  * limitations under the License.
  */
 
-const { query } = require('express');
-const OdbcDatabase = require('./OdbcDatabase'); 
+const { query } = require("express");
+const OdbcDatabase = require("./OdbcDatabase");
 // const he = require('he');
 
-module.exports = function(app,session, passport) {
-    const checkAuthenticated = (req, res, next) => {
-        if (req.isAuthenticated()) { return next(); }
-        res.redirect("/login");
-    };
+module.exports = function (app, session, passport) {
+  const checkAuthenticated = (req, res, next) => {
+    if (req.isAuthenticated()) {
+      return next();
+    }
+    res.redirect("/login");
+  };
 
-    const dsn = app.config.odbcString;
-    // Replace with your actual connection string
-const db = new OdbcDatabase(dsn);
+  const dsn = app.config.odbcString;
+  // Replace with your actual connection string
+  const db = new OdbcDatabase(dsn);
 
-/**
- * @swagger
- * /table-structure/{tableName}:
- *   get:
- *     summary: Get table structure
- *     description: Retrieve the structure of a specified table.
- *     parameters:
- *       - in: path
- *         name: tableName
- *         required: true
- *         description: Name of the table to retrieve structure.
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Table structure retrieved successfully.
- *       500:
- *         description: Internal Server Error
- */
+  /**
+   * @swagger
+   * /table-structure/{tableName}:
+   *   get:
+   *     summary: Get table structure
+   *     description: Retrieve the structure of a specified table.
+   *     parameters:
+   *       - in: path
+   *         name: tableName
+   *         required: true
+   *         description: Name of the table to retrieve structure.
+   *         schema:
+   *           type: string
+   *     responses:
+   *       200:
+   *         description: Table structure retrieved successfully.
+   *       500:
+   *         description: Internal Server Error
+   */
 
-app.get('/table-structure/:tableName',checkAuthenticated, async (req, res) => {
-    try {
+  app.get(
+    "/table-structure/:tableName",
+    checkAuthenticated,
+    async (req, res) => {
+      try {
         await db.connect();
         const tableName = req.params.tableName;
         const structure = await db.getTableStructure(tableName);
         res.json(structure);
-    } catch (err) {
-        console.log('Error:', err);
-        res.status(500).send('Internal Server Error');
-    } finally {
+      } catch (err) {
+        console.log("Error:", err);
+        res.status(500).send("Internal Server Error");
+      } finally {
         await db.close();
+      }
     }
-});
+  );
 
-/**
- * @swagger
- * /tables-list:
- *   get:
- *     summary: Get list of tables
- *     description: Retrieve a list of all tables.
- *     responses:
- *       200:
- *         description: List of tables retrieved successfully.
- *       500:
- *         description: Error retrieving tables list
- */
-    
-app.get('/tables-list', checkAuthenticated, async (req, res) => {
+  /**
+   * @swagger
+   * /tables-list:
+   *   get:
+   *     summary: Get list of tables
+   *     description: Retrieve a list of all tables.
+   *     responses:
+   *       200:
+   *         description: List of tables retrieved successfully.
+   *       500:
+   *         description: Error retrieving tables list
+   */
+
+  app.get("/tables-list", checkAuthenticated, async (req, res) => {
     try {
-        console.log("tablesList");
-        await db.connect();
-        const tablesList = await db.getTablesList();
-        res.json(tablesList);
+      console.log("tablesList");
+      await db.connect();
+      const tablesList = await db.getTablesList();
+      res.json(tablesList);
     } catch (err) {
-        console.log('Error:', err);
-        res.status(500).send('Error retrieving tables list');
+      console.log("Error:", err);
+      res.status(500).send("Error retrieving tables list");
     } finally {
-        await db.close();
+      await db.close();
     }
-});
+  });
 
-/**
- * @swagger
- * /table-fields/{tableName}:
- *   get:
- *     summary: Get fields of a table
- *     description: Retrieve the fields of a specified table.
- *     parameters:
- *       - in: path
- *         name: tableName
- *         required: true
- *         description: Name of the table to retrieve fields.
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Table fields retrieved successfully.
- *       500:
- *         description: Error retrieving fields for table
- */
+  /**
+   * @swagger
+   * /table-fields/{tableName}:
+   *   get:
+   *     summary: Get fields of a table
+   *     description: Retrieve the fields of a specified table.
+   *     parameters:
+   *       - in: path
+   *         name: tableName
+   *         required: true
+   *         description: Name of the table to retrieve fields.
+   *         schema:
+   *           type: string
+   *     responses:
+   *       200:
+   *         description: Table fields retrieved successfully.
+   *       500:
+   *         description: Error retrieving fields for table
+   */
 
-    
-app.get('/table-fields/:tableName',checkAuthenticated, async (req, res) => {
+  app.get("/table-fields/:tableName", checkAuthenticated, async (req, res) => {
     try {
-        console.log("table-fields");
-        await db.connect();
-        const tableName = req.params.tableName;
-        const fields = await db.getTableFields(tableName);
-        res.json(fields);
+      console.log("table-fields");
+      await db.connect();
+      const tableName = req.params.tableName;
+      const fields = await db.getTableFields(tableName);
+      res.json(fields);
     } catch (err) {
-        res.status(500).send(`Error retrieving fields for table ${tableName}`);
+      res.status(500).send(`Error retrieving fields for table ${tableName}`);
     } finally {
-        await db.close();
+      await db.close();
     }
-});
+  });
 
- /**
- * @swagger
- * /table-indexes/{tableName}:
- *   get:
- *     summary: Get indexes of a table
- *     description: Retrieve the indexes of a specified table.
- *     parameters:
- *       - in: path
- *         name: tableName
- *         required: true
- *         description: Name of the table to retrieve indexes.
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Table indexes retrieved successfully.
- *       500:
- *         description: Error retrieving indexes for table
- */
+  /**
+   * @swagger
+   * /table-indexes/{tableName}:
+   *   get:
+   *     summary: Get indexes of a table
+   *     description: Retrieve the indexes of a specified table.
+   *     parameters:
+   *       - in: path
+   *         name: tableName
+   *         required: true
+   *         description: Name of the table to retrieve indexes.
+   *         schema:
+   *           type: string
+   *     responses:
+   *       200:
+   *         description: Table indexes retrieved successfully.
+   *       500:
+   *         description: Error retrieving indexes for table
+   */
 
-
-app.get('/table-indexes/:tableName',checkAuthenticated, async (req, res) => {
+  app.get("/table-indexes/:tableName", checkAuthenticated, async (req, res) => {
     try {
-        console.log("table-indexes");
-        await db.connect();
-        const tableName = req.params.tableName;
-        const indexes = await db.getTableIndexes(tableName);
-        res.json(indexes);
+      console.log("table-indexes");
+      await db.connect();
+      const tableName = req.params.tableName;
+      const indexes = await db.getTableIndexes(tableName);
+      res.json(indexes);
     } catch (err) {
-        res.status(500).send(`Error retrieving indexes for table ${tableName}`);
+      res.status(500).send(`Error retrieving indexes for table ${tableName}`);
     } finally {
-        await db.close();
+      await db.close();
     }
-});
+  });
 
-/**
- * @swagger
- * /move-to-first/{tableName}:
- *   get:
- *     summary: Move to the first record of a table
- *     description: Retrieve the first record of a specified table.
- *     parameters:
- *       - in: path
- *         name: tableName
- *         required: true
- *         description: Name of the table.
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: First record retrieved successfully.
- *       500:
- *         description: Error moving to first record
- */
+  /**
+   * @swagger
+   * /move-to-first/{tableName}:
+   *   get:
+   *     summary: Move to the first record of a table
+   *     description: Retrieve the first record of a specified table.
+   *     parameters:
+   *       - in: path
+   *         name: tableName
+   *         required: true
+   *         description: Name of the table.
+   *         schema:
+   *           type: string
+   *     responses:
+   *       200:
+   *         description: First record retrieved successfully.
+   *       500:
+   *         description: Error moving to first record
+   */
 
-//  app.get('/move-to-first/:tableName', checkAuthenticated, async (req, res) => {
-//     try {
-//         await db.connect();
-//         const tableName = req.params.tableName;
-//          // Get the fields from the query string. It's a comma-separated string.
-//          const fields = req.query.fields ? req.query.fields.split(',') : null;
+  //  app.get('/move-to-first/:tableName', checkAuthenticated, async (req, res) => {
+  //     try {
+  //         await db.connect();
+  //         const tableName = req.params.tableName;
+  //          // Get the fields from the query string. It's a comma-separated string.
+  //          const fields = req.query.fields ? req.query.fields.split(',') : null;
 
-//         const firstRecord = await db.moveToFirst(tableName,fields);
-//         res.json(firstRecord);
-//     } catch (err) {
-//         console.error('Error:', err);
-//         res.status(500).send('Error moving to first record');
-//     } finally {
-//         await db.close();
-//     }
-// });
+  //         const firstRecord = await db.moveToFirst(tableName,fields);
+  //         res.json(firstRecord);
+  //     } catch (err) {
+  //         console.error('Error:', err);
+  //         res.status(500).send('Error moving to first record');
+  //     } finally {
+  //         await db.close();
+  //     }
+  // });
 
-
-/**
- * @swagger
- * /move-to-last/{tableName}:
- *   get:
- *     summary: Move to the last record of a table
- *     description: Retrieve the last record of a specified table.
- *     parameters:
- *       - in: path
- *         name: tableName
- *         required: true
- *         description: Name of the table.
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Last record retrieved successfully.
- *       500:
- *         description: Error moving to last record
- */
-app.get('/move-to-last/:tableName', checkAuthenticated, async (req, res) => {
+  /**
+   * @swagger
+   * /move-to-last/{tableName}:
+   *   get:
+   *     summary: Move to the last record of a table
+   *     description: Retrieve the last record of a specified table.
+   *     parameters:
+   *       - in: path
+   *         name: tableName
+   *         required: true
+   *         description: Name of the table.
+   *         schema:
+   *           type: string
+   *     responses:
+   *       200:
+   *         description: Last record retrieved successfully.
+   *       500:
+   *         description: Error moving to last record
+   */
+  app.get("/move-to-last/:tableName", checkAuthenticated, async (req, res) => {
     try {
-        await db.connect();
-        const tableName = req.params.tableName;
-         // Get the fields from the query string. It's a comma-separated string.
-         const fields = req.query.fields ? req.query.fields.split(',') : null;
-         const filter = req.query.filter ? req.query.filter.split('|') : null;
-         const filterObj = filter ? {
-             column: filter[0],
-             operator: filter[1],
-             value: filter[2]
-         } : null;
-
-        const lastRecord = await db.moveToLast(tableName,fields, filterObj);
-        res.json(lastRecord);
-    } catch (err) {
-        console.error('Error:', err);
-        res.status(500).send('Error moving to last record');
-    } finally {
-        await db.close();
-    }
-});
-
-app.get('/move-to-first/:tableName', checkAuthenticated, async (req, res) => {
-    try {
-        await db.connect();
-        const tableName = req.params.tableName;
-        
-        // Get the fields from the query string. It's a comma-separated string.
-        const fields = req.query.fields ? req.query.fields.split(',') : null;
-        
-        // Parse the filter from the query string.
-        const filter = req.query.filter ? req.query.filter.split('|') : null;
-        const filterObj = filter ? {
+      await db.connect();
+      const tableName = req.params.tableName;
+      // Get the fields from the query string. It's a comma-separated string.
+      const fields = req.query.fields ? req.query.fields.split(",") : null;
+      const filter = req.query.filter ? req.query.filter.split("|") : null;
+      const filterObj = filter
+        ? {
             column: filter[0],
             operator: filter[1],
-            value: filter[2]
-        } : null;
-        
+            value: filter[2],
+          }
+        : null;
 
-        const firstRecord = await db.moveToFirst(tableName, fields, filterObj);
-        res.json(firstRecord);
+      const lastRecord = await db.moveToLast(tableName, fields, filterObj);
+      res.json(lastRecord);
     } catch (err) {
-        console.error('Error:', err);
-        res.status(500).send('Error moving to first record');
+      console.error("Error:", err);
+      res.status(500).send("Error moving to last record");
     } finally {
-        await db.close();
+      await db.close();
     }
-});
+  });
 
-
-/**
- * @swagger
- * /move-to-next/{tableName}/{currentRowId}:
- *   get:
- *     summary: Move to the next record of a table
- *     description: Retrieve the next record of a specified table based on the current row ID.
- *     parameters:
- *       - in: path
- *         name: tableName
- *         required: true
- *         description: Name of the table.
- *         schema:
- *           type: string
- *       - in: path
- *         name: currentRowId
- *         required: true
- *         description: Current row ID.
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Next record retrieved successfully.
- *       500:
- *         description: Error moving to next record
- */
-// app.get('/move-to-next/:tableName/:currentRowId', checkAuthenticated, async (req, res) => {
-//     try {
-//         await db.connect();
-//         const tableName = req.params.tableName;
-//         const currentRowId = req.params.currentRowId;
-//          // Get the fields from the query string. It's a comma-separated string.
-//          const fields = req.query.fields ? req.query.fields.split(',') : null;
-         
-
-//         const nextRecord = await db.moveToNext(tableName, fields, currentRowId);
-//         res.json(nextRecord);
-//     } catch (err) {
-//         console.error('Error:', err);
-//         res.status(500).send('Error moving to next record');
-//     } finally {
-//         await db.close();
-//     }
-// });
-
-app.get('/move-to-next/:tableName/:currentRowId', checkAuthenticated, async (req, res) => {
+  app.get("/move-to-first/:tableName", checkAuthenticated, async (req, res) => {
     try {
+      await db.connect();
+      const tableName = req.params.tableName;
+
+      // Get the fields from the query string. It's a comma-separated string.
+      const fields = req.query.fields ? req.query.fields.split(",") : null;
+
+      // Parse the filter from the query string.
+      const filter = req.query.filter ? req.query.filter.split("|") : null;
+      const filterObj = filter
+        ? {
+            column: filter[0],
+            operator: filter[1],
+            value: filter[2],
+          }
+        : null;
+
+      const firstRecord = await db.moveToFirst(tableName, fields, filterObj);
+      res.json(firstRecord);
+    } catch (err) {
+      console.error("Error:", err);
+      res.status(500).send("Error moving to first record");
+    } finally {
+      await db.close();
+    }
+  });
+
+  /**
+   * @swagger
+   * /move-to-next/{tableName}/{currentRowId}:
+   *   get:
+   *     summary: Move to the next record of a table
+   *     description: Retrieve the next record of a specified table based on the current row ID.
+   *     parameters:
+   *       - in: path
+   *         name: tableName
+   *         required: true
+   *         description: Name of the table.
+   *         schema:
+   *           type: string
+   *       - in: path
+   *         name: currentRowId
+   *         required: true
+   *         description: Current row ID.
+   *         schema:
+   *           type: string
+   *     responses:
+   *       200:
+   *         description: Next record retrieved successfully.
+   *       500:
+   *         description: Error moving to next record
+   */
+  // app.get('/move-to-next/:tableName/:currentRowId', checkAuthenticated, async (req, res) => {
+  //     try {
+  //         await db.connect();
+  //         const tableName = req.params.tableName;
+  //         const currentRowId = req.params.currentRowId;
+  //          // Get the fields from the query string. It's a comma-separated string.
+  //          const fields = req.query.fields ? req.query.fields.split(',') : null;
+
+  //         const nextRecord = await db.moveToNext(tableName, fields, currentRowId);
+  //         res.json(nextRecord);
+  //     } catch (err) {
+  //         console.error('Error:', err);
+  //         res.status(500).send('Error moving to next record');
+  //     } finally {
+  //         await db.close();
+  //     }
+  // });
+
+  app.get(
+    "/move-to-next/:tableName/:currentRowId",
+    checkAuthenticated,
+    async (req, res) => {
+      try {
         await db.connect();
         const tableName = req.params.tableName;
         const currentRowId = parseInt(req.params.currentRowId, 10); // Ensure currentRowId is an integer
 
         // Get the fields from the query string. It's a comma-separated string.
-        const fields = req.query.fields ? req.query.fields.split(',') : null;
-        
+        const fields = req.query.fields ? req.query.fields.split(",") : null;
+
         // Parse the filter from the query string.
-        const filter = req.query.filter ? req.query.filter.split('|') : null;
-        const filterObj = filter ? {
-            column: filter[0],
-            operator: filter[1],
-            value: filter[2]
-        } : null;
+        const filter = req.query.filter ? req.query.filter.split("|") : null;
+        const filterObj = filter
+          ? {
+              column: filter[0],
+              operator: filter[1],
+              value: filter[2],
+            }
+          : null;
 
-        const nextRecord = await db.moveToNext(tableName, fields, currentRowId, filterObj);
+        const nextRecord = await db.moveToNext(
+          tableName,
+          fields,
+          currentRowId,
+          filterObj
+        );
         res.json(nextRecord);
-    } catch (err) {
-        console.error('Error:', err);
-        res.status(500).send('Error moving to next record');
-    } finally {
+      } catch (err) {
+        console.error("Error:", err);
+        res.status(500).send("Error moving to next record");
+      } finally {
         await db.close();
+      }
     }
-});
+  );
 
-
-
-/**
- * @swagger
- * /move-to-previous/{tableName}/{currentRowId}:
- *   get:
- *     summary: Move to the previous record of a table
- *     description: Retrieve the previous record of a specified table based on the current row ID.
- *     parameters:
- *       - in: path
- *         name: tableName
- *         required: true
- *         description: Name of the table.
- *         schema:
- *           type: string
- *       - in: path
- *         name: currentRowId
- *         required: true
- *         description: Current row ID.
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Previous record retrieved successfully.
- *       500:
- *         description: Error moving to previous record.
- */
-app.get('/move-to-previous/:tableName/:currentRowId', checkAuthenticated, async (req, res) => {
-    try {
+  /**
+   * @swagger
+   * /move-to-previous/{tableName}/{currentRowId}:
+   *   get:
+   *     summary: Move to the previous record of a table
+   *     description: Retrieve the previous record of a specified table based on the current row ID.
+   *     parameters:
+   *       - in: path
+   *         name: tableName
+   *         required: true
+   *         description: Name of the table.
+   *         schema:
+   *           type: string
+   *       - in: path
+   *         name: currentRowId
+   *         required: true
+   *         description: Current row ID.
+   *         schema:
+   *           type: string
+   *     responses:
+   *       200:
+   *         description: Previous record retrieved successfully.
+   *       500:
+   *         description: Error moving to previous record.
+   */
+  app.get(
+    "/move-to-previous/:tableName/:currentRowId",
+    checkAuthenticated,
+    async (req, res) => {
+      try {
         await db.connect();
         const tableName = req.params.tableName;
         const currentRowId = req.params.currentRowId;
-         // Get the fields from the query string. It's a comma-separated string.
-         const fields = req.query.fields ? req.query.fields.split(',') : null;
-          // Parse the filter from the query string.
-        const filter = req.query.filter ? req.query.filter.split('|') : null;
-        const filterObj = filter ? {
-            column: filter[0],
-            operator: filter[1],
-            value: filter[2]
-        } : null;
+        // Get the fields from the query string. It's a comma-separated string.
+        const fields = req.query.fields ? req.query.fields.split(",") : null;
+        // Parse the filter from the query string.
+        const filter = req.query.filter ? req.query.filter.split("|") : null;
+        const filterObj = filter
+          ? {
+              column: filter[0],
+              operator: filter[1],
+              value: filter[2],
+            }
+          : null;
 
-        const previousRecord = await db.moveToPrevious(tableName,fields, currentRowId, filterObj);
+        const previousRecord = await db.moveToPrevious(
+          tableName,
+          fields,
+          currentRowId,
+          filterObj
+        );
         res.json(previousRecord);
-    } catch (err) {
-        console.error('Error:', err);
-        res.status(500).send('Error moving to previous record');
-    } finally {
+      } catch (err) {
+        console.error("Error:", err);
+        res.status(500).send("Error moving to previous record");
+      } finally {
         await db.close();
+      }
     }
-});
-//get record by rowid
-app.get('/get-record-by-rowid/:tableName/:rowID', checkAuthenticated, async (req, res) => {
-    try {
+  );
+  //get record by rowid
+  app.get(
+    "/get-record-by-rowid/:tableName/:rowID",
+    checkAuthenticated,
+    async (req, res) => {
+      try {
         await db.connect();
         const tableName = req.params.tableName;
         const rowID = req.params.rowID;
-         // Get the fields from the query string. It's a comma-separated string.
-         const fields = req.query.fields ? req.query.fields.split(',') : 'ROWID';
+        // Get the fields from the query string. It's a comma-separated string.
+        const fields = req.query.fields ? req.query.fields.split(",") : "ROWID";
 
-        const record = await db.getRecordByRowID(tableName,fields, rowID);
+        const record = await db.getRecordByRowID(tableName, fields, rowID);
         res.json(record);
-    } catch (err) {
-        console.error('Error:', err);
-        res.status(500).send('Error moving to previous record');
-    } finally {
+      } catch (err) {
+        console.error("Error:", err);
+        res.status(500).send("Error moving to previous record");
+      } finally {
         await db.close();
+      }
     }
-});
+  );
 
-/**
- * @swagger
- * /getROWID/{tableName}/{currentRowId}:
- *   get:
- *     summary: Get ROWID of a record in a table
- *     description: Retrieve the ROWID of a record in a specified table based on the current row ID.
- *     parameters:
- *       - in: path
- *         name: tableName
- *         required: true
- *         description: Name of the table.
- *         schema:
- *           type: string
- *       - in: path
- *         name: currentRowId
- *         required: true
- *         description: Current row ID.
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: ROWID retrieved successfully.
- *       500:
- *         description: Error retrieving ROWID.
- */
+  /**
+   * @swagger
+   * /getROWID/{tableName}/{currentRowId}:
+   *   get:
+   *     summary: Get ROWID of a record in a table
+   *     description: Retrieve the ROWID of a record in a specified table based on the current row ID.
+   *     parameters:
+   *       - in: path
+   *         name: tableName
+   *         required: true
+   *         description: Name of the table.
+   *         schema:
+   *           type: string
+   *       - in: path
+   *         name: currentRowId
+   *         required: true
+   *         description: Current row ID.
+   *         schema:
+   *           type: string
+   *     responses:
+   *       200:
+   *         description: ROWID retrieved successfully.
+   *       500:
+   *         description: Error retrieving ROWID.
+   */
 
-app.get('/getROWID/:tableName/:currentRowId', checkAuthenticated, async (req, res) => {
-    try {
+  app.get(
+    "/getROWID/:tableName/:currentRowId",
+    checkAuthenticated,
+    async (req, res) => {
+      try {
         await db.connect();
         const tableName = req.params.tableName;
         const currentRowId = req.params.currentRowId;
         const nextRecord = await db.getROWID(tableName, currentRowId);
         res.json(nextRecord);
-    } catch (err) {
-        console.error('Error:', err);
-        res.status(500).send('Error moving to next record');
-    } finally {
+      } catch (err) {
+        console.error("Error:", err);
+        res.status(500).send("Error moving to next record");
+      } finally {
         await db.close();
+      }
     }
-});
+  );
 
-/**
- * @swagger
- * /update-record/{tableName}/{rowID}:
- *   put:
- *     summary: Update a record in a table
- *     description: Update a specific record in a table.
- *     parameters:
- *       - in: path
- *         name: tableName
- *         required: true
- *         description: Name of the table where the record is to be updated.
- *         schema:
- *           type: string
- *       - in: path
- *         name: rowID
- *         required: true
- *         description: ID of the record to update.
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       description: Data to update in the record
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               field1:
- *                 type: string
- *               field2:
- *                 type: string
- *               # Add other fields as required
- *     responses:
- *       200:
- *         description: Record updated successfully.
- *       500:
- *         description: Error updating record.
- */
-app.put('/update-record/:tableName/:rowID',  checkAuthenticated, async (req, res) => {
-    const { tableName, rowID } = req.params;
-    const data = req.body; // Assuming the updated data is sent in the request body
-    console.log(data);    
-    try {
+  /**
+   * @swagger
+   * /update-record/{tableName}/{rowID}:
+   *   put:
+   *     summary: Update a record in a table
+   *     description: Update a specific record in a table.
+   *     parameters:
+   *       - in: path
+   *         name: tableName
+   *         required: true
+   *         description: Name of the table where the record is to be updated.
+   *         schema:
+   *           type: string
+   *       - in: path
+   *         name: rowID
+   *         required: true
+   *         description: ID of the record to update.
+   *         schema:
+   *           type: string
+   *     requestBody:
+   *       required: true
+   *       description: Data to update in the record
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               field1:
+   *                 type: string
+   *               field2:
+   *                 type: string
+   *               # Add other fields as required
+   *     responses:
+   *       200:
+   *         description: Record updated successfully.
+   *       500:
+   *         description: Error updating record.
+   */
+  app.put(
+    "/update-record/:tableName/:rowID",
+    checkAuthenticated,
+    async (req, res) => {
+      const { tableName, rowID } = req.params;
+      const data = req.body; // Assuming the updated data is sent in the request body
+      console.log(data);
+      try {
         await db.connectWrite();
         const result = await db.updateRecord(tableName, data, rowID);
-        res.json({ message: 'Record updated successfully', result });
-    } catch (err) {
+        res.json({ message: "Record updated successfully", result });
+      } catch (err) {
         console.error(err);
-        res.status(500).send('Error updating record');
-    } finally {
+        res.status(500).send("Error updating record");
+      } finally {
         await db.close();
+      }
     }
-});
+  );
 
-// insert record
-app.post('/insert-record/:tableName', checkAuthenticated, async (req, res) => {
-    const { tableName } = req.params;
-    const data = req.body; // Assuming the updated data is sent in the request body
-    console.log(data);    
-    try {
+  // insert record
+  app.post(
+    "/insert-record/:tableName",
+    checkAuthenticated,
+    async (req, res) => {
+      const { tableName } = req.params;
+      const data = req.body; // Assuming the updated data is sent in the request body
+      console.log(data);
+      try {
         await db.connectWrite();
         const result = await db.insertRecord(tableName, data);
-        res.json({ message: 'Record inserted successfully', result });
-    } catch (err) {
+        res.json({ message: "Record inserted successfully", result });
+      } catch (err) {
         console.error(err);
-        res.status(500).send('Error inserting record');
-    } finally {
+        res.status(500).send("Error inserting record");
+      } finally {
         await db.close();
+      }
     }
-});
+  );
 
-//GRID
-app.get('/table-data/:tableName/:page/:pageSize', checkAuthenticated,  async (req, res) => {
-    try {
-        
+  //GRID
+  app.get(
+    "/table-data/:tableName/:page/:pageSize",
+    checkAuthenticated,
+    async (req, res) => {
+      try {
         const { tableName, page, pageSize } = req.params;
         await db.connect();
-        
+
         // Convert page and pageSize to numbers
         const pageNum = parseInt(page, 10);
         const pageSizeNum = parseInt(pageSize, 10);
-         // Get the fields from the query string. It's a comma-separated string.
-         const fields = req.query.fields ? req.query.fields.split(',') : null;
+        // Get the fields from the query string. It's a comma-separated string.
+        const fields = req.query.fields ? req.query.fields.split(",") : null;
         const filter = req.query.filter ? req.query.filter : null;
-        console.log("filter",filter);
-        const data = await db.queryDataWithPagination(tableName, pageNum, pageSizeNum,fields,filter);
+        console.log("filter", filter);
+        const data = await db.queryDataWithPagination(
+          tableName,
+          pageNum,
+          pageSizeNum,
+          fields,
+          filter
+        );
         res.json(data);
-    } catch (err) {
-        console.error('Error:', err);
-        res.status(500).send('Error fetching paginated data');
-    } finally {
+      } catch (err) {
+        console.error("Error:", err);
+        res.status(500).send("Error fetching paginated data");
+      } finally {
         await db.close();
+      }
     }
-});
+  );
 
-//Schema modification
-//Alter table
-app.post('/alter-table/:tableName', checkAuthenticated, async (req, res) => {
+  //Schema modification
+  //Alter table
+  app.post("/alter-table/:tableName", checkAuthenticated, async (req, res) => {
     try {
-        await db.connectWrite();
-        const tableName = req.params.tableName;
-        const { action, columnName, columnType, newColumnName, newColumnType } = req.body;
+      await db.connectWrite();
+      const tableName = req.params.tableName;
+      const { action, columnName, columnType, newColumnName, newColumnType } =
+        req.body;
 
-        let result;
-        if (action === 'add') {
-            result = await db.alterTable(tableName, columnName, columnType);
-        } else if (action === 'modify') {
-            result = await db.alterTableColumn(tableName, columnName, newColumnName, newColumnType);
-        } else {
-            throw new Error('Invalid action');
-        }
+      let result;
+      if (action === "add") {
+        result = await db.alterTable(tableName, columnName, columnType);
+      } else if (action === "modify") {
+        result = await db.alterTableColumn(
+          tableName,
+          columnName,
+          newColumnName,
+          newColumnType
+        );
+      } else {
+        throw new Error("Invalid action");
+      }
 
-        res.json({ message: 'Table altered successfully', result });
+      res.json({ message: "Table altered successfully", result });
     } catch (err) {
-        console.error(err);
-        res.status(500).send('Error altering table');
+      console.error(err);
+      res.status(500).send("Error altering table");
     } finally {
-        await db.close();
+      await db.close();
     }
-});
-//Create table  
-app.post('/create-table/:tableName', checkAuthenticated, async (req, res) => {
+  });
+  //Create table
+  app.post("/create-table/:tableName", checkAuthenticated, async (req, res) => {
     try {
-        await db.connectWrite();
-        const tableName = req.params.tableName;
-        const columns = req.body.columns;
-        const result = await db.createTable(tableName, columns);
-        res.json({ message: 'Table created successfully', result });
+      await db.connectWrite();
+      const tableName = req.params.tableName;
+      const columns = req.body.columns;
+      const result = await db.createTable(tableName, columns);
+      res.json({ message: "Table created successfully", result });
     } catch (err) {
-        console.error(err);
-        res.status(500).send('Error creating table');
+      console.error(err);
+      res.status(500).send("Error creating table");
     } finally {
-        await db.close();
+      await db.close();
     }
-});
+  });
 
-function decodeSpecialChars(data)
-{
- // replace %20 by space
-    data=data.replaceAll("%20", " ").replaceAll("%27", "'").replaceAll("%2C", ",").replaceAll("%3A", ":").replaceAll("%3B", ";").replaceAll("%3D", "=").replaceAll("%3F", "?").replaceAll("%40", "@");
-   
+  function decodeSpecialChars(data) {
+    // replace %20 by space
+    data = data
+      .replaceAll("%20", " ")
+      .replaceAll("%27", "'")
+      .replaceAll("%2C", ",")
+      .replaceAll("%3A", ":")
+      .replaceAll("%3B", ";")
+      .replaceAll("%3D", "=")
+      .replaceAll("%3F", "?")
+      .replaceAll("%40", "@");
+
     return data;
-}
+  }
 
-//select distinct values for a field
-app.get('/select-distinct/:tableName/:fieldName', checkAuthenticated, async (req, res) => {
-    try {
+  //select distinct values for a field
+  app.get(
+    "/select-distinct/:tableName/:fieldName",
+    checkAuthenticated,
+    async (req, res) => {
+      try {
         await db.connect();
         const tableName = req.params.tableName;
         const fieldName = req.params.fieldName;
-       
-        // convert html code to special characters
-    
-        const filter = req.query.filter ?  decodeSpecialChars(req.query.filter) : null;
-       
-        const result = await db.selectDistinct(tableName, fieldName,filter);
-        res.json(result);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Error selecting distinct values');
-    } finally {
-        await db.close();
-    }
-});
 
-//select distinct values for a field
-app.get('/select-distinct-idvalue/:tableName/:fieldName', checkAuthenticated, async (req, res) => {
-    try {
+        // convert html code to special characters
+
+        const filter = req.query.filter
+          ? decodeSpecialChars(req.query.filter)
+          : null;
+
+        const result = await db.selectDistinct(tableName, fieldName, filter);
+        res.json(result);
+      } catch (err) {
+        console.error(err);
+        res.status(500).send("Error selecting distinct values");
+      } finally {
+        await db.close();
+      }
+    }
+  );
+
+  //select distinct values for a field
+  app.get(
+    "/select-distinct-idvalue/:tableName/:fieldName",
+    checkAuthenticated,
+    async (req, res) => {
+      try {
         await db.connect();
         const tableName = req.params.tableName;
         const fieldName = req.params.fieldName;
-       
+
         // convert html code to special characters
-        const fieldid= req.query.id;
-        const filter = req.query.filter ?  decodeSpecialChars(req.query.filter) : null;
-       
-        const result = await db.selectDistinctIdValue(tableName,fieldid, fieldName,filter);
+        const fieldid = req.query.id;
+        const filter = req.query.filter
+          ? decodeSpecialChars(req.query.filter)
+          : null;
+
+        const result = await db.selectDistinctIdValue(
+          tableName,
+          fieldid,
+          fieldName,
+          filter
+        );
         res.json(result);
-    } catch (err) {
+      } catch (err) {
         console.error(err);
-        res.status(500).send('Error selecting distinct values');
-    } finally {
+        res.status(500).send("Error selecting distinct values");
+      } finally {
         await db.close();
+      }
     }
-});
+  );
 
-
-// export table to csv
-// set html mime type in header
-app.get('/export-table/:tableName', checkAuthenticated, async (req, res) => {
+  // export table to csv
+  // set html mime type in header
+  app.get("/export-table/:tableName", checkAuthenticated, async (req, res) => {
     try {
+      await db.connect();
+      const tableName = req.params.tableName;
+      const fields = req.query.fields ? req.query.fields.split(",") : null;
+      const result = await db.exportTableToCSV(tableName, fields);
+      // res set header
+      res.set("Content-Type", "text/csv");
+      res.set("Content-Disposition", `attachment; filename=${tableName}.csv`);
+      res.status(200).send(result);
+    } catch (err) {
+      console.error(err);
+      res.status(500).send("Error exporting table");
+    } finally {
+      await db.close();
+    }
+  });
+
+  // select distinct values for a field selectDistinct(tableName, columnName, filter)
+  app.get(
+    "/get-distinct-data/:tableName",
+    checkAuthenticated,
+    async (req, res) => {
+      try {
         await db.connect();
         const tableName = req.params.tableName;
-        const fields = req.query.fields ? req.query.fields.split(',') : null;
-        const result = await db.exportTableToCSV(tableName,fields);
-        // res set header
-        res.set('Content-Type', 'text/csv');
-        res.set('Content-Disposition', `attachment; filename=${tableName}.csv`);
-        res.status(200).send(result);
-        
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Error exporting table');
-    } finally {
-        await db.close();
-    }
-});
-
-
-// select distinct values for a field selectDistinct(tableName, columnName, filter) 
-app.get('/get-distinct-data/:tableName', checkAuthenticated, async (req, res) => {
-    try {
-        await db.connect();
-        const tableName = req.params.tableName;
-        const fields = req.query.fields ? req.query.fields.split(',') : null;
+        const fields = req.query.fields ? req.query.fields.split(",") : null;
         const filter = req.query.filter ? req.query.filter : null;
-        const result = await db.selectDistinct(tableName,fields,filter);
+        const result = await db.selectDistinct(tableName, fields, filter);
         res.json(result);
-    } catch (err) {
+      } catch (err) {
         console.error(err);
-        res.status(500).send('Error selecting data');
-    } finally {
+        res.status(500).send("Error selecting data");
+      } finally {
         await db.close();
+      }
     }
-});
+  );
 
-// get count of records in a table with selectDistinct
-app.get('/get-count/:tableName', checkAuthenticated, async (req, res) => {
+  // get count of records in a table with selectDistinct
+  app.get("/get-count/:tableName", checkAuthenticated, async (req, res) => {
     try {
-        // connect to database
+      // connect to database
+      await db.connect();
+      const tableName = req.params.tableName;
+
+      // filter
+      const filter = req.query.filter ? req.query.filter : null;
+      const result = await db.count(tableName, filter);
+      res.json(result);
+    } catch (err) {
+      console.error(err);
+      res.status(500).send("Error selecting count");
+    } finally {
+      await db.close();
+    }
+  });
+
+  // app.get("/next-sequence", checkAuthenticated, async (req, res) => {
+  //   try {
+  //     console.log("step three is call");
+  //     await db.connect();
+  //     const sequence = await db.nextSequence();
+  //     console.log(sequence);
+  //     console.log("result Above");
+  //     res.json(sequence);
+  //   } catch (err) {
+  //     res.status(500).send(`Error retrieving fields for table }`);
+  //   } finally {
+  //     await db.close();
+  //   }
+  // });
+  function convertBigIntToString(obj) {
+    if (obj === null || obj === undefined) return obj;
+    if (typeof obj === "bigint") return obj.toString();
+    if (typeof obj === "object") {
+      if (Array.isArray(obj)) {
+        return obj.map((item) => convertBigIntToString(item));
+      } else {
+        const result = {};
+        for (const [key, value] of Object.entries(obj)) {
+          result[key] = convertBigIntToString(value);
+        }
+        return result;
+      }
+    }
+    return obj;
+  }
+
+  app.get("/next-sequence", checkAuthenticated, async (req, res) => {
+    try {
+      console.log("Step three is called");
+      await db.connect();
+
+      const sequence = await db.nextSequence();
+      console.log(sequence);
+      console.log("Result above");
+
+      // Convert BigInt values in the sequence to strings
+      const sanitizedSequence = convertBigIntToString(sequence);
+
+      res.json(sanitizedSequence);
+    } catch (err) {
+      console.error("Error retrieving sequence:", err);
+      res.status(500).json({ error: "Error retrieving fields for the table" });
+    } finally {
+      await db.close();
+    }
+  });
+
+  app.get(
+    "/get-all-groupe/:tableName",
+    checkAuthenticated,
+    async (req, res) => {
+      try {
         await db.connect();
         const tableName = req.params.tableName;
-       
-        // filter
-        const filter = req.query.filter ? req.query.filter : null;
-        const result = await db.count(tableName, filter);
-        res.json(result);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Error selecting count');
-    } finally {
+
+        // Get the fields from the query string. It's a comma-separated string.
+        const fields = req.query.fields ? req.query.fields.split(",") : null;
+
+        // Parse the filter from the query string.
+        const filter = req.query.filter ? req.query.filter.split("|") : null;
+        const filterObj = filter
+          ? {
+              column: filter[0],
+              operator: filter[1],
+              value: filter[2],
+            }
+          : null;
+
+        const groupe = await db.getAllGroupe(tableName, fields, filterObj);
+        res.json(groupe);
+      } catch (err) {
+        console.error("Error:", err);
+        res.status(500).send("Error moving to first record");
+      } finally {
         await db.close();
+      }
     }
-});
-
-
-
-
-}
+  );
+};
