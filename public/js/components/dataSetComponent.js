@@ -426,12 +426,8 @@ function CopyRecord(tableName, datasetFields) {
   const selects = document.querySelectorAll(`#DataSet_${tableName} select`);
   const idObject = getIdObject();
   const main = document.getElementById(idObject.dataSet);
-
-  // Get exceptionData and extract the exceptionFieldNames
   const exceptionData = JSON.parse(main.getAttribute("exceptionSet"));
   const exceptionFieldNames = exceptionData.map((field) => field.fieldName);
-
-  // Process all input fields
   inputs.forEach((input) => {
     input.readOnly = false; // Make input editable
     const field = input.getAttribute("dataset-field-name");
@@ -648,16 +644,12 @@ function handleSelectField(input, options, selectedValue) {
       }
       selectElement.appendChild(optionElement);
     });
-
-    // Assign the same attributes from the input to the new select element
     selectElement.setAttribute(
       "dataset-field-name",
       input.getAttribute("dataset-field-name")
     );
     selectElement.name = input.name;
     selectElement.className = input.className;
-
-    // Append the new select element to the input's parent
     input.parentElement.appendChild(selectElement);
     input.style.display = "none"; // Hide the original input
   }
@@ -707,7 +699,6 @@ function EditRecord(tableName) {
 
 function InsertRecord(tableName) {
   const inputs = document.querySelectorAll(`#DataSet_${tableName} input`);
-
   inputs.forEach((input) => {
     const tableLabel = input.getAttribute("dataset-table-name");
     if (tableLabel == tableName) {
@@ -720,7 +711,6 @@ function InsertRecord(tableName) {
       }
     }
   });
-
   document.getElementById("SaveRecordBtn").disabled = false;
 }
 
@@ -778,48 +768,6 @@ function CreateUpdated(tableName) {
   // Return the final formatted string
   return updateFields.join(", ");
 }
-
-//update record
-// async function SaveRecord(tableName) {
-//   try {
-//     console.log("SaveRecord");
-//     // Get the next row id from the navigation bar
-//     const nextRowIds = document.querySelectorAll("#" + tableName + "_rowid");
-//     nextRowIds.forEach((nextRowId) => {
-//       // get table name from the dataset
-//       datasetTableName = nextRowId.getAttribute("dataset-table-name");
-//       // if the table name is the same as the table name of the record
-//       if (datasetTableName == tableName) {
-//         nextRowId = nextRowId.value;
-//         let result;
-//         if (nextRowId === "new") {
-//           // create data for insert
-//           const data = CreateInsert(tableName);
-//           console.log("data");
-//           console.log(data);
-//           // If nextRowId is 'new', call insertRecord
-//           if (tableName === "util") {
-//             const id = await navigateSequence("next-sequence");
-//             console.log("id");
-//             console.log(id);
-//           }
-//           result = insertRecordDB(tableName, data);
-//         } else {
-//           // Otherwise, call updateRecord
-//           const data = {
-//             body: CreateUpdated(tableName),
-//           };
-//           result = updateRecordDB(tableName, nextRowId, data);
-//         }
-//         document.querySelector("[name=SaveDSBtn]").disabled = true;
-
-//         return result;
-//       }
-//     });
-//   } catch (error) {
-//     showToast("Error:" + error);
-//   }
-// }
 
 function addIdToData(data, id, value) {
   let fieldsArray = data.fields.replace(/"/g, "").split(",");
@@ -927,7 +875,6 @@ async function updateRecordDB(tableName, nextRowId, updateData) {
 async function insertRecordDB(tableName, data) {
   try {
     const payload = JSON.stringify(data);
-
     const response = await fetch(`/insert-record/${tableName}`, {
       method: "POST",
       headers: {
