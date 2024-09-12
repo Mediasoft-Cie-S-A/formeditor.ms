@@ -2,25 +2,45 @@ var apiUrl;
 
 function parseOpenApiJson(openApiJson) {
   const controllers = [];
-
-  // Extracting servers information
+  // Determine OpenAPI version
+  const openApiVersion = openApiJson.openapi
+    ? "3.0"
+    : openApiJson.swagger
+    ? "2.0"
+    : null;
+  if (!openApiVersion) {
+    throw new Error("Unsupported OpenAPI version");
+  }
   const servers = openApiJson.servers || [];
+  const paths = openApiJson.paths || {};
 
-  for (const path in openApiJson.paths) {
-    const pathObj = openApiJson.paths[path];
+  const components =
+    openApiJson.components ||
+    (openApiJson.definitions
+      ? { schemas: openApiJson.definitions }
+      : { schemas: {} });
+
+  for (const path in paths) {
+    const pathObj = paths[path];
 
     for (const method in pathObj) {
       const methodObj = pathObj[method];
 
-      if (method === "parameters" || method === "servers") continue; // Skip irrelevant keys
+      if (method === "parameters" || method === "servers") continue;
 
       const tags = methodObj.tags || [];
-      const summary = methodObj.summary || "";
+      const summary = Array.isArray(methodObj.summary)
+        ? methodObj.summary
+        : typeof methodObj.summary === "string"
+        ? [methodObj.summary]
+        : [];
+
       const parameters = methodObj.parameters || [];
       const requestBody = methodObj.requestBody || {};
       const responses = methodObj.responses || {};
 
-      tags.forEach((tag) => {
+      const mapper = tags.length > 0 ? tags : summary;
+      mapper.forEach((tag) => {
         let controller = controllers.find((c) => c.controllerName === tag);
         if (!controller) {
           controller = {
@@ -30,47 +50,7 @@ function parseOpenApiJson(openApiJson) {
           };
           controllers.push(controller);
         }
-
-        // Check if there is a request body
-        let requestBodyContent = false;
-        if (requestBody.content) {
-          if (requestBody.content["application/json"].schema.$ref) {
-            requestBodyContent = retrievePropertiesFromRef(
-              requestBody,
-              requestBody.content["application/json"].schema.$ref,
-              openApiJson.components.schemas
-            );
-          } else {
-            requestBodyContent = {
-              required: requestBody?.required || false,
-              content: {
-                type: requestBody?.content["application/json"]?.schema?.type,
-                properties: requestBody.content["application/json"].schema
-                  .properties
-                  ? Object.keys(
-                      requestBody.content["application/json"].schema.properties
-                    ).map((propertyName) => ({
-                      name: propertyName,
-                      type: requestBody.content["application/json"].schema
-                        .properties[propertyName].type,
-                      required:
-                        requestBody?.content["application/json"]?.schema
-                          ?.required?.length > 0
-                          ? requestBody?.content[
-                              "application/json"
-                            ]?.schema?.required.includes(propertyName)
-                          : false,
-                      format:
-                        requestBody.content["application/json"].schema
-                          .properties[propertyName].format || false,
-                    }))
-                  : [],
-              },
-            };
-          }
-        }
-
-        // Extract responses
+        const requestBodyContent = parseRequestBody(requestBody, components);
         const responseContent = Object.keys(responses)
           .filter(
             (statusCode) =>
@@ -80,9 +60,9 @@ function parseOpenApiJson(openApiJson) {
               responses[statusCode].content["application/json"].schema
           )
           .reduce((acc, statusCode) => {
-            acc[statusCode] = retrieveResponseProperties(
+            acc[statusCode] = parseResponseContent(
               responses[statusCode].content["application/json"].schema,
-              openApiJson
+              components
             );
             return acc;
           }, {});
@@ -118,20 +98,139 @@ function parseOpenApiJson(openApiJson) {
       });
     }
   }
-
   return controllers;
 }
 
-function retrieveResponseProperties(content, openApiJson) {
+function parseRequestBody(requestBody, components) {
+  if (!requestBody.content) return false;
+
+  const content = requestBody.content["application/json"];
+  if (!content || !content.schema) return false;
+
+  if (content.schema.$ref) {
+    return {
+      required: requestBody.required || false,
+      content: {
+        type: resolveSchemaType(content.schema, components),
+        properties: resolveSchemaProperties(content.schema.$ref, components),
+      },
+    };
+  }
+
+  return {
+    required: requestBody.required || false,
+    content: {
+      type: content.schema.type,
+      properties: content.schema.properties
+        ? Object.keys(content.schema.properties).map((propertyName) => ({
+            name: propertyName,
+            type: content.schema.properties[propertyName].type,
+            required: content.schema.required?.includes(propertyName) || false,
+            format: content.schema.properties[propertyName].format || false,
+          }))
+        : [],
+    },
+  };
+}
+
+function parseResponseContent(schema, components) {
+  if (schema.$ref) {
+    return {
+      content: {
+        type: resolveSchemaType(schema, components),
+        properties: resolveSchemaProperties(schema.$ref, components),
+      },
+    };
+  }
+
+  return {
+    content: {
+      type: schema.type,
+      properties: schema.properties
+        ? Object.keys(schema.properties).map((propertyName) => {
+            const propertySchema = schema.properties[propertyName];
+            if (propertySchema.$ref) {
+              return {
+                name: propertyName,
+                type: resolveSchemaType(propertySchema, components),
+                properties: resolveSchemaProperties(
+                  propertySchema.$ref,
+                  components
+                ),
+              };
+            } else if (
+              propertySchema.type === "array" &&
+              propertySchema.items.$ref
+            ) {
+              return {
+                name: propertyName,
+                type: propertySchema.type,
+                properties: resolveSchemaProperties(
+                  propertySchema.items.$ref,
+                  components
+                ),
+              };
+            } else {
+              return {
+                name: propertyName,
+                type: propertySchema.type,
+                format: propertySchema.format || false,
+              };
+            }
+          })
+        : [],
+    },
+  };
+}
+
+function resolveSchemaType(schema, components) {
+  if (schema.$ref) {
+    const schemaName = schema.$ref.split("/").pop();
+    return components.schemas[schemaName]?.type || "object";
+  }
+  return schema.type || "object";
+}
+
+function resolveSchemaProperties(ref, components) {
+  const schemaName = ref.split("/").pop();
+  const schema = components.schemas[schemaName];
+  if (!schema || !schema.properties) return [];
+
+  return Object.keys(schema.properties).map((propertyName) => {
+    const propertySchema = schema.properties[propertyName];
+    if (propertySchema.$ref) {
+      return {
+        name: propertyName,
+        type: resolveSchemaType(propertySchema, components),
+        properties: resolveSchemaProperties(propertySchema.$ref, components),
+      };
+    } else if (propertySchema.type === "array" && propertySchema.items.$ref) {
+      return {
+        name: propertyName,
+        type: propertySchema.type,
+        properties: resolveSchemaProperties(
+          propertySchema.items.$ref,
+          components
+        ),
+      };
+    } else {
+      return {
+        name: propertyName,
+        type: propertySchema.type,
+        format: propertySchema.format || false,
+      };
+    }
+  });
+}
+
+function retrieveResponseProperties(content, components) {
   if (content?.$ref) {
     return {
       content: {
         type: "object",
         properties: retrieveResponseFromRef(
-          content,
           content.$ref,
-          openApiJson.components.schemas,
-          null,
+          components.schemas,
           true
         ),
       },
@@ -142,48 +241,38 @@ function retrieveResponseProperties(content, openApiJson) {
     content: {
       type: content?.type,
       properties: Object.keys(content?.properties).map((propertyName) => {
-        if (content.properties[propertyName]?.$ref)
+        if (content.properties[propertyName]?.$ref) {
           return retrieveResponseFromRef(
-            content,
             content.properties[propertyName]?.$ref,
-            openApiJson.components.schemas,
-            propertyName
+            components.schemas
           );
-        else if (content.properties[propertyName]?.type === "array")
+        } else if (content.properties[propertyName]?.type === "array") {
           return {
             name: propertyName,
             type: content.properties[propertyName].type,
             properties: retrieveResponseFromRef(
-              content,
               content.properties[propertyName].items.$ref,
-              openApiJson.components.schemas,
-              null,
+              components.schemas,
               true
             ),
           };
-        else
+        } else {
           return {
             name: propertyName,
             type: content.properties[propertyName].type,
             format: content.properties[propertyName].format || false,
           };
+        }
       }),
     },
   };
 }
 
-function retrieveResponseFromRef(
-  content,
-  ref,
-  schemas,
-  propertyName,
-  topLevel = false
-) {
+function retrieveResponseFromRef(ref, schemas, topLevel = false) {
   const schemaName = ref.split("/").pop();
   const schema = schemas[schemaName];
   if (topLevel) {
-    if (!schema || !schema.properties) return;
-    [];
+    if (!schema || !schema.properties) return [];
     return Object.keys(schema.properties || {}).map((propertyName) => ({
       name: propertyName,
       type: schema.properties[propertyName].type,
@@ -191,13 +280,9 @@ function retrieveResponseFromRef(
     }));
   }
   if (!schema || !schema.properties)
-    return {
-      name: propertyName,
-      type: "object",
-      properties: [],
-    };
+    return { name: "", type: "object", properties: [] };
   return {
-    name: propertyName,
+    name: "",
     type: "object",
     properties: Object.keys(schema.properties || {}).map((propertyName) => ({
       name: propertyName,
@@ -207,28 +292,19 @@ function retrieveResponseFromRef(
   };
 }
 
-function retrievePropertiesFromRef(reqB, ref, schemas) {
+function retrievePropertiesFromRef(ref, schemas) {
   const schemaName = ref.split("/").pop();
   const schema = schemas[schemaName];
   if (!schema || !schema.properties)
-    return {
-      required: false,
-      content: {
-        type: "object",
-        properties: [],
-      },
-    };
+    return { required: false, content: { type: "object", properties: [] } };
   return {
-    required: schema?.required?.length > 0 ? true : false,
+    required: schema?.required?.length > 0 || false,
     content: {
       type: schema?.type,
       properties: Object.keys(schema.properties || {}).map((propertyName) => ({
         name: propertyName,
         type: schema.properties[propertyName].type,
-        required:
-          schema?.required?.length > 0
-            ? schema?.required.includes(propertyName)
-            : false,
+        required: schema?.required?.includes(propertyName) || false,
         format: schema.properties[propertyName].format || false,
       })),
     },
@@ -306,7 +382,7 @@ function getApiDataOutputs(api) {
             code: propertyName,
           });
         } else if (item.type === "object") {
-          item.properties.map((innerItem) => {
+          item?.properties?.map((innerItem) => {
             apiDataOutputs.push({
               object: true,
               objectName: item.name,
@@ -319,7 +395,7 @@ function getApiDataOutputs(api) {
             });
           });
         } else if (item.type === "array") {
-          item.properties.map((innerItem) => {
+          item?.properties?.map((innerItem) => {
             apiDataOutputs.push({
               object: false,
               objectName: "",
@@ -368,19 +444,17 @@ function generateAPIHTML(api) {
   }
 
   const tableInputs = document.createElement("table");
-
   const thead = document.createElement("thead");
   const headerRow = document.createElement("tr");
 
   Object.keys(tableDataInputs[0]).forEach((key) => {
     const th = document.createElement("th");
     th.classList.add("web-api-bold");
-
     th.textContent = key;
     headerRow.appendChild(th);
   });
-  thead.appendChild(headerRow);
 
+  thead.appendChild(headerRow);
   const tbody = document.createElement("tbody");
 
   tableDataInputs.forEach((data) => {
@@ -395,7 +469,6 @@ function generateAPIHTML(api) {
 
   tableInputs.appendChild(thead);
   tableInputs.appendChild(tbody);
-
   tableInputs.classList.add("input-output-table");
   tableInputs.style.borderCollapse = "collapse";
   tableInputs.style.width = "100%";
@@ -417,27 +490,23 @@ function generateAPIHTML(api) {
   }
 
   const tableOutputs = document.createElement("table");
-
   const theadOutput = document.createElement("thead");
   const headerRowOutput = document.createElement("tr");
-
   const outputHeaders = ["Name", "Type", "Format", "Code"];
   outputHeaders.map((key) => {
     const th = document.createElement("th");
     th.classList.add("web-api-bold");
-
     th.textContent = key;
     headerRowOutput.appendChild(th);
   });
-  theadOutput.appendChild(headerRowOutput);
 
+  theadOutput.appendChild(headerRowOutput);
   const tbodyOutput = document.createElement("tbody");
 
   tableDataOutputs.forEach((data, index) => {
     const row = document.createElement("tr");
     Object.values(data).forEach((value, index) => {
       if (index < 4) return;
-
       const cell = document.createElement("td");
       cell.textContent = value;
       row.appendChild(cell);
@@ -497,7 +566,6 @@ function generateControllerHTML(controller) {
   // Create HTML elements dynamically
   const div = document.createElement("div");
   div.classList.add("web-controller");
-
   const h2 = document.createElement("h2");
   h2.textContent = controller.controllerName;
   const h4 = document.createElement("h4");
@@ -527,124 +595,163 @@ function loadData(data) {
   });
 }
 
-// Function load web server and populate tables when button is clicked
-function loadWebServer() {
-  apiUrl=document.getElementById("apiUrlLink").value
+async function loadWebServer() {
+  const apiUrl = document.getElementById("apiUrlLink").value;
   const fileInput = document.getElementById("fileInput");
-  const file = fileInput.files[0]; 
+  const file = fileInput.files[0];
 
-  if (file) {
+  const handleFileRead = async (file) => {
     const reader = new FileReader();
-    reader.onload =async function(event) {
-      const fileContent = JSON.parse(event.target.result);
-      const parseApiJson= parseOpenApiJson(fileContent);
-      if(parseApiJson){
-        loadData(parseApiJson);
-      } else{
-        console.error("Failed to fetch or parse OpenAPI JSON.");
-      }
+    reader.onload = async function (event) {
+      try {
+        const content = event.target.result;
+        let jsonContent;
 
+        try {
+          // Try to parse as JSON
+          jsonContent = JSON.parse(content);
+        } catch (jsonError) {
+          // If it fails, assume it's YAML and try to convert to JSON
+          try {
+            jsonContent = jsyaml.load(content);
+          } catch (yamlError) {
+            throw new Error("Error parsing file as JSON or YAML.");
+          }
+        }
+        const parseApiJson = parseOpenApiJson(jsonContent);
+        if (parseApiJson) {
+          loadData(parseApiJson);
+        } else {
+          throw new Error("Failed to parse OpenAPI JSON.");
+        }
+      } catch (error) {
+        console.error("Error processing file:", error);
+      }
     };
     reader.readAsText(file);
-  }else{
-  fetchAndParseOpenApiJson(apiUrl)
-    .then((parsedControllers) => {
-      if (parsedControllers) {
-        loadData(parsedControllers);
-      } else {
-        console.error("Failed to fetch or parse OpenAPI JSON.");
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching or parsing OpenAPI JSON:", error);
-    });
+  };
+
+  if (file) {
+    await handleFileRead(file);
+  } else {
+    fetchAndParseOpenApiJson(apiUrl)
+      .then((parsedControllers) => {
+        if (parsedControllers) {
+          loadData(parsedControllers);
+        } else {
+          console.error("Failed to fetch or parse OpenAPI JSON.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching or parsing OpenAPI JSON:", error);
+      });
   }
 }
 
 async function readFile(file) {
   const reader = new FileReader();
-
   return new Promise((resolve, reject) => {
-    reader.onload = event => resolve(event.target.result);
-    reader.onerror = error => reject(error);
+    reader.onload = (event) => resolve(event.target.result);
+    reader.onerror = (error) => reject(error);
     reader.readAsText(file);
   });
 }
 
-// function to create the api selection list on editor screen
 async function dragDropApiList(list) {
-  var parsedControllers;
+  const apiUrl = document.getElementById("apiUrlLink").value;
   const fileInput = document.getElementById("fileInput");
+  let parsedControllers;
+
+  const readFile = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+      reader.readAsText(file);
+    });
+  };
+
+  const processFileContent = (content) => {
+    try {
+      return JSON.parse(content);
+    } catch (jsonError) {
+      try {
+        return jsyaml.load(content);
+      } catch (yamlError) {
+        throw new Error("Error parsing file as JSON or YAML.");
+      }
+    }
+  };
+
   const file = fileInput?.files[0];
+
   if (file) {
     try {
       const fileContent = await readFile(file);
-      const parsedJson = JSON.parse(fileContent);
+      const parsedJson = processFileContent(fileContent);
       parsedControllers = parseOpenApiJson(parsedJson);
+      updateList(list, parsedControllers);
     } catch (error) {
-      console.error("Error reading file:", error);
+      console.error("Error reading or processing file:", error);
     }
   } else {
     try {
       parsedControllers = await fetchAndParseOpenApiJson(apiUrl);
+      updateList(list, parsedControllers);
     } catch (error) {
       console.error("Error fetching and parsing OpenAPI JSON:", error);
-    }}          
-      list.innerHTML = "";
+    }
+  }
+}
 
-      apiList = [];
-      var i = 0;
-      parsedControllers.forEach((controller) => {
-        const h5 = document.createElement("h5");
-        h5.textContent = controller.controllerName;
-        h5.style.minWidth = "145px";
-        h5.style.marginTop = "8px";
-        h5.style.textAlign = "center";
-        var c = 0;
-        controller.apis.forEach((api) => {
-          var listItem = document.createElement("div");
+function updateList(list, parsedControllers) {
+  list.innerHTML = "";
+  let apiList = [];
+  parsedControllers?.forEach((controller) => {
+    const h5 = document.createElement("h5");
+    h5.textContent = controller.controllerName;
+    h5.style.minWidth = "145px";
+    h5.style.marginTop = "8px";
+    h5.style.textAlign = "center";
+    let c = 0;
+    controller.apis.forEach((api) => {
+      const listItem = document.createElement("div");
+      listItem.id = `API_${api.id}`;
+      listItem.className = "api-list-item";
+      listItem.textContent = api.name;
 
-          listItem.id = `API_${api.id}`;
+      const apiDataInputs = getApiDataInputs(api);
+      const apiDataOutputs = getApiDataOutputs(api);
 
-          listItem.className = "api-list-item";
+      listItem.setAttribute("api-data-inputs", JSON.stringify(apiDataInputs));
+      listItem.setAttribute("api-data-outputs", JSON.stringify(apiDataOutputs));
+      listItem.setAttribute(
+        "data-controller-controllerName",
+        controller.controllerName
+      );
+      listItem.setAttribute("data-controller-serverUrl", controller.serverUrl);
+      listItem.setAttribute("data-api-id", api.id);
+      listItem.setAttribute("data-api-name", api.name);
+      listItem.setAttribute("data-api-method", api.method);
+      listItem.setAttribute("data-api-path", api.path);
 
-          listItem.textContent = api.name;
-          const apiDataInputs = getApiDataInputs(api);
-          const apiDataOutputs = getApiDataOutputs(api);
-          listItem.setAttribute('api-data-inputs',JSON.stringify(apiDataInputs));
-          listItem.setAttribute('api-data-outputs',JSON.stringify(apiDataOutputs));
-          listItem.setAttribute(
-            "data-controller-controllerName",
-            controller.controllerName
-          );
-          listItem.setAttribute(
-            "data-controller-serverUrl",
-            controller.serverUrl
-          );
-          listItem.setAttribute("data-api-id", api.id);
-          listItem.setAttribute("data-api-name", api.name);
-          listItem.setAttribute("data-api-method", api.method);
-          listItem.setAttribute("data-api-path", api.path);
-          var apiDetailsDiv = document.createElement("div");
+      const apiDetailsDiv = document.createElement("div");
+      listItem.appendChild(apiDetailsDiv);
+      listItem.draggable = true;
+      listItem.ondragstart = function (event) {
+        drag(event);
+      };
+      listItem.onclick = function (event) {
+        event.preventDefault();
+        fetchApiFields(controller, api, apiDetailsDiv);
+      };
 
-          listItem.appendChild(apiDetailsDiv);
-          listItem.draggable = true;
-          listItem.ondragstart = function (event) {
-            drag(event);
-          };
-          listItem.onclick = function (event) {
-            event.preventDefault();
-            fetchApiFields(controller, api, apiDetailsDiv);
-          };
-          if (c === 0) list.appendChild(h5);
-          list.appendChild(listItem);
-          apiList.push(api.name);
-          i++;
-          c++;
-        });
-      });
-    // })
-    // .catch((error) => console.error("Error:", error));
+      if (c === 0) list.appendChild(h5);
+      list.appendChild(listItem);
+      apiList.push(api.name);
+      c++;
+    });
+  });
 }
 
 function fetchApiFields(controller, api, detailsDiv) {
@@ -795,7 +902,6 @@ function searchApi(search, contentDivID) {
 
 // function to call webserver apis
 async function callApi(apiUrl, apiMethod, body = {}) {
-  console.log("API Call " + apiUrl);
   try {
     let response;
     switch (apiMethod) {
