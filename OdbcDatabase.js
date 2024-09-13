@@ -532,9 +532,6 @@ class OdbcDatabase {
 
   async nextSequence() {
     let query = `SELECT TOP 1 PUB.seq_util.NEXTVAL FROM PUB."util"`;
-    // let query = `SELECT PUB.seq_util.NEXTVAL FROM PUB."util"`;
-    // let query = `INSERT INTO PUB.util ("id","num") VALUES (PUB.seq_util.NEXTVAL,'48')`;
-    // let query = `SELECT * FROM PUB."util"`;
     console.log(".........................................................");
     console.log(query);
     return this.queryData(query);
