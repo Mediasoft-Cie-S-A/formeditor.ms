@@ -19,10 +19,34 @@ var elementsData = [];
 // create the sidebar menu
 // Load the JSON data
 
+function replaceNameWithDescription(data) {
+  return data?.map((item) => {
+    const { formName, ...rest } = item;
+    return {
+      ...rest,
+      description: formName,
+      icon: "fa fa-briefcase",
+      dataComponent: JSON.stringify(item.formData),
+    };
+  });
+}
+
+async function createSidebarSection(elementsData) {
+  let components = [];
+  try {
+    components = await loadBusinessComponent();
+  } catch (error) {
+    console.error("Failed to load business components:", error);
+    components = [];
+  }
+  const data = replaceNameWithDescription(components);
+  createSidebar(elementsData, data);
+}
+
 loadJson("/elementsConfig")
   .then((data) => {
     elementsData = data;
-    createSidebar(elementsData);
+    createSidebarSection(elementsData);
   })
   .catch((err) => {
     console.error(err);
@@ -71,7 +95,7 @@ function loadScriptIfNotLoaded(scriptUrl, scriptslist) {
   }
 }
 // Create the sidebar
-function createSidebar(elementsData) {
+function createSidebar(elementsData, components) {
   const sidebar = document.getElementById("componentsSidebar");
   const categories = {};
   var scriptslist = [];
@@ -84,6 +108,16 @@ function createSidebar(elementsData) {
       categories[elementData.category] = [];
     }
     categories[elementData.category].push(elementData);
+  }
+
+  if (components && components?.length > 0) {
+    for (const component of components) {
+      const category = component.category || "Business Components";
+      if (!categories[category]) {
+        categories[category] = [];
+      }
+      categories[category].push(component);
+    }
   }
 
   // Create sidebar items
@@ -122,6 +156,7 @@ function createSidebar(elementsData) {
       itemDiv.draggable = true;
       itemDiv.innerHTML = "<i class='" + elementData.icon + "'></i> ";
       itemDiv.id = elementData.type;
+      itemDiv.setAttribute("elementData", elementData.dataComponent);
       itemDiv.style.height = "40px";
       itemDiv.style.width = "40px";
       itemDiv.style.alignContent = "center";
@@ -129,7 +164,29 @@ function createSidebar(elementsData) {
         itemDiv.style.marginBottom = "10px";
       }
 
-      itemDiv.addEventListener("dragstart", drag);
+      // itemDiv.addEventListener("dragstart", function (event) {
+      //   const element = event.target;
+      //   const id = element.id;
+      //   const type = id; // If type is the same as id, use it as is or adjust as needed
+      //   const formData = element.getAttribute("elementData") || "";
+
+      //   const data = {
+      //     id,
+      //     type,
+      //     data: formData,
+      //   };
+
+      //   event.dataTransfer.setData("text/plain", JSON.stringify(data));
+      //   event.dataTransfer.setData("text", id); // Optionally, set the ID separately
+      // });
+      itemDiv.addEventListener("dragstart", function (event) {
+        const data = {
+          id: this.id,
+          type: this.id,
+          data: this.getAttribute("elementData"),
+        };
+        event.dataTransfer.setData("text/plain", JSON.stringify(data));
+      });
       itemDiv.addEventListener("dblclick", doubleclick);
       itemDiv.addEventListener("mouseover", function (event) {
         showHint(elementData.description, 1000, event);
@@ -168,16 +225,71 @@ function allowDrop(event) {
   event.preventDefault();
 }
 
+// function drag(event) {
+//   event.dataTransfer.setData("text", event.target.id);
+// }
 function drag(event) {
-  event.dataTransfer.setData("text", event.target.id);
+  const element = event.target;
+  const formData = element.getAttribute("elementData");
+  if (!formData) {
+    event.dataTransfer.setData("text", event.target.id);
+  } else {
+    event.dataTransfer.setData("text", element.id); // Set the ID of the element
+    event.dataTransfer.setData("text/plain", formData || ""); // Set the form data directly
+  }
 }
+// function drop(event) {
+//   event.preventDefault();
+
+//   var elementId = event.dataTransfer.getData("text");
+//   console.log("elementId:" + elementId);
+//   var newElement = createFormElement(elementId);
+//   if (event.target.childElementCount) {
+//     newElement.setAttribute("position", event.target.childElementCount);
+//   }
+//   if (newElement) {
+//     event.target.appendChild(newElement);
+//   }
+// }
 
 function drop(event) {
   event.preventDefault();
 
+  const elementId = event.dataTransfer.getData("text");
+  const formDataString = event.dataTransfer.getData("text/plain");
+
+  let formData = {};
+  let parsedData = {};
+
+  try {
+    if (formDataString && formDataString !== "undefined") {
+      formData = JSON.parse(formDataString);
+    }
+  } catch (e) {
+    console.error("Error parsing formData:", e);
+  }
+  if (!formData || formData?.data == "undefined") {
+    createAndAppendElement(event);
+  } else {
+    try {
+      parsedData = JSON.parse(formData.data);
+      const parentContainer = document.getElementById("formContainer");
+
+      if (parentContainer) {
+        jsonToDom(parsedData, parentContainer);
+      } else {
+        console.error("Container with ID 'formContainer' not found.");
+      }
+    } catch (e) {
+      console.error("Error parsing formData.data:", e);
+    }
+  }
+}
+
+function createAndAppendElement(event) {
   var elementId = event.dataTransfer.getData("text");
-  console.log("elementId:" + elementId);
-  var newElement = createFormElement(elementId);
+  let parsedObject = JSON.parse(elementId);
+  var newElement = createFormElement(parsedObject.id);
   if (event.target.childElementCount) {
     newElement.setAttribute("position", event.target.childElementCount);
   }
