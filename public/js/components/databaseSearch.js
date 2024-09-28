@@ -93,6 +93,7 @@ function RenderDataSearch(main) {
       field.fieldLabel +
       "'  autocomplete='off' ";
     html += "oninput='searchAutoComplete(event,this)' ";
+    html += " data-value-DBName='" + field.DBName + "'";
     html += " data-value-table-name='" + field.tableName + "'";
     html += " data-value-field-name='" + field.fieldName + "'";
     html += " data-value-field-type='" + field.fieldType + "'";
@@ -122,6 +123,7 @@ function gridSearch(event) {
   autocomplete.style.display = "none";
   // get the input element
   const element = maindiv.querySelector("input");
+  const DBName = element.getAttribute("data-value-DBName");
   const filedName = element.getAttribute("data-value-field-name");
   const searchValue = element.value;
   // define the operator based on the field type
@@ -152,7 +154,7 @@ function gridSearch(event) {
     gridDiv.setAttribute("filedName", filedName);
     gridDiv.setAttribute("operator", operator);
     gridDiv.setAttribute("searchValue", searchValue);
-    searchGrid(filedName, operator, searchValue, idObject.dataGrid);
+    searchGrid(DBName, filedName, operator, searchValue, idObject.dataGrid);
   }
 
   if (idObject?.dataSet) {
@@ -163,7 +165,7 @@ function gridSearch(event) {
     let filter = filedName + "|" + operator + "|" + searchValue;
     main.setAttribute("filter", filter);
 
-    navigateRecords("move-to-first", tableName, datasetFields, "", filter);
+    navigateRecords("move-to-first", DBName,tableName, datasetFields, "", filter);
   }
 }
 // searchAutoComplete that call the search function "/select-distinct/:tableName/:fieldName" and display the result in the autocomplete div

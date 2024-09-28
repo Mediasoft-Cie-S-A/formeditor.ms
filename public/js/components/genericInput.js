@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 function createElementInput(type) {
-    console.log("createElement:"+type);
+//    console.log("createElement:"+type);
     var main= document.createElement('div');
     main.className = 'form-container';
     main.id=type+ Date.now(); // Unique ID for each new element

@@ -90,6 +90,7 @@ function updateDataSet(main, content) {
   var firstJson = JSON.parse(data[0].getAttribute("data-field"));
   var jsonData = [
     {
+      DBName: firstJson.DBName,
       tableName: firstJson.tableName,
       fieldName: "rowid",
       fieldType: "rowid",
@@ -102,6 +103,7 @@ function updateDataSet(main, content) {
   ];
   var exceptionData = [
     {
+      DBName: firstJson.DBName,
       tableName: firstJson.tableName,
       fieldName: "rowid",
       fieldType: "rowid",
@@ -146,8 +148,9 @@ function renderDataSet(main) {
   dataset.setAttribute("DataSet-Fields-List", datasetFields);
   main.setAttribute("DataSet-Fields-List", datasetFields);
   main.appendChild(dataset);
-  main.appendChild(createNavigationBar(jsonData[0].tableName, datasetFields));
-  moveFirst(jsonData[0].tableName, datasetFields);
+  main.appendChild(createNavigationBar(jsonData[0].DBName,jsonData[0].tableName, datasetFields));
+ // console.log(jsonData[0]);
+  moveFirst(jsonData[0].DBName,  jsonData[0].tableName, datasetFields);
 }
 
 function createFieldFromJson(fieldJson) {
@@ -215,6 +218,7 @@ function createFieldFromJson(fieldJson) {
           : fieldJson.fieldLabel; // Set label to column name
     // set the input attributes
     einput.id = fieldJson.tableName + "_" + fieldJson.fieldName;
+    einput.setAttribute("DBName", fieldJson.DBName);
     einput.setAttribute("dataset-table-name", fieldJson.tableName);
     einput.setAttribute("dataset-field-name", fieldJson.fieldName);
     einput.setAttribute("dataset-field-type", fieldJson.fieldType);
@@ -230,12 +234,16 @@ function createFieldFromJson(fieldJson) {
 
 // --- internal functions ---
 
-function createNavigationBar(tableName, datasetFields) {
+function createNavigationBar(DBName, tableName, datasetFields) {
+//  console.log("createNavigationBar");
+//  console.log(DBName);
+
   // Create the navigation bar div
   var navigationBar = document.createElement("div");
   navigationBar.id = "navigationBar_" + tableName;
   navigationBar.type = "navigation-bar";
   navigationBar.className = "navigation-bar";
+  navigationBar.setAttribute("DBName", DBName);
   navigationBar.setAttribute("data-table-name", tableName);
   navigationBar.setAttribute("data-current-row", "0");
   navigationBar.setAttribute("data-dataset-fields", datasetFields);
@@ -247,55 +255,55 @@ function createNavigationBar(tableName, datasetFields) {
       name: "firstDSBtn",
       title: "First",
       text: '<i class="bi bi-arrow-up-circle-fill" style="color:green;margin-left:-6px"></i>',
-      event: "moveFirst('" + tableName + "','" + datasetFields + "')",
+      event: "moveFirst('" + DBName + "','" + tableName + "','" + datasetFields + "')",
     },
     {
       name: "PreviusDSBtn",
       title: "Previus",
       text: '<i class="bi bi-arrow-left-circle-fill" style="color:green;margin-left:-6px"></i>',
-      event: "movePrev('" + tableName + "','" + datasetFields + "')",
+      event: "movePrev('" + DBName + "','" + tableName + "','" + datasetFields + "')",
     },
     {
       name: "NextDSBtn",
       title: "Next",
       text: '<i class="bi bi-arrow-right-circle-fill" style="color:green;margin-left:-6px"></i>',
-      event: "moveNext('" + tableName + "','" + datasetFields + "')",
+      event: "moveNext('" + DBName + "','" + tableName + "','" + datasetFields + "')",
     },
     {
       name: "LastDSBtn",
       title: "Last",
       text: '<i class="bi bi-arrow-down-circle-fill" style="color:green;margin-left:-6px"></i>',
-      event: "moveLast('" + tableName + "','" + datasetFields + "')",
+      event: "moveLast('" + DBName + "','" + tableName + "','" + datasetFields + "')",
     },
     {
       name: "EditDSBtn",
       title: "Edit Record",
       text: '<i class="bi bi-credit-card-2-front" style="color:blue;margin-left:-6px"></i>',
-      event: "EditRecord('" + tableName + "','" + datasetFields + "')",
+      event: "EditRecord('" + tableName + "', false)",
     },
     {
       name: "InsertDSBtn",
       title: "Insert Record",
       text: '<i class="bi bi-sticky-fill" style="color:green;margin-left:-6px"></i>',
-      event: "InsertRecord('" + tableName + "','" + datasetFields + "')",
+      event: "InsertRecord('" + DBName + "','" + tableName + "','" + datasetFields + "')",
     },
     {
       name: "CopyDSBtn",
       title: "Copy",
       text: '<i class="bi bi-clipboard" style="color:red;margin-left:-6px"></i>',
-      event: "CopyRecord('" + tableName + "', '" + datasetFields + "')",
+      event: "CopyRecord('" + DBName + "','" + tableName + "', '" + datasetFields + "')",
     },
     {
       name: "SaveDSBtn",
       title: "Save Record",
       text: '<i class="bi bi-sim-fill" style="color:red;margin-left:-6px"></i>',
-      event: "SaveRecord('" + tableName + "')",
+      event: "SaveRecord('" + DBName + "','" + tableName + "')",
     },
     {
       name: "RefreshDSBtn",
       title: "Refresh Data",
       text: '<i class="bi bi-arrow-clockwise" style="color:green;margin-left:-6px"></i>',
-      event: "RefreshRecord('" + tableName + "')",
+      event: "RefreshRecord('" + DBName + "','" + tableName + "')",
     },
   ];
   var htm = "";
@@ -331,24 +339,25 @@ function insertTable() {
 }
 
 //--- data set navigation ---
-function moveFirst(tableName, datasetFields) {
+function moveFirst(DBName,tableName, datasetFields) {
   if (tableName) {
-    navigateRecords("move-to-first", tableName, datasetFields);
+    navigateRecords("move-to-first",DBName, tableName, datasetFields);
   }
 }
 
-function movePrev(tableName, datasetFields) {
+function movePrev(DBName,tableName, datasetFields) {
   if (tableName) {
     const rowNum = getRowNum(tableName);
     if (rowNum == 0) return;
-    navigateRecords("move-to-previous", tableName, datasetFields, rowNum - 1);
+    navigateRecords("move-to-previous",DBName, tableName, datasetFields, rowNum - 1);
   }
 }
 
-function moveNext(tableName, datasetFields) {
+function moveNext(DBName,tableName, datasetFields) {
   if (tableName) {
     navigateRecords(
       "move-to-next",
+      DBName,
       tableName,
       datasetFields,
       getRowNum(tableName) + 1
@@ -356,16 +365,17 @@ function moveNext(tableName, datasetFields) {
   }
 }
 
-function moveLast(tableName, datasetFields) {
+function moveLast(DBName,tableName, datasetFields) {
   if (tableName)
-    navigateRecords("move-to-last", tableName, datasetFields, "", "", true);
+    navigateRecords("move-to-last",DBName, tableName, datasetFields, "", "", true);
 }
 
 // refresh record
-function RefreshRecord(tableName) {
+function RefreshRecord(DBName,tableName) {
   if (tableName) {
     navigateRecords(
       "move-to-next",
+      DBName,
       tableName,
       datasetFields,
       getRowNum(tableName)
@@ -375,6 +385,7 @@ function RefreshRecord(tableName) {
 
 async function navigateRecords(
   action,
+  DBName,
   tableName,
   datasetFields,
   rowNum = "",
@@ -399,26 +410,28 @@ async function navigateRecords(
     }
   }
   const url =
-    `/${action}/${tableName}` +
+    `/${action}/${DBName}/${tableName}` +
     (rowNum >= 0 ? `/${rowNum}` : "") +
     `?fields=${datasetFields}&filter=${filter}`;
   fetch(url)
     .then((response) => response.json())
     .then((data) => {
       if (!isMoveLast) {
-        updateInputs(data, tableName);
+        updateInputs(data, DBName,tableName);
         rowNum = rowNum == "" ? 0 : rowNum;
         setRowNum(tableName, rowNum);
       } else {
-        updateInputs(data, tableName);
+        updateInputs(data, DBName,tableName);
         rowNum = data == "" ? 0 : data.length - 1;
         setRowNum(tableName, rowNum);
       }
     })
     .catch((error) => console.error("Error:", error));
+  
+  EditRecord(tableName, true);
 }
-async function getRecords(action, tableName, datasetFields) {
-  const url = `/${action}/${tableName}?fields=${datasetFields}`;
+async function getRecords(action, DBName, tableName, datasetFields) {
+  const url = `/${action}/${DBName}/${tableName}?fields=${datasetFields}`;
   try {
     const response = await fetch(url);
     const data = await response.json();
@@ -429,7 +442,7 @@ async function getRecords(action, tableName, datasetFields) {
   }
 }
 
-function CopyRecord(tableName, datasetFields) {
+function CopyRecord(DBName,tableName, datasetFields) {
   const inputs = document.querySelectorAll(`#DataSet_${tableName} input`);
   const selects = document.querySelectorAll(`#DataSet_${tableName} select`);
   const idObject = getIdObject();
@@ -478,12 +491,14 @@ async function navigateSequence(action) {
 // use the fetch function to call the web service and update the inputs with the data
 // use the updateInputs function to update the inputs with the data
 // use the setRowID function to set the current row id in the navigation bar
-async function linkRecordToGrid(tableName, rowId, rowNum) {
+async function linkRecordToGrid(DBName,tableName, rowId, rowNum) {
   try {
     // get all the datasets
     const datasets = document.querySelectorAll("#DataSet_" + tableName);
     // for all the datasets check the div with name DataSet
     datasets.forEach((dataset) => {
+      //get db name from the dataset
+      datasetDBName = dataset.getAttribute("DBName");
       // get table name from the dataset
       datasetTableName = dataset.getAttribute("data-table-name");
       // if the table name is the same as the table name of the record
@@ -491,11 +506,11 @@ async function linkRecordToGrid(tableName, rowId, rowNum) {
         // get the fields from the dataset
         const datasetFields = dataset.getAttribute("dataset-fields-list");
 
-        const url = `/get-record-by-rowid/${tableName}/${rowId}?fields=${datasetFields}`;
+        const url = `/get-record-by-rowid/${DBName}/${tableName}/${rowId}?fields=${datasetFields}`;
         fetch(url)
           .then((response) => response.json())
           .then((data) => {
-            updateInputs(data, tableName);
+            updateInputs(data,DBName, tableName);
             setRowNum(tableName, rowNum); // Assuming the data includes ROWID to-do check if the data includes ROWID
           })
           .catch((error) => showToast("Error:" + error));
@@ -506,7 +521,7 @@ async function linkRecordToGrid(tableName, rowId, rowNum) {
   }
 }
 
-async function updateInputs(data, tableName) {
+async function updateInputs(data,DBName, tableName) {
   const datasets = document.querySelectorAll("#DataSet_" + tableName);
   datasets.forEach(async (dataset) => {
     const datasetTableName = dataset.getAttribute("data-table-name");
@@ -515,6 +530,7 @@ async function updateInputs(data, tableName) {
       const inputs = dataset.querySelectorAll("input, select");
 
       inputs.forEach(async (input) => {
+        const dbFieldName = input.getAttribute("DBName");
         const fieldLabel = input.getAttribute("dataset-field-name");
         // const fieldType = input.tagName.toLowerCase();
         const fieldType = input.getAttribute("type");
@@ -695,20 +711,20 @@ function getRowNum(tabelName) {
   return rowNum;
 }
 
-function EditRecord(tableName) {
+function EditRecord(tableName, action) {
   const inputs = document.querySelectorAll(`#DataSet_${tableName} input`);
   inputs.forEach((input) => {
     const tableLabel = input.getAttribute("dataset-table-name");
 
     // if (tableLabel == tableName) {
-    input.readOnly = false;
+    input.readOnly = action;
     // }
   });
 
-  document.querySelector("[name=SaveDSBtn]").disabled = false;
+  document.querySelector("[name=SaveDSBtn]").disabled = action;
 }
 
-function InsertRecord(tableName) {
+function InsertRecord(DBName,tableName) {
   const inputs = document.querySelectorAll(`#DataSet_${tableName} input`);
   inputs.forEach((input) => {
     const tableLabel = input.getAttribute("dataset-table-name");
@@ -725,7 +741,7 @@ function InsertRecord(tableName) {
   document.getElementById("SaveRecordBtn").disabled = false;
 }
 
-function CreateUpdated(tableName) {
+function CreateUpdated(DBName,tableName) {
   const inputs = document.querySelectorAll(
     `#DataSet_${tableName} input[dataset-field-name]`
   );
@@ -796,28 +812,30 @@ function addIdToData(data, id, value) {
   return data;
 }
 
-async function SaveRecord(tableName) {
+async function SaveRecord(DBName,tableName) {
   try {
     console.log("SaveRecord");
     const nextRowIds = document.querySelectorAll("#" + tableName + "_rowid");
     for (const nextRowId of nextRowIds) {
+      console.log(nextRowId);
       const datasetTableName = nextRowId.getAttribute("dataset-table-name");
+      const dbName = nextRowId.getAttribute("DBName");
       if (datasetTableName === tableName) {
         const rowIdValue = nextRowId.value;
         let result;
         if (rowIdValue === "new") {
-          let data = CreateInsert(tableName);
+          let data = CreateInsert(DBNametableName);
           if (tableName === "util") {
             const val = await navigateSequence("next-sequence");
             const id = val[0].sequence_next;
             data = addIdToData(data, "id", id);
           }
-          result = await insertRecordDB(tableName, data);
+          result = await insertRecordDB(DBName,tableName, data);
         } else {
           const data = {
-            body: CreateUpdated(tableName),
+            body: CreateUpdated(DBName,tableName),
           };
-          result = await updateRecordDB(tableName, rowIdValue, data);
+          result = await updateRecordDB(DBName,tableName, rowIdValue, data);
         }
         document.querySelector("[name=SaveDSBtn]").disabled = true;
         return result;
@@ -850,9 +868,9 @@ function CreateInsert(tableName) {
   return { fields: insertFields, values: insertValues };
 }
 
-async function updateRecordDB(tableName, nextRowId, updateData) {
+async function updateRecordDB(DBName,tableName, nextRowId, updateData) {
   try {
-    const response = await fetch(`/update-record/${tableName}/${nextRowId}`, {
+    const response = await fetch(`/update-record/${DBName}/${tableName}/${nextRowId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -883,10 +901,10 @@ async function updateRecordDB(tableName, nextRowId, updateData) {
   }
 }
 
-async function insertRecordDB(tableName, data) {
+async function insertRecordDB(DBName,tableName, data) {
   try {
     const payload = JSON.stringify(data);
-    const response = await fetch(`/insert-record/${tableName}`, {
+    const response = await fetch(`/insert-record/${DBName}/${tableName}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

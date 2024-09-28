@@ -28,37 +28,44 @@ var tableList=[];
 function fetchTablesList(list,tableDetailsDiv) {
     fetch('/tables-list')
         .then(response => response.json())
-        .then(tables => {
+        .then(dbs => {
             // Clear the list
             
             list.innerHTML = '';
              // add new table button
-             tableList=[];
-             var i=0;
-            tables.forEach(table => {
-               
-                        const listItem = document.createElement('div');
-                        if (i%2==0) 
-                        {
-                            listItem.style.backgroundColor='#e6e6e6';
-                        }
-                        listItem.classList.add('grid-row');
-                        listItem.classList.add('table-item');
-                        listItem.textContent = table.NAME; // Adjust based on your API response
-                        listItem.setAttribute('data-table-name', table.NAME);
-                        listItem.setAttribute('data-table-label', table.LABEL);
-                        listItem.setAttribute('title', table.LABEL);
-                        listItem.onclick = function(event) {
-                                event.preventDefault();
-                                    const tableName = event.target.getAttribute('data-table-name');
-                                    const tableLabel = event.target.getAttribute('data-table-label');
-                                    fetchTableDetails(tableName,tableLabel,tableDetailsDiv);
-                        }
-                        list.appendChild(listItem);
-                        tableList.push(table.NAME);
-                        i++;
+             for(key in dbs)
+             {
                 
-            });
+                const dbname = key;
+                tables=dbs[key];
+                tableList=[];
+                var i=0;
+                tables.forEach(table => {
+                
+                            const listItem = document.createElement('div');
+                            if (i%2==0) 
+                            {
+                                listItem.style.backgroundColor='#e6e6e6';
+                            }
+                            listItem.classList.add('grid-row');
+                            listItem.classList.add('table-item');
+                            listItem.textContent = table.NAME; // Adjust based on your API response
+                            listItem.setAttribute('database-name', dbname);
+                            listItem.setAttribute('data-table-name', table.NAME);
+                            listItem.setAttribute('data-table-label', table.LABEL);
+                            listItem.setAttribute('title', table.LABEL);
+                            listItem.onclick = function(event) {
+                                    event.preventDefault();
+                                        const tableName = event.target.getAttribute('data-table-name');
+                                        const tableLabel = event.target.getAttribute('data-table-label');
+                                        fetchTableDetails(dbname,tableName,tableLabel,tableDetailsDiv);
+                            }
+                            list.appendChild(listItem);
+                            tableList.push(table.NAME);
+                            i++;
+                    
+                             });
+            }
         })
         .catch(error => console.error('Error:', error));
 }
@@ -76,9 +83,10 @@ function createEditableTableList(list,tableDetails) {
    list.addEventListener('click', function(event) {
         event.preventDefault();
         if (event.target.classList.contains('table-item')) {
+            const  DBName = event.target.getAttribute('database-name');
             const tableName = event.target.getAttribute('data-table-name');
             const tableLabel = event.target.getAttribute('data-table-label');
-            editTableDetails(tableName,tableLabel,tableDetails);
+            editTableDetails(DBName,tableName,tableLabel,tableDetails);
         }
     },{capture: true, once: true});
 
@@ -89,46 +97,52 @@ function createEditableTableList(list,tableDetails) {
 function drageDroptableTableList(list) {
     fetch('/tables-list')
         .then(response => response.json())
-        .then(tables => {
+        .then(dbs => {
             // Clear the list
             
             list.innerHTML = '';
              // add new table button
-             tableList=[];
-             var i=0;
-            tables.forEach(table => {
-               
-                        var listItem = document.createElement('div');
-                        
-                        listItem.className='tables-list-item';
-                      
-                        listItem.textContent = table.NAME; // Adjust based on your API response
-                        listItem.setAttribute('data-table-name', table.NAME);
-                        listItem.setAttribute('data-table-label', table.LABEL);
-                        listItem.setAttribute('title', table.LABEL);
-                        var tableDetailsDiv=document.createElement('div');
-                        listItem.appendChild(tableDetailsDiv);
-                        listItem.ondragstart = function(event) { drag(event); };
-                        listItem.onclick = function(event) {
-                                    event.preventDefault();
-                                    const tableName = event.target.getAttribute('data-table-name');                                    
-                                    fetchTableFields(tableName,tableDetailsDiv);
-                        }
-                        list.appendChild(listItem);
-                        tableList.push(table.NAME);
-                        i++;
+                for(key in dbs)
+                {
+                    
+                    const dbname = key;
+                    tables=dbs[key];
+                tableList=[];
+                var i=0;
+                tables.forEach(table => {
                 
-            });
-        })
-        .catch(error => console.error('Error:', error));
+                            var listItem = document.createElement('div');
+                            
+                            listItem.className='tables-list-item';
+                        
+                            listItem.textContent = table.NAME; // Adjust based on your API response
+                            listItem.setAttribute('database-name', dbname);
+                            listItem.setAttribute('data-table-name', table.NAME);
+                            listItem.setAttribute('data-table-label', table.LABEL);
+                            listItem.setAttribute('title', table.LABEL);
+                            var tableDetailsDiv=document.createElement('div');
+                            listItem.appendChild(tableDetailsDiv);
+                            listItem.ondragstart = function(event) { drag(event); };
+                            listItem.onclick = function(event) {
+                                        event.preventDefault();
+                                        const tableName = event.target.getAttribute('data-table-name');                                    
+                                        fetchTableFields(dbname,tableName,tableDetailsDiv);
+                            }
+                            list.appendChild(listItem);
+                            tableList.push(table.NAME);
+                            i++;
+                    
+                });
+            }
+        }).catch(error => console.error('Error:', error));
 }   
 
 
 
 
-function fetchTableFields(tableName,detailsDiv) {
+function fetchTableFields(database,tableName,detailsDiv) {
     removeAllChildNodes(detailsDiv);
-    fetch(`/table-fields/${tableName}`)
+    fetch(`/table-fields/${database}/${tableName}`)
         .then(response => response.json())
         .then(fields => {
            fields.forEach(field => {
@@ -138,6 +152,7 @@ function fetchTableFields(tableName,detailsDiv) {
                 fieldDiv.draggable=true;
                 fieldDiv.ondragstart = function(event) { drag(event); };
                 fieldDiv.textContent = field.NAME; // Adjust based on your API response
+                fieldDiv.setAttribute('database-name', database);
                 fieldDiv.setAttribute('data-table-name', tableName);
                 fieldDiv.setAttribute('data-field-name', field.NAME);
                 fieldDiv.setAttribute('data-field-type', field.TYPE);
@@ -156,10 +171,10 @@ function fetchTableFields(tableName,detailsDiv) {
 }
 
 // table structure
-function fetchTableDetails(tableName,tableLabel,detailsDiv) {
+function fetchTableDetails(DBName,tableName,tableLabel,detailsDiv) {
     removeAllChildNodes(detailsDiv);
     Promise.all([
-        fetch(`/table-fields/${tableName}`).then(response => response.json())        
+        fetch(`/table-fields/${DBName}/${tableName}`).then(response => response.json())        
     ])
     .then(([fields]) => {
       
@@ -238,7 +253,7 @@ function fetchTableDetails(tableName,tableLabel,detailsDiv) {
                                     { name: 'td6', innerHTML: field.WIDTH },
                                 
                                     { name: 'td7', innerHTML: `<select name="inputType" class="input-element" onchange="activateSelect('${field.NAME}')"><option value="input">input</option><option value="select">select</option><option value="checkbox">checkbox</option></select>` },
-                                    { name: 'td8', innerHTML: `<select name="tableName" class="input-element" onchange="loadFieldsList('${field.NAME}')" disabled=true><option></option>#TABLELIST#</select>`	 },
+                                    { name: 'td8', innerHTML: `<select name="tableName" class="input-element" onchange="loadFieldsList('${DBName}','${field.NAME}')" disabled=true><option></option>#TABLELIST#</select>`	 },
                                     { name: 'td9', innerHTML: '<select name="fieldName" class="input-element" disabled=true></select>' },
                                     { name: 'td10', innerHTML: '<select name="order" class="input-element"></select>' }
                                 ];
@@ -334,7 +349,7 @@ function activateSelect(fieldName)
 }
 
 // loadFieldsList function check the table name and load the fields in the select
-function loadFieldsList(fieldName)
+function loadFieldsList(DBName, fieldName)
 {
    var table= document.getElementById('TableFieldsList');
    var tableNameSelect= document.querySelector('tr[data-field-name="'+fieldName+'"] select[name="tableName"]');
@@ -343,7 +358,7 @@ function loadFieldsList(fieldName)
     var select = document.querySelector('tr[data-field-name="'+fieldName+'"] select[name="fieldName"]');
     select.innerHTML = '';
     if (table) {
-        fetch(`/table-fields/${tableName}`)
+        fetch(`/table-fields/${DBName}/${tableName}`)
             .then(response => response.json())
             .then(fields => {
                 fields.forEach(field => {
@@ -358,16 +373,16 @@ function loadFieldsList(fieldName)
 }
 
 // table structure
-async function editTableDetails(tableName, tableLabel, detailsDiv) {
+async function editTableDetails(DBName,tableName, tableLabel, detailsDiv) {
     // Remove all child nodes
     removeAllChildNodes(detailsDiv);
 
     try {
         // Fetch table fields
-        const response = await fetch(`/table-fields/${tableName}`);
+        const response = await fetch(`/table-fields/${DBName}/${tableName}`);
         const fields = await response.json();
         // Set innerHTML
-        detailsDiv.innerHTML = `<h3 id='TableDetails_TableName' table-name='${tableName}'>Table Name:${tableName} Description:${tableLabel}</h3>`;
+        detailsDiv.innerHTML = `<h3 id='TableDetails_TableName' DBName='${DBName}' table-name='${tableName}'>Table Name:${tableName} Description:${tableLabel}</h3>`;
         detailsDiv.style.padding = '10px';
         // Create and append table
         const table = document.createElement('table');
@@ -432,7 +447,7 @@ async function editTableDetails(tableName, tableLabel, detailsDiv) {
         saveButton.className   = 'button';
         saveButton.onclick = function(event) {
             event.preventDefault();
-            saveAlterTable(table,tableName);
+            saveAlterTable(DBName,table,tableName);
         };  
         buttonContainer.appendChild(saveButton);
         detailsDiv.appendChild(buttonContainer);
@@ -478,7 +493,7 @@ function getColumnData(type,newColumn) {
     return columnData;
 }
 
-async function saveAlterTable(table,tabelName) {
+async function saveAlterTable(DBName,table,tabelName) {
     // Prepare the data
   
     const newColumns =table.querySelectorAll('tr[new]');
@@ -502,7 +517,7 @@ async function saveAlterTable(table,tabelName) {
             // adding mandatory and default value if exists 
          
             // call the alter table function
-           alterTable(tabelName, 'add', newColumn.NAME, columnData, null, null);
+           alterTable(DBName,tabelName, 'add', newColumn.NAME, columnData, null, null);
         }
     }
     );
@@ -514,7 +529,7 @@ async function saveAlterTable(table,tabelName) {
 }
 
 
-function addTableColumn(table) {
+function addTableColumn(DBName,table) {
     const tr = document.createElement('tr');
     tr.setAttribute('new', '');
     header.forEach(prop => {
@@ -556,9 +571,9 @@ function addTableColumn(table) {
     table.appendChild(tr);
 }
 
-async function alterTable(tableName, action, columnName, columnType, newColumnName, newColumnType) {
+async function alterTable(DBName,tableName, action, columnName, columnType, newColumnName, newColumnType) {
     try {
-        const response = await fetch(`/alter-table/${tableName}`, {
+        const response = await fetch(`/alter-table/${DBName}/${tableName}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -632,7 +647,7 @@ function  newTable() {
     detailsDiv.appendChild(saveButton);
 }
 
-async function createTable(table) {
+async function createTable(DBName,table) {
     // get tablename form input
     const tableName = document.getElementById('NewtableName').value;
     console.log('tableName:', tableName);
@@ -673,14 +688,14 @@ async function createTable(table) {
         showToast('Table must have at least one column');
         return;
     }   
-    postCreateTable(tableName, columnsData);
+    postCreateTable(DBName,tableName, columnsData);
        
 }
 
-async function postCreateTable(tableName, columns) {
+async function postCreateTable(DBName,tableName, columns) {
     
     try {
-        const response = await fetch(`/create-table/${tableName}`, {
+        const response = await fetch(`/create-table/${DBName}/${tableName}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

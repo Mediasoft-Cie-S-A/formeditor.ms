@@ -103,15 +103,27 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 // authentication
 // init session
-require("./authentication")(app, session, passport);
-require("./authCustom")(app, session, passport);
-require("./authStatic")(app, session, passport);
 
+require('./authentication')(app,session, passport);
+require('./authCustom')(app,session, passport);
+require('./authStatic')(app,session, passport);
+
+const dblayer = require('./dblayer');
+const dbs= new dblayer(app,session, passport);
+dbs.init();
+try
+{
+dbs.generateRoutes(app,dbs);
+}
+catch(err)
+{
+    console.log(err);
+}
 // Import routes
-require("./formService")(app, client, dbName);
-require("./businessComponentService")(app, client, dbName);
-require("./dblayer")(app, session, passport);
-require("./GED")(app, session, passport);
+require('./formService')(app, client,  dbName);
+
+require('./GED')(app,session, passport);
+
 // Swagger definition
 const swaggerDefinition = {
   openapi: "3.0.0",
