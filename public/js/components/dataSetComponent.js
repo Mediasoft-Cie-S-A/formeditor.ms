@@ -81,9 +81,11 @@ function editElementDataSet(type, element, content) {
 
 function updateDataSet(main, content) {
   console.log("updateDataSet");
+
   var data = content.querySelectorAll('span[name="dataContainer"]');
   var exception = Array.from(data).filter((span) => span.closest("#exception"));
   data = Array.from(data).filter((span) => !span.closest("#exception"));
+
   if (data.length == 0) return;
   var firstJson = JSON.parse(data[0].getAttribute("data-field"));
   var jsonData = [
@@ -153,7 +155,12 @@ function renderDataSet(main) {
 
 function createFieldFromJson(fieldJson) {
   var element = null;
+  let einput = null;
   switch (fieldJson.fieldType) {
+    case "combobox":
+      element = createElementInput("combobox");
+      einput = element.querySelector("input"); // Adjust to your combobox selector
+      break;
     case "character":
     case "varchar":
     case "text":
@@ -226,9 +233,11 @@ function createFieldFromJson(fieldJson) {
 }
 
 // --- internal functions ---
+
 function createNavigationBar(DBName, tableName, datasetFields) {
 //  console.log("createNavigationBar");
 //  console.log(DBName);
+
   // Create the navigation bar div
   var navigationBar = document.createElement("div");
   navigationBar.id = "navigationBar_" + tableName;
@@ -464,7 +473,6 @@ function CopyRecord(DBName,tableName, datasetFields) {
 }
 
 async function navigateSequence(action) {
-  console.log("Step two is called");
   const url = `/${action}`;
   try {
     const response = await fetch(url);
@@ -472,7 +480,6 @@ async function navigateSequence(action) {
       throw new Error("Network response was not ok");
     }
     const data = await response.json();
-    console.log(data);
     return data;
   } catch (error) {
     console.error("Error:", error);
@@ -525,8 +532,8 @@ async function updateInputs(data,DBName, tableName) {
       inputs.forEach(async (input) => {
         const dbFieldName = input.getAttribute("DBName");
         const fieldLabel = input.getAttribute("dataset-field-name");
-        const fieldType = input.tagName.toLowerCase();
-
+        // const fieldType = input.tagName.toLowerCase();
+        const fieldType = input.getAttribute("type");
         input.value = "";
         input.disabled = true;
 
@@ -585,9 +592,9 @@ async function updateInputs(data,DBName, tableName) {
           });
         } else {
           // Handle specific cases based on fieldLabel for select fields
-          if (fieldLabel === "la") {
+          if (fieldLabel === "la" && fieldType === "combobox") {
             handleSelectField(input, ["F", "I", "D", "E"], data[0][fieldLabel]);
-          } else if (fieldLabel === "typAcces") {
+          } else if (fieldLabel === "typAcces" && fieldType === "combobox") {
             handleSelectField(
               input,
               [
@@ -597,9 +604,9 @@ async function updateInputs(data,DBName, tableName) {
               ],
               data[0][fieldLabel]
             );
-          } else if (fieldLabel === "groupe") {
+          } else if (fieldLabel === "groupe" && fieldType === "combobox") {
             try {
-              if (fieldType === "input") {
+              if (fieldType === "combobox") {
                 // Only make API call if no existing select options are found
                 const datasetFields = "groupe,desi";
                 const dataGroupe = await getRecords(
@@ -613,17 +620,22 @@ async function updateInputs(data,DBName, tableName) {
                 }));
                 handleSelectField(input, options, data[0][fieldLabel]);
               } else {
-                console.log("Using existing select options");
                 handleSelectField(input, null, data[0][fieldLabel]);
               }
             } catch (error) {
               console.error("Error fetching groupe data:", error);
             }
+          } else if (fieldType === "combobox") {
+            handleSelectField(
+              input,
+              [data[0][fieldLabel]],
+              data[0][fieldLabel]
+            );
           } else {
-            if (fieldType === "input") {
-              input.value = data[0][fieldLabel]?.toString().trim() || "";
-              input.disabled = false;
-            }
+            // if (fieldType === "input") {
+            input.value = data[0][fieldLabel]?.toString().trim() || "";
+            input.disabled = false;
+            // }
           }
         }
 

@@ -14,32 +14,27 @@
  * limitations under the License.
  */
 
-
-
-module.exports = function(app,  client,dbName) {
-
-
-
-// Function to check if the database exists
-async function checkDatabaseExists() {
+module.exports = function (app, client, dbName) {
+  // Function to check if the database exists
+  async function checkDatabaseExists() {
     try {
-        await client.connect();
-        const adminDb = client.db().admin();
-        const dbs = await adminDb.listDatabases();
-        const dbExists = dbs.databases.some(db => db.name === dbName);
+      await client.connect();
+      const adminDb = client.db().admin();
+      const dbs = await adminDb.listDatabases();
+      const dbExists = dbs.databases.some((db) => db.name === dbName);
 
-        if (!dbExists) {
-            console.log(`Database ${dbName} does not exist.`);
-        } else {
-            console.log(`Database ${dbName} exists.`);
-        }
+      if (!dbExists) {
+        console.log(`Database ${dbName} does not exist.`);
+      } else {
+        console.log(`Database ${dbName} exists.`);
+      }
     } catch (err) {
-        console.error('Error connecting to MongoDB:', err);
+      console.error("Error connecting to MongoDB:", err);
     } finally {
-        await client.close();
+      await client.close();
     }
-}
+  }
 
-// Check database existence at server startup
-checkDatabaseExists();
-}
+  // Check database existence at server startup
+  checkDatabaseExists();
+};

@@ -114,11 +114,9 @@ function editElement(element) {
   content.appendChild(label);
 
   // Execute the function editor delcared in the components js if exists type
-  //  console.log("type:"+elementsData[type]);
   if (elementsData[type]) {
     if (elementsData[type].editFunction) {
       var functionName = elementsData[type].editFunction;
-      // console.log("functionName:"+functionName);
       window[functionName](type, element, content);
     }
   }
@@ -255,12 +253,10 @@ function updateElementTxtC(t) {
 }
 
 function updateElementStyle(type, t) {
-  console.log("updateElementStyle:" + type + " " + t);
   currentElement.style.setProperty(type, t);
 }
 
 function updateAttribute(type, t) {
-  console.log("updateElementAttribute:" + type + " " + t);
   currentElement.setAttribute(type, t);
 }
 
@@ -280,13 +276,11 @@ function deleteSelectedElement() {
   }
 }
 
-console.log("keypress init");
 // Event listener for keypress on the window
 window.addEventListener(
   "keyup",
   function (event) {
     // Check if the pressed key is the one you want, e.g., the Delete key
-    // console.log(event.key);
     if (event.key === "Delete") {
       deleteSelectedElement();
     }
@@ -304,7 +298,7 @@ formContainer.addEventListener("click", function (event) {
   event.preventDefault();
   // remove gjs-selection class from all elements
   removeSelection();
-//  console.log("event.target.id:" + event.target.id);
+
   if (event.target.id === "formContainer") {
     hideEditMenu();
   }
@@ -317,7 +311,6 @@ formContainer.addEventListener("click", function (event) {
   var editorFloatMenu = document.getElementById("editorFloatMenu");
   editorFloatMenu.style.display = "block";
   // Get the total offset by combining formContainer's and element's offset
-  // console.log("formContainer.offsetTop:"+formContainer.offsetTop);
   var totalOffsetTop = top + editorElementSelected.offsetTop - 25;
   var totalOffsetLeft =
     left +
@@ -342,7 +335,6 @@ function getAbsoluteOffset(element) {
 // showproperties of the element
 function showProperties() {
   const inputElementSelected = document.getElementById("editorElementSelected");
-  //  console.log("inputElementSelected.value:"+inputElementSelected.value);
   var editorElementSelected = document.getElementById(
     inputElementSelected.value
   );
@@ -392,7 +384,6 @@ codeEditor.on("change", function (instance, changeObj) {
   // Syntax checking logic here (if needed)
   // For example, you can use a linter library like ESLint or JSHint
   /* textarea=document.getElementById('jsCodeEditor');
-    console.log(codeEditor.getValue());
     textarea.value=codeEditor.getValue();*/
 });
 
@@ -403,15 +394,10 @@ function drag(ev) {
 function dropInput(event, id) {
   event.preventDefault();
 
-  console.log("dropInput");
-  //  console.log( event.dataTransfer);
+  // Get the dragged element's ID and its attributes
   var elementId = event.dataTransfer.getData("text");
-
-  // get the element target
-  var target = event.target;
-  // get the element type
-
   var source = document.getElementById(elementId);
+
   var tableName = source.getAttribute("data-table-name");
   var fieldName = source.getAttribute("data-field-name");
   var fieldType = source.getAttribute("data-field-type");
@@ -420,13 +406,15 @@ function dropInput(event, id) {
   var fieldMandatory = source.getAttribute("data-field-mandatory");
   var fieldWidth = source.getAttribute("data-field-width");
   var fieldDefaultValue = source.getAttribute("data-field-default");
+
   var filedDBName = source.getAttribute("database-name");
   // generate the json of all the fields attributes
+
   var fieldJson = {
     DBName: filedDBName,
     tableName: tableName,
     fieldName: fieldName,
-    fieldType: fieldType,
+    fieldType: fieldType, // Will be updated on select change
     copyType: id,
     fieldDataType: fieldDataType,
     fieldLabel: fieldLabel.replace("'", "`"),
@@ -435,13 +423,17 @@ function dropInput(event, id) {
     fieldDefaultValue: fieldDefaultValue,
   };
 
+  // Get the target element
+  var target = event.target;
+
+  // If target is a text input, set its value to fieldName and data-field attribute
   if (target.type == "text") {
     target.setAttribute("data-field", JSON.stringify(fieldJson));
     target.value = fieldName;
-  } else addFieldToPropertiesBar(target, fieldJson);
-
-  // dispatch the input event
-  //  event.target.dispatchEvent(new InputEvent("input"));
+  } else {
+    // Otherwise, pass the fieldJson to addFieldToPropertiesBar to create a new field
+    addFieldToPropertiesBar(target, fieldJson);
+  }
 }
 
 function createSelectItem(id, label, styleProperty) {
@@ -464,8 +456,6 @@ function createSelectItem(id, label, styleProperty) {
     // get type of the field
     var dataType = this.getAttribute("dataType");
     // empty the select
-    console.log("dataType:" + dataType);
-    console.log("select:" + select);
     setOptionsByType(select, dataType);
 
     // get the object by id
@@ -478,11 +468,8 @@ function createSelectItem(id, label, styleProperty) {
   return div;
 }
 
-// function get options by type
-function setOptionsByType(select, type) {
-  // empty the select
-  select.innerHTML = "";
-  // create the options
+function setOptionsByType(select, fieldDataType) {
+  // Define some options (this could be customized based on fieldDataType)
   var options = [
     "text",
     "number",
@@ -491,15 +478,24 @@ function setOptionsByType(select, type) {
     "image",
     "time",
     "color",
+    "combobox",
   ];
 
-  // add the options
+  // Clear any existing options in the select element
+  select.innerHTML = "";
+
+  // Populate the select dropdown with the options
   options.forEach((option) => {
     var opt = document.createElement("option");
     opt.value = option;
     opt.innerHTML = option;
     select.appendChild(opt);
   });
+
+  // Optionally, set the default selected value (based on fieldDataType)
+  if (options.includes(fieldDataType)) {
+    select.value = fieldDataType;
+  }
 }
 
 function createMultiSelectItem(id, label, styleProperty) {
@@ -567,11 +563,6 @@ function createSelectApiWeb(id, type = "") {
 
 function dropSelectApiWeb(event, type) {
   event.preventDefault();
-
-  console.log("type");
-  console.log(type);
-
-  console.log("dropGetByIdWeb");
   var elementId = event.dataTransfer.getData("text");
 
   // get the element target
@@ -657,8 +648,6 @@ function createMultiSelectItemWeb(id, label, styleProperty, isId = false) {
 
 function dropInputWeb(event, isId) {
   event.preventDefault();
-
-  console.log("dropInputWeb");
   var elementId = event.dataTransfer.getData("text");
 
   // get the element target
@@ -708,9 +697,6 @@ function dropInputWeb(event, isId) {
     fieldId: fieldId,
   };
 
-  console.log("fieldJson");
-  console.log(fieldJson);
-
   if (target.type == "text") {
     target.setAttribute("data-field", JSON.stringify(fieldJson));
     target.value = fieldName;
@@ -752,33 +738,50 @@ function addFieldToPropertiesBarWeb(target, fieldJson, isId) {
   dataObjet.style.height = height + 30 + "px";
 }
 
-// function to adding new fileds to the properties bar
 function addFieldToPropertiesBar(target, fieldJson) {
   var dataObjet = target;
-  // create the div
+
+  // Create the div container for the new field
   var div = document.createElement("div");
   div.classList.add("tables-list-item");
-  const elementId = fieldJson.fieldName + "-" + fieldJson.ta;
+  const elementId = fieldJson.fieldName + "-" + fieldJson.tableName;
   div.id = elementId;
-  // get field name
 
-  div.innerHTML = `<span name='dataContainer' data-field='${JSON.stringify(
-    fieldJson
-  )}' >${fieldJson.fieldName}</span>`;
-  div.innerHTML += `<button class='remove-item' onclick='removeItem(event)' style='background:#800;float:right;color:white;border-radius:5px;width:30px;height:30px'>x</button>`;
+  // Set up the inner HTML for the div, including a span and a remove button
+  div.innerHTML = `
+    <span name='dataContainer' data-field='${JSON.stringify(fieldJson)}'>${
+    fieldJson.fieldName
+  }</span>
+    <button class='remove-item' onclick='removeItem(event)' style='background:#800;float:right;color:white;border-radius:5px;width:30px;height:30px'>x</button>
+  `;
+
   dataObjet.appendChild(div);
 
-  // generate the select
+  // Create a select dropdown
   var select = document.createElement("select");
   div.appendChild(select);
-  // get the datatype
 
+  // Populate select options based on field's data type
   setOptionsByType(select, fieldJson.fieldDataType);
-  // select the functionName in the function
 
-  // get the parent div height
+  // Set the selected value as an attribute in the div
+  div.setAttribute("selectedValue", select.value);
+
+  // Event listener to update fieldType when the select dropdown value changes
+  select.addEventListener("change", function () {
+    // Update fieldType in fieldJson
+    fieldJson.fieldType = select.value;
+    fieldJson.fieldDataType = select.value;
+    div.setAttribute("selectedValue", select.value);
+    div.setAttribute("data-field", JSON.stringify(fieldJson));
+    div.setAttribute("fieldDataType", JSON.stringify(fieldJson));
+
+    const span = div.querySelector("span[name='dataContainer']");
+    span.setAttribute("data-field", JSON.stringify(fieldJson));
+  });
+
+  // Adjust the height of the parent element to accommodate the new field
   var height = dataObjet.clientHeight + div.clientHeight;
-  // set the height of the parent div
   dataObjet.style.height = height + 30 + "px";
 }
 

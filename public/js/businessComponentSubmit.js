@@ -33,7 +33,7 @@ document
     var jsonData = domToJson(formContainer);
     console.log(jsonData);
 
-    if (type == "form") {
+    if (type == "business_component") {
       const formData = {
         formId: formId,
         formName: formName,
@@ -46,7 +46,7 @@ document
       };
 
       // Check if form exists
-      fetch(`/get-form/${formId}`)
+      fetch(`/store-business-json/${formId}`)
         .then((response) => {
           console.log("response");
           console.log(response);
@@ -60,7 +60,7 @@ document
           console.log("existingForm");
           console.log(existingForm);
           // If form exists, update it
-          return fetch(`/update-form/${formId}`, {
+          return fetch(`/update-business-component/${formId}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -72,7 +72,7 @@ document
           console.log("error");
           console.log(error);
           // If form does not exist, store it
-          return fetch("/store-json", {
+          return fetch("/store-business-json", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
