@@ -121,7 +121,7 @@ catch(err)
 }
 // Import routes
 require('./formService')(app, client,  dbName);
-
+require('./businessComponentService')(app, client,  dbName);
 require('./GED')(app,session, passport);
 
 // Swagger definition
