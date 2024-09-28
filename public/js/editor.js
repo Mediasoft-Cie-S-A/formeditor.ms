@@ -94,14 +94,16 @@ function editElement(element) {
   content.innerHTML = "";
   // adding icon close to the dialog
   var closeIcon = document.createElement("i");
+  closeIcon.width = "20px";
+  closeIcon.height = "20px";
   closeIcon.className = "fa fa-close";
   closeIcon.onclick = function () {
     document.getElementById("propertiesBar").style.display = "none";
   };
   // set the icon top right
+  closeIcon.classList.add("button");
   closeIcon.style.float = "right";
-  closeIcon.style.cursor = "pointer";
-  closeIcon.style.border = "1px solid black";
+
   content.appendChild(closeIcon);
 
   const label = document.createElement("label");
@@ -302,7 +304,7 @@ formContainer.addEventListener("click", function (event) {
   event.preventDefault();
   // remove gjs-selection class from all elements
   removeSelection();
-  console.log("event.target.id:" + event.target.id);
+//  console.log("event.target.id:" + event.target.id);
   if (event.target.id === "formContainer") {
     hideEditMenu();
   }
@@ -418,8 +420,10 @@ function dropInput(event, id) {
   var fieldMandatory = source.getAttribute("data-field-mandatory");
   var fieldWidth = source.getAttribute("data-field-width");
   var fieldDefaultValue = source.getAttribute("data-field-default");
+  var filedDBName = source.getAttribute("database-name");
   // generate the json of all the fields attributes
   var fieldJson = {
+    DBName: filedDBName,
     tableName: tableName,
     fieldName: fieldName,
     fieldType: fieldType,
