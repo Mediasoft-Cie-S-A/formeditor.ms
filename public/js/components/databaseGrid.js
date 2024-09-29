@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-const { Db } = require("mongodb");
 
 function createDatabaseGrid(type) {
   var main = document.createElement("div");

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+const e = require("express");
+
 function createElementDateSet(type) {
   var main = document.createElement("div");
   main.className = "form-container";
@@ -99,6 +101,7 @@ function updateDataSet(main, content) {
       fieldMandatory: "0",
       fieldWidth: "0",
       fieldDefaultValue: "0",
+      fieldValues: "",
     },
   ];
   var exceptionData = [
@@ -157,8 +160,8 @@ function createFieldFromJson(fieldJson) {
   var element = null;
   let einput = null;
   switch (fieldJson.fieldType) {
-    case "combobox":
-      element = createElementInput("combobox");
+    case "combo_array": 
+      element = createElementInput("combo_array");
       einput = element.querySelector("input"); // Adjust to your combobox selector
       break;
     case "character":
@@ -224,7 +227,8 @@ function createFieldFromJson(fieldJson) {
     einput.setAttribute("dataset-field-type", fieldJson.fieldType);
     einput.setAttribute("dataset-field-size", fieldJson.fieldSize);
     einput.setAttribute("dataset-field-mandatory", fieldJson.fieldMandatory);
-    einput.setAttribute("dataset-field-format", fieldJson.fieldFormat);
+    einput.setAttribute("dataset-fieldValues", fieldJson.fieldValues);
+    
     if (fieldJson.fieldMandatory) {
       einput.required = true;
     }
@@ -536,7 +540,7 @@ async function updateInputs(data,DBName, tableName) {
         const fieldType = input.getAttribute("type");
         input.value = "";
         input.disabled = true;
-
+       
         let subField = data[0][fieldLabel]?.toString().trim().split(";");
 
         if (subField.length > 1) {
@@ -592,43 +596,12 @@ async function updateInputs(data,DBName, tableName) {
           });
         } else {
           // Handle specific cases based on fieldLabel for select fields
-          if (fieldLabel === "la" && fieldType === "combobox") {
-            handleSelectField(input, ["F", "I", "D", "E"], data[0][fieldLabel]);
-          } else if (fieldLabel === "typAcces" && fieldType === "combobox") {
+          if (fieldType === "combo_array") {
+            // get the values of the field
+            let fieldvalues = input.getAttribute("dataset-fieldvalues");
             handleSelectField(
               input,
-              [
-                { value: "1", text: "MS" },
-                { value: "2", text: "WEB" },
-                { value: "3", text: "MS+WEB" },
-              ],
-              data[0][fieldLabel]
-            );
-          } else if (fieldLabel === "groupe" && fieldType === "combobox") {
-            try {
-              if (fieldType === "combobox") {
-                // Only make API call if no existing select options are found
-                const datasetFields = "groupe,desi";
-                const dataGroupe = await getRecords(
-                  "get-all-groupe",
-                  "groupes",
-                  datasetFields
-                );
-                const options = dataGroupe.map((item) => ({
-                  value: item.groupe,
-                  text: item.desi,
-                }));
-                handleSelectField(input, options, data[0][fieldLabel]);
-              } else {
-                handleSelectField(input, null, data[0][fieldLabel]);
-              }
-            } catch (error) {
-              console.error("Error fetching groupe data:", error);
-            }
-          } else if (fieldType === "combobox") {
-            handleSelectField(
-              input,
-              [data[0][fieldLabel]],
+              fieldvalues,
               data[0][fieldLabel]
             );
           } else {
@@ -654,11 +627,13 @@ async function updateInputs(data,DBName, tableName) {
 function handleSelectField(input, options, selectedValue) {
   if (!input) return;
 
+  // convert the options to an array
+  options = options.split(",");
+ 
   // Check if a select element already exists, else create it
   let selectElement = input.parentElement.querySelector("select");
   if (!selectElement) {
     selectElement = document.createElement("select");
-
     // Add options to the select element
     options.forEach((option) => {
       const optionElement = document.createElement("option");
@@ -681,16 +656,17 @@ function handleSelectField(input, options, selectedValue) {
     input.style.display = "none"; // Hide the original input
   }
 
-  // Set the value of the select element
-  selectElement.value = selectedValue || "";
-  selectElement.disabled = false; // Enable the select field
+  
 
   // Add an event listener to sync the select value with the hidden input field
   selectElement.addEventListener("change", () => {
     input.value = selectElement.value; // Update the hidden input with the select's value
     input.dispatchEvent(new Event("input")); // Trigger input event for change detection
   });
-
+  // Set the value of the select element
+  selectElement.value = selectedValue || "";
+  selectElement.disabled = true; 
+  // Enable the select field
   // Initially sync the input field with the selected value
   input.value = selectElement.value || "";
   input.dispatchEvent(new Event("input")); // Trigger input event for change detection
@@ -712,12 +688,12 @@ function getRowNum(tabelName) {
 }
 
 function EditRecord(tableName, action) {
-  const inputs = document.querySelectorAll(`#DataSet_${tableName} input`);
-  inputs.forEach((input) => {
-    const tableLabel = input.getAttribute("dataset-table-name");
+  const inputs = document.querySelectorAll(`#DataSet_${tableName} input, #DataSet_${tableName} select`);
 
-    // if (tableLabel == tableName) {
+  inputs.forEach((input) => {
+    const tableLabel = input.getAttribute("dataset-table-name");    
     input.readOnly = action;
+    input.disabled = action;
     // }
   });
 

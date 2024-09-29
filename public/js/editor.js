@@ -94,14 +94,13 @@ function editElement(element) {
   content.innerHTML = "";
   // adding icon close to the dialog
   var closeIcon = document.createElement("i");
-  closeIcon.width = "20px";
-  closeIcon.height = "20px";
+  
   closeIcon.className = "fa fa-close";
   closeIcon.onclick = function () {
     document.getElementById("propertiesBar").style.display = "none";
   };
   // set the icon top right
-  closeIcon.classList.add("button");
+  closeIcon.classList.add("remove-item");
   closeIcon.style.float = "right";
 
   content.appendChild(closeIcon);
@@ -452,6 +451,15 @@ function createSelectItem(id, label, styleProperty) {
   input.setAttribute("readonly", "true");
   input.setAttribute("ObjectType", "labels");
 
+  var subDiv = document.createElement("div");
+  subDiv.id = "subDiv";
+  subDiv.style.display = "flex";
+
+  div.appendChild(lbl);
+  div.appendChild(input);
+  div.appendChild(select);
+  div.appendChild(subDiv);
+
   input.addEventListener("input", function (event) {
     // get type of the field
     var dataType = this.getAttribute("dataType");
@@ -460,17 +468,12 @@ function createSelectItem(id, label, styleProperty) {
 
     // get the object by id
   });
-
-  div.appendChild(lbl);
-  div.appendChild(input);
-  div.appendChild(select);
-
   return div;
 }
 
 function setOptionsByType(select, fieldDataType) {
   // Define some options (this could be customized based on fieldDataType)
-  var options = [
+ /* var options = [
     "text",
     "number",
     "date",
@@ -479,7 +482,14 @@ function setOptionsByType(select, fieldDataType) {
     "time",
     "color",
     "combobox",
-  ];
+  ]; */
+
+  var options = [
+    "text",
+    "sequence",
+    "combo_array",
+    "combo_sql",
+  ]; 
 
   // Clear any existing options in the select element
   select.innerHTML = "";
@@ -492,6 +502,7 @@ function setOptionsByType(select, fieldDataType) {
     select.appendChild(opt);
   });
 
+ 
   // Optionally, set the default selected value (based on fieldDataType)
   if (options.includes(fieldDataType)) {
     select.value = fieldDataType;
@@ -769,6 +780,11 @@ function addFieldToPropertiesBar(target, fieldJson) {
 
   // Event listener to update fieldType when the select dropdown value changes
   select.addEventListener("change", function () {
+    // remove the textarea if it exists
+    var textarea = div.querySelector("textarea");
+    if (textarea) {
+      textarea.remove();
+    }
     // Update fieldType in fieldJson
     fieldJson.fieldType = select.value;
     fieldJson.fieldDataType = select.value;
@@ -778,6 +794,44 @@ function addFieldToPropertiesBar(target, fieldJson) {
 
     const span = div.querySelector("span[name='dataContainer']");
     span.setAttribute("data-field", JSON.stringify(fieldJson));
+    switch (select.value) {
+      case "combo_array":
+      case "combo_sql":
+         
+          var textarea = document.createElement("textarea");
+          textarea.id = "Data";
+         
+          textarea.setAttribute("rows", "4");
+          textarea.style.width = "100%";
+          textarea.style.marginTop = "10px";
+          textarea.style.marginBottom = "10px";
+          textarea.style.border = "1px solid #ccc";
+          textarea.style.borderRadius = "5px";
+          textarea.style.padding = "5px";
+          textarea.style.resize = "none";
+          textarea.style.flex = "1";
+          div.appendChild(textarea);
+          // Event listener to update fieldValues when the textarea value changes
+          if (select.value === "combo_array") {
+            textarea.setAttribute("placeholder", "Enter comma separated values");
+             textarea.addEventListener("change", function () {
+            fieldJson.fieldValues = this.value.split(",");
+            // get span element
+            const span = div.querySelector("span[name='dataContainer']");
+            span.setAttribute("data-field", JSON.stringify(fieldJson));
+          });
+        } 
+          if (select.value === "combo_sql") {
+            textarea.setAttribute("placeholder", "Enter Sql Query, id, value");
+             textarea.addEventListener("change", function () {
+            fieldJson.fieldSQL = this.value;
+            // get span element
+            const span = div.querySelector("span[name='dataContainer']");
+            span.setAttribute("data-field", JSON.stringify(fieldJson));
+          });
+        }
+      break;
+    }
   });
 
   // Adjust the height of the parent element to accommodate the new field
