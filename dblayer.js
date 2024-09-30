@@ -935,6 +935,21 @@ class dblayer{
             } 
           });
 
+          // call queryData
+          app.get("/query-data/:database/:sqlQuery", dbs.checkAuthenticated, async (req, res) => {
+            try {
+              const {database, sqlQuery } = req.params;
+              const db= dbs.databases[database];
+              await db.connect();
+              const result = await db.queryData(sqlQuery);
+              res.json(result);
+              await db.close();
+            } catch (err) {
+              console.error(err);
+              res.status(500).send("Error querying data");
+            } 
+          });
+
           app.get(
             "/get-all-groupe/:database/:tableName",
             dbs.checkAuthenticated,

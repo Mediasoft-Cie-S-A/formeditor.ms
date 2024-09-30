@@ -814,6 +814,10 @@ function addFieldToPropertiesBar(target, fieldJson) {
           // Event listener to update fieldValues when the textarea value changes
           if (select.value === "combo_array") {
             textarea.setAttribute("placeholder", "Enter comma separated values");
+            // set the textarea vaule from fieldValues if exists
+            if (fieldJson.fieldValues) {
+              textarea.value = fieldJson.fieldValues.join(",");
+            }
              textarea.addEventListener("change", function () {
             fieldJson.fieldValues = this.value.split(",");
             // get span element
@@ -823,6 +827,11 @@ function addFieldToPropertiesBar(target, fieldJson) {
         } 
           if (select.value === "combo_sql") {
             textarea.setAttribute("placeholder", "Enter Sql Query, id, value");
+             // set the textarea vaule from fieldSQL if exists
+            if (fieldJson.fieldSQL) {
+              textarea.value = fieldJson.fieldSQL;
+            }
+          
              textarea.addEventListener("change", function () {
             fieldJson.fieldSQL = this.value;
             // get span element
@@ -834,6 +843,8 @@ function addFieldToPropertiesBar(target, fieldJson) {
     }
   });
 
+  // force the change event to set the fieldJson
+  select.dispatchEvent(new Event("change"));
   // Adjust the height of the parent element to accommodate the new field
   var height = dataObjet.clientHeight + div.clientHeight;
   dataObjet.style.height = height + 30 + "px";

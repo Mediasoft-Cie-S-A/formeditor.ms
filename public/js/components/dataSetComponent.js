@@ -102,6 +102,7 @@ function updateDataSet(main, content) {
       fieldWidth: "0",
       fieldDefaultValue: "0",
       fieldValues: "",
+      fieldSQL: "",
     },
   ];
   var exceptionData = [
@@ -115,6 +116,8 @@ function updateDataSet(main, content) {
       fieldMandatory: "0",
       fieldWidth: "0",
       fieldDefaultValue: "0",
+      fieldValues: "",
+      fieldSQL: "",
     },
   ];
   data.forEach((span) => {
@@ -161,7 +164,8 @@ function createFieldFromJson(fieldJson) {
   let einput = null;
   switch (fieldJson.fieldType) {
     case "combo_array": 
-      element = createElementInput("combo_array");
+    case "combo_sql": 
+      element = createElementInput(fieldJson.fieldType);
       einput = element.querySelector("input"); // Adjust to your combobox selector
       break;
     case "character":
@@ -227,8 +231,8 @@ function createFieldFromJson(fieldJson) {
     einput.setAttribute("dataset-field-type", fieldJson.fieldType);
     einput.setAttribute("dataset-field-size", fieldJson.fieldSize);
     einput.setAttribute("dataset-field-mandatory", fieldJson.fieldMandatory);
-    einput.setAttribute("dataset-fieldValues", fieldJson.fieldValues);
-    
+    einput.setAttribute("dataset-field-values", fieldJson.fieldValues);
+    einput.setAttribute("dataset-field-SQL", fieldJson.fieldSQL);
     if (fieldJson.fieldMandatory) {
       einput.required = true;
     }
@@ -598,13 +602,26 @@ async function updateInputs(data,DBName, tableName) {
           // Handle specific cases based on fieldLabel for select fields
           if (fieldType === "combo_array") {
             // get the values of the field
-            let fieldvalues = input.getAttribute("dataset-fieldvalues");
+            let fieldvalues = input.getAttribute("dataset-field-values");
             handleSelectField(
               input,
               fieldvalues,
               data[0][fieldLabel]
             );
-          } else {
+          } if (fieldType === "combo_sql") {
+            // get the values of the field
+            let fieldSQL = input.getAttribute("dataset-field-SQL");
+            handleSelectFieldSQL(
+              DBName,
+              input,
+              fieldSQL,
+              fieldLabel,
+              data[0][fieldLabel]
+
+            );
+          }
+          
+          else {
             // if (fieldType === "input") {
             input.value = data[0][fieldLabel]?.toString().trim() || "";
             input.disabled = false;
@@ -663,6 +680,67 @@ function handleSelectField(input, options, selectedValue) {
     input.value = selectElement.value; // Update the hidden input with the select's value
     input.dispatchEvent(new Event("input")); // Trigger input event for change detection
   });
+  // Set the value of the select element
+  selectElement.value = selectedValue || "";
+  selectElement.disabled = true; 
+  // Enable the select field
+  // Initially sync the input field with the selected value
+  input.value = selectElement.value || "";
+  input.dispatchEvent(new Event("input")); // Trigger input event for change detection
+}
+
+
+function handleSelectFieldSQL(DBName, input, SQL, fieldLabel,selectedValue) {
+  if (!input) return;
+ // call the fetch function to get the data queryData query-data/${DBName}/${SQL}
+
+   // Check if a select element already exists, else create it
+   let selectElement = input.parentElement.querySelector("select");
+ 
+  if (!selectElement) {
+    const url = `/query-data/${DBName}/${SQL}`;
+    fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        // convert the options to an array by fieldLabel
+        options = data.map((row) => row[fieldLabel]);
+    selectElement = document.createElement("select");
+    // Add options to the select element
+    options.forEach((option) => {
+      const optionElement = document.createElement("option");
+      if (typeof option === "object") {
+        optionElement.value = option.value;
+        optionElement.text = option.text;
+      } else {
+        optionElement.value = option;
+        optionElement.text = option;
+      }
+      selectElement.appendChild(optionElement);
+    });
+    selectElement.setAttribute(
+      "dataset-field-name",
+      input.getAttribute("dataset-field-name")
+    );
+    selectElement.name = input.name;
+    selectElement.className = input.className;
+    input.parentElement.appendChild(selectElement);
+    input.style.display = "none"; // Hide the original input
+  
+  // Add an event listener to sync the select value with the hidden input field
+  selectElement.addEventListener("change", () => {
+    input.value = selectElement.value; // Update the hidden input with the select's value
+    input.dispatchEvent(new Event("input")); // Trigger input event for change detection
+  });
+   // Set the value of the select element
+   selectElement.value = selectedValue || "";
+   selectElement.disabled = true; 
+   // Enable the select field
+   // Initially sync the input field with the selected value
+   input.value = selectElement.value || "";
+   input.dispatchEvent(new Event("input")); // Trigger input event for change detection
+})
+  .catch((error) => console.error("Error:", error));
+  }
   // Set the value of the select element
   selectElement.value = selectedValue || "";
   selectElement.disabled = true; 
