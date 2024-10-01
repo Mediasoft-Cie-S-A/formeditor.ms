@@ -487,6 +487,7 @@ function setOptionsByType(select, fieldDataType) {
   var options = [
     "text",
     "sequence",
+    "array",
     "combo_array",
     "combo_sql",
   ]; 
@@ -797,6 +798,7 @@ function addFieldToPropertiesBar(target, fieldJson) {
     switch (select.value) {
       case "combo_array":
       case "combo_sql":
+      case "array":
          
           var textarea = document.createElement("textarea");
           textarea.id = "Data";
@@ -812,7 +814,7 @@ function addFieldToPropertiesBar(target, fieldJson) {
           textarea.style.flex = "1";
           div.appendChild(textarea);
           // Event listener to update fieldValues when the textarea value changes
-          if (select.value === "combo_array") {
+          if (select.value === "combo_array" || select.value === "array" || select.value === "sequence") {
             textarea.setAttribute("placeholder", "Enter comma separated values");
             // set the textarea vaule from fieldValues if exists
             if (fieldJson.fieldValues) {

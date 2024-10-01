@@ -165,9 +165,16 @@ function createFieldFromJson(fieldJson) {
   switch (fieldJson.fieldType) {
     case "combo_array": 
     case "combo_sql": 
+    case "array":
       element = createElementInput(fieldJson.fieldType);
       einput = element.querySelector("input"); // Adjust to your combobox selector
+      einput.style.display = "none";
       break;
+    case "sequence":
+        element = createElementInput(fieldJson.fieldType);
+        einput = element.querySelector("input"); // Adjust to your combobox selector
+       
+        break;
     case "character":
     case "varchar":
     case "text":
@@ -256,7 +263,7 @@ function createNavigationBar(DBName, tableName, datasetFields) {
   navigationBar.setAttribute("data-current-row", "0");
   navigationBar.setAttribute("data-dataset-fields", datasetFields);
   navigationBar.innerHTML = '<div class="navigation-bar-title">record: </div>';
-  const sequenceName = "droit";
+
   // Create buttons and append them to the navigation bar
   var buttons = [
     {
@@ -545,9 +552,10 @@ async function updateInputs(data,DBName, tableName) {
         input.value = "";
         input.disabled = true;
        
+        switch (fieldType) {
+          case "array":
         let subField = data[0][fieldLabel]?.toString().trim().split(";");
 
-        if (subField.length > 1) {
           input.style.display = "none";
           let fieldId = input.getAttribute("data-field-name");
           let existingFieldContainer = document.getElementById(fieldId);
@@ -559,8 +567,9 @@ async function updateInputs(data,DBName, tableName) {
 
           let fieldContainer = document.createElement("div");
           fieldContainer.style.height = "600px";
-          fieldContainer.style.maxWidth = "400%";
+          fieldContainer.style.maxWidth = "400px";
           fieldContainer.style.overflowX = "scroll";
+          fieldContainer.style.overflowY = "clip";
 
           fieldContainer.style.display = "flex";
           fieldContainer.style.flexDirection = "column";
@@ -568,14 +577,17 @@ async function updateInputs(data,DBName, tableName) {
           fieldContainer.className = "subFieldContainer";
           fieldContainer.id = fieldId;
           input.parentElement.appendChild(fieldContainer);
+          let labelsvalues = input.getAttribute("dataset-field-values");
+          let labels = labelsvalues.split(",");
+
           subField.forEach((val, index) => {
             let fieldJson = {
               fieldDataType: input.getAttribute("data-field-type"), // fixed typo: "dataset-field-type" to "data-field-type"
               fieldDefaultValue: val,
               fieldLabel:
-                input.getAttribute("dataset-field-name") == "droit"
-                  ? droit[index]
-                  : "gama",
+              labels[index] !== undefined
+                  ? labels[index]
+                  : input.getAttribute("dataset-field-name") + "__" + index,
               fieldMandatory: "0",
               fieldName:
                 input.getAttribute("dataset-field-name") + "__" + index,
@@ -598,9 +610,11 @@ async function updateInputs(data,DBName, tableName) {
             }
             fieldContainer.appendChild(createField);
           });
-        } else {
+
+        break;
           // Handle specific cases based on fieldLabel for select fields
-          if (fieldType === "combo_array") {
+          case "combo_array":
+
             // get the values of the field
             let fieldvalues = input.getAttribute("dataset-field-values");
             handleSelectField(
@@ -608,7 +622,8 @@ async function updateInputs(data,DBName, tableName) {
               fieldvalues,
               data[0][fieldLabel]
             );
-          } if (fieldType === "combo_sql") {
+            break;
+          case  "combo_sql":
             // get the values of the field
             let fieldSQL = input.getAttribute("dataset-field-SQL");
             handleSelectFieldSQL(
@@ -619,24 +634,26 @@ async function updateInputs(data,DBName, tableName) {
               data[0][fieldLabel]
 
             );
-          }
+            break;
           
-          else {
+          default:
             // if (fieldType === "input") {
             input.value = data[0][fieldLabel]?.toString().trim() || "";
             input.disabled = false;
             // }
-          }
-        }
-
+            break;
+        
+        } // end switch
         // Enable the save button for the dataset
         dataset.parentElement.querySelector(
           "[name=SaveDSBtn]"
         ).disabled = false;
-      });
-    }
-  });
+        
+      }); // end inputs.forEach
+    } // end if
+  }); // end datasets.forEach
 }
+
 
 // Helper function to handle select fields
 // Helper function to handle select fields and sync with input field
@@ -879,11 +896,7 @@ async function SaveRecord(DBName,tableName) {
         let result;
         if (rowIdValue === "new") {
           let data = CreateInsert(DBNametableName);
-          if (tableName === "util") {
-            const val = await navigateSequence("next-sequence");
-            const id = val[0].sequence_next;
-            data = addIdToData(data, "id", id);
-          }
+          
           result = await insertRecordDB(DBName,tableName, data);
         } else {
           const data = {
@@ -908,13 +921,26 @@ function CreateInsert(tableName) {
   var insertFields = "";
   var insertValues = "";
   for (i = 0; i < inputs.length; i++) {
-    if (inputs[i].type != "hidden") {
+    if (inputs[i].type != "hidden" && inputs[i].fieldType != "sequence") {
       const field = inputs[i].getAttribute("dataset-field-name");
       insertFields += `"${field}"`;
       insertValues += `'${inputs[i].value}'`;
       if (i < inputs.length - 1) {
         insertFields += ",";
         insertValues += ",";
+      }
+    }
+      else {
+        const field = inputs[i].getAttribute("dataset-field-name");
+        insertFields += `"${field}"`;
+        // get sequence value from the the attribute dataset-field-values
+        let sequence = inputs[i].getAttribute("dataset-field-values");
+        let sequenceValue = navigateSequence(sequence);
+        insertValues += `'${insertValues}'`;
+        if (i < inputs.length - 1) {
+          insertFields += ",";
+          insertValues += ",";
+        }
       }
       inputs[i].readOnly = true;
     }
