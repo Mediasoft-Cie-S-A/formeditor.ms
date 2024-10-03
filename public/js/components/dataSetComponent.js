@@ -487,15 +487,15 @@ function CopyRecord(DBName,tableName, datasetFields) {
   });
 }
 
-async function navigateSequence(action) {
-  const url = `/${action}`;
+ function navigateSequence(DBName,tabelName,sequenceName) {
+  const url = `/next-sequence/${DBName}/${tabelName}/${sequenceName}`;
   try {
-    const response = await fetch(url);
+    const response =  fetch(url);
     if (!response.ok) {
       throw new Error("Network response was not ok");
     }
-    const data = await response.json();
-    return data;
+    const data =  response.json();
+    return data[0].sequence_next;
   } catch (error) {
     console.error("Error:", error);
     throw error;
@@ -895,7 +895,7 @@ async function SaveRecord(DBName,tableName) {
         const rowIdValue = nextRowId.value;
         let result;
         if (rowIdValue === "new") {
-          let data = CreateInsert(DBNametableName);
+          let data = CreateInsert(DBName,tableName);
           
           result = await insertRecordDB(DBName,tableName, data);
         } else {
@@ -914,37 +914,43 @@ async function SaveRecord(DBName,tableName) {
 }
 
 // create insert data structure
-function CreateInsert(tableName) {
+function CreateInsert(DBName,tableName) {
   // create data for insert following this structure  `INSERT INTO ${tableName} (${data.fields}) VALUES (${data.values})`;
   // return data with data.fields and data.values
   const inputs = document.querySelectorAll(`#DataSet_${tableName} input`);
   var insertFields = "";
   var insertValues = "";
   for (i = 0; i < inputs.length; i++) {
-    if (inputs[i].type != "hidden" && inputs[i].fieldType != "sequence") {
-      const field = inputs[i].getAttribute("dataset-field-name");
-      insertFields += `"${field}"`;
-      insertValues += `'${inputs[i].value}'`;
-      if (i < inputs.length - 1) {
-        insertFields += ",";
-        insertValues += ",";
-      }
-    }
-      else {
-        const field = inputs[i].getAttribute("dataset-field-name");
+    console.log(inputs[i].type);
+    switch (inputs[i].type) {
+    case "hidden":
+      break;   
+      default:
+         // get the field name from the input
+        var field = inputs[i].getAttribute("dataset-field-name");
+        var subtype = inputs[i].getAttribute("dataset-field-type");
         insertFields += `"${field}"`;
         // get sequence value from the the attribute dataset-field-values
-        let sequence = inputs[i].getAttribute("dataset-field-values");
-        let sequenceValue = navigateSequence(sequence);
-        insertValues += `'${insertValues}'`;
+        if (subtype === "sequence") {
+            let sequence = inputs[i].getAttribute("dataset-field-values");
+            console.log(sequence);
+            console.log(inputs[i]);
+            let tabelName = inputs[i].getAttribute("dataset-table-name");
+            let sequenceValue = navigateSequence(DBName,tabelName,sequence);
+            inputs[i].value = sequenceValue;
+            insertValues += `'${sequenceValue}'`;
+        } else {
+          insertValues += `'${inputs[i].value}'`;
+        }
         if (i < inputs.length - 1) {
           insertFields += ",";
           insertValues += ",";
-        }
-      }
+        } // end if i
+      break;
+      } // end switch
       inputs[i].readOnly = true;
-    }
-  }
+    } // end for
+  
   return { fields: insertFields, values: insertValues };
 }
 

@@ -530,8 +530,8 @@ class OdbcDatabase {
     }
   }
 
-  async nextSequence() {
-    let query = `SELECT TOP 1 PUB.seq_util.NEXTVAL FROM PUB."util"`;
+  async nextSequence(seqTable,seqName) {
+    let query = `SELECT TOP 1 PUB.${seqName}.NEXTVAL FROM PUB."${seqTable}"`;
     console.log(".........................................................");
     console.log(query);
     return this.queryData(query);

@@ -915,12 +915,14 @@ class dblayer{
             return obj;
           }
 
-          app.get("/next-sequence", dbs.checkAuthenticated, async (req, res) => {
+          app.get("/next-sequence/:database/:table/:seq", dbs.checkAuthenticated, async (req, res) => {
             try {
+              const {database,table, seq } = req.params;
               console.log("Step three is called");
+              const db= dbs.databases[database];
               await db.connect();
 
-              const sequence = await db.nextSequence();
+              const sequence = await db.nextSequence(table,seq);
               console.log(sequence);
               console.log("Result above");
 

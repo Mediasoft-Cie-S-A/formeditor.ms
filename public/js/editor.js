@@ -799,7 +799,7 @@ function addFieldToPropertiesBar(target, fieldJson) {
       case "combo_array":
       case "combo_sql":
       case "array":
-         
+      case "sequence":   
           var textarea = document.createElement("textarea");
           textarea.id = "Data";
          
@@ -814,18 +814,21 @@ function addFieldToPropertiesBar(target, fieldJson) {
           textarea.style.flex = "1";
           div.appendChild(textarea);
           // Event listener to update fieldValues when the textarea value changes
-          if (select.value === "combo_array" || select.value === "array" || select.value === "sequence") {
-            textarea.setAttribute("placeholder", "Enter comma separated values");
-            // set the textarea vaule from fieldValues if exists
-            if (fieldJson.fieldValues) {
-              textarea.value = fieldJson.fieldValues.join(",");
-            }
+          if (select.value === "combo_array" 
+              || select.value === "array"
+              || select.value === "sequence")
+               {
+              textarea.setAttribute("placeholder", "Enter comma separated values");
+              // set the textarea vaule from fieldValues if exists
+              if (fieldJson.fieldValues) {
+                textarea.value = fieldJson.fieldValues.join(",");
+               }
              textarea.addEventListener("change", function () {
             fieldJson.fieldValues = this.value.split(",");
             // get span element
             const span = div.querySelector("span[name='dataContainer']");
             span.setAttribute("data-field", JSON.stringify(fieldJson));
-          });
+              }); // end of textarea change event
         } 
           if (select.value === "combo_sql") {
             textarea.setAttribute("placeholder", "Enter Sql Query, id, value");
@@ -839,7 +842,7 @@ function addFieldToPropertiesBar(target, fieldJson) {
             // get span element
             const span = div.querySelector("span[name='dataContainer']");
             span.setAttribute("data-field", JSON.stringify(fieldJson));
-          });
+               }); // end of textarea change event
         }
       break;
     }
