@@ -769,6 +769,15 @@ function addFieldToPropertiesBar(target, fieldJson) {
 
   dataObjet.appendChild(div);
 
+  // adding verification triggers mandatories fields checkbox
+  div.innerHTML += `<div>Mandatory:<input type="checkbox" class="apple-switch" id="mandatory" name="mandatory" value="mandatory" ${
+    fieldJson.fieldMandatory === "true" ? "checked" : ""
+  } onclick="updateMandatory(event, '${elementId}')"> </div>`;
+  // adding verification triggers not null fields checkbox
+  div.innerHTML += `<div>Not Null:<input type="checkbox" class="apple-switch" id="notNull" name="notNull" value="notNull" ${
+    fieldJson.fieldMandatory === "true" ? "checked" : ""
+  } onclick="updateNotNull(event, '${elementId}')"></div>`;
+
   // Create a select dropdown
   var select = document.createElement("select");
   div.appendChild(select);
