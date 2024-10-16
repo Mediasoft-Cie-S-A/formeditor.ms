@@ -617,45 +617,154 @@ async function updateInputs(data, DBName, tableName) {
         switch (fieldType) {
           case "array":
             let subField = data[0][fieldLabel]?.toString().trim().split(";");
-            if (
-              subField.every(
-                (item) =>
-                  item === true || item === false || item == 0 || item == 1
-              )
-            ) {
-            } else {
-              input.style.display = "none";
-              let fieldId = input.getAttribute("data-field-name");
-              let existingFieldContainer = document.getElementById(fieldId);
-              if (existingFieldContainer) {
-                existingFieldContainer.parentElement.removeChild(
-                  existingFieldContainer
-                );
+            let arrayType = subField.every(
+              (item) =>
+                item === true || item === false || item == 0 || item == 1
+            );
+
+            input.style.display = "none"; // Hide the original input
+            let fieldId = input.getAttribute("data-field-name");
+            let existingFieldContainer = document.getElementById(fieldId);
+            if (existingFieldContainer) {
+              existingFieldContainer.parentElement.removeChild(
+                existingFieldContainer
+              );
+            }
+
+            let fieldContainer = document.createElement("div");
+            fieldContainer.style.height = "600px";
+            fieldContainer.style.maxWidth = "400%";
+            fieldContainer.style.overflowX = "scroll";
+            fieldContainer.style.display = "flex";
+            fieldContainer.style.flexDirection = "column";
+            fieldContainer.style.flexWrap = "wrap";
+            fieldContainer.className = "subFieldContainer";
+            fieldContainer.id = fieldId;
+            input.parentElement.appendChild(fieldContainer);
+            let labelsvalues = input.getAttribute("dataset-field-values");
+            let labels = labelsvalues.split(",");
+            if (arrayType) {
+              // Function to render subfields
+              function renderSubFields(
+                input,
+                subField,
+                fieldLabel,
+                fieldContainer,
+                data
+              ) {
+                // Clear any existing content inside the field container
+                fieldContainer.innerHTML = "";
+
+                subField.forEach((val, index) => {
+                  // Create a container for the checkbox and its label
+                  let checkboxWrapper = document.createElement("div");
+                  checkboxWrapper.style.display = "flex";
+                  checkboxWrapper.style.alignItems = "center";
+                  checkboxWrapper.style.justifyContent = "space-between"; // Space between label and checkbox
+                  checkboxWrapper.style.width = "140px"; // Fixed width for each checkbox container
+                  checkboxWrapper.style.marginBottom = "10px"; // Spacing between checkboxes
+
+                  // Create label for the checkbox
+                  let label = document.createElement("label");
+                  label.htmlFor = `checkbox_${index}`;
+                  console.log("labels");
+                  console.log(labels);
+                  label.innerText =
+                    labels[index] === undefined || labels[index] === "undefined"
+                      ? input.getAttribute("dataset-field-name") + "__" + index
+                      : labels[index];
+
+                  // Create checkbox
+                  let checkbox = document.createElement("input");
+                  checkbox.type = "checkbox";
+                  checkbox.id = `checkbox_${index}`; // Give each checkbox a unique id
+                  checkbox.checked = val != 0; // Set checked based on value (1 or 0)
+                  checkbox.style.marginLeft = "1px"; // Spacing between checkbox and label
+
+                  checkbox.addEventListener("click", (event) => {
+                    const isChecked = event.target.checked;
+                    subField[index] = isChecked ? 1 : 0;
+                    data[0][fieldLabel] = subField.join(";");
+                    input.value = data[0][fieldLabel];
+                    input.disabled = false;
+                    console.log(
+                      `Updated data for ${fieldLabel}:`,
+                      data[0][fieldLabel]
+                    );
+                    renderSubFields(
+                      input,
+                      subField,
+                      fieldLabel,
+                      fieldContainer,
+                      data
+                    );
+                  });
+                  checkboxWrapper.appendChild(label);
+                  checkboxWrapper.appendChild(checkbox);
+                  fieldContainer.appendChild(checkboxWrapper);
+                });
               }
 
-              let fieldContainer = document.createElement("div");
-              fieldContainer.style.height = "600px";
-              fieldContainer.style.maxWidth = "400px";
-              fieldContainer.style.overflowX = "scroll";
-              fieldContainer.style.overflowY = "clip";
+              // Function to handle initial setup of subfields
+              function setupSubFields(input, data, fieldLabel) {
+                let subField = data[0][fieldLabel]
+                  ?.toString()
+                  .trim()
+                  .split(";");
 
-              fieldContainer.style.display = "flex";
-              fieldContainer.style.flexDirection = "column";
-              fieldContainer.style.flexWrap = "wrap";
-              fieldContainer.className = "subFieldContainer";
-              fieldContainer.id = fieldId;
-              input.parentElement.appendChild(fieldContainer);
-              let labelsvalues = input.getAttribute("dataset-field-values");
-              let labels = labelsvalues.split(",");
+                if (subField.length > 1) {
+                  input.style.display = "none"; // Hide the original input
+                  let fieldId = input.getAttribute("data-field-name");
+                  let existingFieldContainer = document.getElementById(fieldId);
 
+                  if (existingFieldContainer) {
+                    existingFieldContainer.parentElement.removeChild(
+                      existingFieldContainer
+                    );
+                  }
+
+                  let fieldContainer = document.createElement("div");
+                  fieldContainer.style.height = "600px";
+                  fieldContainer.style.maxWidth = "400%";
+                  fieldContainer.style.overflowX = "scroll";
+                  fieldContainer.style.display = "flex";
+                  fieldContainer.style.flexDirection = "column";
+                  fieldContainer.style.flexWrap = "wrap";
+                  fieldContainer.className = "subFieldContainer";
+                  fieldContainer.id = fieldId;
+                  input.parentElement.appendChild(fieldContainer);
+                  // Initial render of the subfields
+                  renderSubFields(
+                    input,
+                    subField,
+                    fieldLabel,
+                    fieldContainer,
+                    data
+                  );
+                }
+              }
+              datasets.forEach((dataset) => {
+                const datasetTableName =
+                  dataset.getAttribute("data-table-name");
+
+                if (datasetTableName === tableName) {
+                  const inputs = dataset.querySelectorAll("input, select");
+
+                  inputs.forEach((input) => {
+                    const fieldLabel = input.getAttribute("dataset-field-name");
+                    setupSubFields(input, data, fieldLabel);
+                  });
+                }
+              });
+            } else {
               subField.forEach((val, index) => {
                 let fieldJson = {
                   fieldDataType: input.getAttribute("data-field-type"), // fixed typo: "dataset-field-type" to "data-field-type"
                   fieldDefaultValue: val,
                   fieldLabel:
-                    labels[index] !== undefined
-                      ? labels[index]
-                      : input.getAttribute("dataset-field-name") + "__" + index,
+                    labels[index] === undefined || labels[index] === "undefined"
+                      ? input.getAttribute("dataset-field-name") + "__" + index
+                      : labels[index],
                   fieldMandatory: "0",
                   fieldName:
                     input.getAttribute("dataset-field-name") + "__" + index,
