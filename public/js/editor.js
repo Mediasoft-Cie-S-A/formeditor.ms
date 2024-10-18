@@ -94,7 +94,7 @@ function editElement(element) {
   content.innerHTML = "";
   // adding icon close to the dialog
   var closeIcon = document.createElement("i");
-  
+
   closeIcon.className = "fa fa-close";
   closeIcon.onclick = function () {
     document.getElementById("propertiesBar").style.display = "none";
@@ -473,7 +473,7 @@ function createSelectItem(id, label, styleProperty) {
 
 function setOptionsByType(select, fieldDataType) {
   // Define some options (this could be customized based on fieldDataType)
- /* var options = [
+  /* var options = [
     "text",
     "number",
     "date",
@@ -484,13 +484,7 @@ function setOptionsByType(select, fieldDataType) {
     "combobox",
   ]; */
 
-  var options = [
-    "text",
-    "sequence",
-    "array",
-    "combo_array",
-    "combo_sql",
-  ]; 
+  var options = ["text", "sequence", "array", "combo_array", "combo_sql"];
 
   // Clear any existing options in the select element
   select.innerHTML = "";
@@ -503,7 +497,6 @@ function setOptionsByType(select, fieldDataType) {
     select.appendChild(opt);
   });
 
- 
   // Optionally, set the default selected value (based on fieldDataType)
   if (options.includes(fieldDataType)) {
     select.value = fieldDataType;
@@ -734,6 +727,14 @@ function addFieldToPropertiesBarWeb(target, fieldJson, isId) {
     )}' >${fieldJson.fieldName}</span>`;
   dataObjet.appendChild(div);
 
+  div.innerHTML += `<div>Mandatory:<input type="checkbox" class="apple-switch" id="mandatory" name="mandatory" value="mandatory" ${
+    fieldJson.fieldMandatory === "true" ? "checked" : ""
+  } onclick="updateMandatory(event, '${elementId}')"> </div>`;
+  // adding verification triggers not null fields checkbox
+  div.innerHTML += `<div>Not Null:<input type="checkbox" class="apple-switch" id="notNull" name="notNull" value="notNull" ${
+    fieldJson.fieldMandatory === "true" ? "checked" : ""
+  } onclick="updateNotNull(event, '${elementId}')"></div>`;
+
   // generate the select
   if (!isId) {
     var select = document.createElement("select");
@@ -743,11 +744,86 @@ function addFieldToPropertiesBarWeb(target, fieldJson, isId) {
 
   setOptionsByType(select, fieldJson.fieldDataType);
   // select the functionName in the function
+  div.setAttribute("selectedValue", select.value);
+  select.addEventListener("change", function () {
+    // remove the textarea if it exists
+    var textarea = div.querySelector("textarea");
+    if (textarea) {
+      textarea.remove();
+    }
+    // Update fieldType in fieldJson
+    fieldJson.fieldType = select.value;
+    fieldJson.fieldDataType = select.value;
+    div.setAttribute("selectedValue", select.value);
+    div.setAttribute("data-field", JSON.stringify(fieldJson));
+    div.setAttribute("fieldDataType", JSON.stringify(fieldJson));
 
-  // get the parent div height
+    const span = div.querySelector("span[name='dataContainer']");
+    span.setAttribute("data-field", JSON.stringify(fieldJson));
+    switch (select.value) {
+      case "combo_array":
+      case "array":
+      case "combo_sql":
+      case "sequence":
+        var textarea = document.createElement("textarea");
+        textarea.id = "Data";
+
+        textarea.setAttribute("rows", "4");
+        textarea.style.width = "100%";
+        textarea.style.marginTop = "10px";
+        textarea.style.marginBottom = "10px";
+        textarea.style.border = "1px solid #ccc";
+        textarea.style.borderRadius = "5px";
+        textarea.style.padding = "5px";
+        textarea.style.resize = "none";
+        textarea.style.flex = "1";
+        div.appendChild(textarea);
+        // Event listener to update fieldValues when the textarea value changes
+        if (
+          select.value === "combo_array" ||
+          select.value === "array" ||
+          select.value === "sequence"
+        ) {
+          textarea.setAttribute("placeholder", "Enter comma separated values");
+          // set the textarea vaule from fieldValues if exists
+          if (fieldJson.fieldValues) {
+            textarea.value = fieldJson.fieldValues.join(",");
+          }
+          textarea.addEventListener("change", function () {
+            fieldJson.fieldValues = this.value.split(",");
+            // get span element
+            const span = div.querySelector("span[name='dataContainer']");
+            span.setAttribute("data-field", JSON.stringify(fieldJson));
+          });
+        }
+        if (select.value === "combo_sql") {
+          textarea.setAttribute("placeholder", "Enter Sql Query, id, value");
+          // set the textarea vaule from fieldSQL if exists
+          if (fieldJson.fieldSQL) {
+            textarea.value = fieldJson.fieldSQL;
+          }
+
+          textarea.addEventListener("change", function () {
+            fieldJson.fieldSQL = this.value;
+            // get span element
+            const span = div.querySelector("span[name='dataContainer']");
+            span.setAttribute("data-field", JSON.stringify(fieldJson));
+          });
+        }
+        break;
+    }
+  });
+
+  // force the change event to set the fieldJson
+  select.dispatchEvent(new Event("change"));
+  // Adjust the height of the parent element to accommodate the new field
   var height = dataObjet.clientHeight + div.clientHeight;
   // set the height of the parent div
   dataObjet.style.height = height + 30 + "px";
+  // get the parent div height
+  // var height = dataObjet.clientHeight + div.clientHeight;
+  // // set the height of the parent div
+  // dataObjet.style.height = height + 30 + "px";
 }
 
 function addFieldToPropertiesBar(target, fieldJson) {
@@ -808,52 +884,53 @@ function addFieldToPropertiesBar(target, fieldJson) {
       case "combo_array":
       case "combo_sql":
       case "array":
-      case "sequence":   
-          var textarea = document.createElement("textarea");
-          textarea.id = "Data";
-         
-          textarea.setAttribute("rows", "4");
-          textarea.style.width = "100%";
-          textarea.style.marginTop = "10px";
-          textarea.style.marginBottom = "10px";
-          textarea.style.border = "1px solid #ccc";
-          textarea.style.borderRadius = "5px";
-          textarea.style.padding = "5px";
-          textarea.style.resize = "none";
-          textarea.style.flex = "1";
-          div.appendChild(textarea);
-          // Event listener to update fieldValues when the textarea value changes
-          if (select.value === "combo_array" 
-              || select.value === "array"
-              || select.value === "sequence")
-               {
-              textarea.setAttribute("placeholder", "Enter comma separated values");
-              // set the textarea vaule from fieldValues if exists
-              if (fieldJson.fieldValues) {
-                textarea.value = fieldJson.fieldValues.join(",");
-               }
-             textarea.addEventListener("change", function () {
+      case "sequence":
+        var textarea = document.createElement("textarea");
+        textarea.id = "Data";
+
+        textarea.setAttribute("rows", "4");
+        textarea.style.width = "100%";
+        textarea.style.marginTop = "10px";
+        textarea.style.marginBottom = "10px";
+        textarea.style.border = "1px solid #ccc";
+        textarea.style.borderRadius = "5px";
+        textarea.style.padding = "5px";
+        textarea.style.resize = "none";
+        textarea.style.flex = "1";
+        div.appendChild(textarea);
+        // Event listener to update fieldValues when the textarea value changes
+        if (
+          select.value === "combo_array" ||
+          select.value === "array" ||
+          select.value === "sequence"
+        ) {
+          textarea.setAttribute("placeholder", "Enter comma separated values");
+          // set the textarea vaule from fieldValues if exists
+          if (fieldJson.fieldValues) {
+            textarea.value = fieldJson.fieldValues.join(",");
+          }
+          textarea.addEventListener("change", function () {
             fieldJson.fieldValues = this.value.split(",");
             // get span element
             const span = div.querySelector("span[name='dataContainer']");
             span.setAttribute("data-field", JSON.stringify(fieldJson));
-              }); // end of textarea change event
-        } 
-          if (select.value === "combo_sql") {
-            textarea.setAttribute("placeholder", "Enter Sql Query, id, value");
-             // set the textarea vaule from fieldSQL if exists
-            if (fieldJson.fieldSQL) {
-              textarea.value = fieldJson.fieldSQL;
-            }
-          
-             textarea.addEventListener("change", function () {
+          }); // end of textarea change event
+        }
+        if (select.value === "combo_sql") {
+          textarea.setAttribute("placeholder", "Enter Sql Query, id, value");
+          // set the textarea vaule from fieldSQL if exists
+          if (fieldJson.fieldSQL) {
+            textarea.value = fieldJson.fieldSQL;
+          }
+
+          textarea.addEventListener("change", function () {
             fieldJson.fieldSQL = this.value;
             // get span element
             const span = div.querySelector("span[name='dataContainer']");
             span.setAttribute("data-field", JSON.stringify(fieldJson));
-               }); // end of textarea change event
+          }); // end of textarea change event
         }
-      break;
+        break;
     }
   });
 

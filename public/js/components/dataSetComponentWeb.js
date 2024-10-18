@@ -134,6 +134,8 @@ function updateDataSetWeb(main, content) {
       fieldMandatory: "0",
       fieldWidth: "0",
       fieldDefaultValue: "0",
+      fieldValues: "",
+      fieldSQL: "",
     },
   ];
 
@@ -167,7 +169,7 @@ function renderDataSetWeb(main, getById, updateById, createApi) {
   dataset.id = "DataSetWeb_" + apiId;
   dataset.className = "dataSetContainer";
   jsonData.forEach((fieldJson) => {
-    var createField = createFieldFromJsonWeb(fieldJson);
+    var createField = createFieldFromJsonWeb(fieldJson, apiUrl);
     dataset.appendChild(createField);
   });
   main.appendChild(dataset);
@@ -185,34 +187,31 @@ function renderDataSetWeb(main, getById, updateById, createApi) {
   moveFirstWeb(apiUrl, apiMethod, apiId);
 }
 
-function createFieldFromJsonWeb(fieldJson, mainId) {
+function createFieldFromJsonWeb(fieldJson, apiUrl) {
   var element = null;
-  if (fieldJson.fieldFormat) {
-    switch (fieldJson.fieldFormat) {
-      //for different field formats
-      case "rowid":
-        element = createElementInput("hidden");
-        einput = element.querySelector("input");
-        element.style.display = "none";
-        break;
-      case "date-time":
-        element = createElementInput("date");
-        einput = element.querySelector("input");
-        break;
-      default:
-        // Handle default case or unknown field formats
-        element = createElementInput("text");
-        einput = element.querySelector("input");
-        break;
-    }
-  } else if (fieldJson.fieldType) {
+  if (fieldJson.fieldType) {
     switch (fieldJson.fieldType) {
+      case "combo_array":
+      case "array":
+        element = createElementInput(fieldJson.fieldType);
+        einput = element.querySelector("input"); // Adjust to your combobox selector
+        einput.style.display = "none";
+        break;
+      case "sequence":
+        element = createElementInput(fieldJson.fieldType);
+        einput = element.querySelector("input"); // Adjust to your combobox selector
+        break;
+      case "combo_sql":
+        element = createElementInput(fieldJson.fieldType);
+        einput = element.querySelector("input"); // Adjust to your combobox selector
+        break;
       //for different field formats
       case "rowid":
         element = createElementInput("hidden");
         einput = element.querySelector("input");
         element.style.display = "none";
         break;
+
       case "number":
       case "float":
       case "double":
@@ -240,6 +239,10 @@ function createFieldFromJsonWeb(fieldJson, mainId) {
     if (label !== null) label.textContent = fieldJson.fieldName;
     // set the input attributes
     einput.id = fieldJson.fieldId;
+    einput.setAttribute("dataset-field-values", fieldJson.fieldValues);
+    einput.setAttribute("dataset-field-name", fieldJson.fieldName);
+    einput.setAttribute("dataset-field-SQL", fieldJson.fieldSQL);
+    einput.setAttribute("apiUrl", apiUrl);
     // currently no attribute is required separately
     // einput.setAttribute("dataset-table-name", fieldJson.tableName);
     // currently outputs does not have a mandatory attribute
@@ -562,7 +565,7 @@ async function SaveRecordWeb(apiId) {
   const navBar = document.getElementById("navigationBar_" + apiId);
   const getById = JSON.parse(navBar.getAttribute("get-by-id"));
   const apiMethod = getById.apiMethod;
-  var apiUrl = getById.controllerServerUrl + getById.apiPath.slice(1);
+  var apiUrl = getById.controllerServerUrl + getById?.apiPath?.slice(1);
   const replaceString = "{" + getById.apiDataInputs[0].Name + "}";
   apiUrl = apiUrl.replace(replaceString, rowId);
   if (!apiUrl) return;
@@ -665,33 +668,260 @@ function findValue(obj, key) {
 }
 
 function updateInputsWeb(data, jsonData, apiId, row) {
-  // get all the datasets
   console.log("Update Inputs");
   const dataSetId = "#DataSetWeb_" + apiId;
   const escapedDateSetId = dataSetId.replace(/\//g, "\\/");
   const datasets = document.querySelectorAll(escapedDateSetId);
-  // for all the datasets check the div with name DataSet
+
   datasets.forEach((dataset) => {
     const inputs = dataset.querySelectorAll("input");
     inputs.forEach((input) => {
-      const fieldData = jsonData.filter((field) => {
-        return field.fieldId === input.id;
-      });
+      const fieldData = jsonData.filter((field) => field.fieldId === input.id);
+      const fieldLabel = input.getAttribute("dataset-field-name");
       if (fieldData.length < 1) return;
       let fieldValue = getFieldValue(fieldData[0], data, row);
       if (fieldData[0].fieldFormat === "date-time") {
         fieldValue = fieldValue.split("T")[0];
       }
+      const fieldType = input.getAttribute("type");
       input.value = "";
       input.readOnly = true;
-      if (!fieldValue) return;
-      input.value = fieldValue.toString().trim();
 
-      // currently we do not have save button on this component
-      // disable save record button with name SaveRecordBtn
-      // dataset.parentElement.querySelector("[name=SaveDSBtn]").disabled = true;
+      if (fieldType === "array") {
+        input.style.display = "none";
+        let fieldId = input.getAttribute("dataset-field-name");
+
+        // Remove existing field container
+        let existingFieldContainer = document.getElementById(fieldId);
+        if (existingFieldContainer) {
+          existingFieldContainer.parentElement.removeChild(
+            existingFieldContainer
+          );
+        }
+
+        // Create a new container for the checkboxes
+        let fieldContainer = document.createElement("div");
+        fieldContainer.style.height = "auto";
+        fieldContainer.style.maxWidth = "100%";
+        fieldContainer.style.display = "flex";
+        fieldContainer.style.flexDirection = "column";
+        fieldContainer.style.flexWrap = "wrap";
+        fieldContainer.className = "subFieldContainer";
+        fieldContainer.id = fieldId;
+        input.parentElement.appendChild(fieldContainer);
+        let labelsvalues = input.getAttribute("dataset-field-values");
+        let labels = labelsvalues.split(",");
+
+        // Function to render subfields as checkboxes
+        function renderSubFields(subField, fieldId, fieldValue) {
+          fieldContainer.innerHTML = "";
+
+          subField.forEach((val, index) => {
+            let checkboxWrapper = document.createElement("div");
+            checkboxWrapper.style.display = "flex";
+            checkboxWrapper.style.alignItems = "center";
+            checkboxWrapper.style.justifyContent = "space-between";
+            checkboxWrapper.style.width = "140px";
+            checkboxWrapper.style.marginBottom = "10px";
+
+            let label = document.createElement("label");
+            label.htmlFor = `checkbox_${index}`;
+            label.innerText =
+              labels[index] === undefined || labels[index] === "undefined"
+                ? input.getAttribute("dataset-field-name") + "__" + index
+                : labels[index];
+
+            let checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.id = `checkbox_${index}`;
+            checkbox.checked = val != 0;
+            checkbox.style.marginLeft = "1px";
+
+            checkbox.addEventListener("click", (event) => {
+              const isChecked = event.target.checked;
+              subField[index] = isChecked ? 1 : 0;
+
+              fieldValue = subField.join(";");
+              input.value = fieldValue;
+              input.disabled = false;
+
+              // Re-render the subfields after the update
+              renderSubFields(subField, fieldId, fieldValue);
+
+              console.log(`Updated sequence for ${fieldId}:`, fieldValue);
+            });
+
+            checkboxWrapper.appendChild(label);
+            checkboxWrapper.appendChild(checkbox);
+            fieldContainer.appendChild(checkboxWrapper);
+          });
+        }
+
+        // Function to handle initial setup of subfields
+        function setupSubFields(fieldValue, fieldId, data) {
+          let subField = fieldValue?.toString().trim().split(";");
+          if (subField.length >= 1) {
+            let arrayType = subField.every(
+              (item) =>
+                item === true || item === false || item == 0 || item == 1
+            );
+            if (arrayType) {
+              renderSubFields(subField, fieldId, fieldValue);
+            } else {
+              subField.forEach((val, index) => {
+                let fieldJson = {
+                  fieldDataType: input.getAttribute("data-field-type"), // fixed typo: "dataset-field-type" to "data-field-type"
+                  fieldDefaultValue: val,
+                  fieldLabel:
+                    labels[index] === undefined || labels[index] === "undefined"
+                      ? input.getAttribute("dataset-field-name") + "__" + index
+                      : labels[index],
+                  fieldMandatory: "0",
+                  fieldName:
+                    input.getAttribute("dataset-field-name") + "__" + index,
+                  fieldWidth: "1",
+                  tableName: input.getAttribute("data-table-name"), // fixed typo: "dataset-table-name" to "data-table-name"
+                };
+
+                let createField = createFieldFromJson(fieldJson);
+                createField.style.display = "flex";
+                createField.style.maxWidth = "180px";
+                createField.style.alignItems = "center";
+                createField.style.justifyContent = "space-between";
+                let childInput = createField.querySelector("input");
+
+                if (childInput) {
+                  childInput.value = val;
+                  childInput.style.maxWidth = "60px";
+                  childInput.style.marginLeft = "8px";
+                  childInput.readOnly = true;
+                }
+                fieldContainer.appendChild(createField);
+              });
+            }
+          }
+        }
+
+        // Initial setup
+        setupSubFields(fieldValue, fieldId, data?.data);
+      } else if (fieldType === "combo_array") {
+        let fieldvalues = input.getAttribute("dataset-field-values");
+        handleSelectFieldWeb(input, fieldvalues, fieldValue);
+      } else if (fieldType === "combo_sql") {
+        let fieldSQL = input.getAttribute("dataset-field-SQL");
+        handleSelectFieldSQLWeb(input, fieldSQL, fieldLabel);
+      } else {
+        if (!fieldValue) return;
+        input.value = fieldValue.toString().trim();
+        input.disabled = false;
+      }
+
+      dataset.parentElement.querySelector("[name=SaveDSBtn]").disabled = false;
     });
   });
+}
+
+async function handleSelectFieldSQLWeb(input, SQL, fieldLabel, selectedValue) {
+  if (!input) return;
+  // Check if a select element already exists, else create it
+  let selectElement = input.parentElement.querySelector("select");
+  let apiUrl = input.getAttribute("apiUrl");
+  if (!selectElement) {
+    if (!apiUrl) return;
+    const data = await callApi(SQL, "GET");
+    if (!data) return;
+    // convert the options to an array by fieldLabel
+    let options = data?.map((row) => row[fieldLabel]);
+    selectElement = document.createElement("select");
+    // Add options to the select element
+    options.forEach((option) => {
+      const optionElement = document.createElement("option");
+      if (typeof option === "object") {
+        optionElement.value = option.value;
+        optionElement.text = option.text;
+      } else {
+        optionElement.value = option;
+        optionElement.text = option;
+      }
+      selectElement.appendChild(optionElement);
+    });
+    selectElement.setAttribute(
+      "dataset-field-name",
+      input.getAttribute("dataset-field-name")
+    );
+    selectElement.name = input.name;
+    selectElement.className = input.className;
+    input.parentElement.appendChild(selectElement);
+    input.style.display = "none"; // Hide the original input
+
+    // Add an event listener to sync the select value with the hidden input field
+    selectElement.addEventListener("change", () => {
+      input.value = selectElement.value; // Update the hidden input with the select's value
+      input.dispatchEvent(new Event("input")); // Trigger input event for change detection
+    });
+    // Set the value of the select element
+    selectElement.value = selectedValue || "";
+    selectElement.disabled = true;
+    // Enable the select field
+    // Initially sync the input field with the selected value
+    input.value = selectElement.value || "";
+    input.dispatchEvent(new Event("input")); // Trigger input event for change detection
+  }
+  // Set the value of the select element
+  selectElement.value = selectedValue || "";
+  selectElement.disabled = true;
+  // Enable the select field
+  // Initially sync the input field with the selected value
+  input.value = selectElement.value || "";
+  input.dispatchEvent(new Event("input")); // Trigger input event for change detection
+}
+
+function handleSelectFieldWeb(input, options, selectedValue) {
+  if (!input) return;
+  // Convert the options to an array
+  options = options.split(",");
+  // Check if a select element already exists, else create it
+  let selectElement = input.parentElement.querySelector("select");
+  if (!selectElement) {
+    selectElement = document.createElement("select");
+    // Add options to the select element
+    options.forEach((option) => {
+      const optionElement = document.createElement("option");
+      optionElement.value = option;
+      optionElement.text = option;
+      // Set the selected attribute if the option matches the selectedValue
+      if (option === selectedValue) {
+        optionElement.selected = true; // Mark this option as selected
+      }
+
+      selectElement.appendChild(optionElement);
+    });
+
+    // Set attributes for the select element
+    selectElement.setAttribute(
+      "dataset-field-name",
+      input.getAttribute("dataset-field-name")
+    );
+    selectElement.name = input.name;
+    selectElement.className = input.className;
+
+    // Append the select element to the DOM and hide the original input
+    input.parentElement.appendChild(selectElement);
+    input.style.display = "none"; // Hide the original input
+  }
+
+  // Add an event listener to sync the select value with the hidden input field
+  selectElement.addEventListener("change", () => {
+    input.value = selectElement.value; // Update the hidden input with the select's value
+    input.dispatchEvent(new Event("input")); // Trigger input event for change detection
+  });
+
+  // Explicitly set the select element's value to the selectedValue
+  selectElement.value = selectedValue || "";
+
+  // Initially sync the input field with the selected value
+  input.value = selectElement.value || "";
+  input.dispatchEvent(new Event("input")); // Trigger input event for change detection
 }
 
 function getFieldValue(fieldData, data, row) {
