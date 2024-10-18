@@ -256,9 +256,6 @@ function createFieldFromJson(fieldJson) {
 // --- internal functions ---
 
 function createNavigationBar(DBName, tableName, datasetFields) {
-  //  console.log("createNavigationBar");
-  //  console.log(DBName);
-
   // Create the navigation bar div
   var navigationBar = document.createElement("div");
   navigationBar.id = "navigationBar_" + tableName;
@@ -526,7 +523,11 @@ function CopyRecord(DBName, tableName, datasetFields) {
   const main = document.getElementById(idObject.dataSet);
   const exceptionData = JSON.parse(main.getAttribute("exceptionSet"));
   const exceptionFieldNames = exceptionData.map((field) => field.fieldName);
+
   inputs.forEach((input) => {
+    if (input.id && input.id.includes("__")) {
+      return;
+    }
     input.readOnly = false; // Make input editable
     const field = input.getAttribute("dataset-field-name");
     input.setAttribute("value", "new"); // Set all non-exception inputs to "new"
@@ -549,15 +550,12 @@ function CopyRecord(DBName, tableName, datasetFields) {
   });
 }
 
-function navigateSequence(DBName, tabelName, sequenceName) {
-  const url = `/next-sequence/${DBName}/${tabelName}/${sequenceName}`;
+async function navigateSequence(DBName, tableName, sequenceName) {
+  const url = `/next-sequence/${DBName}/${tableName}/${sequenceName}`;
   try {
-    const response = fetch(url);
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
-    const data = response.json();
-    return data[0].sequence_next;
+    const response = await fetch(url);
+    const data = await response.json();
+    return data[0]?.sequence_next; // Return the desired sequence
   } catch (error) {
     console.error("Error:", error);
     throw error;
@@ -621,6 +619,7 @@ async function updateInputs(data, DBName, tableName) {
               (item) =>
                 item === true || item === false || item == 0 || item == 1
             );
+            input.value = data[0][fieldLabel];
 
             input.style.display = "none"; // Hide the original input
             let fieldId = input.getAttribute("data-field-name");
@@ -667,8 +666,6 @@ async function updateInputs(data, DBName, tableName) {
                   // Create label for the checkbox
                   let label = document.createElement("label");
                   label.htmlFor = `checkbox_${index}`;
-                  console.log("labels");
-                  console.log(labels);
                   label.innerText =
                     labels[index] === undefined || labels[index] === "undefined"
                       ? input.getAttribute("dataset-field-name") + "__" + index
@@ -677,7 +674,7 @@ async function updateInputs(data, DBName, tableName) {
                   // Create checkbox
                   let checkbox = document.createElement("input");
                   checkbox.type = "checkbox";
-                  checkbox.id = `checkbox_${index}`; // Give each checkbox a unique id
+                  checkbox.id = `${fieldLabel}__checkbox_${index}`; // Give each checkbox a unique id
                   checkbox.checked = val != 0; // Set checked based on value (1 or 0)
                   checkbox.style.marginLeft = "1px"; // Spacing between checkbox and label
 
@@ -687,10 +684,10 @@ async function updateInputs(data, DBName, tableName) {
                     data[0][fieldLabel] = subField.join(";");
                     input.value = data[0][fieldLabel];
                     input.disabled = false;
-                    console.log(
-                      `Updated data for ${fieldLabel}:`,
-                      data[0][fieldLabel]
-                    );
+                    // console.log(
+                    //   `Updated data for ${fieldLabel}:`,
+                    //   data[0][fieldLabel]
+                    // );
                     renderSubFields(
                       input,
                       subField,
@@ -778,8 +775,11 @@ async function updateInputs(data, DBName, tableName) {
                 createField.style.alignItems = "center";
                 createField.style.justifyContent = "space-between";
                 let childInput = createField.querySelector("input");
+                const fieldLabel = input.getAttribute("dataset-field-name");
 
                 if (childInput) {
+                  childInput.id = `${fieldLabel}__childInput_${index}`; // Give each checkbox a unique id
+
                   childInput.value = val;
                   childInput.style.maxWidth = "60px";
                   childInput.style.marginLeft = "8px";
@@ -1063,8 +1063,7 @@ async function SaveRecord(DBName, tableName) {
         const rowIdValue = nextRowId.value;
         let result;
         if (rowIdValue === "new") {
-          let data = CreateInsert(DBName, tableName);
-
+          let data = await CreateInsert(DBName, tableName);
           result = await insertRecordDB(DBName, tableName, data);
         } else {
           const data = {
@@ -1082,7 +1081,7 @@ async function SaveRecord(DBName, tableName) {
 }
 
 // create insert data structure
-function CreateInsert(DBName, tableName) {
+async function CreateInsert(DBName, tableName) {
   // create data for insert following this structure  `INSERT INTO ${tableName} (${data.fields}) VALUES (${data.values})`;
   // return data with data.fields and data.values
   const inputs = document.querySelectorAll(`#DataSet_${tableName} input`);
@@ -1090,6 +1089,9 @@ function CreateInsert(DBName, tableName) {
   var insertValues = "";
   for (i = 0; i < inputs.length; i++) {
     console.log(inputs[i].type);
+    if (inputs[i].id && inputs[i].id.includes("__")) {
+      continue; // Skip this iteration
+    }
     switch (inputs[i].type) {
       case "hidden":
         break;
@@ -1104,7 +1106,11 @@ function CreateInsert(DBName, tableName) {
           console.log(sequence);
           console.log(inputs[i]);
           let tabelName = inputs[i].getAttribute("dataset-table-name");
-          let sequenceValue = navigateSequence(DBName, tabelName, sequence);
+          let sequenceValue = await navigateSequence(
+            DBName,
+            tabelName,
+            sequence
+          );
           inputs[i].value = sequenceValue;
           insertValues += `'${sequenceValue}'`;
         } else {
@@ -1116,8 +1122,16 @@ function CreateInsert(DBName, tableName) {
         } // end if i
         break;
     } // end switch
+
     inputs[i].readOnly = true;
   } // end for
+
+  if (insertFields.endsWith(",")) {
+    insertFields = insertFields.slice(0, -1); // Remove last comma
+  }
+  if (insertValues.endsWith(",")) {
+    insertValues = insertValues.slice(0, -1); // Remove last comma
+  }
 
   return { fields: insertFields, values: insertValues };
 }
