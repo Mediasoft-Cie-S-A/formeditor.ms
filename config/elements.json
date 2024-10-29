@@ -167,6 +167,16 @@
     "styles": "qrcodeScanner.css",
     "icon": "fa fa-qrcode"
   },
+  "menuComponent": {
+    "type": "menuComponent",
+    "description": "Menu Component",
+    "category": "UI",
+    "scriptName": "menuComponent.js",
+    "createFunction": "createMenuComponent",
+    "editFunction": "editMenuComponent",
+    "styles": "menuComponent.css",
+    "icon": "fa fa-bars"
+},
   "Tab": {
     "type": "Tab",
     "description": "Tab",
