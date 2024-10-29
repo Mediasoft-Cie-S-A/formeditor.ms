@@ -1255,3 +1255,22 @@ input.apple-switch:checked:after {
     
     overflow-y: auto;
   }
+
+  .filter-item{
+    padding: 5px;
+    border: none;
+    border-radius: 0px;
+    cursor: pointer;
+    transition: 0.5s;    
+    box-shadow: none;  
+    border-bottom: 1px solid #ccc;
+    
+  }
+
+  .filter-item:nth-child(odd) {
+    background-color: white;
+  }
+
+  .filter-item:nth-child(even) {
+        background-color: #F1d4aA 
+    }

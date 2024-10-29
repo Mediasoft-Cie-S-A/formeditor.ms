@@ -687,13 +687,17 @@ class dblayer{
                 // Get the fields from the query string. It's a comma-separated string.
                 const fields = req.query.fields ? req.query.fields.split(",") : null;
                 const filter = req.query.filter ? req.query.filter : null;
-                console.log("filter", filter);
+            
+                // decode the json filter              
+                const filterObj = filter ? JSON.parse(filter): null;
+                
+          
                 const data = await db.queryDataWithPagination(
                   tableName,
                   pageNum,
                   pageSizeNum,
                   fields,
-                  filter
+                  filterObj
                 );
                 res.json(data);
                 await db.close();
