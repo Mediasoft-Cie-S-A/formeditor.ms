@@ -5,7 +5,7 @@
     "category": "Web Server",
     "scriptName": "dataSetComponentWebNavigate.js",
     "createFunction": "createDataSetComponentWebNavigate",
-    "styles": "dataSearch.css",
+    "styles": "dataSetComponentWebNavigate.css",
     "icon": "fa fa-compass"
   },
   "dataSetWeb": {
@@ -44,6 +44,7 @@
     "category": "Bussiness  Logic",
     "scriptName": "dataSetComponentNavigate.js",
     "createFunction": "createDataSetComponentNavigate",
+    "styles": "dataSetComponentNavigate.css",
     "icon": "fa fa-compass"
   },
   "dataSet": {
@@ -176,7 +177,7 @@
     "editFunction": "editMenuComponent",
     "styles": "menuComponent.css",
     "icon": "fa fa-bars"
-},
+  },
   "Tab": {
     "type": "Tab",
     "description": "Tab",
