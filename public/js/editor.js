@@ -429,6 +429,8 @@ function dropInput(event, id) {
   if (target.type == "text") {
     target.setAttribute("data-field", JSON.stringify(fieldJson));
     target.value = fieldName;
+    // similate the change event
+    target.dispatchEvent(new Event("change"));
   } else {
     // Otherwise, pass the fieldJson to addFieldToPropertiesBar to create a new field
     addFieldToPropertiesBar(target, fieldJson);
@@ -950,4 +952,276 @@ function removeItem(event) {
   // set the height of the parent div
   dataObjet.style.height = height + 30 + "px";
   item.remove();
+}
+
+
+// filter 
+
+// Function to initialize the filter box
+function createFilterBox(main) {
+    var div = document.createElement("div");
+    div.id = 'filterBox';
+    
+    var lbl = document.createElement("label");
+    lbl.setAttribute("for", div.id);
+    lbl.textContent = "Filter:";
+    div.appendChild(lbl);
+
+    // Add button to add a new filter
+    var addButton = document.createElement("button");
+    addButton.innerHTML = '<i class="fa fa-plus"></i>';
+    addButton.onclick = function() {
+        const filterBoxContainer = main.querySelector('#filterBoxContainer');
+        filterBoxContainer.appendChild(createFilterField(main));
+    };
+    div.appendChild(addButton);
+
+    // Clear button for the filter with icon
+    var clearButton = document.createElement("button");
+    clearButton.innerHTML = '<i class="fa fa-trash"></i>';
+    clearButton.onclick = function() {
+        const chart = document.getElementById(main.getAttribute("elementId"));
+        chart.removeAttribute("filter");
+        const filterBoxContainer = main.querySelector('#filterBoxContainer');
+        filterBoxContainer.innerHTML = '';
+        const viewSelect = main.querySelector('#viewSelect');
+        switchView(event, main, viewSelect.value);
+    };
+    div.appendChild(clearButton);
+
+    // Create container for the filter box
+    const filterBoxContainer = document.createElement('div');
+    filterBoxContainer.id = 'filterBoxContainer';
+
+    // Create the view select dropdown
+    const viewSelect = document.createElement('select');
+    viewSelect.id = 'viewSelect';
+    ['standard', 'advanced'].forEach(view => {
+        const option = new Option(view, view);
+        viewSelect.options.add(option);
+    });
+
+    // Append the view select to the container
+    div.appendChild(viewSelect);
+
+    // Event listener for changing views
+    viewSelect.addEventListener('change', function(event) {
+        switchView(event, main, this.value);
+    });
+    div.appendChild(filterBoxContainer);
+
+    // Create button to apply filter
+    const generateJsonBtn = document.createElement('button');
+    generateJsonBtn.textContent = 'Apply';
+    generateJsonBtn.setAttribute("onclick", "generateJson(event)");
+    div.appendChild(generateJsonBtn);
+
+    return div;
+}
+
+// Function to create individual filter fields
+function createFilterField(main) {
+    const container = document.createElement('div');
+    container.className = 'filterField';
+
+    const textField = document.createElement('input');
+    textField.placeholder = 'Field';
+    textField.name = 'field';
+    textField.setAttribute('ObjectType', 'filters');
+    textField.setAttribute('ondragover', 'allowDrop(event)');
+    textField.setAttribute('ondrop', 'dropInput(event)');
+
+    container.appendChild(textField);
+
+    // Create and append input fields based on view
+    const viewSelect = main.querySelector('#viewSelect').value;
+    if (viewSelect === 'standard') {
+        const multiSelect = document.createElement('select');
+        multiSelect.multiple = true;
+        multiSelect.className = '';
+
+        textField.addEventListener('change', function(event) {
+            const datafield = JSON.parse( this.getAttribute('data-field'));
+            const DBName = datafield.DBName;
+            const tableName = datafield.tableName;
+            const fieldName = datafield.fieldName;
+            const url= `/select-distinct/${DBName}/${tableName}/${fieldName}`;
+        //    const url = '/getDatasetDataDistinct/' + dataset + '/' + this.value;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    multiSelect.innerHTML = '';
+                    data.forEach(value => {
+                        var opt = document.createElement('option');
+                        opt.className = 'filter-item';
+                        opt.value = value[fieldName];
+                        opt.innerHTML = value[fieldName];
+                        multiSelect.appendChild(opt);
+                    });
+
+                    
+                });
+        });
+
+        container.appendChild(multiSelect); 
+    } else if (viewSelect === 'advanced') {
+        const operatorSelect = document.createElement('select');
+        ['=', '!=', '<', '>', '>=', '<='].forEach(op => {
+            const option = new Option(op, op);
+            operatorSelect.options.add(option);
+        });
+
+        const valueInput = document.createElement('input');
+        valueInput.placeholder = 'Value';
+
+        container.appendChild(operatorSelect);
+        container.appendChild(valueInput);
+    }
+
+    return container;
+}
+
+// Function to switch views
+function switchView(event, main, view) {
+    event.preventDefault();
+    const container = main.querySelector('#filterBoxContainer');
+    container.innerHTML = '';
+
+    const addFilterField = createFilterField(main);
+    container.appendChild(addFilterField);
+}
+  
+ // Function to collect data and generate JSON
+function generateJson(event) {
+    event.preventDefault();
+    console.log("generateJson");
+    // get the main element
+   
+    
+   
+    const viewSelect = event.target.parentNode.parentNode.querySelector('#viewSelect');
+   
+    if (!viewSelect) return;
+    
+    const view = viewSelect.options[viewSelect.selectedIndex].value;
+    let filterInfo = { view: view, filters: [] };
+    
+    const filterFields = event.target.parentNode.parentNode.querySelectorAll('#filterBoxContainer .filterField');
+
+ 
+
+    filterFields.forEach(filterField => {
+       
+        const fieldInput = filterField.querySelector('input[name="field"]');
+        const dataType = fieldInput.getAttribute('dataType');
+        
+        if (view === 'standard') {
+            const multiSelect = filterField.querySelector('select');
+          
+            const selectedOptions = Array.from(multiSelect.selectedOptions).map(option => option.value);
+            let filterValues = [];
+            datafield = JSON.parse( fieldInput.getAttribute('data-field'));
+            console.log(selectedOptions);
+            switch (datafield.fieldDataType) {
+                case 'string':
+                    filterValues = selectedOptions;
+                    break;
+                case 'number':
+                    filterValues = selectedOptions.map(option => parseFloat(option));
+                    break;
+                case 'date':
+                    filterValues = selectedOptions.map(option => new Date(option));
+                    break;
+                default:
+                    filterValues = selectedOptions;
+                    break;
+            }
+
+           
+
+            filterInfo.filters.push({
+                field: datafield.fieldName,
+                DBName: datafield.DBName,
+                type: datafield.fieldDataType,
+                operator: '',
+                value: '',
+                values: filterValues
+            });
+
+        } else if (view === 'advanced') {
+            const operatorSelect = filterField.querySelector('select');
+            const valueInput = filterField.querySelector('input[placeholder="Value"]');
+            let value = null;
+
+            switch (dataType) {
+                case 'string':
+                    value = valueInput.value;
+                    break;
+                case 'number':
+                    value = parseFloat(valueInput.value);
+                    break;
+                case 'date':
+                    value = new Date(valueInput.value);
+                    break;
+            }
+
+            filterInfo.filters.push({
+                field: fieldInput.value,
+                DBName: fieldInput.getAttribute('DBName'),
+                type: dataType,
+                operator: operatorSelect.value,
+                value: value,
+                values: []
+            });
+        }
+    });
+
+     // Display the JSON for demonstration purposes
+   //  console.log(JSON.stringify(filterInfo));
+    const propertiesBar = document.getElementById("propertiesBar");
+    // get id of the element
+    const element = document.getElementById( propertiesBar.querySelector("label").innerText);
+    // console.log(element);
+    element.setAttribute("filter", JSON.stringify(filterInfo));
+
+    // Here you could also send the JSON to a server, save it, or use it in some other way
+    // For example:
+    // fetch('/api/filters', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(filterInfo) });
+}
+
+ // Function to regenerate filters from JSON
+function regenerateFilters(content, filterConfig) {
+    if (!filterConfig) return;
+    switchView(event, content, filterConfig.view); // Ensure the correct view is set
+    
+    if (!filterConfig.filters) return;
+
+    if (filterConfig.filters.length > 0) {
+        filterConfig.filters.forEach(filter => {
+            const filterBoxContainer = content.querySelector('#filterBoxContainer');
+            const filterField = createFilterField(content);
+            filterBoxContainer.appendChild(filterField);
+            
+            const textField = filterField.querySelector('input[name="field"]');
+            textField.value = filter.field;
+            textField.setAttribute('dataType', filter.type);
+            textField.setAttribute('dataset', filter.dataset);
+
+            if (filterConfig.view === 'standard') {
+                const multiSelect = filterField.querySelector('select');
+                textField.dispatchEvent(new Event('input')); // Trigger input event to populate options
+                setTimeout(() => {
+                    filter.values.forEach(val => {
+                        for (let option of multiSelect.options) {
+                            if (option.value === val) option.selected = true;
+                        }
+                    });
+                }, 1000); // Adjust timeout as needed to ensure options are populated
+            } else if (filterConfig.view === 'advanced') {
+                filterField.querySelector('select').value = filter.operator;
+                filterField.querySelector('input[placeholder="Value"]').value = filter.value;
+            }
+        });
+    }
 }

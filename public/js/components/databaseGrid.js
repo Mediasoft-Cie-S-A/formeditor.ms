@@ -39,18 +39,7 @@ function editDatabaseGrid(type, element, content) {
   content.appendChild(createMultiSelectItem("Data", "data", "data"));
   content.appendChild(createMultiSelectItem("Link", "link", "link"));
 
-  content.appendChild(
-    createSelectItem(
-      "Filter",
-      "filter",
-      "filter",
-      element.getAttribute("filter"),
-      "text",
-      true
-    )
-  );
-
-  // load the data
+    // load the data
   // check if jsonData is not empty
   if (element.getAttribute("datasetgrid") != null) {
     var target = content.querySelector("#Data");
@@ -67,7 +56,16 @@ function editDatabaseGrid(type, element, content) {
       addFieldToPropertiesBar(target, fieldJson);
     });
   }
-}
+  
+  var filter = createFilterBox(content);
+  element.setAttribute("filter", JSON.stringify(filter));
+  content.appendChild(filter);
+
+  // Initialize with the standard view
+  switchView(event, content, 'standard');
+  regenerateFilters(content, JSON.parse(element.getAttribute("filter")));
+
+} // editDatabaseGrid
 
 function updateGridData(main, content) {
   console.log("updateGridData");
@@ -385,10 +383,13 @@ async function gridGetData(
   datasetFields,
   filter
 ) {
+  console.log(grid.parentElement);
+   const filterJSON=JSON.parse(grid.parentElement.getAttribute("filter"));
+  console.log("filter:"+filter);
   //get body form the table
   const body = grid.querySelector(".grid-body");
   // Prepare the URL
-  const url = `/table-data/${DBName}/${tableName}/${page}/${pageSize}?fields=${datasetFields}&filter=${filter}`;
+  const url = `/table-data/${DBName}/${tableName}/${page}/${pageSize}?fields=${datasetFields}&filter=${encodeURIComponent(JSON.stringify(filterJSON))}`;
   // Fetch the data from the web service
   try {
     const response = await fetch(url);

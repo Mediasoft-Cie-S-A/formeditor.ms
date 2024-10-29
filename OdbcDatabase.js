@@ -197,40 +197,6 @@ class OdbcDatabase {
       //with field name and value separated by | and each filter separated by ,
       // and build the query where clause
 
-      // if filter is not empty, add it to the query
-      if (filter && filter.length > 0) {
-        filter = filter
-          .split(",")
-          .map((f) => {
-            const [fieldName, op, value] = f.split("|");
-            switch (op) {
-              case "eq":
-                return `${fieldName} = '${value}'`;
-              case "ne":
-                return `${fieldName} != '${value}'`;
-              case "lt":
-                return `${fieldName} < '${value}'`;
-              case "le":
-                return `${fieldName} <= '${value}'`;
-              case "gt":
-                return `${fieldName} > '${value}'`;
-              case "ge":
-                return `${fieldName} >= '${value}'`;
-              case "like":
-                return `${fieldName} like '%${value}%'`;
-              case "notlike":
-                return `${fieldName} not like '%${value}%'`;
-              case "in":
-                return `${fieldName} in (${value})`;
-              case "notin":
-                return `${fieldName} not in (${value})`;
-              default:
-                return `${fieldName} like '%${value}%'`;
-            }
-          })
-          .join(" AND ");
-      }
-
       if (fields && fields.length > 0) {
         // Construct the SQL query based on the fields provided by fieldList and adding "" to the field name
         const fieldList = fields
@@ -240,8 +206,9 @@ class OdbcDatabase {
         const offset = (page - 1) * pageSize;
 
         var paginatedQuery = `select  ${fieldList} FROM PUB."${tableName}"`;
-        if (filter && filter.length > 0) {
-          paginatedQuery += ` WHERE ${filter} `;
+        if (filter ) {
+          console.log("filter", filter);
+          paginatedQuery += this.jsonToWhereClause(filter);
         }
         paginatedQuery += ` OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
         console.log(paginatedQuery);
@@ -254,6 +221,44 @@ class OdbcDatabase {
       throw err;
     }
   }
+
+   jsonToWhereClause(json) {
+    
+    let whereClause = '';
+    console.log("json ->", json);
+    if (json.filters) {
+     
+        let conditions = json.filters.map(filter => {
+            console.log(filter);
+            const { field, operator, value, values, type } = filter;
+            const dbField = field;
+
+            // If values array is present, use IN clause
+            if (values && values.length > 0) {
+                const formattedValues = values.map(val => 
+                    type === 'character' ? `'${val}'` : val
+                ).join(', ');
+                return `${dbField} IN (${formattedValues})`;
+            }
+            
+            // If single value, use operator directly
+            if (value && operator) {
+                const formattedValue = type === 'character' ? `'${value}'` : value;
+                return `${dbField} ${operator} ${formattedValue}`;
+            }
+            
+            return ''; // Return empty string if no valid condition found
+        });
+
+        // Join all conditions with AND
+        whereClause = conditions.filter(Boolean).join(' AND ');
+    }
+
+    return whereClause ? ` WHERE ${whereClause}` : '';
+}
+
+
+
 
   // CURSOR
 

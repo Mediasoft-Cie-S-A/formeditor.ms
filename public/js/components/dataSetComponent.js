@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-const e = require("express");
 
 function createElementDateSet(type) {
   var main = document.createElement("div");
