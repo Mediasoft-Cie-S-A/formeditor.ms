@@ -123,12 +123,8 @@ function renderGridWeb(main) {
   table.setAttribute("apiUrl", apiUrl);
   table.setAttribute("apiMethod", apiMethod);
   table.setAttribute("apiId", apiId);
-
-  createGridWeb(table, jsonData[0].apiName, datasetFields, datasetFieldsTypes);
-  main.appendChild(table);
-  // generate div for the dataset
   var datasetDiv = document.createElement("div");
-  datasetDiv.className = "dataset-container";
+  // datasetDiv.className = "dataset-container";
   datasetDiv.id = "DataSet_" + jsonData[0].apiName;
   datasetDiv.setAttribute("grid-id", table.id);
   main.appendChild(datasetDiv);
@@ -138,6 +134,9 @@ function renderGridWeb(main) {
     datasetFields,
     datasetFieldsTypes
   );
+  createGridWeb(table, jsonData[0].apiName, datasetFields, datasetFieldsTypes);
+  main.appendChild(table);
+  // generate div for the dataset
 }
 
 function insertNavBarWeb(
@@ -149,7 +148,7 @@ function insertNavBarWeb(
   // create search structure
   // search header
   var search = document.createElement("div");
-  search.style.display = "table";
+  search.style.display = "flex";
   var searchfields = document.createElement("select");
   searchfields.className = "input-element";
   searchfields.setAttribute("id", "searchfields");
@@ -188,21 +187,25 @@ function insertNavBarWeb(
   search.appendChild(input);
 
   var html = `<div class="right-panel">`;
-  html += `<div class="navigation-bar-title">Record: </div>`;
+  // html += `<div class="navigation-bar-title">Record: </div>`;
+  // <span style='font-size:8px'>Page Size:</span>
   html += search.outerHTML;
-  html += `<span style='font-size:8px'>Page Size:</span><select id="gridPage" class="input-element" onchange='grid_page_sizeWeb(event,"${gridContainer.parentElement.id}",searchfields.options[searchfields.options.selectedIndex].value,searchOperator.value)' style='width:60px;font-size:8px'>`;
-  html += `<option value='5'>5</option>`;
-  html += `<option value='10'>10</option>`;
-  html += `<option value='20'>20</option>`;
-  html += `<option value='50'>50</option>`;
-  html += `<option value='100'>100</option>`;
-  html += `</select>`; // record count
+  html += `<div style='display: flex; align-items: center; gap: 10px;'>`;
   html += `<button name='revGRIDBtn'  title='Previus Page'  grid-id='${gridContainer.parentElement.id}' onclick='gridPrevWeb(event,"${apiName}",searchfields.options[searchfields.options.selectedIndex].value,searchOperator.value)'><i class='bi bi-arrow-left-circle-fill' grid-id='${gridContainer.parentElement.id}'  style='color:blue;'></i></button>`;
   html += `<button name='NextGRIDBtn' title='Next Page'  grid-id='${gridContainer.parentElement.id}' onclick='gridNextWeb(event,"${apiName}",searchfields.options[searchfields.options.selectedIndex].value,searchOperator.value)'><i class='bi bi-arrow-right-circle-fill' grid-id='${gridContainer.parentElement.id}' style='color:blue;'></i></button>`;
   html += `<button name='RefreshGRIDBtn' title='Refresh'  grid-id='${gridContainer.parentElement.id}' onclick='refreshWeb(event,"${apiName}")'><i class='bi bi-arrow-repeat' grid-id='${gridContainer.parentElement.id}'  style='color:green;'></i></button>`;
   html += `<button name='PostitGRIDBtn' title='Postit'  grid-id='${gridContainer.parentElement.id}' onclick='postitWeb(event,"${apiName}")'><i class='bi bi-card-text' grid-id='${gridContainer.parentElement.id}' style='color:#aa0;'></i></button>`;
   html += `<button name='ExportGRIDBtn' title='Export Data'  grid-id='${gridContainer.parentElement.id}' onclick='export2CSVWeb(event,"${apiName}")'><i class='bi bi-file-spreadsheet' grid-id='${gridContainer.parentElement.id}' style='color:green;'></i></button></div>`;
   html += `<div id="Data-Grid-Postit" style="display:none;position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.5); z-index: 1000;"></div>`;
+  html += `<select id="gridPage" class="input-element" onchange='grid_page_sizeWeb(event,"${gridContainer.parentElement.id}",searchfields.options[searchfields.options.selectedIndex].value,searchOperator.value)' style='width:60px;font-size:14px'>`;
+  html += `<option value='5'>5</option>`;
+  html += `<option value='10'>10</option>`;
+  html += `<option value='20'>20</option>`;
+  html += `<option value='50'>50</option>`;
+  html += `<option value='100'>100</option>`;
+  html += `</select>`; // record count
+  html += `</div>`;
+
   html += "</div>";
 
   gridContainer.innerHTML += html;

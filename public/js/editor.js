@@ -503,6 +503,38 @@ function setOptionsByType(select, fieldDataType) {
   }
 }
 
+function setOptionsByTypeWeb(select, fieldDataType) {
+  // Define some options (this could be customized based on fieldDataType)
+  /* var options = [
+    "text",
+    "number",
+    "date",
+    "password",
+    "image",
+    "time",
+    "color",
+    "combobox",
+  ]; */
+
+  var options = ["text", "sequence", "array", "combo_array", "combo_web"];
+
+  // Clear any existing options in the select element
+  select.innerHTML = "";
+
+  // Populate the select dropdown with the options
+  options.forEach((option) => {
+    var opt = document.createElement("option");
+    opt.value = option;
+    opt.innerHTML = option;
+    select.appendChild(opt);
+  });
+
+  // Optionally, set the default selected value (based on fieldDataType)
+  if (options.includes(fieldDataType)) {
+    select.value = fieldDataType;
+  }
+}
+
 function createMultiSelectItem(id, label, styleProperty) {
   var div = document.createElement("div");
   div.style.display = "flex";
@@ -742,7 +774,7 @@ function addFieldToPropertiesBarWeb(target, fieldJson, isId) {
   }
   // get the datatype
 
-  setOptionsByType(select, fieldJson.fieldDataType);
+  setOptionsByTypeWeb(select, fieldJson.fieldDataType);
   // select the functionName in the function
   div.setAttribute("selectedValue", select.value);
   select.addEventListener("change", function () {
@@ -763,7 +795,7 @@ function addFieldToPropertiesBarWeb(target, fieldJson, isId) {
     switch (select.value) {
       case "combo_array":
       case "array":
-      case "combo_sql":
+      case "combo_web":
       case "sequence":
         var textarea = document.createElement("textarea");
         textarea.id = "Data";
@@ -796,8 +828,8 @@ function addFieldToPropertiesBarWeb(target, fieldJson, isId) {
             span.setAttribute("data-field", JSON.stringify(fieldJson));
           });
         }
-        if (select.value === "combo_sql") {
-          textarea.setAttribute("placeholder", "Enter Sql Query, id, value");
+        if (select.value === "combo_web") {
+          textarea.setAttribute("placeholder", "Enter the url");
           // set the textarea vaule from fieldSQL if exists
           if (fieldJson.fieldSQL) {
             textarea.value = fieldJson.fieldSQL;
