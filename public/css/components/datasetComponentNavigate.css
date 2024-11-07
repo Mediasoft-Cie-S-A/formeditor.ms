@@ -1,0 +1,18 @@
+.navigation-bar {
+  float: right;
+  width: 10%;
+  height: 100%;
+  align-items: right;
+  vertical-align: top;
+  border: none;
+  border-left: 1px solid silver;
+  inset: 2px 0px 0px 0px;
+}
+
+.navigation-bar-title {
+  font-size: 8px;
+  font-weight: bold;
+  text-align: center;
+  border-bottom: 1px solid silver;
+  width: 100%;
+}
