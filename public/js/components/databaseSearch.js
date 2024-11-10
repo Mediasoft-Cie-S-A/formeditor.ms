@@ -99,8 +99,15 @@ function RenderDataSearch(main) {
     html += " data-value-field-type='" + field.fieldType + "'";
     html +=
       ' onclick=\'this.parentElement.querySelector(".autocomplete-results").style.display="none"\'>';
-    html += " <button type='button' onclick='gridSearch(event)'>";
+    html += " <button type='button' onclick='gridSearch(event)' >";
+
     html += "<i class='fas fa-search'></i> </button>";
+    // button to clear the search
+    html +=
+      "<button type='button' onclick='document.getElementById(\"search_" +
+      field.tableName +
+      "_input\").value=\"\";'  >";
+    html += "<i class='fas fa-times'></i> </button>";
     html +=
       "<div id='search_" +
       field.tableName +
@@ -148,29 +155,17 @@ function gridSearch(event) {
   // get all the grid div with attribute tagname=dataGrid
   let idObject = getIdObject();
   if (idObject?.dataGrid) {
-    let filter = filedName + "|" + operator + "|" + searchValue;
     const gridDiv = document.getElementById(idObject.dataGrid);
-    gridDiv.setAttribute("filter", filter);
-    gridDiv.setAttribute("filedName", filedName);
-    gridDiv.setAttribute("operator", operator);
-    gridDiv.setAttribute("searchValue", searchValue);
+    
     searchGrid(DBName, filedName, operator, searchValue, idObject.dataGrid);
   }
 
-  if (idObject?.dataSet) {
-    const main = document.getElementById(idObject.dataSet);
-    let datasetFields = main.getAttribute("DataSet-Fields-List");
-    var jsonData = JSON.parse(main.getAttribute("dataSet"));
-    let tableName = jsonData[0].tableName;
-    let filter = filedName + "|" + operator + "|" + searchValue;
-    main.setAttribute("filter", filter);
-
-    navigateRecords("move-to-first", DBName,tableName, datasetFields, "", filter);
-  }
+  
 }
 // searchAutoComplete that call the search function "/select-distinct/:tableName/:fieldName" and display the result in the autocomplete div
 function searchAutoComplete(event, element) {
   event.preventDefault();
+  const DBName = element.getAttribute("data-value-DBName");
   const tableName = element.getAttribute("data-value-table-name");
   const fieldName = element.getAttribute("data-value-field-name");
   const fieldType = element.getAttribute("data-value-field-type");
@@ -180,13 +175,17 @@ function searchAutoComplete(event, element) {
   const searchValue = element.value.trim();
   var url =
     "/select-distinct-idvalue/" +
+    DBName +
+    "/" +
     tableName +
     "/" +
     fieldName +
     "?id=" +
     fieldName;
+    const isWhitespaceString = str => !str.replace(/\s/g, '').length
+    console.log(isWhitespaceString(searchValue))
   // generate filter from searchValue if fieldType is text with openedge syntax
-  if (searchValue.length > 3) {
+  if (searchValue.length > 2 && !isWhitespaceString(searchValue)) {
     switch (fieldType) {
       case "character":
         url = url + "&filter=" + fieldName + " like '%" + searchValue + "%'";
@@ -203,41 +202,43 @@ function searchAutoComplete(event, element) {
       default:
         url = url + "&filter=" + fieldName + " like '%" + searchValue + "%'";
     }
-  }
-  fetch(url)
-    .then((response) => response.json())
-    .then((data) => {
-      autocomplete.innerHTML = "";
-      autocomplete.setAttribute(
-        "style",
-        "display:block;top:" +
-          (parseInt(getAbsoluteOffset(element).top) +
-            parseInt(element.offsetHeight)) +
-          "px;width:" +
-          element.offsetWidth +
-          "px;"
-      );
+  
+      fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+          autocomplete.innerHTML = "";
+          autocomplete.setAttribute(
+            "style",
+            "display:block;top:" +
+              (parseInt(getAbsoluteOffset(element).top) +
+                parseInt(element.offsetHeight)) +
+              "px;width:" +
+              element.offsetWidth +
+              "px;"
+          );
 
-      data.forEach((row) => {
-        var rowDiv = document.createElement("div");
-        rowDiv.className = "autocomplete-row";
-        rowDiv.setAttribute("data-value-table-name", tableName);
-        rowDiv.setAttribute("data-value-field-name", fieldName);
-        rowDiv.setAttribute("data-value-field-type", fieldType);
-        rowDiv.addEventListener("click", function (event) {
-          event.preventDefault();
+          data.forEach((row) => {
+            var rowDiv = document.createElement("div");
+            rowDiv.className = "autocomplete-row";
+            rowDiv.setAttribute("data-value-DBName", DBName);
+            rowDiv.setAttribute("data-value-table-name", tableName);
+            rowDiv.setAttribute("data-value-field-name", fieldName);
+            rowDiv.setAttribute("data-value-field-type", fieldType);
+            rowDiv.addEventListener("click", function (event) {
+              event.preventDefault();
 
-          element.value = row[fieldName];
-          autocomplete.style.display = "none";
+              element.value = row[fieldName];
+              autocomplete.style.display = "none";
+            });
+
+            rowDiv.innerHTML = row[fieldName];
+            autocomplete.appendChild(rowDiv);
+          });
+        })
+        .catch((error) => {
+          console.error(error);
         });
-
-        rowDiv.innerHTML = row[fieldName];
-        autocomplete.appendChild(rowDiv);
-      });
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+   }
 }
 
 function getAbsoluteOffset(element) {

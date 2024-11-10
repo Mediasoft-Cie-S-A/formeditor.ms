@@ -337,57 +337,15 @@ async function getRecords(action, DBName, tableName, datasetFields) {
   }
 }
 
-function CopyRecord(DBName, tableName, datasetFields) {
-  const inputs = document.querySelectorAll(`#DataSet_${tableName} input`);
-  const selects = document.querySelectorAll(`#DataSet_${tableName} select`);
-  const idObject = getIdObject();
-  const main = document.getElementById(idObject.dataSet);
-  const exceptionData = JSON.parse(main.getAttribute("exceptionSet"));
-  const exceptionFieldNames = exceptionData.map((field) => field.fieldName);
 
-  inputs.forEach((input) => {
-    if (input.id && input.id.includes("__")) {
-      return;
-    }
-    input.readOnly = false; // Make input editable
-    const field = input.getAttribute("dataset-field-name");
-    input.setAttribute("value", "new"); // Set all non-exception inputs to "new"
 
-    if (exceptionFieldNames.includes(field) && field !== "rowid") {
-      input.value = ""; // Clear the value for exception fields
-    }
-  });
-
-  // Process all select fields
-  selects.forEach((select) => {
-    const field = select.getAttribute("dataset-field-name");
-
-    // If the select field is in the exception list and not "rowid"
-    if (exceptionFieldNames.includes(field) && field !== "rowid") {
-      select.selectedIndex = -1; // Clear the selection for exception fields
-    } else {
-      select.selectedIndex; // Set to the first option or a default value
-    }
-  });
-}
-
-async function navigateSequence(DBName, tableName, sequenceName) {
-  const url = `/next-sequence/${DBName}/${tableName}/${sequenceName}`;
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
-    return data[0]?.sequence_next; // Return the desired sequence
-  } catch (error) {
-    console.error("Error:", error);
-    throw error;
-  }
-}
 
 // link record to grid using this web service /get-record-by-rowid/:tableName/:rowID and update the inputs with the data
 // use the fetch function to call the web service and update the inputs with the data
 // use the updateInputs function to update the inputs with the data
 // use the setRowID function to set the current row id in the navigation bar
 async function linkRecordToGrid(DBName, tableName, rowId, rowNum) {
+  document.querySelector("[name=SaveDSBtn]").disabled = true;
   try {
     // get all the datasets
     const datasets = document.querySelectorAll("#DataSet_" + tableName);
@@ -432,7 +390,7 @@ async function updateInputs(data, DBName, tableName) {
         const fieldType = input.getAttribute("type");
         input.value = "";
         input.disabled = true;
-
+        input.readOnly = true;
         switch (fieldType) {
           case "array":
             let subField = data[0][fieldLabel]?.toString().trim().split(";");

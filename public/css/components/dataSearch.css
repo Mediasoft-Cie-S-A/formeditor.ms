@@ -2,7 +2,7 @@
 /* Style the search field */
 .searchMain{
   display: inline-block;
-  max-width: 400px;
+  max-width: 500px;
 }
 .search{
   display: inline-block;
@@ -11,6 +11,7 @@
   padding: 10px;
   border-radius: 5px;
   border: 1px solid #ccc;
+
 }
 
 .search label{
@@ -23,7 +24,7 @@
     font-size: 17px;
     border: none;
     float: left;
-    width: 80%;
+    width: 70%;
     background: white;
     border-right: none; /* Prevent double borders */
     border-radius: 5px 0 0 5px;
@@ -38,8 +39,8 @@
   /* Style the submit button */
  .search button {
     float: left;
-    width: 40px;
-    height: 40px;
+    width: 13%;
+   
     padding: 10px;
     background: #4d61fc;
     color: white;

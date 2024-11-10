@@ -4,122 +4,63 @@ function createDataSetComponentNavigate(type) {
   main.id = type + Date.now();
   main.draggable = true;
   main.tagName = type;
+  renderNavigationBar(main);
   return main;
 }
 
-function createNavigationBar(DBName, tableName, datasetFields) {
-  const ides = getIdObject();
-  const main = document.getElementById(ides.dataSetNavigation);
+function renderNavigationBar(main) {
+ 
   // Create the navigation bar div
   var navigationBar = document.createElement("div");
-  navigationBar.id = "navigationBar_" + tableName;
+  navigationBar.id = "navigationBar_" + Date.now();
   navigationBar.type = "navigation-bar";
   //   navigationBar.className = "navigation-bar";
   navigationBar.style.display = "block";
-  navigationBar.setAttribute("DBName", DBName);
-  navigationBar.setAttribute("data-table-name", tableName);
-  navigationBar.setAttribute("data-current-row", "0");
-  navigationBar.setAttribute("data-dataset-fields", datasetFields);
-  navigationBar.innerHTML = '<div class="navigation-bar-title">record: </div>';
-
+  
   // Create buttons and append them to the navigation bar
   var buttons = [
-    {
-      name: "firstDSBtn",
-      title: "First",
-      text: '<i class="bi bi-arrow-up-circle-fill" style="color:green;margin-left:-6px"></i>',
-      event:
-        "moveFirst('" +
-        DBName +
-        "','" +
-        tableName +
-        "','" +
-        datasetFields +
-        "')",
-    },
+   
     {
       name: "PreviusDSBtn",
       title: "Previus",
       text: '<i class="bi bi-arrow-left-circle-fill" style="color:green;margin-left:-6px"></i>',
       event:
-        "movePrev('" +
-        DBName +
-        "','" +
-        tableName +
-        "','" +
-        datasetFields +
-        "')",
+        "navbar_movePrev()",
     },
     {
       name: "NextDSBtn",
       title: "Next",
       text: '<i class="bi bi-arrow-right-circle-fill" style="color:green;margin-left:-6px"></i>',
       event:
-        "moveNext('" +
-        DBName +
-        "','" +
-        tableName +
-        "','" +
-        datasetFields +
-        "')",
+        "navbar_moveNext()",
     },
-    {
-      name: "LastDSBtn",
-      title: "Last",
-      text: '<i class="bi bi-arrow-down-circle-fill" style="color:green;margin-left:-6px"></i>',
-      event:
-        "moveLast('" +
-        DBName +
-        "','" +
-        tableName +
-        "','" +
-        datasetFields +
-        "')",
-    },
+   
     {
       name: "EditDSBtn",
       title: "Edit Record",
       text: '<i class="bi bi-credit-card-2-front" style="color:blue;margin-left:-6px"></i>',
-      event: "EditRecord('" + tableName + "', false)",
+      event: "navbar_EditRecord( false)",
     },
     {
       name: "InsertDSBtn",
       title: "Insert Record",
       text: '<i class="bi bi-sticky-fill" style="color:green;margin-left:-6px"></i>',
       event:
-        "InsertRecord('" +
-        DBName +
-        "','" +
-        tableName +
-        "','" +
-        datasetFields +
-        "')",
+        "navbar_InsertRecord()",
     },
     {
       name: "CopyDSBtn",
       title: "Copy",
       text: '<i class="bi bi-clipboard" style="color:red;margin-left:-6px"></i>',
       event:
-        "CopyRecord('" +
-        DBName +
-        "','" +
-        tableName +
-        "', '" +
-        datasetFields +
-        "')",
+        "navbar_CopyRecord()",
     },
     {
       name: "SaveDSBtn",
       title: "Save Record",
       text: '<i class="bi bi-sim-fill" style="color:red;margin-left:-6px"></i>',
-      event: "SaveRecord('" + DBName + "','" + tableName + "')",
-    },
-    {
-      name: "RefreshDSBtn",
-      title: "Refresh Data",
-      text: '<i class="bi bi-arrow-clockwise" style="color:green;margin-left:-6px"></i>',
-      event: "RefreshRecord('" + DBName + "','" + tableName + "')",
-    },
+      event: "navbar_SaveRecord()",
+    }
   ];
   var htm = "";
   //for the dom2json is mandatory to create a html for the events
@@ -131,61 +72,66 @@ function createNavigationBar(DBName, tableName, datasetFields) {
     }</button>`;
   });
   navigationBar.innerHTML += "<div >" + htm + "</div>";
-  // Append the navigation bar to the body or another element in your document
-  while (main.firstChild) {
-    main.removeChild(main.firstChild);
-  }
+
   main.appendChild(navigationBar);
 }
 
-function moveFirst(DBName, tableName, datasetFields) {
-  if (tableName) {
-    navigateRecords("move-to-first", DBName, tableName, datasetFields);
+
+
+function navbar_movePrev() {
+  // get dataGrid by tag name
+  let dataGrid = document.querySelectorAll("[tagname='dataGrid']");
+  // get all .grid-row and check if threse is a row selected and select the previous row
+  for (let i = 0; i < dataGrid.length; i++) {
+    let grid = dataGrid[i];
+    let rows = grid.querySelectorAll(".grid-row");
+    console.log(rows);
+    let found = false;
+    for (let j = 1; j < rows.length; j++) {
+      if (rows[j].classList.contains("grid-row-selected")) {
+         rows[j].classList.remove("grid-row-selected");
+        //  rows[j - 1].classList.add("grid-row-selected");
+          // simulate click on the row
+          rows[j - 1].querySelector("div").click();
+        found = true;
+        break;
+        }
+      
+    }
+    if (!found) {
+      rows[0].querySelector("div").click();
+    }
   }
 }
 
-function movePrev(DBName, tableName, datasetFields) {
-  if (tableName) {
-    const rowNum = getRowNum(tableName);
-    if (rowNum == 0) return;
-    navigateRecords(
-      "move-to-previous",
-      DBName,
-      tableName,
-      datasetFields,
-      rowNum - 1
-    );
-  }
+function navbar_moveNext(DBName, tableName, datasetFields) {
+   // get dataGrid by tag name
+   let dataGrid = document.querySelectorAll("[tagname='dataGrid']");
+   // get all .grid-row and check if threse is a row selected and select the previous row
+   for (let i = 0; i < dataGrid.length; i++) {
+     let grid = dataGrid[i];
+     let rows = grid.querySelectorAll(".grid-row");
+     console.log(rows);
+     let found = false;
+     for (let j =  rows.length-1; j > 0; j--) {
+       if (rows[j].classList.contains("grid-row-selected")) {
+           rows[j].classList.remove("grid-row-selected");
+       
+           // simulate click on the row
+           rows[j + 1].querySelector("div").click();
+          found = true;
+         break;
+       }
+     }
+     if (!found) {
+       rows[rows.length-1].querySelector("div").click();
+     }
+   }
 }
 
-function moveNext(DBName, tableName, datasetFields) {
-  if (tableName) {
-    navigateRecords(
-      "move-to-next",
-      DBName,
-      tableName,
-      datasetFields,
-      getRowNum(tableName) + 1
-    );
-  }
-}
-
-function moveLast(DBName, tableName, datasetFields) {
-  if (tableName)
-    navigateRecords(
-      "move-to-last",
-      DBName,
-      tableName,
-      datasetFields,
-      "",
-      "",
-      true
-    );
-}
-
-function EditRecord(tableName, action) {
+function navbar_EditRecord(action) {
   const inputs = document.querySelectorAll(
-    `#DataSet_${tableName} input, #DataSet_${tableName} select`
+    `[data-table-name] input[dataset-field-name]`
   );
 
   inputs.forEach((input) => {
@@ -198,27 +144,65 @@ function EditRecord(tableName, action) {
   document.querySelector("[name=SaveDSBtn]").disabled = action;
 }
 
-function InsertRecord(DBName, tableName) {
-  const inputs = document.querySelectorAll(`#DataSet_${tableName} input`);
+function navbar_InsertRecord() {
+  const inputs = document.querySelectorAll(`[data-table-name] input,select`);
+  console.log(inputs);
   inputs.forEach((input) => {
-    const tableLabel = input.getAttribute("dataset-table-name");
-    if (tableLabel == tableName) {
-      input.readOnly = false;
-      const field = inputs[i].getAttribute("dataset-field-name");
-      if (field !== null && field !== "rowid") {
+         input.readOnly = false;
+         input.disabled = false;
+      const field = input.getAttribute("dataset-field-name");
+      if (field === "rowid") {
         input.value = "new";
       } else {
         input.value = "";
       }
+   
+  });
+  document.querySelector("[name=SaveDSBtn]").disabled = false;
+}
+
+function navbar_CopyRecord() {
+  const inputs = document.querySelectorAll(`[data-table-name] input`);
+  const selects = document.querySelectorAll(`[data-table-name] select`);
+  const idObject = getIdObject();
+  const main = document.getElementById(idObject.dataSet);
+  const exceptionData = JSON.parse(main.getAttribute("exceptionSet"));
+  const exceptionFieldNames = exceptionData.map((field) => field.fieldName);
+
+  inputs.forEach((input) => {
+    if (input.id && input.id.includes("__")) {
+      return;
+    }
+    input.readOnly = false; // Make input editable
+    const field = input.getAttribute("dataset-field-name");
+    input.setAttribute("value", "new"); // Set all non-exception inputs to "new"
+
+    if (exceptionFieldNames.includes(field) && field !== "rowid") {
+      input.value = ""; // Clear the value for exception fields
     }
   });
-  document.getElementById("SaveRecordBtn").disabled = false;
+
+  // Process all select fields
+  selects.forEach((select) => {
+    const field = select.getAttribute("dataset-field-name");
+
+    // If the select field is in the exception list and not "rowid"
+    if (exceptionFieldNames.includes(field) && field !== "rowid") {
+      select.selectedIndex = -1; // Clear the selection for exception fields
+    } else {
+      select.selectedIndex; // Set to the first option or a default value
+    }
+  });
+  document.querySelector("[name=SaveDSBtn]").disabled = false;
 }
 
 function CreateUpdated(DBName, tableName) {
+
   const inputs = document.querySelectorAll(
     `#DataSet_${tableName} input[dataset-field-name]`
   );
+
+
   let updateFields = [];
   let fieldGroups = {};
 
@@ -286,29 +270,33 @@ function addIdToData(data, id, value) {
   return data;
 }
 
-async function SaveRecord(DBName, tableName) {
+async function navbar_SaveRecord () {
   try {
+    if ( document.querySelector("[name=SaveDSBtn]").disabled){
+     showToast("Save button is disabled");
+      return;
+    }
     console.log("SaveRecord");
-    const nextRowIds = document.querySelectorAll("#" + tableName + "_rowid");
+    const nextRowIds = document.querySelectorAll("[dataset-field-type='rowid']");
     for (const nextRowId of nextRowIds) {
       console.log(nextRowId);
-      const datasetTableName = nextRowId.getAttribute("dataset-table-name");
-      const dbName = nextRowId.getAttribute("DBName");
-      if (datasetTableName === tableName) {
+      const tableName = nextRowId.getAttribute("dataset-table-name");
+      const dbName = nextRowId.getAttribute("dbname");
+     
         const rowIdValue = nextRowId.value;
         let result;
         if (rowIdValue === "new") {
-          let data = await CreateInsert(DBName, tableName);
-          result = await insertRecordDB(DBName, tableName, data);
+          let data = await CreateInsert(dbName, tableName);
+          result = await insertRecordDB(dbName, tableName, data);
         } else {
           const data = {
-            body: CreateUpdated(DBName, tableName),
+            body: CreateUpdated(dbName, tableName),
           };
-          result = await updateRecordDB(DBName, tableName, rowIdValue, data);
+          result = await updateRecordDB(dbName, tableName, rowIdValue, data);
         }
         document.querySelector("[name=SaveDSBtn]").disabled = true;
         return result;
-      }
+      
     }
   } catch (error) {
     showToast("Error:" + error);
@@ -323,7 +311,7 @@ async function CreateInsert(DBName, tableName) {
   var insertFields = "";
   var insertValues = "";
   for (i = 0; i < inputs.length; i++) {
-    console.log(inputs[i].type);
+    
     if (inputs[i].id && inputs[i].id.includes("__")) {
       continue; // Skip this iteration
     }
@@ -369,6 +357,18 @@ async function CreateInsert(DBName, tableName) {
   }
 
   return { fields: insertFields, values: insertValues };
+}
+
+async function navigateSequence(DBName, tableName, sequenceName) {
+  const url = `/next-sequence/${DBName}/${tableName}/${sequenceName}`;
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    return data[0]?.sequence_next; // Return the desired sequence
+  } catch (error) {
+    console.error("Error:", error);
+    throw error;
+  }
 }
 
 async function updateRecordDB(DBName, tableName, nextRowId, updateData) {
@@ -430,3 +430,5 @@ async function insertRecordDB(DBName, tableName, data) {
     showToast("Error inserting record:" + error);
   }
 }
+
+
