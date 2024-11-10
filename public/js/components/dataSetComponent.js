@@ -154,10 +154,7 @@ function renderDataSet(main) {
   main.setAttribute("DataSet-Fields-List", datasetFields);
   main.appendChild(dataset);
 
-  createNavigationBar(jsonData[0].DBName, jsonData[0].tableName, datasetFields);
-
-  // console.log(jsonData[0]);
-  moveFirst(jsonData[0].DBName, jsonData[0].tableName, datasetFields);
+  // get the data from the main
 }
 
 function createFieldFromJson(fieldJson) {
