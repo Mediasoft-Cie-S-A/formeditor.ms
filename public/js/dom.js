@@ -214,6 +214,7 @@ function jsonToDomBusinessComponent(json, parent) {
     createDomElement(json, parent);
   }
 
+  
   // Processing specific elements with `tagname` attribute
   // Planning
   var planningElements = parent.querySelectorAll('div[tagname="planning"]');

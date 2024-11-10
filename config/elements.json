@@ -6,7 +6,9 @@
     "scriptName": "dataSetComponentWebNavigate.js",
     "createFunction": "createDataSetComponentWebNavigate",
     "styles": "dataSetComponentWebNavigate.css",
-    "icon": "fa fa-compass"
+    "icon": "fa fa-compass",
+    "editFunction": "editElementDataSetWebNavigate",
+    "renderFunction": ""
   },
   "dataSetWeb": {
     "type": "dataSetWeb",
@@ -16,7 +18,8 @@
     "createFunction": "createElementDataSetWeb",
     "editFunction": "editElementDataSetWeb",
     "styles": "dataSetComponentWeb.css",
-    "icon": "fa fa-database"
+    "icon": "fa fa-database",
+    "renderFunction": ""
   },
   "dataGridWeb": {
     "type": "dataGridWeb",
@@ -26,7 +29,8 @@
     "createFunction": "createDatabaseGridWeb",
     "editFunction": "editDatabaseGridWeb",
     "styles": "databaseGridWeb.css",
-    "icon": "fa fa-table"
+    "icon": "fa fa-table",
+    "renderFunction": ""
   },
   "dataSearchWeb": {
     "type": "dataSearchWeb",
@@ -36,7 +40,8 @@
     "createFunction": "createDatabaseSearchWeb",
     "editFunction": "editDatabaseSearchWeb",
     "styles": "dataSearch.css",
-    "icon": "fa fa-search"
+    "icon": "fa fa-search",
+    "renderFunction": ""
   },
   "dataSetNavigation": {
     "type": "dataSetNavigation",
@@ -45,7 +50,8 @@
     "scriptName": "dataSetComponentNavigate.js",
     "createFunction": "createDataSetComponentNavigate",
     "styles": "dataSetComponentNavigate.css",
-    "icon": "fa fa-compass"
+    "icon": "fa fa-compass",
+    "renderFunction": ""
   },
   "dataSet": {
     "type": "dataSet",
@@ -55,7 +61,8 @@
     "createFunction": "createElementDateSet",
     "editFunction": "editElementDataSet",
     "styles": "dataSetComponent.css",
-    "icon": "fa fa-database"
+    "icon": "fa fa-database",
+    "renderFunction": "renderDataSet"
   },
   "dataGrid": {
     "type": "dataGrid",
@@ -65,7 +72,8 @@
     "createFunction": "createDatabaseGrid",
     "editFunction": "editDatabaseGrid",
     "styles": "databaseGrid.css",
-    "icon": "fa fa-table"
+    "icon": "fa fa-table",
+    "renderFunction": "renderGrid"
   },
   "dataSearch": {
     "type": "dataSearch",
@@ -75,7 +83,8 @@
     "createFunction": "createDatabaseSearch",
     "editFunction": "editDatabaseSearch",
     "styles": "dataSearch.css",
-    "icon": "fa fa-search"
+    "icon": "fa fa-search",
+    "renderFunction": ""
   },
   "dataCombox": {
     "type": "dataCombox",
@@ -85,7 +94,8 @@
     "createFunction": "createElementCombox",
     "editFunction": "editElementCombox",
     "styles": "combox.css",
-    "icon": "fa fa-list"
+    "icon": "fa fa-list",
+    "renderFunction": ""
   },
   "workflow": {
     "type": "workflow",
@@ -95,7 +105,8 @@
     "createFunction": "createElementWorkflow",
     "editFunction": "editElementWorkflow",
     "styles": "workflow.css",
-    "icon": "fa fa-sitemap"
+    "icon": "fa fa-sitemap",
+    "renderFunction": ""
   },
   "fileExplorer": {
     "type": "fileExplorer",
@@ -105,7 +116,8 @@
     "createFunction": "createElementFileExplorer",
     "editFunction": "editElementFileExplorer",
     "styles": "fileExplorer.css",
-    "icon": "fa fa-folder-open"
+    "icon": "fa fa-folder-open",
+    "renderFunction": ""
   },
 
   "workflowStep": {
@@ -116,7 +128,8 @@
     "createFunction": "createElementWorkflowStep",
     "editFunction": "editElementWorkflowStep",
     "styles": "workflowStep.css",
-    "icon": "fa fa-sitemap"
+    "icon": "fa fa-sitemap",
+    "renderFunction": ""
   },
   "workflowStepAction": {
     "type": "workflowStepAction",
@@ -126,7 +139,8 @@
     "createFunction": "createElementWorkflowStepAction",
     "editFunction": "editElementWorkflowStepAction",
     "styles": "workflowStepAction.css",
-    "icon": "fa fa-sitemap"
+    "icon": "fa fa-sitemap",
+    "renderFunction": ""
   },
   "jscode": {
     "type": "jscode",
@@ -136,7 +150,8 @@
     "createFunction": "createJScode",
     "editFunction": "editJScode",
     "styles": "jscode.css",
-    "icon": "fa fa-code"
+    "icon": "fa fa-code",
+    "renderFunction": ""
   },
   "planning": {
     "type": "planning",
@@ -146,7 +161,8 @@
     "createFunction": "createPlanning",
     "editFunction": "editPlanning",
     "styles": "planning.css",
-    "icon": "fa fa-calendar"
+    "icon": "fa fa-calendar",
+    "renderFunction": "gantrender"
   },
   "qrcode": {
     "type": "qrcode",
@@ -156,7 +172,8 @@
     "createFunction": "createQRCode",
     "editFunction": "editQRCode",
     "styles": "qrcode.css",
-    "icon": "fa fa-qrcode"
+    "icon": "fa fa-qrcode",
+    "renderFunction": ""
   },
   "qrcodeScanner": {
     "type": "qrcodeScanner",
@@ -166,7 +183,8 @@
     "createFunction": "createQRCodeScanner",
     "editFunction": "editQRCodeScanner",
     "styles": "qrcodeScanner.css",
-    "icon": "fa fa-qrcode"
+    "icon": "fa fa-qrcode",
+    "renderFunction": ""
   },
   "menuComponent": {
     "type": "menuComponent",
@@ -176,7 +194,8 @@
     "createFunction": "createMenuComponent",
     "editFunction": "editMenuComponent",
     "styles": "menuComponent.css",
-    "icon": "fa fa-bars"
+    "icon": "fa fa-bars",
+    "renderFunction": ""
   },
   "Tab": {
     "type": "Tab",
@@ -186,7 +205,8 @@
     "createFunction": "createElementTab",
     "editFunction": "editElementTab",
     "styles": "tab.css",
-    "icon": "fa fa-folder"
+    "icon": "fa fa-folder",
+    "renderFunction": ""
   },
   "grid": {
     "type": "grid",
@@ -196,7 +216,8 @@
     "createFunction": "showHtmlGridModal",
     "editFunction": "editGridElement",
     "styles": "htmlGrid.css",
-    "icon": "fa fa-table"
+    "icon": "fa fa-table",
+    "renderFunction": ""
   },
   "textfield": {
     "type": "textfield",
@@ -206,7 +227,8 @@
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
     "styles": "genericInput.css",
-    "icon": "fa fa-font"
+    "icon": "fa fa-font",
+    "renderFunction": ""
   },
   "number": {
     "type": "number",
@@ -216,7 +238,8 @@
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
     "styles": "genericInput.css",
-    "icon": "fa fa-sort-numeric-asc"
+    "icon": "fa fa-sort-numeric-asc",
+    "renderFunction": ""
   },
   "password": {
     "type": "password",
@@ -226,7 +249,8 @@
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
     "styles": "genericInput.css",
-    "icon": "fa fa-key"
+    "icon": "fa fa-key",
+    "renderFunction": ""
   },
   "email": {
     "type": "email",
@@ -236,7 +260,8 @@
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
     "styles": "genericInput.css",
-    "icon": "fa fa-envelope"
+    "icon": "fa fa-envelope",
+    "renderFunction": ""
   },
   "textarea": {
     "type": "textarea",
@@ -246,7 +271,8 @@
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
     "styles": "genericInput.css",
-    "icon": "fa fa-text-height"
+    "icon": "fa fa-text-height",
+    "renderFunction": ""
   },
   "checkbox": {
     "type": "checkbox",
@@ -256,7 +282,8 @@
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
     "styles": "genericInput.css",
-    "icon": "fa fa-check-square-o"
+    "icon": "fa fa-check-square-o",
+    "renderFunction": ""
   },
   "radio": {
     "type": "radio",
@@ -266,7 +293,8 @@
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
     "styles": "genericInput.css",
-    "icon": "fa fa-dot-circle-o"
+    "icon": "fa fa-dot-circle-o",
+    "renderFunction": ""
   },
   "select": {
     "type": "select",
@@ -276,7 +304,8 @@
     "createFunction": "createElementSelect",
     "editFunction": "editElementSelect",
     "styles": "genericInput.css",
-    "icon": "fa fa-list"
+    "icon": "fa fa-list",
+    "renderFunction": ""
   },
   "button": {
     "type": "button",
@@ -286,7 +315,8 @@
     "createFunction": "createElementButton",
     "editFunction": "editElementButton",
     "styles": "genericInput.css",
-    "icon": "fa fa-hand-pointer-o"
+    "icon": "fa fa-hand-pointer-o",
+    "renderFunction": ""
   },
   "submit": {
     "type": "submit",
@@ -296,7 +326,8 @@
     "createFunction": "createElementButton",
     "editFunction": "editElementButton",
     "styles": "genericInput.css",
-    "icon": "fa fa-hand-pointer-o"
+    "icon": "fa fa-hand-pointer-o",
+    "renderFunction": ""
   },
   "reset": {
     "type": "reset",
@@ -306,7 +337,8 @@
     "createFunction": "createElementButton",
     "editFunction": "editElementButton",
     "styles": "genericInput.css",
-    "icon": "fa fa-hand-pointer-o"
+    "icon": "fa fa-hand-pointer-o",
+    "renderFunction": ""
   },
   "image": {
     "type": "image",
@@ -316,7 +348,8 @@
     "createFunction": "createElementImage",
     "editFunction": "editElementImage",
     "styles": "genericInput.css",
-    "icon": "fa fa-picture-o"
+    "icon": "fa fa-picture-o",
+    "renderFunction": ""
   },
   "file": {
     "type": "file",
@@ -326,7 +359,8 @@
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
     "styles": "genericInput.css",
-    "icon": "fa fa-file"
+    "icon": "fa fa-file",
+    "renderFunction": ""
   },
   "hidden": {
     "type": "hidden",
@@ -336,7 +370,8 @@
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
     "styles": "genericInput.css",
-    "icon": "fa fa-eye-slash"
+    "icon": "fa fa-eye-slash",
+    "renderFunction": ""
   },
   "date": {
     "type": "date",
@@ -346,7 +381,8 @@
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
     "styles": "genericInput.css",
-    "icon": "fa fa-calendar"
+    "icon": "fa fa-calendar",
+    "renderFunction": ""
   },
   "datetime": {
     "type": "datetime",
@@ -356,7 +392,8 @@
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
     "styles": "genericInput.css",
-    "icon": "fa fa-calendar"
+    "icon": "fa fa-calendar",
+    "renderFunction": ""
   },
 
   "month": {
@@ -367,7 +404,8 @@
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
     "styles": "genericInput.css",
-    "icon": "fa fa-calendar"
+    "icon": "fa fa-calendar",
+    "renderFunction": ""
   },
   "week": {
     "type": "week",
@@ -377,7 +415,8 @@
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
     "styles": "genericInput.css",
-    "icon": "fa fa-calendar"
+    "icon": "fa fa-calendar",
+    "renderFunction": ""
   },
   "time": {
     "type": "time",
@@ -387,7 +426,8 @@
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
     "styles": "genericInput.css",
-    "icon": "fa fa-calendar"
+    "icon": "fa fa-calendar",
+    "renderFunction": ""
   },
   "range": {
     "type": "range",
@@ -397,7 +437,8 @@
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
     "styles": "genericInput.css",
-    "icon": "fa fa-sliders"
+    "icon": "fa fa-sliders",
+    "renderFunction": ""
   },
   "color": {
     "type": "color",
@@ -407,7 +448,8 @@
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
     "styles": "genericInput.css",
-    "icon": "fa fa-paint-brush"
+    "icon": "fa fa-paint-brush",
+    "renderFunction": ""
   },
 
   "tel": {
@@ -418,7 +460,8 @@
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
     "styles": "genericInput.css",
-    "icon": "fa fa-phone"
+    "icon": "fa fa-phone",
+    "renderFunction": ""
   },
   "url": {
     "type": "url",
@@ -428,6 +471,7 @@
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
     "styles": "genericInput.css",
-    "icon": "fa fa-link"
+    "icon": "fa fa-link",
+    "renderFunction": ""
   }
 }
