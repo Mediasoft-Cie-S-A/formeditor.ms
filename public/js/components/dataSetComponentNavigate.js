@@ -299,7 +299,8 @@ async function navbar_SaveRecord () {
       
     }
   } catch (error) {
-    showToast("Error:" + error);
+    //showToast("Error:" + error);
+    console.error("Error:", error);
   }
 }
 
@@ -388,22 +389,22 @@ async function updateRecordDB(DBName, tableName, nextRowId, updateData) {
       showToast(`HTTP error! status: ${response.status}`);
     }
     const updateResult = await response.json();
-    let idObject = getIdObject();
+    
     let filedName = "";
     let operator = "";
     let searchValue = "";
+    let idObject = getIdObject();
     if (idObject?.dataGrid) {
-      const grid = document.getElementById(idObject?.dataGrid);
-      filedName = grid.getAttribute("filedName") || "";
-      operator = grid.getAttribute("operator") || "";
-      searchValue = grid.getAttribute("searchValue") || "";
+      //const gridDiv = document.getElementById(idObject.dataGrid);
+
+      searchGrid(DBName, filedName, operator, searchValue, idObject.dataGrid);
     }
-    searchGrid(filedName, operator, searchValue, idObject?.dataGrid);
 
     showToast("Record updated successfully", 5000); // Show toast for 5 seconds
     return updateResult;
   } catch (error) {
     showToast("Error:" + error);
+    console.error("Error:", error);
   }
 }
 

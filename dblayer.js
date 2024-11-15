@@ -479,20 +479,21 @@ class dblayer{
             dbs.checkAuthenticated,
             async (req, res) => {
               try {
-                const {database, tableName, page, pageSize } = req.params;
+                const {database, tableName, page, pageSize  } = req.params;
                 const db= dbs.databases[database];
                 await db.connect();
 
                 // Convert page and pageSize to numbers
                 const pageNum = parseInt(page, 10);
                 const pageSizeNum = parseInt(pageSize, 10);
+              
                 // Get the fields from the query string. It's a comma-separated string.
                 const fields = req.query.fields ? req.query.fields.split(",") : null;
                 const filter = req.query.filter ? req.query.filter : null;
-            
+              
                 // decode the json filter              
                 const filterObj = filter ? JSON.parse(filter): null;
-                
+              
           
                 const data = await db.queryDataWithPagination(
                   tableName,

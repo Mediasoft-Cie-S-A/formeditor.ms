@@ -88,6 +88,12 @@ function jsonToDom(json, parent) {
     console.log("dataset:" + datasetElements[i]);
     renderDataSet(datasetElements[i]);
   }
+
+  var cookieStorageElements = parent.querySelectorAll('div[tagname="cookieStorage"]');
+  for (var i = 0; i < cookieStorageElements.length; i++) {
+    console.log("cookieStorage:" + cookieStorageElements[i]);
+    renderCookieStorage(cookieStorageElements[i]);    
+  }
 }
 // Function to create DOM element from JSON
 function createDomElement(json, parent) {
@@ -235,5 +241,12 @@ function jsonToDomBusinessComponent(json, parent) {
   for (var i = 0; i < datasetElements.length; i++) {
     console.log("dataset:" + datasetElements[i]);
     renderDataSet(datasetElements[i]); // Custom function to render dataset elements
+  }
+
+  // cookieStorage
+  var cookieStorageElements = parent.querySelectorAll('div[tagname="cookieStorage"]');
+  for (var i = 0; i < cookieStorageElements.length; i++) {
+    console.log("cookieStorage:" + cookieStorageElements[i]);
+    renderCookieStorage(cookieStorageElements[i]); // Custom function to render cookieStorage elements
   }
 }

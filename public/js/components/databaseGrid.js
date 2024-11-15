@@ -106,7 +106,7 @@ function renderGrid(main) {
 
   var table = document.createElement("div");
   table.className = "table-container";
-  table.setAttribute("tag-Name", "dataTable");
+  table.setAttribute("tagName", "dataTable");
   table.id = "Data-Grid_" + jsonData[0].tableName;
   table.setAttribute("DBName", jsonData[0].DBName);
 
@@ -165,7 +165,7 @@ function insertNavBar(
     `</button>`;
 
   html +=
-    `<button name='RefreshGRIDBtn' title='Refresh' grid-id='${gridContainer.parentElement.id}' onclick='refresh(event,"${DBName}","${tableName}")'>` +
+    `<button name='RefreshGRIDBtn' title='Refresh' grid-id='${gridContainer.parentElement.id}' onclick='searchGrid("${DBName}","","","","${gridContainer.parentElement.id}")'>` +
     `<i class='bi bi-arrow-repeat' grid-id='${gridContainer.parentElement.id}' style='color:green;'></i>` +
     `</button>`;
   html +=
@@ -177,7 +177,7 @@ function insertNavBar(
     `<i class='bi bi-file-spreadsheet' grid-id='${gridContainer.parentElement.id}' style='color:green;'></i>` +
     `</button>`;
   html += `</div>`;
-  // get tag-name="dataTable" from the gridContainer
+  // get tagname="dataTable" from the gridContainer
 
 
   html += `<select id="gridPage" class="input-element" onchange='grid_page_size(event,"${gridContainer.parentElement.id}")' style='width:60px;font-size:14px'>`;
@@ -240,14 +240,21 @@ function createGrid(
   body.className = "grid-body";
   grid.appendChild(body);
   //set search inputs
-  gridFetchData(grid);
+  // check if in the page exists tagname="cookieStorage"
+  var cookieStorage = document.querySelector('[tagname="cookieStorage"]');
+  console.log(cookieStorage);
+  if (!cookieStorage) {
+
+    console.log("cookieStorage not found");
+    gridFetchData(grid);
+  }
 }
 
 function grid_page_size(e, dataGridId) {
   e.preventDefault();
   // get selected page size
   const dataGrid = document.getElementById(dataGridId);
-  const dataTable = dataGrid.querySelector('[tag-Name="dataTable"]');
+  const dataTable = dataGrid.querySelector('[tagName="dataTable"]');
   const DBName = dataTable.getAttribute("DBName");
   var pageSize = e.target[e.target.selectedIndex].value;
   
@@ -299,8 +306,8 @@ function gridNext(e, DBName, tableName) {
 
 function searchGrid(DBName, filterName, FilterOp, filterValue, gridID) {
   const grid = document.getElementById(gridID);
-
-  const tableGrid = grid.querySelector('[tag-name="dataTable"]');
+  console.log(grid);
+  const tableGrid = grid.querySelector('[tagname="dataTable"]');
   tableGrid.setAttribute("current_page", 1);
 
 

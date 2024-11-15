@@ -342,7 +342,9 @@ async function getRecords(action, DBName, tableName, datasetFields) {
 // use the updateInputs function to update the inputs with the data
 // use the setRowID function to set the current row id in the navigation bar
 async function linkRecordToGrid(DBName, tableName, rowId, rowNum) {
-  document.querySelector("[name=SaveDSBtn]").disabled = true;
+  const saveBtn = document.querySelector("[name=SaveDSBtn]");
+  if (saveBtn) saveBtn.disabled = true;
+  
   try {
     // get all the datasets
     const datasets = document.querySelectorAll("#DataSet_" + tableName);
@@ -362,9 +364,9 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum) {
           .then((response) => response.json())
           .then((data) => {
             updateInputs(data, DBName, tableName);
-            setRowNum(tableName, rowNum); // Assuming the data includes ROWID to-do check if the data includes ROWID
+          
           })
-          .catch((error) => showToast("Error:" + error));
+          .catch((error) => console.error("Error:", error));
       }
     });
   } catch (error) {

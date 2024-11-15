@@ -46,7 +46,7 @@
   "dataSetNavigation": {
     "type": "dataSetNavigation",
     "description": "Navigate component dataSet",
-    "category": "Bussiness  Logic",
+    "category": "Bussiness Logic",
     "scriptName": "dataSetComponentNavigate.js",
     "createFunction": "createDataSetComponentNavigate",
     "styles": "dataSetComponentNavigate.css",
@@ -56,7 +56,7 @@
   "dataSet": {
     "type": "dataSet",
     "description": "Data Set",
-    "category": "Bussiness  Logic",
+    "category": "Bussiness Logic",
     "scriptName": "dataSetComponent.js",
     "createFunction": "createElementDateSet",
     "editFunction": "editElementDataSet",
@@ -67,7 +67,7 @@
   "dataGrid": {
     "type": "dataGrid",
     "description": "Data Grid",
-    "category": "Bussiness  Logic",
+    "category": "Bussiness Logic",
     "scriptName": "databaseGrid.js",
     "createFunction": "createDatabaseGrid",
     "editFunction": "editDatabaseGrid",
@@ -78,7 +78,7 @@
   "dataSearch": {
     "type": "dataSearch",
     "description": "Search field",
-    "category": "Bussiness  Logic",
+    "category": "Bussiness Logic",
     "scriptName": "databaseSearch.js",
     "createFunction": "createDatabaseSearch",
     "editFunction": "editDatabaseSearch",
@@ -89,7 +89,7 @@
   "dataCombox": {
     "type": "dataCombox",
     "description": "dataCombox",
-    "category": "Bussiness  Logic",
+    "category": "Bussiness Logic",
     "scriptName": "comboxComponent.js",
     "createFunction": "createElementCombox",
     "editFunction": "editElementCombox",
@@ -97,6 +97,18 @@
     "icon": "fa fa-list",
     "renderFunction": ""
   },
+  "cookieStorage": {
+    "type": "cookieStorage",
+    "description": "Session Information Storage",
+    "category": "Business Logic",
+    "scriptName": "cookieStorage.js",
+    "createFunction": "createCookieStorage",
+    "editFunction": "editCookieStorage",
+    "styles": "cookieStorage.css",
+    "icon": "fa fa-cookie",
+    "renderFunction": "renderCookieStorage"
+},
+
   "workflow": {
     "type": "workflow",
     "description": "Workflow",
@@ -118,30 +130,7 @@
     "styles": "fileExplorer.css",
     "icon": "fa fa-folder-open",
     "renderFunction": ""
-  },
-
-  "workflowStep": {
-    "type": "workflowStep",
-    "description": "Workflow Step",
-    "category": "Workflow",
-    "scriptName": "workflowStepComponent.js",
-    "createFunction": "createElementWorkflowStep",
-    "editFunction": "editElementWorkflowStep",
-    "styles": "workflowStep.css",
-    "icon": "fa fa-sitemap",
-    "renderFunction": ""
-  },
-  "workflowStepAction": {
-    "type": "workflowStepAction",
-    "description": "Workflow Step Action",
-    "category": "Workflow",
-    "scriptName": "workflowStepActionComponent.js",
-    "createFunction": "createElementWorkflowStepAction",
-    "editFunction": "editElementWorkflowStepAction",
-    "styles": "workflowStepAction.css",
-    "icon": "fa fa-sitemap",
-    "renderFunction": ""
-  },
+  },  
   "jscode": {
     "type": "jscode",
     "description": "javascript code",
