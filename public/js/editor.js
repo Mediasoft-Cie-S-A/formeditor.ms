@@ -765,9 +765,8 @@ function addFieldToPropertiesBarWeb(target, fieldJson, isId) {
     fieldJson.fieldMandatory === "true" ? "checked" : ""
   } onclick="updateMandatory(event, '${elementId}')"> </div>`;
   // adding verification triggers not null fields checkbox
-  div.innerHTML += `<div>Not Null:<input type="checkbox" class="apple-switch" id="notNull" name="notNull" value="notNull" ${
-    fieldJson.fieldMandatory === "true" ? "checked" : ""
-  } onclick="updateNotNull(event, '${elementId}')"></div>`;
+  div.innerHTML += `<div>regexp<input type="text"  tagname="regexp" id="regexp" name="regexp" 
+  } onclick="regexp(event, '${elementId}')"></div>`;
 
   // generate the select
   if (!isId) {
@@ -884,9 +883,8 @@ function addFieldToPropertiesBar(target, fieldJson) {
     fieldJson.fieldMandatory === "true" ? "checked" : ""
   } onclick="updateMandatory(event, '${elementId}')"> </div>`;
   // adding verification triggers not null fields checkbox
-  div.innerHTML += `<div>Not Null:<input type="checkbox" class="apple-switch" id="notNull" name="notNull" value="notNull" ${
-    fieldJson.fieldMandatory === "true" ? "checked" : ""
-  } onclick="updateNotNull(event, '${elementId}')"></div>`;
+  div.innerHTML += `<div>regexp<input type="text"  tagname="regexp" id="regexp" name="regexp" 
+} onclick="regexp(event, '${elementId}')"></div>`;
 
   // Create a select dropdown
   var select = document.createElement("select");
