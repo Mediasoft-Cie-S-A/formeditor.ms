@@ -77,6 +77,7 @@
   vertical-align: top;
   display: table-row-group;
   align-items: top;
+  width: 100%;
 }
 
 .grid-cell-header {
@@ -94,6 +95,7 @@
   font-weight: bold;
   font-size: 16px;
   padding: 5px;
+  width: 100%;
 }
 
 .grid-row-selected {
@@ -105,4 +107,22 @@
 .grid-row-selected:hover {
   background-color: #859bfc;
  
+}
+
+.panel {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.panel:hover {
+  background-color: #f2f2f2;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.selected-panel {
+  background-color: #d3f2d3 !important; /* Light green for selected panel */
+  border-color: #28a745; /* Green border for selected panel */
 }

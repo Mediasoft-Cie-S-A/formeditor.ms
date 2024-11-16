@@ -177,6 +177,15 @@ function insertNavBar(
     `<i class='bi bi-file-spreadsheet' grid-id='${gridContainer.parentElement.id}' style='color:green;'></i>` +
     `</button>`;
   html += `</div>`;
+  // adding button for grid or panel 
+  html += `<button name='gridView' title='Grid View' grid-id='${gridContainer.parentElement.id}' onclick='switchView(event,"${DBName}","${gridContainer.parentElement.id}","standard")'>` +
+  `<i class='bi bi-grid-3x3-gap-fill' grid-id='${gridContainer.parentElement.id}' style='color:blue;'></i>` +
+  `</button>`;
+  html += `<button name='panelView' title='Panel View' grid-id='${gridContainer.parentElement.id}' onclick='switchView(event,"${DBName}","${gridContainer.parentElement.id}","panel")'>` +
+  `<i class='bi bi-card-list' grid-id='${gridContainer.parentElement.id}' style='color:blue;'></i>` +
+  `</button>`;
+  html += `</div>`;
+
   // get tagname="dataTable" from the gridContainer
 
 
@@ -208,30 +217,6 @@ function createGrid(
   grid.setAttribute("DBName", DBName);
   grid.setAttribute("main-id", main.id);
 
-  // table header
-  var header = document.createElement("div");
-  header.className = "grid-header";
-
-  // header
-  var row = document.createElement("div");
-  row.className = "grid-row";
-
-  datasetFields.forEach((field) => {
-    if (field !== "rowid") {
-      const cell = document.createElement("div");
-      cell.className = "grid-cell-header";
-      cell.textContent = field !== "rowid" ? field : "";
-      row.appendChild(cell);
-    } else {
-      const cell = document.createElement("div");
-      cell.style.display = "none";
-      cell.className = "";
-      cell.textContent = "";
-      row.appendChild(cell);
-    }
-  });
-  header.appendChild(row);
-  grid.appendChild(header);
   // search inputs
 
   grid.setAttribute("Dataset-Fields-Names", datasetFields);
@@ -249,6 +234,45 @@ function createGrid(
     gridFetchData(grid);
   }
 }
+
+function switchView(e, DBName, gridID, view) {
+  e.preventDefault();
+  // get the grid
+  const grid = document.getElementById(gridID);
+  grid.setAttribute("view", view);
+  searchGrid(DBName, "", "", "", gridID); // refresh the grid
+}
+
+function generateHeaderRow(grid, datasetFields) {
+   // table header
+   var header = document.createElement("div");
+   header.className = "grid-header";
+ 
+   // header
+   var row = document.createElement("div");
+   row.className = "grid-row";
+ 
+   datasetFields.forEach((field) => {
+     if (field !== "rowid") {
+       const cell = document.createElement("div");
+       cell.className = "grid-cell-header";
+       cell.textContent = field !== "rowid" ? field : "";
+       row.appendChild(cell);
+     } else {
+       const cell = document.createElement("div");
+       cell.style.display = "none";
+       cell.className = "";
+       cell.textContent = "";
+       row.appendChild(cell);
+     }
+   });
+   header.appendChild(row);
+   const body = document.createElement("div");
+   body.className = "grid-body";
+  
+   grid.appendChild(header);
+   grid.appendChild(body);
+} 
 
 function grid_page_size(e, dataGridId) {
   e.preventDefault();
@@ -279,8 +303,8 @@ function gridPrev(e, DBName, tableName) {
 
     grid.setAttribute("current_page", currentPage);
     grid.parentElement.querySelector("#current_page").textContent ="Page: " + currentPage;
-    removeAllChildRows(grid);
-    gridFetchData(grid);
+    
+   searchGrid(DBName, "", "", "", mainID);
   }
 }
 
@@ -298,14 +322,14 @@ function gridNext(e, DBName, tableName) {
     currentPage++;
     grid.setAttribute("current_page", currentPage);
     grid.parentElement.querySelector("#current_page").textContent ="Page: " + currentPage;
-    removeAllChildRows(grid);
-    gridFetchData(grid);
+    searchGrid(DBName, "", "", "", mainID);
     
   }
 }
 
 function searchGrid(DBName, filterName, FilterOp, filterValue, gridID) {
   const grid = document.getElementById(gridID);
+
   console.log(grid);
   const tableGrid = grid.querySelector('[tagname="dataTable"]');
   tableGrid.setAttribute("current_page", 1);
@@ -314,12 +338,32 @@ function searchGrid(DBName, filterName, FilterOp, filterValue, gridID) {
   var tableName = tableGrid.getAttribute("Table-Name");
   var datasetFields = tableGrid.getAttribute("Dataset-Fields-Names");
   var datasetFieldsTypes = tableGrid.getAttribute("Dataset-Fields-Types");
-  removeAllChildRows(tableGrid);
+  var page = parseInt(tableGrid.getAttribute("current_page")) || 1;
   var pageSize = parseInt(tableGrid.getAttribute("page_size"));
   // check if filter is empty
   var filter = filterName + "|" + FilterOp + "|" + filterValue;
  
-  gridGetData(tableGrid, DBName, tableName, 1, pageSize, datasetFields, filter);
+  // get the view type
+  var view = grid.getAttribute("view");
+  switch (view) {
+    case "standard":
+      tableGrid.innerHTML = "";
+      generateHeaderRow(tableGrid, datasetFields.split(","));
+    
+  
+      gridGetData(tableGrid, DBName, tableName, page, pageSize, datasetFields, filter);
+      break;
+    case "panel":
+      gridGetDataInPanelFormat(tableGrid, DBName, tableName, page, pageSize, datasetFields, filter);
+      break;
+    default:
+      tableGrid.innerHTML = "";
+      generateHeaderRow(tableGrid, datasetFields.split(","));
+
+    
+      gridGetData(tableGrid, DBName, tableName, page, pageSize, datasetFields, filter);
+      break;
+  }
 }
 
 // export grid to csv
@@ -333,15 +377,7 @@ function export2CSV(e, DBName, tabelName) {
   window.open(url, "_blank");
 }
 
-//remove all rows except the row get have the header attribute
-function removeAllChildRows(grid) {
-  // get body form the table
-  const body = grid.querySelector(".grid-body");
-  //remove all rows in the body
-  while (body.firstChild) {
-    body.removeChild(body.firstChild);
-  }
-}
+
 
 function gridFetchData(grid, body) {
   var DBName = grid.getAttribute("DBName");
@@ -572,6 +608,161 @@ async function gridGetData(
     let row = document.createElement("div");
     row.style.height = "100%";
     body.appendChild(row);
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}
+
+async function gridGetDataInPanelFormat(
+  grid,
+  DBName,
+  tableName,
+  page,
+  pageSize,
+  datasetFields,
+  filter
+) {
+  // Get the filter from the dataset grid JSON
+  var mainID = grid.getAttribute("main-id");
+  var main = document.getElementById(mainID);
+  var filterJSON = JSON.parse(main.getAttribute("filter"));
+
+  // Check if filter is empty
+  if (filterJSON == undefined || filterJSON == null || filterJSON == "") {
+    filterJSON = {};
+  }
+
+  console.log(filter);
+  // If filter is not empty, add the filter to the filterJSON
+  if (filter != "") {
+    var filterArray = filter.split("|");
+    var filterName = filterArray[0];
+    var filterOp = filterArray[1];
+    var filterValue = filterArray[2];
+
+    // Determine the type of the filterValue
+    var filterType = typeof filterValue === "string" ? "character" : "number";
+    if (filterJSON.filters == undefined) {
+      filterJSON.filters = [];
+    }
+
+    // Check if the filter is already in the filterJSON
+    var found = false;
+    for (var i = 0; i < filterJSON.filters.length; i++) {
+      if (
+        filterJSON.filters[i].field == filterName &&
+        filterJSON.filters[i].tableName == tableName &&
+        filterJSON.filters[i].DBName == DBName
+      ) {
+        found = true;
+        // If filter value is empty, remove the filter from the filterJSON
+        if (filterValue == "") {
+          filterJSON.filters.splice(i, 1);
+        } else {
+          filterJSON.filters[i].value = filterValue;
+          filterJSON.filters[i].operator = filterOp;
+          filterJSON.filters[i].type = filterType;
+        }
+      }
+    }
+    // If filter is not found, add it to the filterJSON
+    if (!found && filterValue != "") {
+      filterJSON.filters.push({
+        DBName: DBName,
+        tableName: tableName,
+        field: filterName,
+        operator: filterOp,
+        value: filterValue,
+        type: filterType,
+      });
+    }
+    // Set the filterJSON to the main element
+    main.setAttribute("filter", JSON.stringify(filterJSON));
+  }
+
+  grid.innerHTML = ""; // Clear any previous content in the grid body
+  // Get body from the grid
+  const body = document.createElement("div");
+  
+
+  body.style.display = "flex";
+  body.style.flexDirection = "column";
+  body.style.gap = "10px";
+  grid.appendChild(body);
+  // Prepare the URL
+  const url = `/table-data/${DBName}/${tableName}/${page}/${pageSize}?fields=${datasetFields}&filter=${encodeURIComponent(
+    JSON.stringify(filterJSON)
+  )}`;
+
+  // Fetch the data from the web service
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    const data = await response.json();
+
+    // The data is now available
+    for (var j = 0; j < data.length; j++) {
+      const record = data[j]; // Each row is an object with field-value pairs
+      const keys = Object.keys(record);
+
+      // Create a panel for each record
+      const panelDiv = document.createElement("div");
+      panelDiv.className = "panel";
+      panelDiv.style.border = "1px solid #ddd";
+      panelDiv.style.borderRadius = "8px";
+      panelDiv.style.padding = "10px";
+      panelDiv.style.marginBottom = "10px";
+      panelDiv.style.backgroundColor = j % 2 === 0 ? "#f9f9f9" : "#ffffff"; // Alternate colors
+
+      // Add click event to highlight the selected panel
+      panelDiv.addEventListener("click", function () {
+        // Remove selected class from all panels
+        const panels = grid.querySelectorAll(".panel");
+        panels.forEach((panel) => {
+          panel.classList.remove("selected-panel");
+        });
+
+        // Add selected class to the clicked panel
+        panelDiv.classList.add("selected-panel");
+      });
+
+      // Loop through each field in the record and display it
+      keys.forEach((key) => {
+        const fieldDiv = document.createElement("div");
+        fieldDiv.className = "field";
+        fieldDiv.style.marginBottom = "5px";
+
+        // Field name and value
+        const fieldName = document.createElement("span");
+        fieldName.style.fontWeight = "bold";
+        fieldName.textContent = `${key}: `;
+
+        const fieldValue = document.createElement("span");
+        fieldValue.textContent = record[key] || "-";
+
+        // Append the field name and value to the field div
+        fieldDiv.appendChild(fieldName);
+        fieldDiv.appendChild(fieldValue);
+        if (key === "rowid") {
+          fieldDiv.style.display = "none";
+        }
+        // Append the field div to the panel
+        panelDiv.appendChild(fieldDiv);
+      });
+
+      // Append the panel to the grid body
+      body.appendChild(panelDiv);
+    }
+
+    // If no records are found
+    if (data.length === 0) {
+      const noDataDiv = document.createElement("div");
+      noDataDiv.className = "no-data";
+      noDataDiv.textContent = "No records found.";
+      body.appendChild(noDataDiv);
+    }
   } catch (error) {
     console.error("Error:", error);
   }
