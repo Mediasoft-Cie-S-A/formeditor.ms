@@ -108,6 +108,17 @@
     "icon": "fa fa-cookie",
     "renderFunction": "renderCookieStorage"
 },
+ "SearchWindow": {
+    "type": "SearchWindow",
+    "description": "Search Window",
+    "category": "Business Logic",
+    "scriptName": "searchWindow.js",
+    "createFunction": "createSearchWindow",
+    "editFunction": "editSearchWindow",
+    "styles": "searchWindow.css",
+    "icon": "fa fa-search",
+    "renderFunction": ""
+  },
 
   "workflow": {
     "type": "workflow",

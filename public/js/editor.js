@@ -486,7 +486,7 @@ function setOptionsByType(select, fieldDataType) {
     "combobox",
   ]; */
 
-  var options = ["text", "sequence", "array", "combo_array", "combo_sql"];
+  var options = ["text", "sequence", "array", "combo_array", "combo_sql","search_win"];
 
   // Clear any existing options in the select element
   select.innerHTML = "";
@@ -919,6 +919,7 @@ function addFieldToPropertiesBar(target, fieldJson) {
       case "combo_sql":
       case "array":
       case "sequence":
+      case "search_win":
         var textarea = document.createElement("textarea");
         textarea.id = "Data";
 
@@ -950,8 +951,13 @@ function addFieldToPropertiesBar(target, fieldJson) {
             span.setAttribute("data-field", JSON.stringify(fieldJson));
           }); // end of textarea change event
         }
-        if (select.value === "combo_sql") {
-          textarea.setAttribute("placeholder", "Enter Sql Query, id, value");
+        if (select.value === "combo_sql" || select.value === "search_win") {
+          if (select.value === "combo_sql") {
+            textarea.setAttribute("placeholder", "Enter Sql Query, id, value");
+          }
+          if (select.value === "search_win") {
+            textarea.setAttribute("placeholder", "DBName|Enter Sql Query, id, value1, value2, value3 ..");
+          }
           // set the textarea vaule from fieldSQL if exists
           if (fieldJson.fieldSQL) {
             textarea.value = fieldJson.fieldSQL;

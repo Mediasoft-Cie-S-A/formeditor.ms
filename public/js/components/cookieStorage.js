@@ -1,5 +1,4 @@
-const e = require("express");
-const { copySync } = require("fs-extra");
+
 
 function createCookieStorage(type) {
     const main = document.createElement("div");

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const e = require("express");
 
 function createElementDateSet(type) {
   var main = document.createElement("div");
@@ -173,6 +174,47 @@ function createFieldFromJson(fieldJson) {
       einput = element.querySelector("input"); // Adjust to your combobox selector
 
       break;
+    case "search_win":
+      element = createElementInput(fieldJson.fieldType);
+      einput = element.querySelector("input"); // Adjust to your combobox selector
+      // adding the search button
+      var searchButton = document.createElement("button");
+      searchButton.style.float = "right";
+      searchButton.style.width = "20px" ;
+      searchButton.style.height = "20px" ;
+      searchButton.style.padding = "0px";
+      // icon for the search button
+      var icon = document.createElement("i");
+      icon.className = "fas fa-search";      
+      searchButton.appendChild(icon);
+      searchButton.onclick = function () {
+        var input = einput;
+        var filter = input.value.toUpperCase();
+        // generate the modalwindow for the search
+        // Example JSON dataset and query
+        
+        query = einput.getAttribute("dataset-field-SQL");
+        console.log("query", query);
+        // split the query
+        var queryArray = query.split("|");
+        // get the database name
+        DBName = queryArray[0];
+        // get the query
+        query = queryArray[1];
+        // extract all fields from the query
+        var fields = query.match(/SELECT(.*?)FROM/)[1];
+        // get the dataset from the query in this format  { fieldName: "field", fieldType: "string" },
+       const datasetJson = fields.split(",").map((field) => {
+          return {
+            fieldName: field.trim(),
+            fieldType: "string",
+          };
+        });
+     // Show the modal with the query results
+          showQueryResultModal(DBName, datasetJson, queryArray[1],einput.id);
+      };
+      element.appendChild(searchButton);
+      break;
     case "character":
     case "varchar":
     case "text":
@@ -244,6 +286,8 @@ function createFieldFromJson(fieldJson) {
   }
   return element;
 }
+
+
 
 function insertTable() {
   const modal = document.getElementById("tableDetailsModal");
@@ -575,6 +619,7 @@ async function updateInputs(data, DBName, tableName) {
             handleSelectField(input, fieldvalues, data[0][fieldLabel]);
             break;
           case "combo_sql":
+         
             // get the values of the field
             let fieldSQL = input.getAttribute("dataset-field-SQL");
             handleSelectFieldSQL(
@@ -585,7 +630,7 @@ async function updateInputs(data, DBName, tableName) {
               data[0][fieldLabel]
             );
             break;
-
+          
           default:
             // if (fieldType === "input") {
             input.value = data[0][fieldLabel]?.toString().trim() || "";
@@ -659,7 +704,7 @@ function handleSelectFieldSQL(DBName, input, SQL, fieldLabel, selectedValue) {
   let selectElement = input.parentElement.querySelector("select");
 
   if (!selectElement) {
-    const url = `/query-data/${DBName}/${SQL}`;
+    const url = `/query-data/${DBName}/${encodeURIComponent(SQL)}`;
     fetch(url)
       .then((response) => response.json())
       .then((data) => {
