@@ -104,7 +104,7 @@ function updateDataSetWeb(main, content) {
 
   try {
     createApi = JSON.parse(dataCreateApi[0].getAttribute("data-field"));
-  } catch {}
+  } catch { }
   try {
     getById = JSON.parse(dataGetById[0].getAttribute("data-field"));
     updateById = JSON.parse(dataUpdateById[0].getAttribute("data-field"));
@@ -157,7 +157,6 @@ function updateDataSetWeb(main, content) {
   main.setAttribute("update-by-id", JSON.stringify(updateById));
   main.setAttribute("create-api", JSON.stringify(createApi));
   renderDataSetWeb(main, getById, updateById, createApi);
-  renderDataSetNavigateWeb(main, getById, updateById, createApi);
 }
 
 function renderDataSetWeb(main, getById, updateById, createApi) {
@@ -177,15 +176,6 @@ function renderDataSetWeb(main, getById, updateById, createApi) {
     dataset.appendChild(createField);
   });
   main.appendChild(dataset);
-  renderDataSetNavigateWeb(
-    apiUrl,
-    apiMethod,
-    jsonData,
-    apiId,
-    getById,
-    updateById,
-    createApi
-  );
 }
 
 function createFieldFromJsonWeb(fieldJson, apiUrl) {
@@ -263,7 +253,7 @@ async function linkRecordToGridWeb(selectedData, record) {
     const data = { data: [selectedData] };
     updateInputsWeb(data, jsonData, apiId, 0);
     setRowNumWeb(apiId, record);
-  } catch {}
+  } catch { }
 }
 
 async function apiData(apiUrl, apiMethod, apiFilter = false) {
@@ -325,7 +315,7 @@ async function apiData(apiUrl, apiMethod, apiFilter = false) {
         }
         return false;
       });
-    } catch {}
+    } catch { }
   }
   return data;
 }

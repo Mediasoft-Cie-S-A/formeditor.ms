@@ -62,7 +62,7 @@ function updateDataSearchWeb(main, content) {
   RenderDataSearchWeb(main);
 }
 
-function search(event) {}
+function search(event) { }
 function RenderDataSearchWeb(main) {
   main.innerHTML = "";
   var searchMainDiv = document.createElement("div");
@@ -155,18 +155,7 @@ function gridSearchWeb(event) {
     }
   }
 
-  if (idObject.dataSetWeb) {
-    const main = document.getElementById(idObject.dataSetWeb);
-    main.setAttribute("apiFilter", filter);
-    const dataSetGrid = JSON.parse(main.getAttribute("dataset"));
-    let baseurl = dataSetGrid[1]?.controllerServerUrl.slice(0, -1);
-    const apiPath = dataSetGrid[1]?.apiPath;
-    const apiUrl = baseurl + apiPath;
-    const apiId = dataSetGrid[1]?.apiId;
-    const apiMethod = dataSetGrid[1]?.apiMethod;
 
-    moveFirstWeb(apiUrl, apiMethod, apiId);
-  }
 }
 async function searchAutoCompleteWeb(event, element) {
   event.preventDefault();
@@ -190,11 +179,11 @@ async function searchAutoCompleteWeb(event, element) {
       autocomplete.setAttribute(
         "style",
         "display:block;top:" +
-          (parseInt(getAbsoluteOffset(element).top) +
-            parseInt(element.offsetHeight)) +
-          "px;width:" +
-          element.offsetWidth +
-          "px;"
+        (parseInt(getAbsoluteOffset(element).top) +
+          parseInt(element.offsetHeight)) +
+        "px;width:" +
+        element.offsetWidth +
+        "px;"
       );
       const uniqueValues = new Set();
       data.forEach((row) => {

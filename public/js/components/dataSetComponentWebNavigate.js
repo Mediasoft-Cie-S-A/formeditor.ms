@@ -4,256 +4,195 @@ function createDataSetComponentWebNavigate(type) {
   main.id = type + Date.now();
   main.draggable = true;
   main.tagName = type;
+  renderNavigationBarWeb(
+    main,
+    "",
+    "",
+    ""
+  )
   return main;
 }
 
-function renderDataSetNavigateWeb(
-  apiUrl,
-  apiMethod,
-  jsonData,
-  apiId,
-  getById,
-  updateById,
-  createApi
-) {
-  const ides = getIdObject();
-  const navigate = document.getElementById(ides.dataNavigationWeb);
-  if (navigate) {
-    while (navigate.firstChild) {
-      navigate.removeChild(navigate.firstChild);
-    }
-    navigate.appendChild(
-      createNavigationBarWeb(
-        apiUrl,
-        apiMethod,
-        jsonData,
-        apiId,
-        getById,
-        updateById,
-        createApi
-      )
-    );
-  } else {
-    console.error(
-      "❌ 'navigate' element not found. Check 'ides.dataNavigationWeb' value."
-    );
-  }
 
-  moveFirstWeb(apiUrl, apiMethod, apiId);
-}
+function renderNavigationBarWeb(
+  main,
 
-function createNavigationBarWeb(
-  apiUrl1,
-  apiMethod1,
-  jsonData,
-  apiId1,
-  getById,
-  updateById,
-  createApi
 ) {
   console.log("createNavigationBarWeb");
   const ides = getIdObject();
-  const main = document.getElementById(ides.dataSetWeb);
-  const apiUrl = main.getAttribute("data-api-url");
-  const apiMethod = main.getAttribute("data-api-method");
-  const apiId = main.getAttribute("data-api-id");
+
   // Create the navigation bar div
   var navigationBar = document.createElement("div");
-  navigationBar.id = "navigationBar_" + apiId;
+  navigationBar.id = "navigationBar_" + Date.now();
   navigationBar.type = "navigation-bar";
-  // navigationBar.className = "navigation-bar";
   navigationBar.style.display = "block";
-
-  navigationBar.setAttribute("data-current-row", "0");
-  navigationBar.setAttribute("data-current-length", "0");
-  navigationBar.setAttribute("data-api-url", apiUrl);
-  navigationBar.setAttribute("data-api-method", apiMethod);
-  navigationBar.setAttribute("data-api-id", apiId);
-  navigationBar.setAttribute("get-by-id", JSON.stringify(getById));
-  navigationBar.setAttribute("update-by-id", JSON.stringify(updateById));
-  navigationBar.setAttribute("create-api", JSON.stringify(createApi));
-
-  navigationBar.innerHTML = '<div class="navigation-bar-title">record: </div>';
-  // Create buttons and append them to the navigation bar
   var buttons = [
-    {
-      name: "firstDSBtn",
-      title: "First",
-      text: '<i class="bi bi-arrow-up-circle-fill" style="color:green;margin-left:-6px"></i>',
-      event:
-        "moveFirstWeb('" + apiUrl + "','" + apiMethod + "','" + apiId + "')",
-    },
+
     {
       name: "PreviusDSBtn",
       title: "Previus",
       text: '<i class="bi bi-arrow-left-circle-fill" style="color:green;margin-left:-6px"></i>',
       event:
-        "movePrevWeb('" + apiUrl + "','" + apiMethod + "','" + apiId + "')",
+        "movePrevWeb()",
     },
     {
       name: "NextDSBtn",
       title: "Next",
       text: '<i class="bi bi-arrow-right-circle-fill" style="color:green;margin-left:-6px"></i>',
       event:
-        "moveNextWeb('" + apiUrl + "','" + apiMethod + "','" + apiId + "')",
+        "moveNextWeb()",
     },
-    {
-      name: "LastDSBtn",
-      title: "Last",
-      text: '<i class="bi bi-arrow-down-circle-fill" style="color:green;margin-left:-6px"></i>',
-      event:
-        "moveLastWeb('" + apiUrl + "','" + apiMethod + "','" + apiId + "')",
-    },
+
     {
       name: "EditDSBtn",
       title: "Edit Record",
       text: '<i class="bi bi-credit-card-2-front" style="color:blue;margin-left:-6px"></i>',
-      event: "EditRecordWeb('" + apiId + "')",
+      event: "EditRecordWeb()",
     },
     {
       name: "InsertDSBtn",
       title: "Create Record",
       text: '<i class="bi bi-sticky-fill" style="color:green;margin-left:-6px"></i>',
-      event: "InsertRecordWeb('" + apiId + "')",
+      event: "InsertRecordWeb()",
     },
     {
       name: "SaveDSBtn",
       title: "Save Record",
       text: '<i class="bi bi-sim-fill" style="color:red;margin-left:-6px"></i>',
-      event: "SaveRecordWeb('" + apiId + "')",
+      event: "SaveRecordWeb()",
     },
     {
       name: "RefreshDSBtn",
       title: "Refresh Data",
       text: '<i class="bi bi-arrow-clockwise" style="color:green;margin-left:-6px"></i>',
-      event: "RefreshRecordWeb('" + apiId + "')",
+      event: "RefreshRecordWeb()",
     },
   ];
   var htm = "";
   //for the dom2json is mandatory to create a html for the events
   buttons.forEach((buttonInfo) => {
-    htm += `<button name='${buttonInfo.name}'  title="${
-      buttonInfo.title
-    }" onclick="${buttonInfo.event.trim()}" style="width:30px;">${
-      buttonInfo.text
-    }</button>`;
+    htm += `<button name='${buttonInfo.name}'  title="${buttonInfo.title
+      }" onclick="${buttonInfo.event.trim()}" style="width:30px;">${buttonInfo.text
+      }</button>`;
   });
   navigationBar.innerHTML += "<div >" + htm + "</div>";
   // Append the navigation bar to the body or another element in your document
-  return navigationBar;
+  main.appendChild(navigationBar);
 }
 
 async function moveNextWeb(apiUrl) {
-  const ides = getIdObject();
-  console.log("DataSetWeb Move Next");
-  const main = document.getElementById(ides.dataSetWeb);
-  const apiFilter = main.getAttribute("apiFilter");
-  const apiUrl1 = main.getAttribute("data-api-url");
-  const apiMethod = main.getAttribute("data-api-method");
-  const apiId = main.getAttribute("data-api-id");
-  const row = getRowNumWeb(ides.dataNavigationWeb);
-  const length = getDataLength(ides.dataNavigationWeb);
-  if (row === length - 1) return;
-  const jsonData = JSON.parse(main.getAttribute("dataSet"));
-  if (!apiUrl) return;
-  const data = await apiData(apiUrl1, apiMethod, apiFilter);
-  if (!data) return;
-  updateInputsWeb(data, jsonData, apiId, row + 1);
-  setRowNumWeb(ides.dataNavigationWeb, row + 1);
-  setDataLength(
-    ides.dataNavigationWeb,
-    data[jsonData[1].fieldArrayName].length
-  );
-}
+  // Handle panel navigation
+  let allPanels = document.querySelectorAll(".panel");
+  console.log("allPanels", allPanels);
+  let selectedPanel = document.querySelector(".selected-panel");
+  console.log("selectedPanel", selectedPanel);
 
-async function moveFirstWeb(apiUrl, apiMethod, apiId) {
-  console.log("DataSetWeb Move First");
-  const ides = getIdObject();
-  const dataSetId = "DataSetWeb_" + apiId;
-  // const dataSet = document.getElementById(dataSetId);
-  const main = document.getElementById(ides.dataSetWeb);
-  const apiFilter = main.getAttribute("apiFilter");
-  const jsonData = JSON.parse(main.getAttribute("dataSet"));
-  if (!apiUrl) return;
-  const data = await apiData(apiUrl, apiMethod, apiFilter);
-  if (!data) return;
-  updateInputsWeb(data, jsonData, apiId, 0);
-  setDataLength(
-    ides.dataNavigationWeb,
-    data[jsonData[1].fieldArrayName].length
-  );
-  setRowNumWeb(ides.dataNavigationWeb, 0);
-}
-
-async function movePrevWeb() {
-  const ides = getIdObject();
-  const main = document.getElementById(ides.dataSetWeb);
-  const apiFilter = main.getAttribute("apiFilter");
-  const apiUrl = main.getAttribute("data-api-url");
-  const apiMethod = main.getAttribute("data-api-method");
-  const apiId = main.getAttribute("data-api-id");
-  const row = getRowNumWeb(ides.dataNavigationWeb);
-  if (row === 0) return;
-  const jsonData = JSON.parse(main.getAttribute("dataSet"));
-  if (!apiUrl) return;
-  const data = await apiData(apiUrl, apiMethod, apiFilter);
-  if (!data) return;
-  updateInputsWeb(data, jsonData, apiId, row - 1);
-  setRowNumWeb(ides.dataNavigationWeb, row - 1);
-  setDataLength(
-    ides.dataNavigationWeb,
-    data[jsonData[1].fieldArrayName].length
-  );
-}
-
-async function moveLastWeb() {
-  console.log("DataSetWeb Move Last");
-  const ides = getIdObject();
-  const main = document.getElementById(ides.dataSetWeb);
-  const apiFilter = main.getAttribute("apiFilter");
-  const apiUrl = main.getAttribute("data-api-url");
-  const apiMethod = main.getAttribute("data-api-method");
-  const apiId = main.getAttribute("data-api-id");
-  const jsonData = JSON.parse(main.getAttribute("dataSet"));
-  if (!apiUrl) return;
-  const data = await apiData(apiUrl, apiMethod, apiFilter);
-  if (!data) return;
-  let length;
-  const searchFilter = apiFilter?.split("|");
-  if (searchFilter?.length < 3 || apiFilter == false) {
-    length = getDataLength(apiId);
-  } else {
-    length = data?.data?.length;
+  if (!selectedPanel && allPanels.length > 0) {
+    // If no panel is selected, consider the first panel as selected
+    selectedPanel = allPanels[0];
+    selectedPanel.classList.add("selected-panel");
   }
-  // if(fromInsertRecord) length = data[jsonData[1].fieldArrayName].length;
-  updateInputsWeb(data, jsonData, apiId, length - 1);
-  setRowNumWeb(ides.dataNavigationWeb, length - 1);
-  setDataLength(
-    ides.dataNavigationWeb,
-    data[jsonData[1].fieldArrayName].length
-  );
+
+  if (selectedPanel) {
+    selectedPanel.classList.remove("selected-panel");
+
+    let panels = Array.from(allPanels);
+    let currentIndex = panels.indexOf(selectedPanel);
+
+    // Select the next panel if it exists
+    if (currentIndex + 1 < panels.length) {
+      panels[currentIndex + 1].classList.add("selected-panel");
+      panels[currentIndex + 1].click();
+      return; // Exit after handling panels
+    } else {
+      console.log("No next panel to select.");
+    }
+  }
+
+  // Handle grid navigation
+  let dataGrid = document.querySelectorAll("[tagname='dataGridWeb']");
+  console.log("dataGrid", dataGrid);
+
+  for (let i = 0; i < dataGrid.length; i++) {
+    let grid = dataGrid[i];
+    let rows = Array.from(grid.querySelectorAll(".grid-row"));
+    let selectedRowIndex = rows.findIndex(row => row.classList.contains("grid-row-selected"));
+    console.log(`Grid ${i}: selectedRowIndex`, selectedRowIndex);
+
+    // If a row is selected, move to the next row
+    if (selectedRowIndex >= 0 && selectedRowIndex + 1 < rows.length) {
+      rows[selectedRowIndex].classList.remove("grid-row-selected");
+      rows[selectedRowIndex + 1].classList.add("grid-row-selected");
+      rows[selectedRowIndex + 1].querySelector("div").click();
+    }
+    // If no row is selected, simulate click on the first row
+    else if (selectedRowIndex === -1 && rows.length > 0) {
+      rows[0].classList.add("grid-row-selected");
+      rows[0].querySelector("div").click();
+    } else {
+      console.log("No rows to navigate in this grid.");
+    }
+  }
 }
 
-async function moveFirstWeb() {
-  console.log("DataSetWeb Move First");
-  const ides = getIdObject();
-  const main = document.getElementById(ides.dataSetWeb);
-  const apiFilter = main.getAttribute("apiFilter");
-  const apiUrl = main.getAttribute("data-api-url");
-  const apiMethod = main.getAttribute("data-api-method");
-  const apiId = main.getAttribute("data-api-id");
-  const jsonData = JSON.parse(main.getAttribute("dataSet"));
 
-  if (!apiUrl) return;
-  const data = await apiData(apiUrl, apiMethod, apiFilter);
-  if (!data) return;
-  updateInputsWeb(data, jsonData, apiId, 0);
-  setDataLength(
-    ides.dataNavigationWeb,
-    data[jsonData[1].fieldArrayName].length
-  );
-  setRowNumWeb(ides.dataNavigationWeb, 0);
+async function movePrevWeb(apiUrl) {
+  // Handle panel navigation
+  let allPanels = document.querySelectorAll(".panel");
+  console.log("allPanels", allPanels);
+  let selectedPanel = document.querySelector(".selected-panel");
+  console.log("selectedPanel", selectedPanel);
+
+  if (!selectedPanel && allPanels.length > 0) {
+    // If no panel is selected, consider the first panel as selected
+    selectedPanel = allPanels[0];
+    selectedPanel.classList.add("selected-panel");
+  }
+
+  if (selectedPanel) {
+    selectedPanel.classList.remove("selected-panel");
+
+    let panels = Array.from(allPanels);
+    let currentIndex = panels.indexOf(selectedPanel);
+
+    // Select the previous panel if it exists
+    if (currentIndex - 1 >= 0) {
+      panels[currentIndex - 1].classList.add("selected-panel");
+      panels[currentIndex - 1].click();
+      return; // Exit after handling panels
+    } else {
+      console.log("No previous panel to select.");
+    }
+  }
+
+  // Handle grid navigation
+  let dataGrid = document.querySelectorAll("[tagname='dataGridWeb']");
+  console.log("dataGrid", dataGrid);
+
+  for (let i = 0; i < dataGrid.length; i++) {
+    let grid = dataGrid[i];
+    let rows = Array.from(grid.querySelectorAll(".grid-row"));
+    let selectedRowIndex = rows.findIndex(row => row.classList.contains("grid-row-selected"));
+    console.log(`Grid ${i}: selectedRowIndex`, selectedRowIndex);
+
+    // If a row is selected, move to the previous row
+    if (selectedRowIndex > 0) {
+      rows[selectedRowIndex].classList.remove("grid-row-selected");
+      rows[selectedRowIndex - 1].classList.add("grid-row-selected");
+      rows[selectedRowIndex - 1].querySelector("div").click();
+    }
+    // If no row is selected, simulate click on the last row
+    else if (selectedRowIndex === -1 && rows.length > 0) {
+      rows[rows.length - 1].classList.add("grid-row-selected");
+      rows[rows.length - 1].querySelector("div").click();
+    } else {
+      console.log("No rows to navigate in this grid.");
+    }
+  }
 }
+
+
+
 
 function EditRecordWeb(apiId1, handle = false) {
   console.log("Edit Input");
