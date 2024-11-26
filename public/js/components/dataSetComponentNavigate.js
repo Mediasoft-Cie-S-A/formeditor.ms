@@ -9,17 +9,17 @@ function createDataSetComponentNavigate(type) {
 }
 
 function renderNavigationBar(main) {
- 
+
   // Create the navigation bar div
   var navigationBar = document.createElement("div");
   navigationBar.id = "navigationBar_" + Date.now();
   navigationBar.type = "navigation-bar";
   //   navigationBar.className = "navigation-bar";
   navigationBar.style.display = "block";
-  
+
   // Create buttons and append them to the navigation bar
   var buttons = [
-   
+
     {
       name: "PreviusDSBtn",
       title: "Previus",
@@ -34,7 +34,7 @@ function renderNavigationBar(main) {
       event:
         "navbar_moveNext()",
     },
-   
+
     {
       name: "EditDSBtn",
       title: "Edit Record",
@@ -65,68 +65,124 @@ function renderNavigationBar(main) {
   var htm = "";
   //for the dom2json is mandatory to create a html for the events
   buttons.forEach((buttonInfo) => {
-    htm += `<button name='${buttonInfo.name}'  title="${
-      buttonInfo.title
-    }" onclick="${buttonInfo.event.trim()}" style="width:30px;">${
-      buttonInfo.text
-    }</button>`;
+    htm += `<button name='${buttonInfo.name}'  title="${buttonInfo.title
+      }" onclick="${buttonInfo.event.trim()}" style="width:30px;">${buttonInfo.text
+      }</button>`;
   });
   navigationBar.innerHTML += "<div >" + htm + "</div>";
 
   main.appendChild(navigationBar);
 }
 
-
-
 function navbar_movePrev() {
-  // get dataGrid by tag name
+  let allPanels = document.querySelectorAll("[tagname='dataTable'] div.panel");
+  let selectedPanel = document.querySelector(".selected-panel");
+
+  if (!selectedPanel && allPanels.length > 0) {
+    // If no panel is selected, consider the first panel as selected
+    selectedPanel = allPanels[0];
+    selectedPanel.classList.add("selected-panel");
+  }
+
+  if (selectedPanel) {
+    selectedPanel.classList.remove("selected-panel");
+
+    let panels = Array.from(allPanels);
+    let currentIndex = panels.indexOf(selectedPanel);
+
+    // Click on the previous panel div if it exists
+    if (currentIndex > 0) {
+      panels[currentIndex - 1].classList.add("selected-panel");
+      panels[currentIndex - 1].click();
+      return; // Exit after handling panels
+    } else {
+      console.log("No previous panel to select.");
+    }
+  }
+
   let dataGrid = document.querySelectorAll("[tagname='dataGrid']");
-  // get all .grid-row and check if threse is a row selected and select the previous row
+
   for (let i = 0; i < dataGrid.length; i++) {
     let grid = dataGrid[i];
     let rows = grid.querySelectorAll(".grid-row");
-    console.log(rows);
     let found = false;
+
+    // Iterate through the rows to find the selected one
     for (let j = 1; j < rows.length; j++) {
       if (rows[j].classList.contains("grid-row-selected")) {
-         rows[j].classList.remove("grid-row-selected");
-        //  rows[j - 1].classList.add("grid-row-selected");
-          // simulate click on the row
+        rows[j].classList.remove("grid-row-selected");
+
+        // Simulate click on the previous row
+        if (j - 1 >= 0) {
           rows[j - 1].querySelector("div").click();
+        }
         found = true;
         break;
-        }
-      
+      }
     }
-    if (!found) {
+
+    // If no row is selected, simulate click on the first row
+    if (!found && rows.length > 0) {
       rows[0].querySelector("div").click();
     }
   }
 }
 
-function navbar_moveNext(DBName, tableName, datasetFields) {
-   // get dataGrid by tag name
-   let dataGrid = document.querySelectorAll("[tagname='dataGrid']");
-   // get all .grid-row and check if threse is a row selected and select the previous row
-   for (let i = 0; i < dataGrid.length; i++) {
-     let grid = dataGrid[i];
-     let rows = grid.querySelectorAll(".grid-row");
-     console.log(rows);
-     let found = false;
-     for (let j =  rows.length-1; j > 0; j--) {
-       if (rows[j].classList.contains("grid-row-selected")) {
-           rows[j].classList.remove("grid-row-selected");
-       
-           // simulate click on the row
-           rows[j + 1].querySelector("div").click();
-          found = true;
-         break;
-       }
-     }
-     if (!found) {
-       rows[rows.length-1].querySelector("div").click();
-     }
-   }
+
+function navbar_moveNext() {
+  // Handle selected-panel logic
+  let allPanels = document.querySelectorAll("[tagname='dataTable'] div.panel");
+  let selectedPanel = document.querySelector(".selected-panel");
+
+  if (!selectedPanel && allPanels.length > 0) {
+    // If no panel is selected, consider the first panel as selected
+    selectedPanel = allPanels[0];
+    selectedPanel.classList.add("selected-panel");
+  }
+
+  if (selectedPanel) {
+    selectedPanel.classList.remove("selected-panel");
+
+    let panels = Array.from(allPanels);
+    let currentIndex = panels.indexOf(selectedPanel);
+
+    // Click on the next panel div if it exists
+    if (currentIndex + 1 < panels.length) {
+      panels[currentIndex + 1].classList.add("selected-panel");
+      panels[currentIndex + 1].click();
+      return; // Exit after handling panels
+    } else {
+      console.log("No next panel to select.");
+    }
+  }
+
+  // Fallback: Handle grid-row navigation if no panels or no more panels are available
+  let dataGrid = document.querySelectorAll("[tagname='dataGrid']");
+
+  for (let i = 0; i < dataGrid.length; i++) {
+    let grid = dataGrid[i];
+    let rows = grid.querySelectorAll(".grid-row");
+    let found = false;
+
+    // Iterate through the rows to find the selected one
+    for (let j = rows.length - 1; j >= 0; j--) {
+      if (rows[j].classList.contains("grid-row-selected")) {
+        rows[j].classList.remove("grid-row-selected");
+
+        // Simulate click on the next row
+        if (j + 1 < rows.length) {
+          rows[j + 1].querySelector("div").click();
+        }
+        found = true;
+        break;
+      }
+    }
+
+    // If no row is selected, simulate click on the first row
+    if (!found && rows.length > 0) {
+      rows[0].querySelector("div").click();
+    }
+  }
 }
 
 function navbar_EditRecord(action) {
@@ -148,15 +204,15 @@ function navbar_InsertRecord() {
   const inputs = document.querySelectorAll(`[data-table-name] input,select`);
   console.log(inputs);
   inputs.forEach((input) => {
-         input.readOnly = false;
-         input.disabled = false;
-      const field = input.getAttribute("dataset-field-name");
-      if (field === "rowid") {
-        input.value = "new";
-      } else {
-        input.value = "";
-      }
-   
+    input.readOnly = false;
+    input.disabled = false;
+    const field = input.getAttribute("dataset-field-name");
+    if (field === "rowid") {
+      input.value = "new";
+    } else {
+      input.value = "";
+    }
+
   });
   document.querySelector("[name=SaveDSBtn]").disabled = false;
 }
@@ -270,10 +326,10 @@ function addIdToData(data, id, value) {
   return data;
 }
 
-async function navbar_SaveRecord () {
+async function navbar_SaveRecord() {
   try {
-    if ( document.querySelector("[name=SaveDSBtn]").disabled){
-     showToast("Save button is disabled");
+    if (document.querySelector("[name=SaveDSBtn]").disabled) {
+      showToast("Save button is disabled");
       return;
     }
     console.log("SaveRecord");
@@ -282,21 +338,21 @@ async function navbar_SaveRecord () {
       console.log(nextRowId);
       const tableName = nextRowId.getAttribute("dataset-table-name");
       const dbName = nextRowId.getAttribute("dbname");
-     
-        const rowIdValue = nextRowId.value;
-        let result;
-        if (rowIdValue === "new") {
-          let data = await CreateInsert(dbName, tableName);
-          result = await insertRecordDB(dbName, tableName, data);
-        } else {
-          const data = {
-            body: CreateUpdated(dbName, tableName),
-          };
-          result = await updateRecordDB(dbName, tableName, rowIdValue, data);
-        }
-        document.querySelector("[name=SaveDSBtn]").disabled = true;
-        return result;
-      
+
+      const rowIdValue = nextRowId.value;
+      let result;
+      if (rowIdValue === "new") {
+        let data = await CreateInsert(dbName, tableName);
+        result = await insertRecordDB(dbName, tableName, data);
+      } else {
+        const data = {
+          body: CreateUpdated(dbName, tableName),
+        };
+        result = await updateRecordDB(dbName, tableName, rowIdValue, data);
+      }
+      document.querySelector("[name=SaveDSBtn]").disabled = true;
+      return result;
+
     }
   } catch (error) {
     //showToast("Error:" + error);
@@ -312,7 +368,7 @@ async function CreateInsert(DBName, tableName) {
   var insertFields = "";
   var insertValues = "";
   for (i = 0; i < inputs.length; i++) {
-    
+
     if (inputs[i].id && inputs[i].id.includes("__")) {
       continue; // Skip this iteration
     }
@@ -389,7 +445,7 @@ async function updateRecordDB(DBName, tableName, nextRowId, updateData) {
       showToast(`HTTP error! status: ${response.status}`);
     }
     const updateResult = await response.json();
-    
+
     let filedName = "";
     let operator = "";
     let searchValue = "";

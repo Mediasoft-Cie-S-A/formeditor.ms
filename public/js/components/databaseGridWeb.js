@@ -195,7 +195,14 @@ function insertNavBarWeb(
   html += `<button name='NextGRIDBtn' title='Next Page'  grid-id='${gridContainer.parentElement.id}' onclick='gridNextWeb(event,"${apiName}",searchfields.options[searchfields.options.selectedIndex].value,searchOperator.value)'><i class='bi bi-arrow-right-circle-fill' grid-id='${gridContainer.parentElement.id}' style='color:blue;'></i></button>`;
   html += `<button name='RefreshGRIDBtn' title='Refresh'  grid-id='${gridContainer.parentElement.id}' onclick='refreshWeb(event,"${apiName}")'><i class='bi bi-arrow-repeat' grid-id='${gridContainer.parentElement.id}'  style='color:green;'></i></button>`;
   html += `<button name='PostitGRIDBtn' title='Postit'  grid-id='${gridContainer.parentElement.id}' onclick='postitWeb(event,"${apiName}")'><i class='bi bi-card-text' grid-id='${gridContainer.parentElement.id}' style='color:#aa0;'></i></button>`;
-  html += `<button name='ExportGRIDBtn' title='Export Data'  grid-id='${gridContainer.parentElement.id}' onclick='export2CSVWeb(event,"${apiName}")'><i class='bi bi-file-spreadsheet' grid-id='${gridContainer.parentElement.id}' style='color:green;'></i></button></div>`;
+  html += `<button name='ExportGRIDBtn' title='Export Data'  grid-id='${gridContainer.parentElement.id}' onclick='export2CSVWeb(event,"${apiName}")'><i class='bi bi-file-spreadsheet' grid-id='${gridContainer.parentElement.id}' style='color:green;'></i></button>`;
+
+  html += `<button name='gridView' title='Grid View'  grid-id='${gridContainer.parentElement.id}'onclick='switchViewWeb(event,"${apiName}","${gridContainer.parentElement.id}","grid")'>` +
+    `<i class='bi bi-grid-3x3-gap-fill' style='color:blue;'></i>` + `</button>`;
+
+  html += `<button name='panelView' title='Panel View'  grid-id='${gridContainer.parentElement.id}'onclick='switchViewWeb(event,"${apiName}","${gridContainer.parentElement.id}","panel")'>` +
+    `<i class='bi bi-card-list'  style='color:blue;'></i>` + `</button></div>`;
+
   html += `<div id="Data-Grid-Postit" style="display:none;position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.5); z-index: 1000;"></div>`;
   html += `<select id="gridPage" class="input-element" onchange='grid_page_sizeWeb(event,"${gridContainer.parentElement.id}",searchfields.options[searchfields.options.selectedIndex].value,searchOperator.value)' style='width:60px;font-size:14px'>`;
   html += `<option value='5'>5</option>`;
@@ -210,16 +217,7 @@ function insertNavBarWeb(
 
   gridContainer.innerHTML += html;
 }
-
-//Grid code
-function createGridWeb(grid, apiName, datasetFields, datasetFieldsTypes) {
-  //header
-  grid.setAttribute("dataset-api-table-name", apiName);
-  grid.setAttribute("current_page", 1);
-  grid.setAttribute("page_size", 5);
-  grid.setAttribute("api-name", apiName);
-
-  // table header
+function generateHeaderRowWeb(grid, datasetFields) {
   var header = document.createElement("div");
   header.className = "grid-header";
   // header
@@ -241,14 +239,35 @@ function createGridWeb(grid, apiName, datasetFields, datasetFieldsTypes) {
   });
   header.appendChild(row);
   grid.appendChild(header);
+}
+
+//Grid code
+function createGridWeb(grid, apiName, datasetFields, datasetFieldsTypes) {
+  //header
+  grid.setAttribute("dataset-api-table-name", apiName);
+  grid.setAttribute("current_page", 1);
+  grid.setAttribute("page_size", 5);
+  grid.setAttribute("api-name", apiName);
+  grid.setAttribute("view-web", "standered");
+  // table header
+  generateHeaderRowWeb(grid, datasetFields)
   // search inputs
   grid.setAttribute("Dataset-Fields-Names", datasetFields);
   grid.setAttribute("Dataset-Fields-Types", datasetFieldsTypes);
   const body = document.createElement("div");
   body.className = "grid-body";
+
   grid.appendChild(body);
   //set search inputs
   gridFetchDataWeb(grid);
+}
+function switchViewWeb(e, apiName, gridID, viewWeb) {
+
+  e.preventDefault();
+  // get the grid
+  const grid = document.getElementById(gridID);
+  grid.setAttribute("view-web", viewWeb);
+  searchGridWeb("", "", "", gridID); // refresh the grid
 }
 
 function grid_page_sizeWeb(e, dataGridId, fieldName, operator) {
@@ -278,7 +297,7 @@ function gridPrevWeb(e, apiName, fieldName, operator) {
     }
     grid.setAttribute("current_page", currentPage);
     removeAllChildRows(grid);
-    gridFetchDataWeb(grid, fieldName, operator, searchValue);
+    gridFetchDataWeb(grid, fieldName, operator, searchValue, true);
   }
 }
 
@@ -296,7 +315,7 @@ function gridNextWeb(e, apiName, fieldName, operator) {
     currentPage++;
     grid.setAttribute("current_page", currentPage);
     removeAllChildRows(grid);
-    gridFetchDataWeb(grid, fieldName, operator, searchValue);
+    gridFetchDataWeb(grid, fieldName, operator, searchValue, true);
   }
 }
 function refreshWeb(e, apiName) {
@@ -313,9 +332,27 @@ function refreshWeb(e, apiName) {
   }
 }
 
+function gridViewWeb(view, tableGrid, apiName, page, pageSize, datasetFields, filter) {
+  switch (view) {
+    case "standard":
+      // tableGrid.innerHTML = "";
+      // generateHeaderRowWeb(tableGrid, datasetFields.split(","));
+      gridGetDataWeb(tableGrid, apiName, page, pageSize, datasetFields, filter);
+      break;
+    case "panel":
+      gridGetDataInPanelFormatWeb(tableGrid, apiName, page, pageSize, datasetFields, filter);
+      break;
+    default:
+      // generateHeaderRowWeb(tableGrid, datasetFields.split(","))
+      gridGetDataWeb(tableGrid, apiName, page, pageSize, datasetFields, filter);
+  }
+}
+
 function searchGridWeb(filterName, FilterOp, filterValue, gridID) {
+
   const grid = document.getElementById(gridID);
-  const tableGrid = grid.querySelector('[tag-name="dataTable"]');
+  // const tableGrid = grid.querySelector('[tagname="dataTable"]');
+  const tableGrid = grid.children[1]; // Selects the second child of grid
   tableGrid.setAttribute("current_page", 1);
   var apiName = tableGrid.getAttribute("api-name");
   var datasetFields = tableGrid.getAttribute("Dataset-Fields-Names");
@@ -328,7 +365,9 @@ function searchGridWeb(filterName, FilterOp, filterValue, gridID) {
   if (filterValue == "") {
     filter = "";
   }
-  gridGetDataWeb(tableGrid, apiName, 1, pageSize, datasetFields, filter);
+  var view = grid.getAttribute("view-web");
+
+  gridViewWeb(view, tableGrid, apiName, 1, pageSize, datasetFields, filter);
 }
 
 function export2CSVWeb(e, tabelName) {
@@ -388,7 +427,8 @@ function gridFetchDataWeb(
   grid,
   fieldName = null,
   operator = null,
-  searchValue = null
+  searchValue = null,
+  moveNext = false
 ) {
   var apiName = grid.getAttribute("api-name");
   var currentPage = parseInt(grid.getAttribute("current_page"));
@@ -403,7 +443,8 @@ function gridFetchDataWeb(
     datasetFields,
     fieldName,
     operator,
-    searchValue
+    searchValue,
+    moveNext
   );
 }
 
@@ -415,7 +456,8 @@ function fetchTableDataWeb(
   datasetFields,
   fieldName = null,
   operator = null,
-  searchValue = null
+  searchValue = null,
+  moveNext = false
 ) {
   var filter = "";
   var i = 0;
@@ -426,7 +468,12 @@ function fetchTableDataWeb(
     filter += "|";
     filter += searchValue;
   }
-  gridGetDataWeb(grid, apiName, page, pageSize, datasetFields, filter);
+  if (moveNext) {
+    const view = grid.parentElement.getAttribute("view-web") || "standard"
+    gridViewWeb(view, grid, apiName, page, pageSize, datasetFields, filter);
+  } else {
+    gridGetDataWeb(grid, apiName, page, pageSize, datasetFields, filter);
+  }
 }
 
 const filterKeys = (data, keys) => {
@@ -518,7 +565,6 @@ async function gridGetDataWeb(
         return false;
       });
     }
-
     let jsonData = data.data;
     const filteredData = filterKeys(jsonData, fields);
     grid.setAttribute("jsonData", JSON.stringify(filteredData));
@@ -530,6 +576,7 @@ async function gridGetDataWeb(
       fieldIndex = lastStartValue;
       grid.setAttribute("current_page", page - 1);
     }
+
     // The data is now available
     for (var j = fieldIndex; j < fieldIndex + pageSize; j++) {
       let record = j;
@@ -543,9 +590,18 @@ async function gridGetDataWeb(
       else rowDiv.style.backgroundColor = "#ffffff";
       rowDiv.className = "grid-row";
       rowDiv.setAttribute("rowid", row[0]);
+      if (record == 0) {
+        rowDiv.classList.add("grid-row-selected"); // Add default selection to the first row
+        linkRecordToGridWeb(
+          rowData, record
+        );
+      }
       // add click event to row to call linkRecordToGrid(apiName, rowId)
       rowDiv.addEventListener("click", function (event) {
-        event.preventDefault();
+        const allRows = document.querySelectorAll(".grid-row");
+        allRows.forEach((row) => row.classList.remove("grid-row-selected"));
+        this.classList.add("grid-row-selected");
+
         linkRecordToGridWeb(rowData, record);
       });
       var i = 0;
@@ -570,5 +626,193 @@ async function gridGetDataWeb(
     body.appendChild(row);
   } catch (error) {
     console.error("Error:", error);
+  }
+}
+
+
+async function gridGetDataInPanelFormatWeb(
+  grid,
+  apiName,
+  page,
+  pageSize,
+  datasetFields,
+  filter
+) {
+  try {
+    // Validate datasetFields
+    if (!datasetFields || typeof datasetFields !== "string") {
+      console.error("Invalid datasetFields: Expected a non-empty string.");
+      return;
+    }
+
+    // Split datasetFields into an array
+    const fields = datasetFields.split(",").map((field) => field.trim());
+    // Get the grid body
+    const body = grid.querySelector(".grid-body");
+    const header = grid.querySelector(".grid-header");
+    if (header) {
+      header.remove();
+    }
+    if (!body) {
+      console.error("Grid body element not found.");
+      return;
+    }
+    body.innerHTML = ""; // Clear existing content
+
+    // Get API URL and method from grid attributes
+    const apiUrl = grid.getAttribute("apiUrl");
+    const apiMethod = grid.getAttribute("apiMethod");
+    if (!apiUrl || !apiMethod) {
+      console.error("API URL or Method not found.");
+      return;
+    }
+
+    // Calculate starting index for pagination
+    const fieldIndex = (page - 1) * pageSize;
+
+    // Fetch data from the API
+    const response = await callApi(apiUrl, apiMethod);
+    if (!response || response.status !== 200) {
+      console.error(`API request failed with status ${response?.status}`);
+      return;
+    }
+
+    const data = await response.json();
+
+    // Apply filter if provided
+    if (filter && data?.data) {
+      const searchFilter = filter.split("|");
+      if (searchFilter.length < 3) {
+        console.error("Invalid filter format. Expected format: 'field|operator|value'.");
+        return;
+      }
+
+      const [field, operator, value] = searchFilter;
+      const operatorMap = {
+        eq: (a, b) => a === b,
+        lt: (a, b) => a < b,
+        lte: (a, b) => a <= b,
+        gt: (a, b) => a > b,
+        gte: (a, b) => a >= b,
+        like: (a, b) =>
+          a.toString().toLowerCase().includes(b.toString().toLowerCase()),
+      };
+
+      if (!operatorMap[operator]) {
+        console.error(`Invalid operator: ${operator}`);
+        return;
+      }
+
+      // Filter the data
+      data.data = data.data.filter((item) => {
+        const fieldValue = item[field];
+        if (fieldValue == null) return false;
+
+        let processedFieldValue;
+        let processedValue;
+
+        // Date comparison
+        if (!isNaN(Date.parse(fieldValue)) && !isNaN(Date.parse(value))) {
+          processedFieldValue = new Date(fieldValue);
+          processedValue = new Date(value);
+          return operatorMap[operator](processedFieldValue.getTime(), processedValue.getTime());
+        }
+
+        // Numeric comparison
+        if (!isNaN(fieldValue) && !isNaN(value)) {
+          processedFieldValue = parseFloat(fieldValue);
+          processedValue = parseFloat(value);
+          return operatorMap[operator](processedFieldValue, processedValue);
+        }
+
+        // String comparison for 'like'
+        if (operator === "like") {
+          return operatorMap[operator](fieldValue.toString(), value.toString());
+        }
+
+        return false; // Unsupported comparison
+      });
+    }
+
+    const jsonData = data?.data || [];
+
+    // Filter the data to include only the specified datasetFields
+    const filteredData = jsonData.map((item) =>
+      fields.reduce((acc, field) => {
+        if (field in item) {
+          acc[field] = item[field];
+        }
+        return acc;
+      }, {})
+    );
+
+    grid.setAttribute("jsonData", JSON.stringify(filteredData));
+    grid.setAttribute("datasetFields", datasetFields);
+    grid.setAttribute("apiName", apiName);
+    grid.setAttribute("page", page);
+    grid.setAttribute("pageSize", pageSize);
+
+    // Render panels for the filtered data
+    filteredData.slice(fieldIndex, fieldIndex + pageSize).forEach((record, index) => {
+      const panelDiv = document.createElement("div");
+      panelDiv.className = "panel";
+      panelDiv.style.border = "1px solid #ddd";
+      panelDiv.style.borderRadius = "8px";
+      panelDiv.style.padding = "10px";
+      panelDiv.style.marginBottom = "10px";
+      panelDiv.style.backgroundColor = index % 2 === 0 ? "#f9f9f9" : "#ffffff";
+      if (index == 0) {
+        panelDiv.classList.add("selected-panel"); // Add default selection to the first row
+
+        // call linkRecordToGrid(tableName, rowId)
+        linkRecordToGridWeb(
+          record, index
+        );
+      }
+      panelDiv.addEventListener("click", function () {
+        // Highlight selected panel
+        const panels = grid.querySelectorAll(".panel");
+        panels.forEach((panel) => {
+          panel.classList.remove("selected-panel");
+        });
+        panelDiv.classList.add("selected-panel");
+
+        // Call linkRecordToGrid with appropriate arguments
+        linkRecordToGridWeb(
+          record, index
+        );
+      });
+      // Alternate colors
+
+      // Display only specified fields
+      Object.entries(record).forEach(([key, value]) => {
+        if (key === "rowid") return; // Skip hidden fields
+
+        const fieldDiv = document.createElement("div");
+        fieldDiv.className = "field";
+        fieldDiv.style.marginBottom = "5px";
+
+        const fieldName = document.createElement("span");
+        fieldName.style.fontWeight = "bold";
+        fieldName.textContent = `${key}: `;
+
+        const fieldValue = document.createElement("span");
+        fieldValue.textContent = value || "-";
+
+        fieldDiv.appendChild(fieldName);
+        fieldDiv.appendChild(fieldValue);
+
+        panelDiv.appendChild(fieldDiv);
+      });
+
+      body.appendChild(panelDiv);
+    });
+
+    // Append an empty row for layout consistency
+    const row = document.createElement("div");
+    row.style.height = "100%";
+    body.appendChild(row);
+  } catch (error) {
+    console.error("Error in gridGetDataInPanelFormatWeb:", error);
   }
 }
