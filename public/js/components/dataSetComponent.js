@@ -162,13 +162,16 @@ function createFieldFromJson(fieldJson) {
   var element = null;
   let einput = null;
   switch (fieldJson.fieldType) {
-    case "combo_array":
-    case "combo_sql":
+    
     case "array":
+      case "combo_array":
+        case "combo_sql":
       element = createElementInput(fieldJson.fieldType);
       einput = element.querySelector("input"); // Adjust to your combobox selector
       einput.style.display = "none";
       break;
+     
+      
     case "sequence":
       element = createElementInput(fieldJson.fieldType);
       einput = element.querySelector("input"); // Adjust to your combobox selector
@@ -651,8 +654,11 @@ async function updateInputs(data, DBName, tableName) {
 // Helper function to handle select fields and sync with input field
 
 function handleSelectField(input, options, selectedValue) {
+  console.log("handleSelectField");
   if (!input) return;
 
+  console.log(input);
+  console.log(options);
   // convert the options to an array
   options = options.split(",");
 
