@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+var moveElementEvent = false;
+
 function removeAllChildNodes(parent) {
   while (parent.firstChild) {
     parent.removeChild(parent.firstChild);
@@ -340,6 +342,100 @@ function showProperties() {
 
   editElement(editorElementSelected);
 }
+
+function setParent() {
+  
+  // get the element selected by class  gjs-selection
+  const editorElementSelected = document.getElementsByClassName("gjs-selection")[0];
+  console.log(editorElementSelected.parentNode);
+  // simulate click on parent node of editorElementSelected 
+  editorElementSelected.parentNode.click();
+ 
+  //  hideEditMenu();
+}
+
+
+
+function stopMoveEvent(event) {
+  event.preventDefault();
+  console.log("stopMoveEvent");
+  console.log(moveElementEvent);
+  if (moveElementEvent === true) {
+    moveElementEvent = false;
+    // get the element selected by class  gjs-selection
+    const editorElementSelected = document.getElementsByClassName("gjs-selection")[0];
+    // get the position of the element
+    console.log(editorElementSelected);
+    // get the position of the mouse
+    const x = event.clientX;
+    const y = event.clientY;
+    // get the html element by position
+    const element = document.elementFromPoint(x, y);
+    console.log(element);
+    // reverse the position of the elements
+    // get the parent element of the element
+    const parentElement = element.parentNode;
+    const parentElementSelected = editorElementSelected.parentNode;
+    if (element.id === "formContainer" && parentElementSelected) {
+      // find the child element of the element closest to the mouse
+      const closestChild = findClosestChildToMouse(element, x, y);
+      if (closestChild) {
+        element.insertBefore(editorElementSelected, closestChild);
+      }
+    } else if (parentElement.id === "formContainer"  && parentElementSelected){
+      // find the child element of the element closest to the mouse
+      const closestChild = findClosestChildToMouse(parentElement, x, y);
+      if (closestChild) {
+        parentElement.insertBefore(editorElementSelected, closestChild);
+      }
+    }else if (parentElement && parentElementSelected) {
+      parentElement.appendChild(editorElementSelected);
+    }
+   
+
+    return;
+  }
+  // execute the drag event
+  
+}
+
+function findClosestChildToMouse(element, mouseX, mouseY) {
+  if (!element || !element.children || element.children.length === 0) {
+    console.warn("No child elements found in the target element.");
+    return null;
+  }
+
+  let closestChild = null;
+  let closestDistance = Infinity;
+
+  Array.from(element.children).forEach((child) => {
+    const rect = child.getBoundingClientRect();
+
+    // Calculate the center of the child element
+    const childCenterX = rect.left + rect.width / 2;
+    const childCenterY = rect.top + rect.height / 2;
+
+    // Calculate the distance from the mouse to the center of the child
+    const distance = Math.sqrt(
+      Math.pow(childCenterX - mouseX, 2) + Math.pow(childCenterY - mouseY, 2)
+    );
+
+    // Update the closest child if this one is nearer
+    if (distance < closestDistance) {
+      closestChild = child;
+      closestDistance = distance;
+    }
+  });
+
+  return closestChild;
+}
+
+
+function moveElement() {
+  moveElementEvent = true;
+  console.log("moveElement");
+}
+
 
 function deleteElement() {
   const inputElementSelected = document.getElementById("editorElementSelected");

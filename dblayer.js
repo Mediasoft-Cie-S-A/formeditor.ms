@@ -20,6 +20,8 @@ class dblayer{
       dbList = [];
       databases = [];
       dbCache = [];
+      mongoClient = null;
+      mongoDbName = "";
     checkAuthenticated = (req, res, next) => {
               if (req.isAuthenticated()) { return next(); }
               res.redirect("/login");
@@ -27,12 +29,14 @@ class dblayer{
 
 
       // for each dns entre create a db object
-    constructor(app,session, passport)
+    constructor(app,session, passport,client,dbname)
       {
           console.log("dblayer constructor");           
           this.dbList = app.config.dblist;
           this.generateRoutes = this.generateRoutes.bind(this);
           this.checkAuthenticated = this.checkAuthenticated.bind(this);
+          this.mongoClient=client;
+          this.mongoDbName=dbname;
           // get key value from dblist           
       }
 
@@ -56,6 +60,30 @@ class dblayer{
     getTableNames(dbCache, dbName) {
     return dbCache[dbName].map(table => table.NAME.toLowerCase());
     }
+
+    async trackAction(action, details) {
+      try {
+          this.mongoClient.connect();
+          const db = this.mongoClient.db(this.mongoDbName); // Database name          
+          const collection = db.collection("actions"); // Collection name
+
+          // Check if the action already exists
+          const existingAction = await collection.findOne({ action: action, details: details });
+
+          if (existingAction) {
+              console.log(`Action already tracked: ${action}`);
+          } else {
+              // Insert the new action
+              await collection.insertOne({ action: action, details: details, timestamp: new Date() });
+              console.log(`Action tracked successfully: ${action}`);
+          }
+      } catch (err) {
+          console.error("Error tracking action in MongoDB:", err);
+      }
+      finally{
+        await this.mongoClient.close();
+      }
+  }
 
     // Function to generate a mapping of tables to their databases
     createTableDatabaseMapping(dbCache) {
@@ -444,6 +472,10 @@ class dblayer{
                 const result = await db.updateRecord(tableName, data, rowID);
                 res.json({ message: "Record updated successfully", result });
                 await db.close();
+                const action = "event_triggered";
+                const details = { tableName, data, rowID, event: "Update" };
+                // Track the action in MongoDB
+                await this.trackAction(action, details);
               } catch (err) {
                 console.error(err);
                 res.status(500).send("Error updating record");
@@ -466,6 +498,10 @@ class dblayer{
                 const result = await db.insertRecord(tableName, data);
                 res.json({ message: "Record inserted successfully", result });
                 await db.close();
+                const action = "event_triggered";
+                const details = { tableName, data, rowID, event: "Insert" };
+                // Track the action in MongoDB
+                await this.trackAction(action, details);
               } catch (err) {
                 console.error(err);
                 res.status(500).send("Error inserting record");

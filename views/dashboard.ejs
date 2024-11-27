@@ -62,7 +62,7 @@
     <script src="js/msjv2/ui.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
   </head>
-  <body>
+  <body  ondrop="stopMoveEvent(event)">
     <!-- As a link -->
     <div class="main-header">
       <div class="row">
@@ -200,10 +200,10 @@
                 <div class="col" style="display: inline-block">
                   <label for="type">Type:</label><br />
                   <select class="input-element" id="type" name="type" required>
+                    
                     <option value="form">Form</option>
-                    <option value="business_component">
-                      Business Component
-                    </option></select
+                    <option value="business_component">Business Component </option>
+                  </select
                   ><br />
                 </div>
 
@@ -383,7 +383,7 @@
     >
       <input type="hidden" id="editorElementSelected" value="" />
       <div class="gjs-toolbar-items">
-        <div class="gjs-toolbar-item">
+        <div class="gjs-toolbar-item" onclick="setParent()" title="select parent">
           <svg viewBox="0 0 24 24">
             <path
               fill="currentColor"
@@ -391,7 +391,7 @@
             ></path>
           </svg>
         </div>
-        <div class="gjs-no-touch-actions gjs-toolbar-item" draggable="true">
+        <div class="gjs-no-touch-actions gjs-toolbar-item" onclick="moveElement()" draggable="true" ondrag="moveElementEvent=true"  title="Move Element">  
           <svg viewBox="0 0 24 24">
             <path
               fill="currentColor"
@@ -399,7 +399,7 @@
             ></path>
           </svg>
         </div>
-        <div class="gjs-toolbar-item" onclick="showProperties()">
+        <div class="gjs-toolbar-item" onclick="showProperties()" title="Show Properties">
           <svg viewBox="0 0 24 24">
             <path
               fill="currentColor"
@@ -407,7 +407,7 @@
             ></path>
           </svg>
         </div>
-        <div class="gjs-toolbar-item" onclick="deleteElement()">
+        <div class="gjs-toolbar-item" onclick="deleteElement()"  title="Delete Element">
           <svg viewBox="0 0 24 24">
             <path
               fill="currentColor"
