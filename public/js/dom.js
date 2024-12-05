@@ -67,9 +67,11 @@ function jsonToDom(json, parent) {
   } else {
     createDomElement(json, parent);
   }
-
+  
+}
   // planning
 
+function renderElements(parent){
   var planningElements = parent.querySelectorAll('div[tagname="planning"]');
   for (var i = 0; i < planningElements.length; i++) {
     console.log("planning:" + planningElements[i]);
