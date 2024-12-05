@@ -34,6 +34,19 @@ function getIdObject() {
   return idObject;
 }
 
+function getDataGridObject() {
+  console.log("---getDataGridObject---")
+  const grid = document.querySelector("[tagname='dataGrid']");
+  console.log(grid)
+  var idObject = {};
+  if (grid != null){
+    var fullId = grid.id;
+    var name = fullId.match(/[a-zA-Z]+/)[0];
+    idObject[name] = fullId;
+  }
+  return idObject;
+}
+
 function createInputItem(id, label, styleProperty, text, type, attribute) {
   var div = document.createElement("div");
   var lbl = document.createElement("label");
