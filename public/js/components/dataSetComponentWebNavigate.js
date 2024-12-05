@@ -258,21 +258,53 @@ async function SaveRecordWeb(apiId1) {
   console.log("DataSetWeb Update");
   const ides = getIdObject();
   const main = document.getElementById(ides.dataSetWeb);
-  // const apiUrl = main.getAttribute("data-api-url");
   const apiId = main.getAttribute("data-api-id");
   const jsonData = JSON.parse(main.getAttribute("dataSet"));
   const input = document.getElementById(jsonData[0].fieldId);
   const rowId = input.value;
   if (!rowId) return;
-  // const navBar = document.getElementById("navigationBar_" + apiId);
+
+  // Validate inputs before making API calls
+  const validationResults = [];
+  jsonData.forEach((field, index) => {
+    if (index === 0) return; // Skip the first field (assumed to be rowId)
+
+    const inputElement = document.getElementById(field.fieldId);
+    const value = inputElement.value;
+    const mandatory = inputElement.getAttribute("dataset-field-mandatory") === "true";
+    const regexp = inputElement.getAttribute("dataset-field-regexp");
+
+    // Validate mandatory field
+    if (mandatory && (!value || value.trim() === "")) {
+      validationResults.push(`Error: The field "${field.fieldName}" is mandatory and cannot be empty.`);
+    }
+
+    // Validate against regular expression if defined
+    if (regexp && regexp !== "undefined") {
+      const regex = new RegExp(regexp);
+      if (!regex.test(value)) {
+        validationResults.push(`Error: The field "${field.fieldName}" does not match the expected pattern: ${regexp}.`);
+      }
+    }
+  });
+
+  // If any validation errors exist, alert and stop the function
+  if (validationResults.length > 0) {
+    validationResults.forEach(error => alert(error));
+    return;
+  }
+
+  // Proceed with the existing logic for API calls
   const getById = JSON.parse(main.getAttribute("get-by-id"));
   const apiMethod = getById.apiMethod;
-  var apiUrl = getById.controllerServerUrl + getById?.apiPath?.slice(1);
+  let apiUrl = getById.controllerServerUrl + getById?.apiPath?.slice(1);
   const replaceString = "{" + getById.apiDataInputs[0].Name + "}";
   apiUrl = apiUrl.replace(replaceString, rowId);
   if (!apiUrl) return;
+
   const responseGetById = await callApi(apiUrl, apiMethod);
   if (!responseGetById || responseGetById.status !== 200) return;
+
   let dataGetById = await responseGetById.json();
   jsonData.map((field, index) => {
     if (index === 0) return;
@@ -284,32 +316,23 @@ async function SaveRecordWeb(apiId1) {
 
   const updateById = JSON.parse(main.getAttribute("update-by-id"));
   const apiMethodUpdate = updateById.apiMethod;
-
-  var apiUrlUpdate =
-    updateById.controllerServerUrl + updateById.apiPath.slice(1);
+  let apiUrlUpdate = updateById.controllerServerUrl + updateById.apiPath.slice(1);
   const replaceStringUpdate = "{" + updateById.apiDataInputs[0].Name + "}";
   apiUrlUpdate = apiUrlUpdate.replace(replaceStringUpdate, rowId);
 
-  const filteredBody = updateById.apiDataInputs.filter(
-    (item) => item.Location === "Body"
-  );
-
+  const filteredBody = updateById.apiDataInputs.filter(item => item.Location === "Body");
   let payload = {};
 
-  filteredBody.map((item) => {
+  filteredBody.map(item => {
     const val = findValue(dataGetById, item.Name);
     if (val) payload[item.Name] = val;
   });
 
   if (!apiUrlUpdate) return;
-  const responseUpdateById = await callApi(
-    apiUrlUpdate,
-    apiMethodUpdate,
-    payload
-  );
+  const responseUpdateById = await callApi(apiUrlUpdate, apiMethodUpdate, payload);
   if (!responseUpdateById || responseUpdateById.status !== 200) return;
-  let dataUpdateById = await responseUpdateById.json();
 
+  let dataUpdateById = await responseUpdateById.json();
   EditRecordWeb(apiId, true);
 
   let idObject = getIdObject();
@@ -329,6 +352,7 @@ async function SaveRecordWeb(apiId1) {
     searchGridWeb(filedName, operator, searchValue, idObject.dataGridWeb);
   }
 }
+
 
 async function RefreshRecordWeb(apiId1) {
   console.log("DataSetWeb Refresh ");

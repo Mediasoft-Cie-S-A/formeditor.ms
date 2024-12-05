@@ -132,6 +132,7 @@ function updateDataSetWeb(main, content) {
       fieldDataType: "rowid",
       fieldLabel: "rowid",
       fieldMandatory: "0",
+      fieldRegexp: "",
       fieldWidth: "0",
       fieldDefaultValue: "0",
       fieldValues: "",
@@ -172,6 +173,8 @@ function renderDataSetWeb(main, getById, updateById, createApi) {
   dataset.id = "DataSetWeb_" + apiId;
   dataset.className = "dataSetContainer";
   jsonData.forEach((fieldJson) => {
+    console.log("🤦‍♀️🤦‍♀️🤦‍♀️🤦‍♀️🤦‍♀️🤦‍♀️🤦‍♀️")
+    console.log(fieldJson)
     var createField = createFieldFromJsonWeb(fieldJson, apiUrl);
     dataset.appendChild(createField);
   });
@@ -195,6 +198,40 @@ function createFieldFromJsonWeb(fieldJson, apiUrl) {
       case "combo_web":
         element = createElementInput(fieldJson.fieldType);
         einput = element.querySelector("input"); // Adjust to your combobox selector
+        break;
+
+      case "search_win_web":
+        console.log("fieldJson")
+        console.log(fieldJson)
+        element = createElementInput(fieldJson.fieldType);
+        einput = element.querySelector("input"); // Adjust to your combobox selector
+        // adding the search button
+        var searchButton = document.createElement("button");
+        searchButton.style.float = "right";
+        searchButton.style.width = "20px";
+        searchButton.style.height = "20px";
+        searchButton.style.padding = "0px";
+        // icon for the search button
+        var icon = document.createElement("i");
+        icon.className = "fas fa-search";
+        searchButton.appendChild(icon);
+        searchButton.onclick = function () {
+          query = fieldJson?.fieldSQL
+          var queryArray = query.split("|");
+          // console.log(queryArray)
+          url = queryArray[0];
+          fields = queryArray[1];
+          const datasetJson = fields.split(",").map((field) => {
+            return {
+              fieldName: field.trim(),
+              fieldType: "string",
+            };
+          });
+          console.log(queryArray)
+          console.log(datasetJson)
+          showQueryResultModalWeb(url, datasetJson, queryArray[1], einput.id);
+        };
+        element.appendChild(searchButton);
         break;
       //for different field formats
       case "rowid":
@@ -234,6 +271,9 @@ function createFieldFromJsonWeb(fieldJson, apiUrl) {
     einput.setAttribute("dataset-field-name", fieldJson.fieldName);
     einput.setAttribute("dataset-field-SQL", fieldJson.fieldSQL);
     einput.setAttribute("apiUrl", apiUrl);
+    einput.setAttribute("dataset-field-mandatory", fieldJson.fieldMandatory);
+    einput.setAttribute("dataset-field-regexp", fieldJson.regexp);
+
     // currently no attribute is required separately
     // einput.setAttribute("dataset-table-name", fieldJson.tableName);
     // currently outputs does not have a mandatory attribute

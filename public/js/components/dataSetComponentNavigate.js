@@ -253,22 +253,41 @@ function navbar_CopyRecord() {
 }
 
 function CreateUpdated(DBName, tableName) {
-
   const inputs = document.querySelectorAll(
     `#DataSet_${tableName} input[dataset-field-name]`
   );
-
 
   let updateFields = [];
   let fieldGroups = {};
 
   inputs.forEach((input) => {
     const field = input.getAttribute("dataset-field-name");
+    const mandatory = input.getAttribute("dataset-field-mandatory") === "true";
+    const regexp = input.getAttribute("dataset-field-regexp");
     const value = input.value;
+
+    // Skip the rowid field
     if (field === "rowid") {
-      return; // Skip rowid field
+      return;
     }
-    // Extract the prefix and index
+
+    // Validate field value based on regexp and mandatory attributes
+    if (mandatory && (!value || value.trim() === "")) {
+      alert(`Error: The field "${field}" is mandatory and cannot be empty.`);
+      throw new Error(`Validation failed for mandatory field "${field}".`);
+    }
+
+    if (regexp && regexp != "undefined") {
+      const regex = new RegExp(regexp);
+      if (!regex.test(value)) {
+        alert(
+          `Error: The field "${field}" does not match the expected pattern: ${regexp}.`
+        );
+        throw new Error(`Validation failed for field "${field}" with regex.`);
+      }
+    }
+
+    // Extract the prefix and index for grouped fields
     const match = field.match(/^([a-zA-Z]+)__(\d+)$/);
     if (match) {
       const prefix = match[1]; // Extract the base prefix (e.g., 'droit')

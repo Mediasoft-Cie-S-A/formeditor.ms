@@ -116,6 +116,7 @@ function renderGridWeb(main) {
 
   main.innerHTML = "";
   main.style.padding = "10px";
+  main.setAttribute("datasetFieldsTypes", datasetFieldsTypes);
   var table = document.createElement("div");
   table.className = "table-container";
   table.setAttribute("tag-Name", "dataTable");
@@ -217,18 +218,58 @@ function insertNavBarWeb(
 
   gridContainer.innerHTML += html;
 }
-function generateHeaderRowWeb(grid, datasetFields) {
+function generateHeaderRowWeb(grid, datasetFields, isGrid = true) {
+  let idObject = getIdObject();
+  let main = document.getElementById(idObject.dataGridWeb)
+  const datasetgrid = JSON.parse(main?.getAttribute('datasetgrid') || '[]');
   var header = document.createElement("div");
   header.className = "grid-header";
+  const fieldType = main.getAttribute("datasetFieldsTypes").split(",")
+
   // header
   var row = document.createElement("div");
   row.className = "grid-row";
-  datasetFields.forEach((field) => {
+  datasetFields.forEach((field, index) => {
     if (field !== "rowid") {
-      const cell = document.createElement("div");
-      cell.className = "grid-cell-header";
-      cell.textContent = field !== "rowid" ? field : "";
-      row.appendChild(cell);
+      if (fieldType[index] !== "search_win_web") {
+        if (isGrid) {
+          const cell = document.createElement("div");
+          cell.className = "grid-cell-header";
+          cell.textContent = field !== "rowid" ? field : "";
+          row.appendChild(cell);
+        }
+      } else {
+        const cell = document.createElement("div");
+        cell.className = "grid-cell-header";
+        cell.textContent = field !== "rowid" ? field : "";
+        var searchButton = document.createElement("button");
+        searchButton.style.width = "20px";
+        searchButton.style.height = "20px";
+        searchButton.style.padding = "0px";
+        // icon for the search button
+        var icon = document.createElement("i");
+        icon.className = "fas fa-search";
+        searchButton.appendChild(icon);
+        searchButton.onclick = function () {
+          query = datasetgrid[index - 1]["fieldSQL"];
+          console.log("query")
+          console.log(query)
+          var queryArray = query.split("|");
+          url = queryArray[0];
+          console.log("url")
+          console.log(url)
+          var fields = queryArray[1];
+          const datasetJson = fields.split(",").map((field) => {
+            return {
+              fieldName: field.trim(),
+              fieldType: "string",
+            };
+          });
+          showQueryResultModalWeb(url, datasetJson, queryArray[1], "");
+        };
+        cell.appendChild(searchButton);
+        row.appendChild(cell);
+      }
     } else {
       const cell = document.createElement("div");
       cell.style.display = "none";
@@ -333,6 +374,7 @@ function refreshWeb(e, apiName) {
 }
 
 function gridViewWeb(view, tableGrid, apiName, page, pageSize, datasetFields, filter) {
+  console.log(tableGrid)
   switch (view) {
     case "standard":
       // tableGrid.innerHTML = "";
@@ -340,10 +382,15 @@ function gridViewWeb(view, tableGrid, apiName, page, pageSize, datasetFields, fi
       gridGetDataWeb(tableGrid, apiName, page, pageSize, datasetFields, filter);
       break;
     case "panel":
+      generateHeaderRowWeb(tableGrid, datasetFields.split(","), false)
       gridGetDataInPanelFormatWeb(tableGrid, apiName, page, pageSize, datasetFields, filter);
       break;
     default:
-      // generateHeaderRowWeb(tableGrid, datasetFields.split(","))
+      const gridHeader = tableGrid.querySelector('.grid-header');
+      if (gridHeader) {
+        tableGrid.removeChild(gridHeader);
+      }
+      generateHeaderRowWeb(tableGrid, datasetFields.split(","))
       gridGetDataWeb(tableGrid, apiName, page, pageSize, datasetFields, filter);
   }
 }

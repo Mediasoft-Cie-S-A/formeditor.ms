@@ -344,13 +344,13 @@ function showProperties() {
 }
 
 function setParent() {
-  
+
   // get the element selected by class  gjs-selection
   const editorElementSelected = document.getElementsByClassName("gjs-selection")[0];
   console.log(editorElementSelected.parentNode);
   // simulate click on parent node of editorElementSelected 
   editorElementSelected.parentNode.click();
- 
+
   //  hideEditMenu();
 }
 
@@ -382,21 +382,21 @@ function stopMoveEvent(event) {
       if (closestChild) {
         element.insertBefore(editorElementSelected, closestChild);
       }
-    } else if (parentElement.id === "formContainer"  && parentElementSelected){
+    } else if (parentElement.id === "formContainer" && parentElementSelected) {
       // find the child element of the element closest to the mouse
       const closestChild = findClosestChildToMouse(parentElement, x, y);
       if (closestChild) {
         parentElement.insertBefore(editorElementSelected, closestChild);
       }
-    }else if (parentElement && parentElementSelected) {
+    } else if (parentElement && parentElementSelected) {
       parentElement.appendChild(editorElementSelected);
     }
-   
+
 
     return;
   }
   // execute the drag event
-  
+
 }
 
 function findClosestChildToMouse(element, mouseX, mouseY) {
@@ -492,7 +492,6 @@ function dropInput(event, id) {
   // Get the dragged element's ID and its attributes
   var elementId = event.dataTransfer.getData("text");
   var source = document.getElementById(elementId);
-
   var tableName = source.getAttribute("data-table-name");
   var fieldName = source.getAttribute("data-field-name");
   var fieldType = source.getAttribute("data-field-type");
@@ -501,7 +500,6 @@ function dropInput(event, id) {
   var fieldMandatory = source.getAttribute("data-field-mandatory");
   var fieldWidth = source.getAttribute("data-field-width");
   var fieldDefaultValue = source.getAttribute("data-field-default");
-
   var filedDBName = source.getAttribute("database-name");
   // generate the json of all the fields attributes
 
@@ -582,7 +580,7 @@ function setOptionsByType(select, fieldDataType) {
     "combobox",
   ]; */
 
-  var options = ["text", "sequence", "array", "combo_array", "combo_sql","search_win"];
+  var options = ["text", "sequence", "array", "combo_array", "combo_sql", "search_win"];
 
   // Clear any existing options in the select element
   select.innerHTML = "";
@@ -614,7 +612,7 @@ function setOptionsByTypeWeb(select, fieldDataType) {
     "combobox",
   ]; */
 
-  var options = ["text", "sequence", "array", "combo_array", "combo_web"];
+  var options = ["text", "sequence", "array", "combo_array", "combo_web", "search_win_web"];
 
   // Clear any existing options in the select element
   select.innerHTML = "";
@@ -838,57 +836,85 @@ function dropInputWeb(event, isId) {
   } else addFieldToPropertiesBarWeb(target, fieldJson, isId);
 }
 
-// function to adding new fileds to the properties bar
+
 function addFieldToPropertiesBarWeb(target, fieldJson, isId) {
   var dataObjet = target;
-  // create the div
+  // Create the div container
   var div = document.createElement("div");
   div.classList.add("tables-list-item");
   const elementId = fieldJson.fieldName + "_" + fieldJson.fieldId;
   div.id = elementId;
-  // get field name
-  if (isId)
-    div.innerHTML = `<button class='remove-item' onclick='removeItem(event)'>x</button><span name='dataContainerId' data-field='${JSON.stringify(
-      fieldJson
-    )}' >${fieldJson.fieldName}</span>`;
-  else
-    div.innerHTML = `<button class='remove-item' onclick='removeItem(event)'>x</button><span name='dataContainer' data-field='${JSON.stringify(
-      fieldJson
-    )}' >${fieldJson.fieldName}</span>`;
+
+  // Add remove button and field name span
+  if (isId) {
+    div.innerHTML = `<button class='remove-item' onclick='removeItem(event)'>x</button>
+      <span name='dataContainerId' data-field='${JSON.stringify(fieldJson)}'>${fieldJson.fieldName}</span>`;
+  } else {
+    div.innerHTML = `<button class='remove-item' onclick='removeItem(event)'>x</button>
+      <span name='dataContainer' data-field='${JSON.stringify(fieldJson)}'>${fieldJson.fieldName}</span>`;
+  }
   dataObjet.appendChild(div);
 
-  div.innerHTML += `<div>Mandatory:<input type="checkbox" class="apple-switch" id="mandatory" name="mandatory" value="mandatory" ${
-    fieldJson.fieldMandatory === "true" ? "checked" : ""
-  } onclick="updateMandatory(event, '${elementId}')"> </div>`;
-  // adding verification triggers not null fields checkbox
-  div.innerHTML += `<div>regexp<input type="text"  tagname="regexp" id="regexp" name="regexp" 
-  } onclick="regexp(event, '${elementId}')"></div>`;
+  // Add mandatory checkbox
+  const mandatoryDiv = document.createElement("div");
+  mandatoryDiv.innerHTML = `
+    Mandatory:
+    <input type="checkbox" class="apple-switch" id="mandatory" name="mandatory" value="mandatory" 
+      ${fieldJson.fieldMandatory === "true" ? "checked" : ""}>
+  `;
+  div.appendChild(mandatoryDiv);
 
-  // generate the select
+  // Event listener to update fieldJson.fieldMandatory on checkbox toggle
+  const mandatoryCheckbox = mandatoryDiv.querySelector("input[type='checkbox']");
+  mandatoryCheckbox.addEventListener("change", function () {
+    fieldJson.fieldMandatory = this.checked.toString();
+    const span = div.querySelector("span[name='dataContainer']");
+    span.setAttribute("data-field", JSON.stringify(fieldJson));
+  });
+
+  // Add regexp input field
+  const regexpDiv = document.createElement("div");
+  regexpDiv.innerHTML = `
+    Regexp:
+    <input type="text" id="regexp" name="regexp" value="${fieldJson.regexp || ""}">
+  `;
+  div.appendChild(regexpDiv);
+
+  // Event listener to update fieldJson.regexp on text input change
+  const regexpInput = regexpDiv.querySelector("input[type='text']");
+  regexpInput.addEventListener("input", function () {
+    fieldJson.regexp = this.value;
+    const span = div.querySelector("span[name='dataContainer']");
+    span.setAttribute("data-field", JSON.stringify(fieldJson));
+  });
+
+  // Create and populate the select dropdown
   if (!isId) {
     var select = document.createElement("select");
     div.appendChild(select);
   }
-  // get the datatype
 
   setOptionsByTypeWeb(select, fieldJson.fieldDataType);
-  // select the functionName in the function
   div.setAttribute("selectedValue", select.value);
+
+  // Event listener for dropdown changes
   select.addEventListener("change", function () {
-    // remove the textarea if it exists
+    // Remove existing textarea if it exists
     var textarea = div.querySelector("textarea");
     if (textarea) {
       textarea.remove();
     }
+
     // Update fieldType in fieldJson
     fieldJson.fieldType = select.value;
     fieldJson.fieldDataType = select.value;
     div.setAttribute("selectedValue", select.value);
     div.setAttribute("data-field", JSON.stringify(fieldJson));
-    div.setAttribute("fieldDataType", JSON.stringify(fieldJson));
 
     const span = div.querySelector("span[name='dataContainer']");
     span.setAttribute("data-field", JSON.stringify(fieldJson));
+
+    // Handle textarea creation based on selected value
     switch (select.value) {
       case "combo_array":
       case "array":
@@ -896,64 +922,96 @@ function addFieldToPropertiesBarWeb(target, fieldJson, isId) {
       case "sequence":
         var textarea = document.createElement("textarea");
         textarea.id = "Data";
-
         textarea.setAttribute("rows", "4");
-        textarea.style.width = "100%";
-        textarea.style.marginTop = "10px";
-        textarea.style.marginBottom = "10px";
-        textarea.style.border = "1px solid #ccc";
-        textarea.style.borderRadius = "5px";
-        textarea.style.padding = "5px";
-        textarea.style.resize = "none";
-        textarea.style.flex = "1";
+        textarea.style.cssText = `
+          width: 100%;
+          margin-top: 10px;
+          margin-bottom: 10px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+          padding: 5px;
+          resize: none;
+          flex: 1;
+        `;
         div.appendChild(textarea);
-        // Event listener to update fieldValues when the textarea value changes
-        if (
-          select.value === "combo_array" ||
-          select.value === "array" ||
-          select.value === "sequence"
-        ) {
-          textarea.setAttribute("placeholder", "Enter comma separated values");
-          // set the textarea vaule from fieldValues if exists
-          if (fieldJson.fieldValues) {
-            textarea.value = fieldJson.fieldValues.join(",");
-          }
-          textarea.addEventListener("change", function () {
-            fieldJson.fieldValues = this.value.split(",");
-            // get span element
-            const span = div.querySelector("span[name='dataContainer']");
-            span.setAttribute("data-field", JSON.stringify(fieldJson));
-          });
-        }
-        if (select.value === "combo_web") {
-          textarea.setAttribute("placeholder", "Enter the url");
-          // set the textarea vaule from fieldSQL if exists
-          if (fieldJson.fieldSQL) {
-            textarea.value = fieldJson.fieldSQL;
-          }
 
-          textarea.addEventListener("change", function () {
-            fieldJson.fieldSQL = this.value;
-            // get span element
-            const span = div.querySelector("span[name='dataContainer']");
-            span.setAttribute("data-field", JSON.stringify(fieldJson));
-          });
+        textarea.setAttribute("placeholder", "Enter comma separated values");
+        if (["combo_array", "array", "sequence"].includes(select.value) && fieldJson.fieldValues) {
+          textarea.value = fieldJson.fieldValues.join(",");
         }
+
+        textarea.addEventListener("change", function () {
+          fieldJson.fieldValues = this.value.split(",");
+          span.setAttribute("data-field", JSON.stringify(fieldJson));
+        });
+        break;
+
+      case "combo_web":
+        var textarea = document.createElement("textarea");
+        textarea.id = "Data";
+        textarea.setAttribute("rows", "4");
+        textarea.style.cssText = `
+          width: 100%;
+          margin-top: 10px;
+          margin-bottom: 10px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+          padding: 5px;
+          resize: none;
+          flex: 1;
+        `;
+        div.appendChild(textarea);
+        textarea.setAttribute("placeholder", "Enter the url");
+
+        if (fieldJson.fieldSQL) {
+          textarea.value = fieldJson.fieldSQL;
+        }
+
+        textarea.addEventListener("change", function () {
+          fieldJson.fieldSQL = this.value;
+          span.setAttribute("data-field", JSON.stringify(fieldJson));
+        });
+        break;
+
+      case "search_win_web":
+        var textarea = document.createElement("textarea");
+        textarea.id = "Data";
+        textarea.setAttribute("rows", "4");
+        textarea.style.cssText = `
+          width: 100%;
+          margin-top: 10px;
+          margin-bottom: 10px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+          padding: 5px;
+          resize: none;
+          flex: 1;
+        `;
+        div.appendChild(textarea);
+        textarea.setAttribute("placeholder", "Enter url|Enter field value1, value2, value3...");
+
+        if (fieldJson.fieldSQL) {
+          textarea.value = fieldJson.fieldSQL;
+        }
+
+        textarea.addEventListener("change", function () {
+          fieldJson.fieldSQL = this.value;
+          span.setAttribute("data-field", JSON.stringify(fieldJson));
+        });
         break;
     }
   });
 
-  // force the change event to set the fieldJson
+  // Force change event to initialize fieldJson
   select.dispatchEvent(new Event("change"));
-  // Adjust the height of the parent element to accommodate the new field
+
+  // Adjust the height of the parent element
   var height = dataObjet.clientHeight + div.clientHeight;
-  // set the height of the parent div
   dataObjet.style.height = height + 30 + "px";
-  // get the parent div height
-  // var height = dataObjet.clientHeight + div.clientHeight;
-  // // set the height of the parent div
-  // dataObjet.style.height = height + 30 + "px";
 }
+
+
+// function to remove the item
 
 function addFieldToPropertiesBar(target, fieldJson) {
   var dataObjet = target;
@@ -966,21 +1024,43 @@ function addFieldToPropertiesBar(target, fieldJson) {
 
   // Set up the inner HTML for the div, including a span and a remove button
   div.innerHTML = `
-    <span name='dataContainer' data-field='${JSON.stringify(fieldJson)}'>${
-    fieldJson.fieldName
-  }</span>
+    <span name='dataContainer' data-field='${JSON.stringify(fieldJson)}'>${fieldJson.fieldName
+    }</span>
     <button class='remove-item' onclick='removeItem(event)' style='background:#800;float:right;color:white;border-radius:5px;width:30px;height:30px'>x</button>
   `;
 
   dataObjet.appendChild(div);
 
-  // adding verification triggers mandatories fields checkbox
-  div.innerHTML += `<div>Mandatory:<input type="checkbox" class="apple-switch" id="mandatory" name="mandatory" value="mandatory" ${
-    fieldJson.fieldMandatory === "true" ? "checked" : ""
-  } onclick="updateMandatory(event, '${elementId}')"> </div>`;
-  // adding verification triggers not null fields checkbox
-  div.innerHTML += `<div>regexp<input type="text"  tagname="regexp" id="regexp" name="regexp" 
-} onclick="regexp(event, '${elementId}')"></div>`;
+  // Adding mandatory field checkbox
+  const mandatoryDiv = document.createElement("div");
+  mandatoryDiv.innerHTML = `
+    Mandatory:
+    <input type="checkbox" class="apple-switch" id="mandatory" name="mandatory" value="mandatory" ${fieldJson.fieldMandatory === "true" ? "checked" : ""
+    } >
+  `;
+  div.appendChild(mandatoryDiv);
+
+  // Event listener to update fieldJson.fieldMandatory on checkbox toggle
+  const mandatoryCheckbox = mandatoryDiv.querySelector("input[type='checkbox']");
+  mandatoryCheckbox.addEventListener("change", function () {
+    fieldJson.fieldMandatory = this.checked.toString();
+    updateFieldJson(div, fieldJson);
+  });
+
+  // Adding regexp input field
+  const regexpDiv = document.createElement("div");
+  regexpDiv.innerHTML = `
+    Regexp:
+    <input type="text" id="regexp" name="regexp" value="${fieldJson.regexp || ""}">
+  `;
+  div.appendChild(regexpDiv);
+
+  // Event listener to update fieldJson.regexp on text input change
+  const regexpInput = regexpDiv.querySelector("input[type='text']");
+  regexpInput.addEventListener("input", function () {
+    fieldJson.regexp = this.value;
+    updateFieldJson(div, fieldJson);
+  });
 
   // Create a select dropdown
   var select = document.createElement("select");
@@ -994,20 +1074,18 @@ function addFieldToPropertiesBar(target, fieldJson) {
 
   // Event listener to update fieldType when the select dropdown value changes
   select.addEventListener("change", function () {
-    // remove the textarea if it exists
+    // Remove the textarea if it exists
     var textarea = div.querySelector("textarea");
     if (textarea) {
       textarea.remove();
     }
+
     // Update fieldType in fieldJson
     fieldJson.fieldType = select.value;
     fieldJson.fieldDataType = select.value;
-    div.setAttribute("selectedValue", select.value);
-    div.setAttribute("data-field", JSON.stringify(fieldJson));
-    div.setAttribute("fieldDataType", JSON.stringify(fieldJson));
+    updateFieldJson(div, fieldJson);
 
-    const span = div.querySelector("span[name='dataContainer']");
-    span.setAttribute("data-field", JSON.stringify(fieldJson));
+    // Handling textarea creation based on the selected value
     switch (select.value) {
       case "combo_array":
       case "combo_sql":
@@ -1016,66 +1094,64 @@ function addFieldToPropertiesBar(target, fieldJson) {
       case "search_win":
         var textarea = document.createElement("textarea");
         textarea.id = "Data";
-
         textarea.setAttribute("rows", "4");
-        textarea.style.width = "100%";
-        textarea.style.marginTop = "10px";
-        textarea.style.marginBottom = "10px";
-        textarea.style.border = "1px solid #ccc";
-        textarea.style.borderRadius = "5px";
-        textarea.style.padding = "5px";
-        textarea.style.resize = "none";
-        textarea.style.flex = "1";
+        textarea.style.cssText = `
+          width: 100%;
+          margin-top: 10px;
+          margin-bottom: 10px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+          padding: 5px;
+          resize: none;
+          flex: 1;
+        `;
         div.appendChild(textarea);
-        // Event listener to update fieldValues when the textarea value changes
-        if (
-          select.value === "combo_array" ||
-          select.value === "array" ||
-          select.value === "sequence"
-        ) {
-          textarea.setAttribute("placeholder", "Enter comma separated values");
-          // set the textarea vaule from fieldValues if exists
+
+        if (["combo_array", "array", "sequence"].includes(select.value)) {
+          textarea.setAttribute("placeholder", "Enter comma-separated values");
           if (fieldJson.fieldValues) {
             textarea.value = fieldJson.fieldValues.join(",");
           }
           textarea.addEventListener("change", function () {
             fieldJson.fieldValues = this.value.split(",");
-            // get span element
-            const span = div.querySelector("span[name='dataContainer']");
-            span.setAttribute("data-field", JSON.stringify(fieldJson));
-          }); // end of textarea change event
+            updateFieldJson(div, fieldJson);
+          });
         }
+
         if (select.value === "combo_sql" || select.value === "search_win") {
-          if (select.value === "combo_sql") {
-            textarea.setAttribute("placeholder", "Enter Sql Query, id, value");
-          }
-          if (select.value === "search_win") {
-            textarea.setAttribute("placeholder", "DBName|Enter Sql Query, id, value1, value2, value3 ..");
-          }
-          // set the textarea vaule from fieldSQL if exists
+          textarea.setAttribute(
+            "placeholder",
+            select.value === "combo_sql"
+              ? "Enter SQL Query, id, value"
+              : "DBName|Enter SQL Query, id, value1, value2, value3..."
+          );
           if (fieldJson.fieldSQL) {
             textarea.value = fieldJson.fieldSQL;
           }
-
           textarea.addEventListener("change", function () {
             fieldJson.fieldSQL = this.value;
-            // get span element
-            const span = div.querySelector("span[name='dataContainer']");
-            span.setAttribute("data-field", JSON.stringify(fieldJson));
-          }); // end of textarea change event
+            updateFieldJson(div, fieldJson);
+          });
         }
         break;
     }
   });
 
-  // force the change event to set the fieldJson
+  // Force the change event to set the fieldJson
   select.dispatchEvent(new Event("change"));
+
   // Adjust the height of the parent element to accommodate the new field
   var height = dataObjet.clientHeight + div.clientHeight;
   dataObjet.style.height = height + 30 + "px";
 }
 
-// function to remove the item
+// Helper function to update fieldJson in the span element
+function updateFieldJson(div, fieldJson) {
+  const span = div.querySelector("span[name='dataContainer']");
+  span.setAttribute("data-field", JSON.stringify(fieldJson));
+}
+
+
 function removeItem(event) {
   var item = event.target.parentNode;
   var dataObjet = item.parentNode;
@@ -1091,269 +1167,269 @@ function removeItem(event) {
 
 // Function to initialize the filter box
 function createFilterBox(main) {
-    var div = document.createElement("div");
-    div.id = 'filterBox';
-    
-    var lbl = document.createElement("label");
-    lbl.setAttribute("for", div.id);
-    lbl.textContent = "Filter:";
-    div.appendChild(lbl);
+  var div = document.createElement("div");
+  div.id = 'filterBox';
 
-    // Add button to add a new filter
-    var addButton = document.createElement("button");
-    addButton.innerHTML = '<i class="fa fa-plus"></i>';
-    addButton.onclick = function() {
-        const filterBoxContainer = main.querySelector('#filterBoxContainer');
-        filterBoxContainer.appendChild(createFilterField(main));
-    };
-    div.appendChild(addButton);
+  var lbl = document.createElement("label");
+  lbl.setAttribute("for", div.id);
+  lbl.textContent = "Filter:";
+  div.appendChild(lbl);
 
-    // Clear button for the filter with icon
-    var clearButton = document.createElement("button");
-    clearButton.innerHTML = '<i class="fa fa-trash"></i>';
-    clearButton.onclick = function() {
-        const chart = document.getElementById(main.getAttribute("elementId"));
-        chart.removeAttribute("filter");
-        const filterBoxContainer = main.querySelector('#filterBoxContainer');
-        filterBoxContainer.innerHTML = '';
-        const viewSelect = main.querySelector('#viewSelect');
-        switchView(event, main, viewSelect.value);
-    };
-    div.appendChild(clearButton);
+  // Add button to add a new filter
+  var addButton = document.createElement("button");
+  addButton.innerHTML = '<i class="fa fa-plus"></i>';
+  addButton.onclick = function () {
+    const filterBoxContainer = main.querySelector('#filterBoxContainer');
+    filterBoxContainer.appendChild(createFilterField(main));
+  };
+  div.appendChild(addButton);
 
-    // Create container for the filter box
-    const filterBoxContainer = document.createElement('div');
-    filterBoxContainer.id = 'filterBoxContainer';
+  // Clear button for the filter with icon
+  var clearButton = document.createElement("button");
+  clearButton.innerHTML = '<i class="fa fa-trash"></i>';
+  clearButton.onclick = function () {
+    const chart = document.getElementById(main.getAttribute("elementId"));
+    chart.removeAttribute("filter");
+    const filterBoxContainer = main.querySelector('#filterBoxContainer');
+    filterBoxContainer.innerHTML = '';
+    const viewSelect = main.querySelector('#viewSelect');
+    switchView(event, main, viewSelect.value);
+  };
+  div.appendChild(clearButton);
 
-    // Create the view select dropdown
-    const viewSelect = document.createElement('select');
-    viewSelect.id = 'viewSelect';
-    ['standard', 'advanced'].forEach(view => {
-        const option = new Option(view, view);
-        viewSelect.options.add(option);
-    });
+  // Create container for the filter box
+  const filterBoxContainer = document.createElement('div');
+  filterBoxContainer.id = 'filterBoxContainer';
 
-    // Append the view select to the container
-    div.appendChild(viewSelect);
+  // Create the view select dropdown
+  const viewSelect = document.createElement('select');
+  viewSelect.id = 'viewSelect';
+  ['standard', 'advanced'].forEach(view => {
+    const option = new Option(view, view);
+    viewSelect.options.add(option);
+  });
 
-    // Event listener for changing views
-    viewSelect.addEventListener('change', function(event) {
-        switchView(event, main, this.value);
-    });
-    div.appendChild(filterBoxContainer);
+  // Append the view select to the container
+  div.appendChild(viewSelect);
 
-    // Create button to apply filter
-    const generateJsonBtn = document.createElement('button');
-    generateJsonBtn.textContent = 'Apply';
-    generateJsonBtn.setAttribute("onclick", "generateJson(event)");
-    div.appendChild(generateJsonBtn);
+  // Event listener for changing views
+  viewSelect.addEventListener('change', function (event) {
+    switchView(event, main, this.value);
+  });
+  div.appendChild(filterBoxContainer);
 
-    return div;
+  // Create button to apply filter
+  const generateJsonBtn = document.createElement('button');
+  generateJsonBtn.textContent = 'Apply';
+  generateJsonBtn.setAttribute("onclick", "generateJson(event)");
+  div.appendChild(generateJsonBtn);
+
+  return div;
 }
 
 // Function to create individual filter fields
 function createFilterField(main) {
-    const container = document.createElement('div');
-    container.className = 'filterField';
+  const container = document.createElement('div');
+  container.className = 'filterField';
 
-    const textField = document.createElement('input');
-    textField.placeholder = 'Field';
-    textField.name = 'field';
-    textField.setAttribute('ObjectType', 'filters');
-    textField.setAttribute('ondragover', 'allowDrop(event)');
-    textField.setAttribute('ondrop', 'dropInput(event)');
+  const textField = document.createElement('input');
+  textField.placeholder = 'Field';
+  textField.name = 'field';
+  textField.setAttribute('ObjectType', 'filters');
+  textField.setAttribute('ondragover', 'allowDrop(event)');
+  textField.setAttribute('ondrop', 'dropInput(event)');
 
-    container.appendChild(textField);
+  container.appendChild(textField);
 
-    // Create and append input fields based on view
-    const viewSelect = main.querySelector('#viewSelect').value;
-    if (viewSelect === 'standard') {
-        const multiSelect = document.createElement('select');
-        multiSelect.multiple = true;
-        multiSelect.className = '';
+  // Create and append input fields based on view
+  const viewSelect = main.querySelector('#viewSelect').value;
+  if (viewSelect === 'standard') {
+    const multiSelect = document.createElement('select');
+    multiSelect.multiple = true;
+    multiSelect.className = '';
 
-        textField.addEventListener('change', function(event) {
-            const datafield = JSON.parse( this.getAttribute('data-field'));
-            const DBName = datafield.DBName;
-            const tableName = datafield.tableName;
-            const fieldName = datafield.fieldName;
-            const url= `/select-distinct/${DBName}/${tableName}/${fieldName}`;
-        //    const url = '/getDatasetDataDistinct/' + dataset + '/' + this.value;
+    textField.addEventListener('change', function (event) {
+      const datafield = JSON.parse(this.getAttribute('data-field'));
+      const DBName = datafield.DBName;
+      const tableName = datafield.tableName;
+      const fieldName = datafield.fieldName;
+      const url = `/select-distinct/${DBName}/${tableName}/${fieldName}`;
+      //    const url = '/getDatasetDataDistinct/' + dataset + '/' + this.value;
 
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    multiSelect.innerHTML = '';
-                    data.forEach(value => {
-                        var opt = document.createElement('option');
-                        opt.className = 'filter-item';
-                        opt.value = value[fieldName];
-                        opt.innerHTML = value[fieldName];
-                        multiSelect.appendChild(opt);
-                    });
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          multiSelect.innerHTML = '';
+          data.forEach(value => {
+            var opt = document.createElement('option');
+            opt.className = 'filter-item';
+            opt.value = value[fieldName];
+            opt.innerHTML = value[fieldName];
+            multiSelect.appendChild(opt);
+          });
 
-                    
-                });
+
         });
+    });
 
-        container.appendChild(multiSelect); 
-    } else if (viewSelect === 'advanced') {
-        const operatorSelect = document.createElement('select');
-        ['=', '!=', '<', '>', '>=', '<='].forEach(op => {
-            const option = new Option(op, op);
-            operatorSelect.options.add(option);
-        });
+    container.appendChild(multiSelect);
+  } else if (viewSelect === 'advanced') {
+    const operatorSelect = document.createElement('select');
+    ['=', '!=', '<', '>', '>=', '<='].forEach(op => {
+      const option = new Option(op, op);
+      operatorSelect.options.add(option);
+    });
 
-        const valueInput = document.createElement('input');
-        valueInput.placeholder = 'Value';
+    const valueInput = document.createElement('input');
+    valueInput.placeholder = 'Value';
 
-        container.appendChild(operatorSelect);
-        container.appendChild(valueInput);
-    }
+    container.appendChild(operatorSelect);
+    container.appendChild(valueInput);
+  }
 
-    return container;
+  return container;
 }
 
 // Function to switch views
 function switchView(event, main, view) {
-    event.preventDefault();
-    const container = main.querySelector('#filterBoxContainer');
-    container.innerHTML = '';
+  event.preventDefault();
+  const container = main.querySelector('#filterBoxContainer');
+  container.innerHTML = '';
 
-    const addFilterField = createFilterField(main);
-    container.appendChild(addFilterField);
+  const addFilterField = createFilterField(main);
+  container.appendChild(addFilterField);
 }
-  
- // Function to collect data and generate JSON
+
+// Function to collect data and generate JSON
 function generateJson(event) {
-    event.preventDefault();
-    console.log("generateJson");
-    // get the main element
-   
-    
-   
-    const viewSelect = event.target.parentNode.parentNode.querySelector('#viewSelect');
-   
-    if (!viewSelect) return;
-    
-    const view = viewSelect.options[viewSelect.selectedIndex].value;
-    let filterInfo = { view: view, filters: [] };
-    
-    const filterFields = event.target.parentNode.parentNode.querySelectorAll('#filterBoxContainer .filterField');
+  event.preventDefault();
+  console.log("generateJson");
+  // get the main element
 
- 
 
-    filterFields.forEach(filterField => {
-       
-        const fieldInput = filterField.querySelector('input[name="field"]');
-        const dataType = fieldInput.getAttribute('dataType');
-        
-        if (view === 'standard') {
-            const multiSelect = filterField.querySelector('select');
-          
-            const selectedOptions = Array.from(multiSelect.selectedOptions).map(option => option.value);
-            let filterValues = [];
-            datafield = JSON.parse( fieldInput.getAttribute('data-field'));
-            console.log(selectedOptions);
-            switch (datafield.fieldDataType) {
-                case 'string':
-                    filterValues = selectedOptions;
-                    break;
-                case 'number':
-                    filterValues = selectedOptions.map(option => parseFloat(option));
-                    break;
-                case 'date':
-                    filterValues = selectedOptions.map(option => new Date(option));
-                    break;
-                default:
-                    filterValues = selectedOptions;
-                    break;
-            }
 
-           
+  const viewSelect = event.target.parentNode.parentNode.querySelector('#viewSelect');
 
-            filterInfo.filters.push({
-                field: datafield.fieldName,
-                DBName: datafield.DBName,
-                type: datafield.fieldDataType,
-                operator: '',
-                value: '',
-                values: filterValues
-            });
+  if (!viewSelect) return;
 
-        } else if (view === 'advanced') {
-            const operatorSelect = filterField.querySelector('select');
-            const valueInput = filterField.querySelector('input[placeholder="Value"]');
-            let value = null;
+  const view = viewSelect.options[viewSelect.selectedIndex].value;
+  let filterInfo = { view: view, filters: [] };
 
-            switch (dataType) {
-                case 'string':
-                    value = valueInput.value;
-                    break;
-                case 'number':
-                    value = parseFloat(valueInput.value);
-                    break;
-                case 'date':
-                    value = new Date(valueInput.value);
-                    break;
-            }
+  const filterFields = event.target.parentNode.parentNode.querySelectorAll('#filterBoxContainer .filterField');
 
-            filterInfo.filters.push({
-                field: fieldInput.value,
-                DBName: fieldInput.getAttribute('DBName'),
-                type: dataType,
-                operator: operatorSelect.value,
-                value: value,
-                values: []
-            });
-        }
-    });
 
-     // Display the JSON for demonstration purposes
-   //  console.log(JSON.stringify(filterInfo));
-    const propertiesBar = document.getElementById("propertiesBar");
-    // get id of the element
-    const element = document.getElementById( propertiesBar.querySelector("label").innerText);
-    // console.log(element);
-    element.setAttribute("filter", JSON.stringify(filterInfo));
 
-    // Here you could also send the JSON to a server, save it, or use it in some other way
-    // For example:
-    // fetch('/api/filters', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(filterInfo) });
+  filterFields.forEach(filterField => {
+
+    const fieldInput = filterField.querySelector('input[name="field"]');
+    const dataType = fieldInput.getAttribute('dataType');
+
+    if (view === 'standard') {
+      const multiSelect = filterField.querySelector('select');
+
+      const selectedOptions = Array.from(multiSelect.selectedOptions).map(option => option.value);
+      let filterValues = [];
+      datafield = JSON.parse(fieldInput.getAttribute('data-field'));
+      console.log(selectedOptions);
+      switch (datafield.fieldDataType) {
+        case 'string':
+          filterValues = selectedOptions;
+          break;
+        case 'number':
+          filterValues = selectedOptions.map(option => parseFloat(option));
+          break;
+        case 'date':
+          filterValues = selectedOptions.map(option => new Date(option));
+          break;
+        default:
+          filterValues = selectedOptions;
+          break;
+      }
+
+
+
+      filterInfo.filters.push({
+        field: datafield.fieldName,
+        DBName: datafield.DBName,
+        type: datafield.fieldDataType,
+        operator: '',
+        value: '',
+        values: filterValues
+      });
+
+    } else if (view === 'advanced') {
+      const operatorSelect = filterField.querySelector('select');
+      const valueInput = filterField.querySelector('input[placeholder="Value"]');
+      let value = null;
+
+      switch (dataType) {
+        case 'string':
+          value = valueInput.value;
+          break;
+        case 'number':
+          value = parseFloat(valueInput.value);
+          break;
+        case 'date':
+          value = new Date(valueInput.value);
+          break;
+      }
+
+      filterInfo.filters.push({
+        field: fieldInput.value,
+        DBName: fieldInput.getAttribute('DBName'),
+        type: dataType,
+        operator: operatorSelect.value,
+        value: value,
+        values: []
+      });
+    }
+  });
+
+  // Display the JSON for demonstration purposes
+  //  console.log(JSON.stringify(filterInfo));
+  const propertiesBar = document.getElementById("propertiesBar");
+  // get id of the element
+  const element = document.getElementById(propertiesBar.querySelector("label").innerText);
+  // console.log(element);
+  element.setAttribute("filter", JSON.stringify(filterInfo));
+
+  // Here you could also send the JSON to a server, save it, or use it in some other way
+  // For example:
+  // fetch('/api/filters', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(filterInfo) });
 }
 
- // Function to regenerate filters from JSON
+// Function to regenerate filters from JSON
 function regenerateFilters(content, filterConfig) {
-    if (!filterConfig) return;
-    switchView(event, content, filterConfig.view); // Ensure the correct view is set
-    
-    if (!filterConfig.filters) return;
+  if (!filterConfig) return;
+  switchView(event, content, filterConfig.view); // Ensure the correct view is set
 
-    if (filterConfig.filters.length > 0) {
-        filterConfig.filters.forEach(filter => {
-            const filterBoxContainer = content.querySelector('#filterBoxContainer');
-            const filterField = createFilterField(content);
-            filterBoxContainer.appendChild(filterField);
-            
-            const textField = filterField.querySelector('input[name="field"]');
-            textField.value = filter.field;
-            textField.setAttribute('dataType', filter.type);
-            textField.setAttribute('dataset', filter.dataset);
+  if (!filterConfig.filters) return;
 
-            if (filterConfig.view === 'standard') {
-                const multiSelect = filterField.querySelector('select');
-                textField.dispatchEvent(new Event('input')); // Trigger input event to populate options
-                setTimeout(() => {
-                    filter.values.forEach(val => {
-                        for (let option of multiSelect.options) {
-                            if (option.value === val) option.selected = true;
-                        }
-                    });
-                }, 1000); // Adjust timeout as needed to ensure options are populated
-            } else if (filterConfig.view === 'advanced') {
-                filterField.querySelector('select').value = filter.operator;
-                filterField.querySelector('input[placeholder="Value"]').value = filter.value;
+  if (filterConfig.filters.length > 0) {
+    filterConfig.filters.forEach(filter => {
+      const filterBoxContainer = content.querySelector('#filterBoxContainer');
+      const filterField = createFilterField(content);
+      filterBoxContainer.appendChild(filterField);
+
+      const textField = filterField.querySelector('input[name="field"]');
+      textField.value = filter.field;
+      textField.setAttribute('dataType', filter.type);
+      textField.setAttribute('dataset', filter.dataset);
+
+      if (filterConfig.view === 'standard') {
+        const multiSelect = filterField.querySelector('select');
+        textField.dispatchEvent(new Event('input')); // Trigger input event to populate options
+        setTimeout(() => {
+          filter.values.forEach(val => {
+            for (let option of multiSelect.options) {
+              if (option.value === val) option.selected = true;
             }
-        });
-    }
+          });
+        }, 1000); // Adjust timeout as needed to ensure options are populated
+      } else if (filterConfig.view === 'advanced') {
+        filterField.querySelector('select').value = filter.operator;
+        filterField.querySelector('input[placeholder="Value"]').value = filter.value;
+      }
+    });
+  }
 }

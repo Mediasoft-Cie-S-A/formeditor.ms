@@ -53,6 +53,17 @@
     "icon": "fa fa-compass",
     "renderFunction": ""
   },
+  "SearchWindowWeb": {
+    "type": "SearchWindowWeb",
+    "description": "Search Window Web",
+    "category": "Web Business Logic",
+    "scriptName": "searchWindowWeb.js",
+    "createFunction": "createSearchWindowWeb",
+    "editFunction": "editSearchWindowWeb",
+    "styles": "searchWindow.css",
+    "icon": "fa fa-search",
+    "renderFunction": ""
+  },
   "dataSet": {
     "type": "dataSet",
     "description": "Data Set",
@@ -107,8 +118,8 @@
     "styles": "cookieStorage.css",
     "icon": "fa fa-cookie",
     "renderFunction": "renderCookieStorage"
-},
- "SearchWindow": {
+  },
+  "SearchWindow": {
     "type": "SearchWindow",
     "description": "Search Window",
     "category": "Business Logic",
@@ -141,7 +152,7 @@
     "styles": "fileExplorer.css",
     "icon": "fa fa-folder-open",
     "renderFunction": ""
-  },  
+  },
   "jscode": {
     "type": "jscode",
     "description": "javascript code",

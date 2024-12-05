@@ -162,16 +162,13 @@ function createFieldFromJson(fieldJson) {
   var element = null;
   let einput = null;
   switch (fieldJson.fieldType) {
-    
+    case "combo_array":
+    case "combo_sql":
     case "array":
-      case "combo_array":
-        case "combo_sql":
       element = createElementInput(fieldJson.fieldType);
       einput = element.querySelector("input"); // Adjust to your combobox selector
       einput.style.display = "none";
       break;
-     
-      
     case "sequence":
       element = createElementInput(fieldJson.fieldType);
       einput = element.querySelector("input"); // Adjust to your combobox selector
@@ -183,19 +180,19 @@ function createFieldFromJson(fieldJson) {
       // adding the search button
       var searchButton = document.createElement("button");
       searchButton.style.float = "right";
-      searchButton.style.width = "20px" ;
-      searchButton.style.height = "20px" ;
+      searchButton.style.width = "20px";
+      searchButton.style.height = "20px";
       searchButton.style.padding = "0px";
       // icon for the search button
       var icon = document.createElement("i");
-      icon.className = "fas fa-search";      
+      icon.className = "fas fa-search";
       searchButton.appendChild(icon);
       searchButton.onclick = function () {
         var input = einput;
         var filter = input.value.toUpperCase();
         // generate the modalwindow for the search
         // Example JSON dataset and query
-        
+
         query = einput.getAttribute("dataset-field-SQL");
         console.log("query", query);
         // split the query
@@ -207,14 +204,14 @@ function createFieldFromJson(fieldJson) {
         // extract all fields from the query
         var fields = query.match(/SELECT(.*?)FROM/)[1];
         // get the dataset from the query in this format  { fieldName: "field", fieldType: "string" },
-       const datasetJson = fields.split(",").map((field) => {
+        const datasetJson = fields.split(",").map((field) => {
           return {
             fieldName: field.trim(),
             fieldType: "string",
           };
         });
-     // Show the modal with the query results
-          showQueryResultModal(DBName, datasetJson, queryArray[1],einput.id);
+        // Show the modal with the query results
+        showQueryResultModal(DBName, datasetJson, queryArray[1], einput.id);
       };
       element.appendChild(searchButton);
       break;
@@ -281,6 +278,7 @@ function createFieldFromJson(fieldJson) {
     einput.setAttribute("dataset-field-type", fieldJson.fieldType);
     einput.setAttribute("dataset-field-size", fieldJson.fieldSize);
     einput.setAttribute("dataset-field-mandatory", fieldJson.fieldMandatory);
+    einput.setAttribute("dataset-field-regexp", fieldJson.regexp);
     einput.setAttribute("dataset-field-values", fieldJson.fieldValues);
     einput.setAttribute("dataset-field-SQL", fieldJson.fieldSQL);
     if (fieldJson.fieldMandatory) {
@@ -391,7 +389,7 @@ async function getRecords(action, DBName, tableName, datasetFields) {
 async function linkRecordToGrid(DBName, tableName, rowId, rowNum) {
   const saveBtn = document.querySelector("[name=SaveDSBtn]");
   if (saveBtn) saveBtn.disabled = true;
-  
+
   try {
     // get all the datasets
     const datasets = document.querySelectorAll("#DataSet_" + tableName);
@@ -411,7 +409,7 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum) {
           .then((response) => response.json())
           .then((data) => {
             updateInputs(data, DBName, tableName);
-          
+
           })
           .catch((error) => console.error("Error:", error));
       }
@@ -622,7 +620,7 @@ async function updateInputs(data, DBName, tableName) {
             handleSelectField(input, fieldvalues, data[0][fieldLabel]);
             break;
           case "combo_sql":
-         
+
             // get the values of the field
             let fieldSQL = input.getAttribute("dataset-field-SQL");
             handleSelectFieldSQL(
@@ -633,7 +631,7 @@ async function updateInputs(data, DBName, tableName) {
               data[0][fieldLabel]
             );
             break;
-          
+
           default:
             // if (fieldType === "input") {
             input.value = data[0][fieldLabel]?.toString().trim() || "";
@@ -654,11 +652,8 @@ async function updateInputs(data, DBName, tableName) {
 // Helper function to handle select fields and sync with input field
 
 function handleSelectField(input, options, selectedValue) {
-  console.log("handleSelectField");
   if (!input) return;
 
-  console.log(input);
-  console.log(options);
   // convert the options to an array
   options = options.split(",");
 
