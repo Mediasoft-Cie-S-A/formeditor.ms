@@ -134,13 +134,14 @@ function createDomElement(json, parent) {
 // Function to export the json to file
 function exportJson() {
   var formContainer = document.getElementById("formContainer");
+  var formId = document.getElementById("formId").value;
   var jsonData = domToJson(formContainer);
   var dataStr =
     "data:text/json;charset=utf-8," +
     encodeURIComponent(JSON.stringify(jsonData));
   var downloadAnchorNode = document.createElement("a");
   downloadAnchorNode.setAttribute("href", dataStr);
-  downloadAnchorNode.setAttribute("download", "form.json");
+  downloadAnchorNode.setAttribute("download", formId + ".json");
   document.body.appendChild(downloadAnchorNode); // required for firefox
   downloadAnchorNode.click();
   downloadAnchorNode.remove();
