@@ -16,29 +16,34 @@ function createCookieStorage(type) {
 
 function editCookieStorage(type, element, content) {
     // Clear the content area to prevent duplicates
-    content.innerHTML = "";
-
+    const div = document.createElement("div");
+    div.style.width = "150px";
+    div.style.height = "100%";
+    div.style.border = "1px solid #ccc";
+    div.style.borderRadius = "5px";
+    div.style.padding = "10px";
+    // Button to save all variables as cookies
+    const saveButton = document.createElement("button");
+    saveButton.textContent = "Update";
+    saveButton.onclick = () => saveAllCookies(element,content);
+    saveButton.style.width = "100%";
+    div.appendChild(saveButton);
     // Create a container div for the variables
     const vardiv = document.createElement("div");
     vardiv.id = "cookieStorage";
     vardiv.draggable = true;   
-    content.appendChild(vardiv);
+    div.appendChild(vardiv);
 
     // Button to add new variables
     const addButton = document.createElement("button");
-    addButton.textContent = "Add";
+    addButton.textContent = "Add Var";
     addButton.onclick = () => addVariableInput(element, vardiv);
     addButton.style.width = "100%";
 
-    // Button to save all variables as cookies
-    const saveButton = document.createElement("button");
-    saveButton.textContent = "Save";
-    saveButton.onclick = () => saveAllCookies(element,content);
-    saveButton.style.width = "100%";
-
+    
     // Append the Add and Save buttons to the property bar
-    content.appendChild(addButton);
-    content.appendChild(saveButton);
+    div.appendChild(addButton);
+    content.appendChild(div);
 
     // Display existing variables if any
     const variables = JSON.parse(element.dataset.cookies || "[]");
@@ -86,7 +91,7 @@ function renderCookieStorage(main) {
                 // slice the value to get the array
                 let array = value.split(",");
                 // write array values in select
-                let select = document.createElement("select");
+                select = document.createElement("select");
                 select.setAttribute("var_name", name);  
                 select.style.width = "150px";
                 select.title = cookieValue;
@@ -94,6 +99,7 @@ function renderCookieStorage(main) {
                     
                     let option = document.createElement("option");
                     option.textContent = val;
+                    option.value = val;
                     select.appendChild(option);
                     // set the value of the variable to the selected value
                     if (val === cookieValue) {
@@ -113,34 +119,36 @@ function renderCookieStorage(main) {
             break;
             case "Query":
                 // execute the query and write the result in select
-                let SQL = value;
-                let DBName = getCookie("DBName");
-                let result = document.createElement("select");
-                let option = document.createElement("option");
-                result.setAttribute("var_name", name);  
-                result.style.width = "150px";
-                result.title = cookieValue;
+                let SQL = value.split("|")[1];
+                let DBName = value.split("|")[0];
+                select = document.createElement("select");
+                select.setAttribute("var_name", name);  
+                select.style.width = "150px";
+                select.title = cookieValue;
                 const url = `/query-data/${DBName}/${SQL}`;
                 fetch(url)
                 .then(response => response.json())
                 .then(data => {
-                    data.forEach((val) => {
+                    data.forEach((idx,val) => {
                         let option = document.createElement("option");
                         option.textContent = val;
-                        result.appendChild(option);
-                          // set the value of the variable to the selected value
-                         if (val === value) {
-                               result.value = val;
-                         }
+                        option.value = val;
+                        select.appendChild(option);
+                        // set the value of the variable to the selected value
+                        if (val === cookieValue) {
+                            console.log(cookieValue);
+                            select.value = cookieValue;
+                        }
                     });
                 });
-                updateGrid(name,select);
-                // change the value of the variable when the select changes
-                result.onchange = () => {
-                    updateGrid(name,result);
-                };
+               // excute the search when the select changes
+               updateGrid(name,select);
+               // change the value of the variable when the select changes
+               select.onchange = () => {
+                   updateGrid(name,select);
+               };
 
-                varContainer.appendChild(result);
+               varContainer.appendChild(select);
             break;
         }
                 
@@ -204,14 +212,14 @@ function addVariableInput(element, content, name = "") {
     const description = document.createElement("input");
     description.type = "text";
     description.placeholder = "Description";
-    description.value = currentVariables?.description;
+    description.value = currentVariables?.description!=undefined?currentVariables?.description:"";
     description.setAttribute("tag", "var_description");
     
     // Input for the variable name
     const nameInput = document.createElement("input");
     nameInput.type = "text";
     nameInput.placeholder = "Variable Name";
-    nameInput.value = name;
+    nameInput.value = name!=undefined?name:"";
     nameInput.setAttribute("tag", "var_name");
     
     // Predefined options for the select dropdown¨
@@ -238,7 +246,7 @@ function addVariableInput(element, content, name = "") {
     valueInput = document.createElement("input");
     valueInput.type = "text";
     valueInput.placeholder = "Variable Value";
-    valueInput.value = currentVariables?.value;
+    valueInput.value = currentVariables?.value!=undefined?currentVariables?.value:"";
     valueInput.setAttribute("tag", "var_value");
 
     // Predefined options for the select dropdown
@@ -246,6 +254,7 @@ function addVariableInput(element, content, name = "") {
     // Button to remove this variable entry
     const removeButton = document.createElement("button");
     removeButton.textContent = "Remove";
+    removeButton.style.width = "100%";
     removeButton.onclick = () => {
         varContainer.remove();
         updateStoredVariables(element,content);
