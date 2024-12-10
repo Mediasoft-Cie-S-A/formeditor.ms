@@ -762,13 +762,26 @@ function closeModalDbStrct() {
 
 function searchtable(search,contentDivID)
 {
-    var filter=search.toUpperCase();
+    var filter=search.toUpperCase().split(' ');
+    var dbnames = filter[0];
+    var tables = filter[1];
+
     var list=document.getElementById(contentDivID);
     var items = list.getElementsByClassName('tables-list-item');
     for (var i = 0; i < items.length; i++) {
         var txtValue = items[i].getAttribute('data-table-name');
-        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        if (txtValue.toUpperCase().indexOf(dbnames) > -1) {
             items[i].style.display = "";
+            var tableDetailsDiv=items[i].getElementsByClassName('field-item');
+            for (var j = 0; j < tableDetailsDiv.length; j++) {
+                var txtValue = tableDetailsDiv[j].getAttribute('data-table-name');
+                if (txtValue.toUpperCase().indexOf(tables) > -1) {
+                    tableDetailsDiv[j].style.display = "";
+                } else {
+                    tableDetailsDiv[j].style.display = "none";
+                }
+            }
+
         } else {
             items[i].style.display = "none";
         }

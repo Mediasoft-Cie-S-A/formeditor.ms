@@ -1369,4 +1369,13 @@ function regenerateFilters(content, filterConfig) {
             }
         });
     }
+    
+
+}
+
+function showDiv(divId) {
+  document.querySelectorAll('.tab-div').forEach(div => {
+      div.style.display = 'none';
+  });
+  document.getElementById(divId).style.display = 'block';
 }
