@@ -153,7 +153,9 @@ function renderCookieStorage(main) {
 function updateGrid(name,select){
     cookieValue = select.value;
                     setCookie(name, cookieValue, 1);
-                    let idObject = getIdObject();
+                    //let test = getDataGridObject();
+                    let idObject = getDataGridObject();
+                    // getIdObject();
                     console.log(idObject);
                     if (idObject?.dataGrid) {
                       const gridDiv = document.getElementById(idObject.dataGrid);

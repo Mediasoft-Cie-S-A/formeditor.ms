@@ -67,9 +67,11 @@ function jsonToDom(json, parent) {
   } else {
     createDomElement(json, parent);
   }
-
+  
+}
   // planning
 
+function renderElements(parent){
   var planningElements = parent.querySelectorAll('div[tagname="planning"]');
   for (var i = 0; i < planningElements.length; i++) {
     console.log("planning:" + planningElements[i]);
@@ -132,13 +134,14 @@ function createDomElement(json, parent) {
 // Function to export the json to file
 function exportJson() {
   var formContainer = document.getElementById("formContainer");
+  var formId = document.getElementById("formId").value;
   var jsonData = domToJson(formContainer);
   var dataStr =
     "data:text/json;charset=utf-8," +
     encodeURIComponent(JSON.stringify(jsonData));
   var downloadAnchorNode = document.createElement("a");
   downloadAnchorNode.setAttribute("href", dataStr);
-  downloadAnchorNode.setAttribute("download", "form.json");
+  downloadAnchorNode.setAttribute("download", formId + ".json");
   document.body.appendChild(downloadAnchorNode); // required for firefox
   downloadAnchorNode.click();
   downloadAnchorNode.remove();

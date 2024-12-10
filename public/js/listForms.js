@@ -165,7 +165,7 @@ function loadFormData(formId,renderContainer=document.getElementById('renderForm
 
             // Convert JSON back to DOM and append
             var domContent = jsonToDom(form.formData,renderContainer);
-        
+            renderElements(renderContainer);
             console.log(domContent);
            
         })
