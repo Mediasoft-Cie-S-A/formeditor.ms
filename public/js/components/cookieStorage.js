@@ -170,10 +170,14 @@ function updateGrid(name,select){
                       const datasetgrid =JSON.parse( gridDiv.getAttribute("datasetgrid"));
                       const var_name = select.getAttribute("var_name");
                      // find DBName based on the field name = var_name
-                      const DBName = datasetgrid.find((field) => field.fieldName === var_name).DBName;
-                      
-                      console.log(DBName);
-                      searchGrid(DBName, var_name, "=", cookieValue, idObject.dataGrid);
+                      const varObject = datasetgrid.find((field) => field.fieldName === var_name);
+                      console.log(varObject);
+                      if (varObject) {
+                        DBName = varObject.DBName;
+                        console.log(DBName);
+                        searchGrid(DBName, var_name, "=", cookieValue, idObject.dataGrid);
+                        }
+                    
                     }
 }
 // Helper function to get a cookie by name
