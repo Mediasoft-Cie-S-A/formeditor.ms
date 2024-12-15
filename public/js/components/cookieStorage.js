@@ -162,23 +162,20 @@ function updateGrid(name,select){
     cookieValue = select.value;
                     setCookie(name, cookieValue, 1);
                     //let test = getDataGridObject();
-                    let idObject = getDataGridObject();
-                    // getIdObject();
-                    console.log(idObject);
-                    if (idObject?.dataGrid) {
-                      const gridDiv = document.getElementById(idObject.dataGrid);
-                      const datasetgrid =JSON.parse( gridDiv.getAttribute("datasetgrid"));
+                      // get all the grid div with attribute tagname=dataGrid
+                     let idObjects = document.querySelectorAll("div[tagname='dataGrid']");
+                                       
+                    idObjects.forEach((idObject) => {{
+                      const gridDiv = document.getElementById(idObject.id);
+                     
+                      const datasetJSON =JSON.parse( gridDiv.getAttribute("datasetgrid"));
+                    if (datasetJSON.length > 0) {
                       const var_name = select.getAttribute("var_name");
-                     // find DBName based on the field name = var_name
-                      const varObject = datasetgrid.find((field) => field.fieldName === var_name);
-                      console.log(varObject);
-                      if (varObject) {
-                        DBName = varObject.DBName;
-                        console.log(DBName);
-                        searchGrid(DBName, var_name, "=", cookieValue, idObject.dataGrid);
-                        }
+                        searchGrid(datasetJSON[0].DBName, var_name, "=", cookieValue, idObject.id);
+                    }
                     
                     }
+                });
 }
 // Helper function to get a cookie by name
 function getCookie(name) {

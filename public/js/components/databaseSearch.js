@@ -122,6 +122,7 @@ function RenderDataSearch(main) {
 }
 
 function gridSearch(event) {
+  console.log("gridSearch");
   event.preventDefault();
   const maindiv = event.target.parentElement.parentElement;
   // get autocomplete div¨
@@ -153,12 +154,17 @@ function gridSearch(event) {
       operator = "like";
   }
   // get all the grid div with attribute tagname=dataGrid
-  let idObject = getIdObject();
-  if (idObject?.dataGrid) {
-    const gridDiv = document.getElementById(idObject.dataGrid);
-    
-    searchGrid(DBName, filedName, operator, searchValue, idObject.dataGrid);
-  }
+  let idObjects = document.querySelectorAll("div[tagname='dataGrid']");
+  
+
+  idObjects.forEach((idObject) => {
+    // if the grid is visible
+    if (idObject.style.display != "none") {
+      // call the searchGrid function
+      searchGrid(DBName, filedName, operator, searchValue, idObject.id);
+    }
+ 
+  });
 
   
 }

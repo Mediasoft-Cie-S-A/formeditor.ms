@@ -30,6 +30,9 @@ class OdbcDatabase {
       };
       this.connection = await odbc.connect(connectionConfig);
       this.connection.setIsolationLevel(odbc.SQL_TXN_READ_COMMITTED);
+      // set pool size
+     this.connection.poolSize = 10;
+
     } catch (err) {
       console.log("Error connecting to the database:", err);
       //  throw err;
