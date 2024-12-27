@@ -15,7 +15,7 @@
  */
 
 var moveElementEvent = false;
-
+const labelheight = 20;
 function removeAllChildNodes(parent) {
   while (parent.firstChild) {
     parent.removeChild(parent.firstChild);
@@ -51,28 +51,15 @@ function createInputItem(id, label, styleProperty, text, type, attribute) {
   var div = document.createElement("div");
   var lbl = document.createElement("label");
   lbl.setAttribute("for", id);
-  lbl.textContent = label;
-
+  lbl.textContent = label.replace(/-/g, " ").toLocaleLowerCase();
+  lbl.style.fontSize = "9px";
+  lbl.style.height = labelheight+"px";
   var input = document.createElement("input");
   input.type = type;
   input.className = "input-element";
   input.id = id;
-  input.onchange = function (event) {
-    if (event.target.type == "file") {
-    } else {
-      if (attribute === true) {
-        updateAttribute(styleProperty, this.value);
-      } else {
-        updateElementStyle(styleProperty, this.value);
-      }
-    }
-  };
-  if (input.type != "file") {
-    //set the relative path for the image
-    input.value = text;
-  } else {
-    input.setAttribute("accept", "image/*");
-  }
+ 
+  input.value = text;
   div.appendChild(lbl);
   div.appendChild(input);
 
@@ -98,153 +85,152 @@ function createInputDiv(id, labelText, onChangeFunction, text) {
   return div;
 }
 
+
+
 function editElement(element) {
-  // Get the type of the element
-  // if type is null get the element type
-  var type = element.getAttribute("tagName");
-  currentElement = element;
-  var dialog = document.getElementById("propertiesBar");
-  dialog.style.display = "block";
-  var content = dialog.querySelector("div");
-  content.innerHTML = "";
-  // adding icon close to the dialog
-  var closeIcon = document.createElement("i");
+  const categories = {
+    "Text & Font": [
+        "color", "font-size", "font-family", "font-weight", "text-align", "line-height", "text-decoration", "text-transform", "letter-spacing", "white-space"
+    ],
+    "Box Model": [
+       "width", "height", "margin", "margin-top", "margin-right", "margin-bottom", "margin-left", "padding", "padding-top", "padding-right", "padding-bottom", "padding-left", "border", "border-width", "border-style", "border-color",  "max-width", "min-width", "max-height", "min-height"
+    ],
+    "Background": [
+        "background-color", "background-image", "background-size", "background-position", "background-repeat"
+    ],
+    "Visibility": ["display", "visibility", "opacity"],
+    "Positioning": ["position", "top", "right", "bottom", "left", "z-index"],
+    "Flexbox": ["display", "flex-direction", "justify-content", "align-items", "align-self", "flex", "flex-grow", "flex-shrink", "order"],
+    "Borders & Shadows": ["border-radius", "box-shadow"],
+    "Overflow": ["overflow", "overflow-x", "overflow-y"],
+    "Grid": ["display", "grid-template-rows", "grid-template-columns", "grid-template-areas", "grid-gap", "row-gap", "column-gap", "grid-auto-rows", "grid-auto-columns", "grid-auto-flow"],
+    "Transitions & Animations": ["transition", "transition-property", "transition-duration", "transition-timing-function", "transition-delay", "animation", "animation-name", "animation-duration", "animation-timing-function", "animation-delay", "animation-iteration-count", "animation-direction"],
+    "Filters & Effects": ["clip-path", "filter"],
+    "Cursor & Interaction": ["cursor", "pointer-events"]
+};
 
-  closeIcon.className = "fa fa-close";
-  closeIcon.onclick = function () {
-    document.getElementById("propertiesBar").style.display = "none";
+
+  const predefinedValues = {
+      "display": ["block", "inline", "flex", "grid", "none"],
+      "position": ["static", "relative", "absolute", "fixed", "sticky"],
+      "text-align": ["left", "center", "right", "justify"],
+      "flex-direction": ["row", "row-reverse", "column", "column-reverse"],
+      "justify-content": ["flex-start", "center", "flex-end", "space-between", "space-around"],
+      "align-items": ["flex-start", "center", "flex-end", "stretch", "baseline"]
   };
-  // set the icon top right
-  closeIcon.classList.add("remove-item");
-  closeIcon.style.float = "right";
 
+  const dialog = document.getElementById("propertiesBar");
+  dialog.style.display = "block";
+  const content = dialog.querySelector("div");
+  content.innerHTML = "";
+  content.style.padding = "5px";
+  const closeIcon = document.createElement("i");
+  closeIcon.className = "fa fa-close remove-item";
+ // closeIcon.style.float = "right";
+  closeIcon.onclick = () => (dialog.style.display = "none");
   content.appendChild(closeIcon);
 
   const label = document.createElement("label");
   label.textContent = element.id;
-  label.style.float = "left";
+ // label.style.float = "left";
   label.style.backgroundColor = "grey";
   label.style.color = "white";
+  label.style.fontSize = "10px";
   content.appendChild(label);
-
-  // Execute the function editor delcared in the components js if exists type
-  if (elementsData[type]) {
-    if (elementsData[type].editFunction) {
-      var functionName = elementsData[type].editFunction;
-      window[functionName](type, element, content);
+// Get the type of the element
+  // if type is null get the element type
+  var type = element.getAttribute("tagName");
+  currentElement = element;
+    // Execute the function editor delcared in the components js if exists type
+    console.log(type);
+    if (elementsData[type]) {
+      if (elementsData[type].editFunction) {
+        var functionName = elementsData[type].editFunction;
+        window[functionName](type, element, content);
+      }
     }
+
+  for (const [category, properties] of Object.entries(categories)) {
+      const box = document.createElement("div");
+      box.className = "editor-box";
+      box.style.border = "1px solid #ccc";
+      box.style.marginBottom = "10px";
+      box.style.padding = "10px";
+      box.style.fontSize = "9px";
+      box.style.borderRadius = "5px";
+      box.innerHTML = `<div style='font-weight: bold; width:100%'>${category}</div>`;
+
+      const inputsContainer = document.createElement("div");
+      inputsContainer.style.display = "grid";
+      inputsContainer.style.gridGap = "5px";
+      inputsContainer.style.gridTemplateColumns = "1fr 1fr";
+
+      const inputElements = properties.map((prop) => {
+          const value = element.style[prop] || "";
+
+          let input;
+          if (prop === "color" || prop === "background-color" || prop === "border-color") {
+              input = document.createElement("div");
+              const label = document.createElement("label");
+              label.textContent = prop.replace(/-/g, " ").toLocaleLowerCase();
+              label.style.fontSize = "9px";
+              label.style.height = labelheight+"px";
+              const colorInput = document.createElement("input");
+              colorInput.type = "color";
+              colorInput.value = value || "#ffffff";
+              colorInput.setAttribute("data-style-property", prop);
+              input.appendChild(label);
+              input.appendChild(colorInput);
+          } else if (predefinedValues[prop]) {
+              input = document.createElement("div");
+              const label = document.createElement("label");
+              label.textContent = prop.replace(/-/g, " ").toLocaleLowerCase();
+              label.style.fontSize = "9px";
+              label.style.height = labelheight+"px";
+              const select = document.createElement("select");
+              select.setAttribute("data-style-property", prop);
+
+              const emptyOption = document.createElement("option");
+              emptyOption.value = "";
+              emptyOption.textContent = "(none)";
+              if (!value) emptyOption.selected = true;
+              select.appendChild(emptyOption);
+
+              predefinedValues[prop].forEach((option) => {
+                  const optionElement = document.createElement("option");
+                  optionElement.value = option;
+                  optionElement.textContent = option;
+                  if (option === value) optionElement.selected = true;
+                  select.appendChild(optionElement);
+              });
+
+              input.appendChild(label);
+              input.appendChild(select);
+          } else {
+              input = createInputItem(prop, prop.replace(/-/g, " ").toUpperCase(), prop, value, "text");
+          }
+
+          inputsContainer.appendChild(input);
+          return input;
+      });
+
+      box.appendChild(inputsContainer);
+
+      const updateButton = document.createElement("button");
+      updateButton.textContent = "Update";
+      updateButton.onclick = () => {
+          inputElements.forEach((input) => {
+              const prop = input.querySelector("select, input").getAttribute("data-style-property");
+              const value = input.querySelector("select, input").value;
+              updateElementStyle(prop, value);
+          });
+      };
+      box.appendChild(updateButton);
+
+      content.appendChild(box);
   }
-
-  const style = element.style;
-
-  content.appendChild(
-    createInputDiv("label", "Text:", updateElementText, element.innerText)
-  );
-  content.appendChild(
-    createInputDiv("text", "Value:", updateElementValue, element.value)
-  );
-  content.appendChild(
-    createInputItem("vs", "visibility", "visibility", style.visibility, "text")
-  );
-  content.appendChild(
-    createInputItem(
-      "chk",
-      "checked",
-      "checked",
-      element.getAttribute("checked"),
-      "text"
-    )
-  );
-
-  content.appendChild(
-    createInputItem("wd", "width", "width", style.width, "text")
-  );
-  content.appendChild(
-    createInputItem("hg", "height", "height", style.height, "text")
-  );
-  content.appendChild(
-    createInputItem("cl", "color", "color", style.color, "color")
-  );
-  content.appendChild(
-    createInputItem(
-      "bg",
-      "background-color",
-      "background-color",
-      style.backgroundColor,
-      "color"
-    )
-  );
-  content.appendChild(
-    createInputItem("border", "border", "border", style.border, "text")
-  );
-  content.appendChild(
-    createInputItem("cl", "class", "class", element.getAttribute("class")),
-    "text"
-  );
-  content.appendChild(
-    createInputItem("font", "font", "font", style.font, true, "text")
-  );
-  content.appendChild(
-    createInputItem("margin", "margin", "margin", style.margin, "text")
-  );
-  content.appendChild(
-    createInputItem("padding", "padding", "padding", style.padding, "text")
-  );
-  content.appendChild(
-    createInputItem("html", "html", "html", element.innerHTML, "text", true)
-  );
-  content.appendChild(
-    createInputItem(
-      "Data Table Name",
-      "dataset-table-name",
-      "dataset-table-name",
-      element.getAttribute("dataset-table-name"),
-      "text",
-      true
-    )
-  );
-  content.appendChild(
-    createInputItem(
-      "Data Field Name",
-      "dataset-field-name",
-      "dataset-field-name",
-      element.getAttribute("dataset-field-name"),
-      "text",
-      true
-    )
-  );
-  content.appendChild(
-    createInputItem(
-      "change",
-      "onChange",
-      "onchange",
-      element.getAttribute("onchange"),
-      "text",
-      true
-    )
-  );
-  content.appendChild(
-    createInputItem(
-      "click",
-      "onClick",
-      "onclick",
-      element.getAttribute("onclick"),
-      "text",
-      true
-    )
-  );
-
-  content.appendChild(
-    createInputItem(
-      "dblclick",
-      "Double Click",
-      "dblclick",
-      element.getAttribute("dblclick"),
-      "text",
-      true
-    )
-  );
 }
+
 
 function closeModalDbStrct() {
   document.getElementById("tableDetailsModal").style.display = "none";

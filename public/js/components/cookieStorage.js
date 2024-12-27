@@ -57,7 +57,7 @@ function editCookieStorage(type, element, content) {
 function renderCookieStorage(main) {
     // Clear previous content
     main.innerHTML = "";
-   
+    main.border= "none";    
     //get main.dataset.cookies
     variables = JSON.parse(main.getAttribute("data-cookies"));
     // Retrieve or initialize the variables from cookies
@@ -66,9 +66,9 @@ function renderCookieStorage(main) {
         // Create a container for each variable
         const varContainer = document.createElement("div");
         varContainer.className = "variable-container";
-        varContainer.style.border = "1px solid #ccc";   
-        varContainer.style.padding = "10px";
-        varContainer.style.borderRadius = "5px";
+       
+        varContainer.style.padding = "5px";
+    
         let label = document.createElement("label");
         if (description) {
             label.textContent = `${description}: `;

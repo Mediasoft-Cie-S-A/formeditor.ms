@@ -34,6 +34,7 @@ function editDatabaseGrid(type, element, content) {
     const gridID = propertiesBar.querySelector("label").textContent;
     const main = document.getElementById(gridID);
     updateGridData(main, content);
+    
   };
   content.appendChild(button);
   content.appendChild(createMultiSelectItem("Data", "data", "data"));
@@ -157,31 +158,31 @@ function insertNavBar(
   html += `<div style='display: flex; align-items: center; gap: 10px;'>`;
   html +=
     `<button name='revGRIDBtn' title='Previous Page' grid-id='${gridContainer.parentElement.id}' onclick='gridPrev(event,"${DBName}","${tableName}")'>` +
-    `<i class='bi bi-arrow-left-circle-fill' grid-id='${gridContainer.parentElement.id}' style='color:blue;'></i>` +
+    `<i class='fa fa-chevron-left' grid-id='${gridContainer.parentElement.id}' style='color:#4d61fc;'></i>` +
     `</button>`;
   html +=
     `<button name='NextGRIDBtn' title='Next Page' grid-id='${gridContainer.parentElement.id}' onclick='gridNext(event,"${DBName}","${tableName}")'>` +
-    `<i class='bi bi-arrow-right-circle-fill' grid-id='${gridContainer.parentElement.id}' style='color:blue;'></i>` +
+    `<i class='fa fa-chevron-right' grid-id='${gridContainer.parentElement.id}' style='color:#4d61fc;'></i>` +
     `</button>`;
 
   html +=
     `<button name='RefreshGRIDBtn' title='Refresh' grid-id='${gridContainer.parentElement.id}' onclick='searchGrid("${DBName}","","","","${gridContainer.parentElement.id}")'>` +
-    `<i class='bi bi-arrow-repeat' grid-id='${gridContainer.parentElement.id}' style='color:green;'></i>` +
+    `<i class='fa fa-refresh' grid-id='${gridContainer.parentElement.id}' style='color:#4d61fc;'></i>` +
     `</button>`;
   html +=
     `<button name='PostitGRIDBtn' title='Postit' grid-id='${gridContainer.parentElement.id}' onclick='postit(event,"${DBName}","${tableName}")'>` +
-    `<i class='bi bi-card-text' grid-id='${gridContainer.parentElement.id}' style='color:#aa0;'></i>` +
+    `<i class='bi bi-card-text' grid-id='${gridContainer.parentElement.id}' style='color:#4d61fc;'></i>` +
     `</button>`;
   html +=
     `<button name='ExportGRIDBtn' title='Export Data' grid-id='${gridContainer.parentElement.id}' onclick='export2CSV(event,"${DBName}","${tableName}")'>` +
-    `<i class='bi bi-file-spreadsheet' grid-id='${gridContainer.parentElement.id}' style='color:green;'></i>` +
+    `<i class='fa fa-download' grid-id='${gridContainer.parentElement.id}' style='color:#4d61fc;'></i>` +
     `</button>`;
   // adding button for grid or panel 
   html += `<button name='gridView' title='Grid View' grid-id='${gridContainer.parentElement.id}' onclick='switchView(event,"${DBName}","${gridContainer.parentElement.id}","standard")'>` +
-    `<i class='bi bi-grid-3x3-gap-fill' grid-id='${gridContainer.parentElement.id}' style='color:blue;'></i>` +
+    `<i class='fa fa-th' grid-id='${gridContainer.parentElement.id}' style='color:green;'></i>` +
     `</button>`;
   html += `<button name='panelView' title='Panel View' grid-id='${gridContainer.parentElement.id}' onclick='switchView(event,"${DBName}","${gridContainer.parentElement.id}","panel")'>` +
-    `<i class='bi bi-card-list' grid-id='${gridContainer.parentElement.id}' style='color:blue;'></i>` +
+    `<i class='bi bi-card-list' grid-id='${gridContainer.parentElement.id}' style='color:green;'></i>` +
     `</button>`;
   html += `</div>`;
   html += `<select id="gridPage" class="input-element" onchange='grid_page_size(event,"${gridContainer.parentElement.id}")' style='width:60px;font-size:14px'>`;
@@ -214,7 +215,7 @@ function createGrid(
   //header
   grid.setAttribute("dataset-table-name", tableName);
   grid.setAttribute("current_page", 1);
-  grid.setAttribute("page_size", 5);
+  grid.setAttribute("page_size", 10);
   grid.setAttribute("Table-Name", tableName);
   grid.setAttribute("DBName", DBName);
   grid.setAttribute("main-id", main.id);
@@ -569,6 +570,17 @@ async function gridGetData(
           row[0],
           record + (page - 1) * pageSize
         );
+
+          // get the tab
+          const tab = document.querySelector('[tagname="Tab"]');
+          console.log(tab);
+          // the header by class ctab_tabs-header
+          const header = tab.querySelector(".ctab_tabs-header");
+          if (header.childNodes.length > 0) {
+            // second tab
+            activateTab(event,header.childNodes[1],document.getElementById(header.childNodes[1].getAttribute("data-tab")));
+          }
+
       });
       var i = 0;
       row.forEach((field, index) => {
@@ -610,6 +622,25 @@ async function gridGetData(
     let row = document.createElement("div");
     row.style.height = "100%";
     body.appendChild(row);
+    let newbutton = document.createElement("button");
+    newbutton.title = "Add New Record";
+    newbutton.innerHTML ='<i class="fa fa-plus" style="color:green;margin-left:-6px">';
+    newbutton.style.width = "40px";
+    newbutton.style.height = "40px";
+    newbutton.addEventListener("click", function (event) {
+      event.preventDefault();
+      // get the tab
+      const tab = document.querySelector('[tagname="Tab"]');
+      console.log(tab);
+      // the header by class ctab_tabs-header
+      const header = tab.querySelector(".ctab_tabs-header");
+      if (header.childNodes.length > 0) {
+        // second tab
+        activateTab(event,header.childNodes[1],document.getElementById(header.childNodes[1].getAttribute("data-tab")));
+        navbar_InsertRecord();
+      }
+    });
+    body.appendChild(newbutton);
   } catch (error) {
     console.error("Error:", error);
   }
@@ -744,7 +775,15 @@ async function gridGetDataInPanelFormat(
           record + (page - 1) * pageSize
         );
       });
-
+      // get tab
+      const tab = document.querySelector('[tagname="Tab"]');
+      console.log(tab);
+      // the header by class ctab_tabs-header
+      const header = tab.querySelector(".ctab_tabs-header");
+      if (header.childNodes.length > 0) {
+        // second tab
+        activateTab(event, header.childNodes[1], document.getElementById(header.childNodes[1].getAttribute("data-tab")));
+      }
       // rowDiv.addEventListener("click", function (event) {
       //   event.preventDefault();
       //   // var gridRows = document.querySelectorAll('.grid-row');

@@ -8,6 +8,108 @@ function createDataSetComponentNavigate(type) {
   return main;
 }
 
+function editDataSetComponentNavigate(type, element, content) {
+  // Logic to edit the menu, for example adding/removing items
+  const actions = JSON.parse(element.getAttribute("actions"));
+  // generate input
+  // Clear the content area to prevent duplicates
+  const div = document.createElement("div");
+  div.style.width = "100%";
+
+  div.style.border = "1px solid #ccc";
+  div.style.borderRadius = "5px";
+  div.style.padding = "10px";
+  // Button to save all variables as cookies
+  const saveButton = document.createElement("button");
+  saveButton.textContent = "Update";
+  saveButton.onclick = () => saveActions(element);
+  saveButton.style.width = "100%";
+  div.appendChild(saveButton);
+  // Create a container div for the variables
+  const itemdiv = document.createElement("div");
+  itemdiv.id = "actions";
+  itemdiv.draggable = true;
+  div.appendChild(itemdiv);
+
+  // Button to add new variables
+  const addButton = document.createElement("button");
+  addButton.textContent = "Add Action";
+  addButton.onclick = () => addAction(element, itemdiv, {});
+  addButton.style.width = "100%";
+  // Append the Add and Save buttons to the property bar
+  div.appendChild(addButton);
+  content.appendChild(div);
+  // set the actions
+  actions.forEach((action) => {
+    addAction(element, itemdiv, action);
+  });
+
+}
+
+function addAction(element, itemdiv, action) {
+  const actionDiv = document.createElement("div");
+  actionDiv.className = "action";
+  actionDiv.draggable = true;
+  actionDiv.style.border = "1px solid #ccc";
+  actionDiv.style.borderRadius = "5px";
+  actionDiv.style.padding = "5px";
+  const actionEvent = document.createElement("select");
+  actionEvent.options.add(new Option("Read", "read"));
+  actionEvent.options.add(new Option("Write", "write"));
+  actionEvent.options.add(new Option("Update", "update"));
+  actionEvent.options.add(new Option("Copy", "copy"));
+  if (action.actionEvent) {
+    actionEvent.value = action.actionEvent;
+  }
+  actionDiv.appendChild(actionEvent);
+  const actionType = document.createElement("select");
+  actionType.options.add(new Option("Send Email", "email"));
+  actionType.options.add(new Option("Call API", "api"));
+  actionType.options.add(new Option("Navigate", "navigate"));
+  actionType.options.add(new Option("Show Message", "message"));
+  actionType.options.add(new Option("Show Toast", "toast"));
+  actionType.options.add(new Option("Show Modal", "modal"));
+  actionType.options.add(new Option("Show Alert", "alert"));
+  actionType.options.add(new Option("Show Confirm", "confirm"));
+  actionType.options.add(new Option("Show Prompt", "prompt"));
+  // select the action type by action.actionType
+  if (action.actionType)
+  {
+      actionType.value = action.actionType;
+  }
+  actionDiv.appendChild(actionType);
+  const actionContent = document.createElement("textarea");
+  actionContent.placeholder = "Action content";
+  actionContent.style.width = "100%";
+  actionContent.style.height = "100px";
+  if (action.actionContent) {
+    actionContent.value = action.actionContent;
+  }
+  actionDiv.appendChild(actionContent);
+  const deleteButton = document.createElement("button");
+  deleteButton.textContent = "Delete";
+  deleteButton.onclick = () => actionDiv.remove();
+  actionDiv.appendChild(deleteButton);
+  itemdiv.appendChild(actionDiv);
+}
+  
+
+function saveActions(element) {
+  const actions = [];
+  const actionDivs = element.querySelectorAll(".action");
+  actionDivs.forEach((actionDiv) => {
+    const action = {};
+    const actionEvent = actionDiv.querySelector("select");
+    action.actionEvent = actionEvent.value;
+    const actionType = actionDiv.querySelector("select");
+    action.actionType = actionType.value;
+    const actionContent = actionDiv.querySelector("textarea");
+    action.actionContent = actionContent.value;
+    actions.push(action);
+  });
+  element.setAttribute("actions", JSON.stringify(actions));
+}
+
 function renderNavigationBar(main) {
 
   // Create the navigation bar div
@@ -23,14 +125,14 @@ function renderNavigationBar(main) {
     {
       name: "PreviusDSBtn",
       title: "Previus",
-      text: '<i class="bi bi-arrow-left-circle-fill" style="color:green;margin-left:-6px"></i>',
+      text: '<p>Previus</p> <i class="fa fa-chevron-left" style="color:#4d61fc;margin-left:-6px"></i>',
       event:
         "navbar_movePrev()",
     },
     {
       name: "NextDSBtn",
       title: "Next",
-      text: '<i class="bi bi-arrow-right-circle-fill" style="color:green;margin-left:-6px"></i>',
+      text: '<p>Next</p><i class="fa fa-chevron-right" style="color:#4d61fc;margin-left:-6px"></i>',
       event:
         "navbar_moveNext()",
     },
@@ -38,27 +140,27 @@ function renderNavigationBar(main) {
     {
       name: "EditDSBtn",
       title: "Edit Record",
-      text: '<i class="bi bi-credit-card-2-front" style="color:blue;margin-left:-6px"></i>',
+      text: '<p>Edit</p><i class="fa fa-pencil-square-o" style="color:#4d61fc;margin-left:-6px"></i>',
       event: "navbar_EditRecord( false)",
     },
     {
       name: "InsertDSBtn",
-      title: "Insert Record",
-      text: '<i class="bi bi-sticky-fill" style="color:green;margin-left:-6px"></i>',
+      title: "New Record",
+      text: '<p>New Record</p><i class="fa fa-plus" style="color:green;margin-left:-6px"></i>',
       event:
         "navbar_InsertRecord()",
     },
     {
       name: "CopyDSBtn",
       title: "Copy",
-      text: '<i class="bi bi-clipboard" style="color:red;margin-left:-6px"></i>',
+      text: '<p>Copy</p><i class="fa fa-files-o" style="color:#4d61fc;margin-left:-6px"></i>',
       event:
         "navbar_CopyRecord()",
     },
     {
       name: "SaveDSBtn",
       title: "Save Record",
-      text: '<i class="bi bi-sim-fill" style="color:red;margin-left:-6px"></i>',
+      text: '<p>Save</p><i class="fa fa-floppy-o" style="color:red;margin-left:-6px"></i>',
       event: "navbar_SaveRecord()",
     }
   ];
@@ -66,7 +168,7 @@ function renderNavigationBar(main) {
   //for the dom2json is mandatory to create a html for the events
   buttons.forEach((buttonInfo) => {
     htm += `<button name='${buttonInfo.name}'  title="${buttonInfo.title
-      }" onclick="${buttonInfo.event.trim()}" style="width:30px;">${buttonInfo.text
+      }" onclick="${buttonInfo.event.trim()}" style="width:150px;">${buttonInfo.text
       }</button>`;
   });
   navigationBar.innerHTML += "<div >" + htm + "</div>";

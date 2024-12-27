@@ -389,39 +389,28 @@
       class="gjs-toolbar"
       style="pointer-events: all; top: 200px; left: 545.438px"
     >
-      <input type="hidden" id="editorElementSelected" value="" />
+      <input type="hidden" id="editorElementSelected" value="" >
       <div class="gjs-toolbar-items">
         <div class="gjs-toolbar-item" onclick="setParent()" title="select parent">
-          <svg viewBox="0 0 24 24">
-            <path
-              fill="currentColor"
-              d="M13,20H11V8L5.5,13.5L4.08,12.08L12,4.16L19.92,12.08L18.5,13.5L13,8V20Z"
-            ></path>
-          </svg>
+          <i class="bi bi-arrow-up"></i>
         </div>
         <div class="gjs-no-touch-actions gjs-toolbar-item" onclick="moveElement()" draggable="true" ondrag="moveElementEvent=true"  title="Move Element">  
-          <svg viewBox="0 0 24 24">
-            <path
-              fill="currentColor"
-              d="M13,6V11H18V7.75L22.25,12L18,16.25V13H13V18H16.25L12,22.25L7.75,18H11V13H6V16.25L1.75,12L6,7.75V11H11V6H7.75L12,1.75L16.25,6H13Z"
-            ></path>
-          </svg>
+          <i class="bi bi-arrows-move"></i>
         </div>
         <div class="gjs-toolbar-item" onclick="showProperties()" title="Show Properties">
-          <svg viewBox="0 0 24 24">
-            <path
-              fill="currentColor"
-              d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"
-            ></path>
-          </svg>
+          <i class="bi bi-gear"></i>
+        </div>
+        <div class="gjs-toolbar-item" onclick="showHTMLCodeEditor()" title="Show HTML Editor">
+          <i class="bi bi-code-slash"></i>
+        </div>
+        <div class="gjs-toolbar-item" onclick="copyHTMLElement()" title="Copy Component"> 
+          <i class="bi bi-clipboard"></i>
+        </div>
+        <div class="gjs-toolbar-item" onclick="pasteHTMLElement()" title="Paste Component">
+          <i class="bi bi-clipboard-plus"></i>
         </div>
         <div class="gjs-toolbar-item" onclick="deleteElement()"  title="Delete Element">
-          <svg viewBox="0 0 24 24">
-            <path
-              fill="currentColor"
-              d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"
-            ></path>
-          </svg>
+          <i class="bi bi-trash"></i>
         </div>
       </div>
     </div>
@@ -442,46 +431,19 @@
       <button class="button" onclick="savejsCodeCode()">Save Code</button>
       <button class="button" onclick="hidejsCodeEditor()">Close Editor</button>
     </dialog>
-    <div id="htmlGridModal">
-      <div id="htmlGridOptions">
-        <div class="row">
-          <div class="col-md-12 img-grid">
-            <a href="#" onclick="insertHtmlGrid(event)"
-              ><img src="img/grid/66.png" id="66" alt="66"
-            /></a>
-          </div>
-          <div class="col-md-12 img-grid">
-            <a href="#" onclick="insertHtmlGrid(event)"
-              ><img src="img/grid/48.png" id="48" alt="48"
-            /></a>
-          </div>
-          <div class="col-md-12 img-grid">
-            <a href="#" onclick="insertHtmlGrid(event)"
-              ><img src="img/grid/84.png" id="84" alt="84"
-            /></a>
-          </div>
-          <div class="col-md-12 img-grid">
-            <a href="#" onclick="insertHtmlGrid(event)"
-              ><img src="img/grid/633.png" id="633" alt="633"
-            /></a>
-          </div>
-          <div class="col-md-12 img-grid">
-            <a href="#" onclick="insertHtmlGrid(event)"
-              ><img src="img/grid/336.png" id="336" alt="336"
-            /></a>
-          </div>
-          <div class="col-md-12 img-grid">
-            <a href="#" onclick="insertHtmlGrid(event)"
-              ><img src="img/grid/444.png" id="444" alt="444"
-            /></a>
-          </div>
-        </div>
+    <dialog id="HTMLCodeDialog">
+      <div>HTML & JS Editor</div>
+      <div style="border: 1px solid black">
+        <textarea
+          id="HTMLCodeEditorArea"
+          name="HTMLCodeEditorArea"
+          style="width: 100%; height: 100%"
+        ></textarea>
       </div>
-      <button class="button float-right" onclick="closeHtmlGridModal()">
-        Close
-      </button>
-    </div>
-
+      <button class="button" onclick="saveHTMLCode()">Save Code</button>
+      <button class="button" onclick="document.getElementById('HTMLCodeDialog').style.display='none';">Close Editor</button>
+    </dialog>
+  
     <div id="userModal">
       <div class="row">
         <div class="col-md-12">
@@ -530,6 +492,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/hint/javascript-hint.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/hint/show-hint.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/lint/javascript-lint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/htmlmixed/htmlmixed.min.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/edit/closebrackets.min.js"></script>
 

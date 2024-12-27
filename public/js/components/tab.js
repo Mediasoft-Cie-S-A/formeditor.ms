@@ -134,8 +134,10 @@ function createTabContent (tabsHeader,tabsContent)
 };
 
 function activateTab(event,tabHeader,tabContent){
-    event.preventDefault();
-    
+    if (event)
+        {
+            event.preventDefault();
+        }
     tabContent.parentElement.querySelectorAll('.ctab_ContentDiv').forEach((el) => el.style.display = 'none');
     tabHeader.parentElement.querySelectorAll('.ctab_HeaderButton').forEach((el) => el.classList.remove('active'));
     tabHeader.classList.add('active');       
