@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
+
 module.exports = function (app, client, dbName) {
   const checkAuthenticated = (req, res, next) => {
     if (req.isAuthenticated()) {
@@ -21,26 +25,51 @@ module.exports = function (app, client, dbName) {
     }
     res.redirect("/login");
   };
+
+  // Configure multer for file uploads
+  const upload = multer({
+    storage: multer.diskStorage({
+      destination: (req, file, cb) => {
+        const uploadDir = path.join(__dirname, 'public/img'); // Replace with your target directory
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+      },
+      filename: (req, file, cb) => {
+        cb(null, `${Date.now()}-${file.originalname}`);
+      }
+    }),
+    fileFilter: (req, file, cb) => {
+      const allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/bmp'];
+      if (allowedTypes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Invalid file type. Only images are allowed.'));
+      }
+    }
+  });
+
   app.get("/dashboard", checkAuthenticated, (req, res) => {
     res.render("dashboard.ejs", { name: req.user.name });
   });
+
   app.post("/store-json", checkAuthenticated, async (req, res) => {
     try {
-      console.log();
       await client.connect();
       const db = client.db(dbName);
       const col = db.collection("forms");
 
       // Construct form data with metadata
       const formData = {
-        formId: req.body.formId, // Assuming formId is provided in the request
+        formId: req.body.formId,
         formName: req.body.formName,
         formPath: req.body.formPath,
         userCreated: req.body.userCreated,
         userModified: req.body.userModified,
         modificationDate: new Date(),
         creationDate: new Date(),
-        formData: req.body.formData, // The actual form data
+        formData: req.body.formData,
       };
 
       // Insert the form data
@@ -146,5 +175,56 @@ module.exports = function (app, client, dbName) {
     }
   });
 
-  // Other form routes...
+  // Web service to return all images
+  app.get('/images', checkAuthenticated, (req, res) => {
+    const imgDir = path.join(__dirname, 'public/img'); // Replace with your target directory
+
+    const getAllImages = (dir, baseDir = dir) => {
+      const images = [];
+      const supportedExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp']; // Add supported image extensions here
+
+      // Read directory contents
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+
+      entries.forEach(entry => {
+        const fullPath = path.join(dir, entry.name);
+
+        if (entry.isDirectory()) {
+          // Recursively process subdirectories
+          images.push(...getAllImages(fullPath, baseDir));
+        } else if (entry.isFile() && supportedExtensions.includes(path.extname(entry.name).toLowerCase())) {
+          // Add relative path to images array
+          images.push(path.relative(baseDir, fullPath));
+        }
+      });
+
+      return images;
+    };
+
+    try {
+      const imagePaths = getAllImages(imgDir);
+      res.json({ images: imagePaths });
+    } catch (error) {
+      console.error('Error reading directory:', error);
+      res.status(500).json({ error: 'Unable to retrieve images' });
+    }
+  });
+
+  // Web service to upload images
+  app.post('/upload-image', checkAuthenticated, upload.single('image'), (req, res) => {
+    try {
+      // save the image in public/img
+      res.json({ imagePath: `${req.file.filename}` });
+
+      
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      res.status(500).json({ error: 'Unable to upload image' });
+    }
+  });
+
+  // Frontend functions for media library
+  app.get('/media-library', checkAuthenticated, (req, res) => {
+    res.render('media-library.ejs');
+  });
 };

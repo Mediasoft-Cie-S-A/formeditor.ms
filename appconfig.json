@@ -2,7 +2,8 @@
   "port": 3000,
   "dblist": {
 
-    "msdb" :"DSN=msdb;UID=sysprogress;PWD=sysprogress"
+    "complus" :"DSN=complus;UID=thesis;PWD=alpha"
+   
         },
 
   "mongoDbUrl": "mongodb://0.0.0.0:27017",

@@ -49,6 +49,7 @@
     "category": "Bussiness Logic",
     "scriptName": "dataSetComponentNavigate.js",
     "createFunction": "createDataSetComponentNavigate",
+    "editFunction": "editDataSetComponentNavigate",
     "styles": "dataSetComponentNavigate.css",
     "icon": "fa fa-compass",
     "renderFunction": ""

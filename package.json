@@ -28,6 +28,7 @@
     "json2csv": "^6.0.0-alpha.2",
     "mongodb": "^6.3.0",
     "msal-node": "^0.0.1-security",
+    "multer": "^1.4.5-lts.1",
     "odbc": "^2.4.8",
     "passport": "^0.6.0",
     "passport-local": "^1.0.0",

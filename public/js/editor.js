@@ -356,6 +356,60 @@ function showProperties() {
   editElement(editorElementSelected);
 }
 
+function copyHTMLElement() {
+  const inputElementSelected = document.getElementById("editorElementSelected");
+  var editorElementSelected = document.getElementById(
+    inputElementSelected.value
+  );
+  // set the html element to the clipboard
+  navigator.clipboard.writeText(editorElementSelected.outerHTML);
+}
+
+function showHTMLCodeEditor() {
+  console.log("showHTMLCodeEditor");
+  const inputElementSelected = document.getElementById("editorElementSelected");
+  var editorElementSelected = document.getElementById(
+    inputElementSelected.value
+  );
+  // set the html element to the clipboard
+  const CodeDialog = document.getElementById("HTMLCodeDialog");
+  CodeDialog.setAttribute("data-element-id", editorElementSelected.id);
+  console.log(codeEditor);
+  CodeDialog.style.display = "block";
+  // get the textare element
+  const codeEditorArea = document.getElementById("HTMLCodeEditorArea");
+  
+
+  codeEditorHTML.setValue(editorElementSelected.outerHTML);
+   
+
+}
+
+function saveHTMLCode() {
+  const CodeDialog = document.getElementById("HTMLCodeDialog");
+  const codeEditorArea = document.getElementById("HTMLCodeEditorArea");
+  const elementId = CodeDialog.getAttribute("data-element-id");
+  const editorElementSelected = document.getElementById(elementId);
+  editorElementSelected.outerHTML = codeEditorHTML.getValue();
+  CodeDialog.style.display = "none";
+}
+
+function pasteHTMLElement() {
+  // get the clipboard content
+  navigator.clipboard.readText().then((text) => {
+    // get the formContainer id
+    var formContainer = document.getElementById("formContainer");
+    // create a new element
+    var newElement = document.createElement("div");
+    // set the html content to the new element
+    newElement.innerHTML = text;
+    // reduce the id of the new element to avoid conflict, 
+    newElement.firstChild.id = newElement.firstChild.id + "_c";
+    // append the new element to the formContainer
+    formContainer.appendChild(newElement.firstChild);
+  });
+}
+
 function setParent() {
   
   // get the element selected by class  gjs-selection
@@ -474,7 +528,7 @@ function removeSelection() {
 const codeEditor = CodeMirror.fromTextArea(
   document.getElementById("jsCodeEditor"),
   {
-    lineNumbers: false,
+    lineNumbers: true,
     mode: "javascript",
     lint: true, // Enable JavaScript linting
     extraKeys: { Tab: "autocomplete" }, // Enable autocompletion
@@ -485,6 +539,25 @@ const codeEditor = CodeMirror.fromTextArea(
     matchBrackets: true,
     // enable cut
     autoCloseTags: true,
+  }
+);
+
+const codeEditorHTML = CodeMirror.fromTextArea(
+  document.getElementById("HTMLCodeEditorArea"),
+  {
+    lineNumbers: true,
+    mode: "htmlmixed",
+    lint: true, // Enable JavaScript linting
+    extraKeys: { Tab: "autocomplete" }, // Enable autocompletion
+    autoCloseBrackets: true, // Enable auto-closing of brackets
+    // enable copy
+    readOnly: false,
+    // enable paste
+    matchBrackets: true,
+    // enable cut
+    autoCloseTags: true,
+    // autocomple
+   
   }
 );
 
