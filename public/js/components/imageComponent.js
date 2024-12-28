@@ -21,13 +21,27 @@ function createElementImage(type) {
     element.id=type+ Date.now(); // Unique ID for each new element
     element.tagName=type;
             element.setAttribute('alt', 'na');
-            element.setAttribute('height', '1px');
-            element.setAttribute('width', '1px');
+            element.setAttribute('height', '150px');
+            element.setAttribute('width', '150px');
     return element;
 }
 
 function editElementImage(type,element,content)
 {
+    const updateButton = document.createElement("button");
+    updateButton.textContent = "Update";
+    updateButton.onclick = () => {
+        // Update image src and alt
+        const srcInput = content.querySelector('#imageSrcInput');
+        const altInput = content.querySelector('#imageAltInput');
+        const heightInput = content.querySelector('#imageHeightInput');
+        const widthInput = content.querySelector('#imageWidthInput');
+        element.setAttribute('height', heightInput.value);
+        element.setAttribute('width', widthInput.value);
+        element.setAttribute('src', srcInput.value);
+        element.setAttribute('alt', altInput.value);
+    };
+    content.appendChild(updateButton);
     // addinput for image src
     content.appendChild(createInputItem("imageSrcInput", "Source", "Source",element.getAttribute('src'),"text"));
     // button to open media library to select image
@@ -35,9 +49,10 @@ function editElementImage(type,element,content)
     button.textContent = "Select Image";
     button.onclick = () => openMediaLibrary(element);
     content.appendChild(button);
-    // add input for image alt
-       
-    content.appendChild(createInputItem("alt", "alt", "alt",element.getAttribute('alt'),"text"));
+    // add input for image size
+    content.appendChild(createInputItem("imageHeightInput", "height", "height",element.getAttribute('height'),"text"));
+    content.appendChild(createInputItem("imageWidthInput", "width", "width",element.getAttribute('width'),"text"));
+    content.appendChild(createInputItem("imageAltInput", "alt", "alt",element.getAttribute('alt'),"text"));
 }
 
 function openMediaLibrary(targetElement) {
