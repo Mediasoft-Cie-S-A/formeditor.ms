@@ -198,6 +198,17 @@
     "icon": "fa fa-bars",
     "renderFunction": ""
   },
+  "translate": {
+    "type": "translate",
+    "description": "Translate",
+    "category": "UI",
+    "scriptName": "translateComponent.js",
+    "createFunction": "createTranslateComponent",
+    "editFunction": "editTranslateComponent",
+    "styles": "translate.css",
+    "icon": "fa fa-language",
+    "renderFunction": "renderTranslationComponent"
+  },
   "Tab": {
     "type": "Tab",
     "description": "Tab",

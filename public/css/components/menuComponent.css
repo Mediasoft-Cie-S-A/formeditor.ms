@@ -17,7 +17,7 @@
     padding: 10px;
     cursor: pointer;
     color: black;
-    text-align: center;
+    text-align: left;
   
     transition: background-color 0.3s;
     flex: 1;
@@ -38,7 +38,7 @@
     left: 0;
     width: 100%;
     display: flex;
-    justify-content: center;
+    justify-content: left;
 }
 
 .menu-bottom {
@@ -46,7 +46,7 @@
     left: 0;
     width: 100%;
     display: flex;
-    justify-content: center;
+    justify-content: left;
 }
 
 .menu-left {
@@ -73,7 +73,33 @@
     cursor: hand;
 }
 
+.menu-component a:visited {
+    color: black;
+}
+
+
 .menu-component a:hover {
     color: black;
     font-style: bold;
+}
+
+.menu-component i{
+    margin-right: 10px;
+    border-radius: 5px;
+    padding: 5px;
+    background-color: #eee;
+    color: black;
+    font-size: 20px;
+    width: 30px;
+    height: 30px;
+
+}
+.menu-component li {
+    list-style: none;
+}
+
+.sub-menu {
+    margin-left: 20px;
+    padding-left: 20px;
+    border-left: 1px dashed #ccc;
 }
