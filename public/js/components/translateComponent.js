@@ -105,6 +105,7 @@ function renderTranslationComponent(type, mainDiv) {
     mainDiv.appendChild(languageSelector);
 }
 
+/*
 function translatePage(language) {
     const dictionary = translationDictionary[language];
     if (!dictionary) {
@@ -120,5 +121,27 @@ function translatePage(language) {
             }
         }
     });
-}
+}*/
 
+function translatePage(language) {
+    const dictionary = translationDictionary[language];
+    if (!dictionary) {
+        alert(`Translation for ${language} is not available.`);
+        return;
+    }
+
+    const replaceTextInDOM = (node) => {
+        
+        if (node.nodeType === Node.TEXT_NODE) {
+            console.log(node.textContent);
+            const textContent = node.textContent.trim();
+            if (dictionary[textContent]) {
+                node.textContent = dictionary[textContent];
+            }
+        } else {
+            node.childNodes.forEach(child => replaceTextInDOM(child));
+        }
+    };
+
+    replaceTextInDOM(document.body);
+}
