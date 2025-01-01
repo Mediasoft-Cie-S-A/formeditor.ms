@@ -179,11 +179,16 @@ function rendenderMenuComponent(type, content) {
         a.target = item.target;
         i.className = item.icon;
         li.appendChild(i);
-        if (item.children!=null) 
+       
+        if (item.children==null) 
         {
             li.appendChild(a);
+            
         }
-        li.appendChild(document.createTextNode(" " + item.item));
+        else
+        {
+            li.appendChild(document.createTextNode(" " + item.item));
+        }
         
         // Create sub-menu if there are children
         if (item.children && item.children.length > 0) {

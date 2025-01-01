@@ -77,6 +77,7 @@ function renderTranslationComponent(type, mainDiv) {
     floatButton.style.height = '30px';
 
     const languageSelector = document.createElement('select');
+    languageSelector.id = 'landSelector'+Date.now();
     languageSelector.style.position = 'absolute';
     languageSelector.style.width = '150px';
     languageSelector.style.padding = '5px';
@@ -91,19 +92,21 @@ function renderTranslationComponent(type, mainDiv) {
         languageSelector.appendChild(option);
     });
 
-    floatButton.onclick = () => {
-        languageSelector.style.display = languageSelector.style.display === 'none' ? 'block' : 'none';
-    };
+    floatButton.setAttribute('onclick', `showlanguageSelector('${languageSelector.id}')`);
+    
 
-    languageSelector.onchange = () => {
-        const selectedLanguage = languageSelector.value;
-        translatePage(selectedLanguage);
-        languageSelector.style.display = 'none';
-    };
-
+    languageSelector.setAttribute('onchange', `translatePage('${languageSelector.id}', this.value)`);
+    
+  
     mainDiv.appendChild(floatButton);
     mainDiv.appendChild(languageSelector);
 }
+
+function showlanguageSelector(langSelectorID){
+  const languageSelector = document.getElementById(langSelectorID);
+    languageSelector.style.display = languageSelector.style.display === 'none' ? 'block' : 'none'
+}
+
 
 /*
 function translatePage(language) {
@@ -123,15 +126,16 @@ function translatePage(language) {
     });
 }*/
 
-function translatePage(language) {
+function translatePage(langSelectorID,language) {
     const dictionary = translationDictionary[language];
+    const languageSelector = document.getElementById(langSelectorID);
     if (!dictionary) {
         alert(`Translation for ${language} is not available.`);
         return;
     }
 
     const replaceTextInDOM = (node) => {
-        
+      //  console.log(node);
         if (node.nodeType === Node.TEXT_NODE) {
             console.log(node.textContent);
             const textContent = node.textContent.trim();
@@ -144,4 +148,5 @@ function translatePage(language) {
     };
 
     replaceTextInDOM(document.body);
+    languageSelector.style.display = 'none';
 }
