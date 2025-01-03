@@ -124,29 +124,33 @@ function createSidebar(elementsData, components) {
   for (const category in categories) {
     const categoryDiv = document.createElement("div");
     categoryDiv.className = "category";
-    const button = document.createElement("button");
+    const button = document.createElement("div");
     button.textContent = category;
-    button.className = "category-button button";
+    button.className = "category-button";
+   
+    button.style.backgroundColor = "#fff";
+    button.style.borderRight = "3px solid green";
     button.style.justifyContent = "center";
     button.style.padding = "10px 10px";
-
-    button.addEventListener("click", function () {
-      const categoryDiv = this.parentElement;
-      const height = categoryDiv.style.height;
-      console.log(height);
-      if (height === "75px") {
-        categoryDiv.style.height = "auto";
-      } else {
-        categoryDiv.style.height = "75px";
-      }
-    });
+    button.style.boxShadow = "0 2px 5px rgba(0, 0, 0, 0.3)";
+   
     categoryDiv.appendChild(button);
     const divContainer = document.createElement("div");
-    divContainer.style.display = "flex";
+    divContainer.style.display = "none";
     divContainer.style.flexWrap = "wrap";
     divContainer.style.justifyContent = "center";
     divContainer.style.flexDirection = "row";
     categoryDiv.appendChild(divContainer);
+
+    button.addEventListener("click", function () {
+     
+      if (divContainer.style.display === "none") {
+        divContainer.style.display = "flex";
+      } else {
+        divContainer.style.display = "none";
+      }
+    });
+
     const elements = categories[category];
 
     for (const elementData of elements) {

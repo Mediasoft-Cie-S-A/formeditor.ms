@@ -1,5 +1,21 @@
 // Translation Dictionary Example (Replace with Google Translate API generated data)
 const translationDictionary = {
+    
+    "fr": {
+        // Add French translations here if needed
+        "Tableau de bord": "Tableau de bord",
+        "Apercu": "Apercu",
+        "Analyse": "Analyse",
+        "Comptabilité": "Comptabilité",
+        "Clients": "Clients",
+        "Fournisseurs": "Fournisseurs",
+        "Produits": "Produits",
+        "Stocks": "Stocks",
+        "Commandes": "Commandes",
+        "Factures": "Factures",
+        "Paiements": "Paiements",
+
+    },
     "en": {
         "Tableau de bord": "Dashboard",
         "Apercu": "Overview",
@@ -17,21 +33,42 @@ const translationDictionary = {
         "Daily Report": "Daily Report",
         "Monthly Report": "Monthly Report"
     },
-    "fr": {
-        // Add French translations here if needed
-        "Tableau de bord": "Tableau de bord",
-        "Apercu": "Apercu",
+    "de": {
+        // Add German translations here if needed
+        "Tableau de bord": "Instrumententafel",
+        "Apercu": "Überblick",
         "Analyse": "Analyse",
-        "Comptabilité": "Comptabilité",
-        "Clients": "Clients",
-        "Fournisseurs": "Fournisseurs",
-        "Produits": "Produits",
-        "Stocks": "Stocks",
-        "Commandes": "Commandes",
-        "Factures": "Factures",
-        "Paiements": "Paiements",
-
-    }
+        "Comptabilité": "Buchhaltung",
+        "Clients": "Kunden",
+        "Fournisseurs": "Lieferanten",
+        "Produits": "Produkte",
+        "Stocks": "Bestände",
+        "Commandes": "Bestellungen",
+        "Factures": "Rechnungen",
+        "Paiements": "Zahlungen",
+        "Banques": "Banken",
+        "Reports": "Berichte",
+        "Daily Report": "Täglicher Bericht",
+        "Monthly Report": "Monatlicher Bericht"
+    },
+    "it": {
+        // Add Italian translations here if needed
+        "Tableau de bord": "Cruscotto",
+        "Apercu": "Panoramica",
+        "Analyse": "Analisi",
+        "Comptabilité": "Contabilità",
+        "Clients": "Clienti",
+        "Fournisseurs": "Fornitori",
+        "Produits": "Prodotti",
+        "Stocks": "Scorte",
+        "Commandes": "Ordini",
+        "Factures": "Fatture",
+        "Paiements": "Pagamenti",
+        "Banques": "Banche",
+        "Reports": "Rapporti",
+        "Daily Report": "Rapporto giornaliero",
+        "Monthly Report": "Rapporto mensile"
+    },
 };
 // create component
 function createTranslateComponent(type) {
@@ -52,11 +89,37 @@ function editTranslateComponent(type, element, content) {
     const updateButton = document.createElement("button");
     updateButton.textContent = "Update";
     updateButton.onclick = () => {
-        // Update translation dictionary
-        const translationDictionary = JSON.parse(content.querySelector('#translationDictionaryInput').value);
-        window.translationDictionary = translationDictionary;
+        // Update translation dictionary from the editor
+        // get the language name and dictionary
+        const languageBoxes = content.querySelectorAll("div[tagName='language']");
+        languageBoxes.forEach(languageBox => {
+            const languageName = languageBox.querySelector("input").value;
+            const languageDictionary = languageBox.querySelector("textarea").value;
+            translationDictionary[languageName] = JSON.parse(languageDictionary);
+        });
+      
     };
     content.appendChild(updateButton);
+
+    // Add translation languages button
+    const addLanguageButton = document.createElement("button");
+    addLanguageButton.textContent = "Add Language";
+    addLanguageButton.onclick = () => {
+        console.log("addLanguageButton");
+      // generate a box to add a new language
+        const newLanguageBox = document.createElement("div");
+        newLanguageBox.tagName = "language";
+        const languageNameInput = document.createElement("input");
+        languageNameInput.placeholder = "Language Name";
+        const languageDictionaryInput = document.createElement("textarea");
+        languageDictionaryInput.placeholder = "Language Dictionary";
+        newLanguageBox.appendChild(languageNameInput);
+        newLanguageBox.appendChild(languageDictionaryInput);
+        content.appendChild(newLanguageBox);
+    
+    };
+    content.appendChild(addLanguageButton);
+
 }
 
 

@@ -1432,9 +1432,23 @@ function regenerateFilters(content, filterConfig) {
 
 }
 
-function showDiv(divId) {
+function showDiv(divId,btn) {
+ // get the div parent of button
+  const parent = btn.parentNode;
+  // get all the buttons
+  const buttons = parent.querySelectorAll('button');
+  // remove the active class from all the buttons
+  buttons.forEach(button => {
+    button.style.boxShadow = 'none';
+  });
+
   document.querySelectorAll('.tab-div').forEach(div => {
       div.style.display = 'none';
+      div.style.boxshadow = 'none';
   });
-  document.getElementById(divId).style.display = 'block';
+  const div = document.getElementById(divId);
+  div.style.display = 'block';
+  // inset shadow
+  
+  btn.style.boxShadow = 'inset 0 0 10px #000000';
 }

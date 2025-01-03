@@ -194,7 +194,7 @@
                     placeholder="User Modified"
                     value=" <%= name %> "
                     required
-                  /><br />
+                  ><br />
                 </div>
 
                 <div class="col" style="display: inline-block">
@@ -234,42 +234,41 @@
               </div>
             </form>
           </div>
-          <div class="row">
+          <div class="row" style="padding: 10px; margin: 5px">
             <!-- Sidebar -->
-            <table
-              id="componentsList"
-              class="table table-striped table-bordered table-hover table-condensed"
-            >
-              <tr>
-                <td style="width: 120px">
-                  <div id="componentsSidebar"></div>
-                </td>
-                <td style="width: 100%">
+
+                
+                  <div id="componentsSidebar" style="float: left; width: 9%;" ></div>
+                  <div style="float: left; width: 71%;">
                   <div
                     id="formContainer"
+                    
                     ondrop="drop(event)"
                     ondragover="allowDrop(event)"
                   >
                     <!-- Form elements will be added here -->
                   </div>
-                </td>
-                <td style="width: 200px">
-                  <div id="propertiesBar">
-                    <div>
-                      <!-- Edit -->
-                    </div>
+                </div>
+                  <div style="float: left; width: 10%;" >
+                          
+                        <div id="propertiesBar" >
+                          <div>
+                            <!-- Edit -->
+                          </div>
+                        </div>
                   </div>
-                </td>
-                <td style="width: 200px">
-                  <div class="button-container" style="border-bottom: 2px solid #ccc; padding: 10px;">;
-                    <button onclick="showDiv('webserviceDiv')">
-                        <img src="img/webservice.png" alt="Webservice" style="width: 32px"> 
+                  <div  style="float: left; width: 10%;"   >
+                  
+                  <div class="button-container" style="border-bottom: 2px solid #ccc; padding: 10px;">
+                   
+                    <button onclick="showDiv('webserviceDiv',this)" title="Web Server">
+                        <i class="fa fa-server"></i>
                     </button>
-                    <button onclick="showDiv('databaseDiv')">
-                        <img src="img/database_icon.png" alt="Database" style="width: 32px"> 
+                    <button onclick="showDiv('databaseDiv',this)" title="Database" style="box-shadow:inset 0 0 10px #000000 ">
+                        <i class="fa fa-database"></i>
                     </button>
                 </div>
-                 
+               
                   <div id="webserviceDiv" class="tab-div" style="display: none;">
                     <div>
                       <input
@@ -277,27 +276,26 @@
                         placeholder="filter.. API"
                         name="searchApi"
                         onchange="searchApi(this.value,'dragDropApiList')"
-                      />
+                      >
                     </div>
                     <div id="dragDropApiList" style="overflow: auto"></div>
                     <!-- Web Server will be listed here -->
                   </div>
               
-                  <div id="databaseDiv" class="tab-div">
+                  <div id="databaseDiv" class="tab-div" >
                     <div>
                       <input
                         type="text"
                         placeholder="filter.. table"
                         name="searchtable"
                         onchange="searchtable(this.value,'drageDroptablesList')"
-                      />
+                      >
                     </div>
                     <div id="drageDroptablesList" style="overflow: auto"></div>
                     <!-- Tables will be listed here -->
                   </div>
-                </td>
-              </tr>
-            </table>
+                </div>
+            
           </div>
         </div>
         <div id="DatabaseForm" class="tab-pane fade">
@@ -327,7 +325,7 @@
                           placeholder="filter.. table"
                           name="searchtable"
                           onchange="searchtable(this.value,'ContentTableListBar')"
-                        />
+                        >
                       </div>
                       <div
                         id="ContentTableListBar"
@@ -357,10 +355,10 @@
                     type="link"
                     id="apiUrlLink"
                     name="apiUrlLink"
-                    placeholder="http://localhost:3000"
+                    placeholder="API URL"
                     value=""
                     required
-                  /><br />
+                  ><br />
 
                   <input
                     style="display: inline-block"
@@ -368,7 +366,7 @@
                     id="fileInput"
                     name="fileInput"
                     accept=".yaml,.yml,.json"
-                  />
+                  >
                 </div>
               </div>
               <button
