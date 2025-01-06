@@ -157,7 +157,7 @@
   "planning": {
     "type": "planning",
     "description": "Planning",
-    "category": "Bussiness  Logic",
+    "category": "Bussiness Logic",
     "scriptName": "planning.js",
     "createFunction": "createPlanning",
     "editFunction": "editPlanning",
@@ -168,7 +168,7 @@
   "qrcode": {
     "type": "qrcode",
     "description": "QR Code",
-    "category": "Bussiness  Logic",
+    "category": "Bussiness Logic",
     "scriptName": "qrcodeComponent.js",
     "createFunction": "createQRCode",
     "editFunction": "editQRCode",
@@ -179,7 +179,7 @@
   "qrcodeScanner": {
     "type": "qrcodeScanner",
     "description": "QR Code Scanner",
-    "category": "Bussiness  Logic",
+    "category": "Bussiness Logic",
     "scriptName": "qrcodeScannerComponent.js",
     "createFunction": "createQRCodeScanner",
     "editFunction": "editQRCodeScanner",
@@ -212,7 +212,7 @@
   "Tab": {
     "type": "Tab",
     "description": "Tab",
-    "category": "HTML",
+    "category": "UI",
     "scriptName": "tab.js",
     "createFunction": "createElementTab",
     "editFunction": "editElementTab",
@@ -223,7 +223,7 @@
   "grid": {
     "type": "grid",
     "description": "HTML Grid",
-    "category": "HTML",
+    "category": "UI",
     "scriptName": "htmlGridInput.js",
     "createFunction": "showHtmlGridModal",
     "editFunction": "editGridElement",
@@ -231,6 +231,17 @@
     "icon": "fa fa-table",
     "renderFunction": ""
   },
+  "BarChart": {
+    "type": "BarChart",
+    "description": "Bar Chart",
+    "category": "Charts",
+    "scriptName": "chart.js",
+    "createFunction": "createElementChart",
+    "editFunction": "editElementChart",
+    "styles": "chart.css",
+    "icon": "fa fa-bar-chart",
+    "renderFunction": ""
+},
   "textfield": {
     "type": "textfield",
     "description": "Text field",
@@ -240,7 +251,7 @@
     "editFunction": "editElementInput",
     "styles": "genericInput.css",
     "icon": "fa fa-font",
-    "renderFunction": ""
+    "renderFunction": "renderData"
   },
   "number": {
     "type": "number",

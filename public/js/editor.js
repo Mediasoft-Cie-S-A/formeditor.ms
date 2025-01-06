@@ -132,6 +132,8 @@ function editElement(element) {
 
   const label = document.createElement("label");
   label.textContent = element.id;
+  dialog.setAttribute("data-element-id", element.id);
+  dialog.setAttribute("data-element-type", element.getAttribute("tagName"));
  // label.style.float = "left";
   label.style.backgroundColor = "grey";
   label.style.color = "white";
@@ -573,23 +575,23 @@ function dropInput(event, id) {
   var fieldMandatory = source.getAttribute("data-field-mandatory");
   var fieldWidth = source.getAttribute("data-field-width");
   var fieldDefaultValue = source.getAttribute("data-field-default");
-
   var filedDBName = source.getAttribute("database-name");
   // generate the json of all the fields attributes
-
+ // console.log(source);
   var fieldJson = {
     DBName: filedDBName,
     tableName: tableName,
     fieldName: fieldName,
-    fieldType: fieldType, // Will be updated on select change
-    copyType: id,
+    fieldType: fieldType, // Attention!!! Will be updated on select change
+    copyType: elementId,
     fieldDataType: fieldDataType,
     fieldLabel: fieldLabel.replace("'", "`"),
     fieldMandatory: fieldMandatory,
     fieldWidth: fieldWidth,
     fieldDefaultValue: fieldDefaultValue,
+    functionName: "value",
   };
-
+  // console.log(fieldJson);
   // Get the target element
   var target = event.target;
 
@@ -600,8 +602,16 @@ function dropInput(event, id) {
     // similate the change event
     target.dispatchEvent(new Event("change"));
   } else {
+    // get property bar
+    var propertiesBar = document.getElementById("propertiesBar");
+    // get the select element type 
+    var tagName = propertiesBar.getAttribute("data-element-type");
+    var showType= false; 
+    if (tagName === "BarChart") {
+      showType = true;
+    }
     // Otherwise, pass the fieldJson to addFieldToPropertiesBar to create a new field
-    addFieldToPropertiesBar(target, fieldJson);
+    addFieldToPropertiesBar(target, fieldJson,showType);
   }
 }
 
@@ -631,11 +641,21 @@ function createSelectItem(id, label, styleProperty) {
   div.appendChild(subDiv);
 
   input.addEventListener("input", function (event) {
-    // get type of the field
-    var dataType = this.getAttribute("dataType");
-    // empty the select
-    setOptionsByType(select, dataType);
-
+    console.log(event.target);
+    console.log(this);
+    // get the property bar
+    var propertiesBar = document.getElementById("propertiesBar");
+    // get the select element type
+    var tagName = propertiesBar.getAttribute("data-element-type");
+    if (tagName === "BarChart") {
+      var dataType = this.getAttribute("fieldDataType");
+      setOptionsByTypeChart(select, dataType);
+    } else {
+      // get type of the field
+      var dataType = this.getAttribute("fieldType");
+      // empty the select
+      setOptionsByType(select, dataType);
+      }
     // get the object by id
   });
   return div;
@@ -654,6 +674,7 @@ function setOptionsByType(select, fieldDataType) {
     "combobox",
   ]; */
 
+
   var options = ["text", "sequence", "array", "combo_array", "combo_sql","search_win"];
 
   // Clear any existing options in the select element
@@ -667,10 +688,7 @@ function setOptionsByType(select, fieldDataType) {
     select.appendChild(opt);
   });
 
-  // Optionally, set the default selected value (based on fieldDataType)
-  if (options.includes(fieldDataType)) {
-    select.value = fieldDataType;
-  }
+
 }
 
 function setOptionsByTypeWeb(select, fieldDataType) {
@@ -699,10 +717,7 @@ function setOptionsByTypeWeb(select, fieldDataType) {
     select.appendChild(opt);
   });
 
-  // Optionally, set the default selected value (based on fieldDataType)
-  if (options.includes(fieldDataType)) {
-    select.value = fieldDataType;
-  }
+ 
 }
 
 function createMultiSelectItem(id, label, styleProperty) {
@@ -954,10 +969,10 @@ function addFieldToPropertiesBarWeb(target, fieldJson, isId) {
     }
     // Update fieldType in fieldJson
     fieldJson.fieldType = select.value;
-    fieldJson.fieldDataType = select.value;
+   
     div.setAttribute("selectedValue", select.value);
     div.setAttribute("data-field", JSON.stringify(fieldJson));
-    div.setAttribute("fieldDataType", JSON.stringify(fieldJson));
+  
 
     const span = div.querySelector("span[name='dataContainer']");
     span.setAttribute("data-field", JSON.stringify(fieldJson));
@@ -1027,7 +1042,8 @@ function addFieldToPropertiesBarWeb(target, fieldJson, isId) {
   // dataObjet.style.height = height + 30 + "px";
 }
 
-function addFieldToPropertiesBar(target, fieldJson) {
+function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false )
+ {
   var dataObjet = target;
 
   // Create the div container for the new field
@@ -1035,15 +1051,16 @@ function addFieldToPropertiesBar(target, fieldJson) {
   div.classList.add("tables-list-item");
   const elementId = fieldJson.fieldName + "-" + fieldJson.tableName;
   div.id = elementId;
-
+  div.style.display = "block";
   // Set up the inner HTML for the div, including a span and a remove button
-  div.innerHTML = `
-    <span name='dataContainer' data-field='${JSON.stringify(fieldJson)}'>${
-    fieldJson.fieldName
-  }</span>
-    <button class='remove-item' onclick='removeItem(event)' style='background:#800;float:right;color:white;border-radius:5px;width:30px;height:30px'>x</button>
-  `;
+  div.innerHTML = `<i class="fa fa-trash" onclick="removeItem(event)" style="color:red" title="Remove"></i>`;
+  div.innerHTML += `<i class="fa fa-arrow-up" onclick="moveUp(event)" style="color:blue" title="Move Up"></i>`;
+  div.innerHTML += `<i class="fa fa-arrow-down" onclick="moveDown(event)" style="color:blue"  title="Move Up"></i><hr style="margin: 0px;">`;
 
+  div.innerHTML += `<span name='dataContainer' data-field='${JSON.stringify(fieldJson)}' style="  font-weight: bold;">${
+    fieldJson.fieldName
+  }</span>`;
+ 
   dataObjet.appendChild(div);
 
   // adding verification triggers mandatories fields checkbox
@@ -1073,13 +1090,13 @@ function addFieldToPropertiesBar(target, fieldJson) {
     }
     // Update fieldType in fieldJson
     fieldJson.fieldType = select.value;
-    fieldJson.fieldDataType = select.value;
+    
     div.setAttribute("selectedValue", select.value);
     div.setAttribute("data-field", JSON.stringify(fieldJson));
-    div.setAttribute("fieldDataType", JSON.stringify(fieldJson));
-
+   
     const span = div.querySelector("span[name='dataContainer']");
     span.setAttribute("data-field", JSON.stringify(fieldJson));
+    
     switch (select.value) {
       case "combo_array":
       case "combo_sql":
@@ -1145,6 +1162,53 @@ function addFieldToPropertiesBar(target, fieldJson) {
   // Adjust the height of the parent element to accommodate the new field
   var height = dataObjet.clientHeight + div.clientHeight;
   dataObjet.style.height = height + 30 + "px";
+
+  // adding select datatype if 
+  if (dataTypeVisble) {
+    // create the div
+    var selectType = document.createElement("select");   
+    selectType.id = elementId+"select";
+    selectType.setAttribute("name", "chartSelect");
+    selectType.setAttribute("data-field", JSON.stringify(fieldJson));
+    console.log(fieldJson);
+    setOptionsByTypeChart(selectType, fieldJson.fieldDataType);
+    div.appendChild(selectType);
+  }
+}
+
+// function get options by type
+function setOptionsByTypeChart(select,type)
+{
+    // empty the select
+    select.innerHTML = '';
+    // create the options
+    var options=[];
+    switch (type) {
+        case 'string':
+            options=['value','count','distinct'];
+            break;
+        case 'number':
+        case 'integer':
+        case 'decimal':        
+            options=['value','sum','count','avg','min','max','distinct','std','var','median','mode','percentile'];
+            break;
+        case 'date':
+            options=['value','count','distinct'];
+            break;
+        default:
+            options=['value','count','distinct'];
+            break;
+    }
+    console.log(options);
+    // add the options
+    options.forEach(option => {
+      
+        var opt = document.createElement('option');
+        opt.value = option;
+        opt.innerHTML = option;
+        select.appendChild(opt);
+    });
+    console.log(select);
 }
 
 // function to remove the item
@@ -1158,6 +1222,23 @@ function removeItem(event) {
   item.remove();
 }
 
+function moveUp(event) {
+  var item = event.target.parentNode;
+  var dataObjet = item.parentNode;
+  var previous = item.previousElementSibling;
+  if (previous) {
+    dataObjet.insertBefore(item, previous);
+  }
+}
+
+function moveDown(event) {
+  var item = event.target.parentNode;
+  var dataObjet = item.parentNode;
+  var next = item.nextElementSibling;
+  if (next) {
+    dataObjet.insertBefore(next, item);
+  }
+} 
 
 // filter 
 

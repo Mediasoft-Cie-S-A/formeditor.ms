@@ -26,9 +26,17 @@ var tableList=[];
 // it will be used to create the table list
 // is called when the page is loaded and when the user click on the table list
 function fetchTablesList(list,tableDetailsDiv) {
-    fetch('/tables-list')
-        .then(response => response.json())
-        .then(dbs => {
+
+    // sychronous call to get the table list
+    const request = new XMLHttpRequest();
+    request.open("GET", '/tables-list', false); // `false` makes the request synchronous
+
+
+
+    request.send();
+    
+    if (request.status === 200) {
+        const dbs = JSON.parse(request.responseText);
             // Clear the list
             
             list.innerHTML = '';
@@ -66,9 +74,10 @@ function fetchTablesList(list,tableDetailsDiv) {
                     
                              });
             }
-        })
-        .catch(error => console.error('Error:', error));
+       
 }
+}
+
 function createTableList(list,tableDetails) {
    
     fetchTablesList(list);    
@@ -719,35 +728,205 @@ async function postCreateTable(DBName,tableName, columns) {
 
 function showModalDbStrc(main,type) {
     console.log(type);
-    const modal = document.getElementById('tableDetailsModal');
-    modal.setAttribute('data-main-id', main.id);
+    const modal = document.getElementById('DatabaseDetailsModal');
+  
     const overl = document.getElementById('overlayModal');
     modal.style.display = 'block';
-    overl.style.display = 'block';
-    switch(type)
-    {
+   // overl.style.display = 'block';
+    // get the table list
+    const list = modal.querySelector('#modalTableListPanel');
+    // get table details from api   
+    fetchTablesList(list);
+    // wait for the table list to be loaded
+    
+    // replace the click event with the new one for all the div in the list
+    const tables= list.querySelectorAll('.table-item');
+
+ 
+    tables.forEach(table => {
+        // remove the click event
        
-        case "dataGrid":
-            document.getElementById('_insertGrid').style.display = 'block';
-            document.getElementById('_insertSearch').style.display = 'none';
-            document.getElementById('_insertTable').style.display = 'none';
-            break;
-        case "dataSet":
-                document.getElementById('_insertTable').style.display = 'block';
-                document.getElementById('_insertGrid').style.display = 'none';
-                document.getElementById('_insertSearch').style.display = 'none';
-                break;
-        case "dataSearch":
-            document.getElementById('_insertSearch').style.display = 'block';
-            document.getElementById('_insertTable').style.display = 'none';
-            document.getElementById('_insertGrid').style.display = 'none';
-            break;  
-        default:
-            document.getElementById('_insertSearch').style.display = 'none';
-            document.getElementById('_insertTable').style.display = 'none';
-            document.getElementById('_insertGrid').style.display = 'none';
-            break;
-    }
+        table.onclick = function(event) {
+            // Clear the table details div
+             event.preventDefault();
+             const contentDiv = modal.querySelector('#modaltableDetails');
+            console.log('contentDiv:', contentDiv);
+             contentDiv.innerHTML = '';
+            
+             const DBName = event.target.getAttribute('database-name');
+            const tableName = event.target.getAttribute('data-table-name');
+            const tableLabel = event.target.getAttribute('data-table-label');
+            // get the table details div
+            var header = ['X', 'Name', 'Field Description', 'Type', 'Mandatory','Up','Down'];
+                const table = document.createElement('table');
+                table.style.padding='10px';
+                table.style.cellpadding='10px';
+                const thead = document.createElement('thead');
+                thead.style.padding='10px';
+                table.appendChild(thead);
+                const tr = document.createElement('tr');
+                tr.style.padding='10px';
+                tr.style.backgroundColor='#4d61fc';
+                tr.style.color='white';
+                tr.id='TableFieldsList';
+                tr.style.borderbottom='1px solid #ddd';
+                header.forEach(prop => {
+                    const th = document.createElement('th');
+                    if (prop === 'X') {
+                        // genereate the checkbox
+                        var selectAll = document.createElement('input');
+                        selectAll.type = 'checkbox';
+                        selectAll.name = 'selectAll';
+                        selectAll.className= 'apple-switch';
+                        selectAll.addEventListener('change', function(event) {
+                            var checkboxes= table.querySelectorAll('input[name="fieldItem"]');
+                            checkboxes.forEach(checkbox => {
+                                checkbox.checked = selectAll.checked;
+                            });
+                        });
+                        th.appendChild(selectAll);
+                    } else {
+                    th.innerHTML =prop  ;
+                    }
+                    th.style.padding='10px';
+                    th.style.alignContent='center';
+                    th.style.borderRight='1px solid #ddd';
+                    tr.appendChild(th);
+                });
+                thead.appendChild(tr);
+                const tbody = document.createElement('tbody');
+                tbody.style.padding='10px';
+                table.appendChild(tbody);
+                contentDiv.appendChild(table);
+
+                header = ['X', 'NAME', 'LABEL', 'TYPE', 'MANDATORY','UP','DOWN'];
+            fetch(`/table-fields/${DBName}/${tableName}`).then(response => response.json())        
+            .then(fields => {
+               // add to the tbody the fields with this structure  const header = ['X', 'Field Name', 'Field Description', 'Type', 'Mandatory'];
+              //  console.log('fields:', fields);
+                // c
+               fields.forEach(field => {
+                  //  console.log('field:', field);
+                     const tr = document.createElement('tr');
+                      tr.classList.add('grid-row');
+                      tr.style.padding='10px';
+                      tr.style.borderbottom='1px solid #ddd';
+                      const json = {
+                            DBName: DBName,
+                            tableName: tableName,
+                            fieldName: field.NAME,
+                            fieldLabel: field.LABEL,
+                            fieldType: field.TYPE,
+                            fieldDataType: field.TYPE,
+                            fieldMandatory: field.MANDATORY,
+                            fieldWidth: field.WIDTH,    
+                            copyType: 'Data',
+                            fieldDefault: field.DEFAULT
+
+
+                        };
+                      // add table name and db name json
+                      
+                      tr.setAttribute('filed-data', JSON.stringify(json));
+                      header.forEach(prop => {
+                            const td = document.createElement('td');
+                            if (prop === 'X') {
+                             // genereate the checkbox
+                             var selectAll = document.createElement('input');
+                             selectAll.type = 'checkbox';
+                             selectAll.name = 'fieldItem';
+                             selectAll.className= 'apple-switch';
+                             selectAll.setAttribute('data-field-name', field.NAME);
+                             selectAll.addEventListener('change', function(event) {
+                                  // get the order select in the line
+                                  var selects= tr.querySelector('select[name="order"]');
+                                  // get all the checkboxes cheecked
+                                  var checkboxes= table.querySelectorAll('input[name="fieldItem"]:checked');
+                                  if (event.target.checked) {
+                                        selects.selectedIndex=checkboxes.length-1;
+                                  }
+                                  else
+                                  {
+                                        selects.selectedIndex=0;
+                                  }
+                             });
+    
+                             td.appendChild(selectAll);
+                            } else if (prop === 'UP') {
+                                var up = document.createElement('i');
+                               
+                                up.className = 'fa fa-arrow-up';
+                                up.onclick = function(event) {
+                                    event.preventDefault();
+                                   // move the row up
+                                      var previous = tr.previousElementSibling;
+                                        if (previous) {
+                                            tbody.insertBefore(tr, previous);
+                                        }
+                                };
+                                td.appendChild(up);
+                            } else if (prop === 'DOWN') {
+                                var down = document.createElement('i');
+                              
+                                down.className = 'fa fa-arrow-down';
+                                down.onclick = function(event) {
+                                    event.preventDefault();
+                                    // move the row down
+                                    var next = tr.nextElementSibling;
+                                    if (next) {
+                                        tbody.insertBefore(next, tr);
+                                    }
+                                };
+                                td.appendChild(down);
+                            }
+                            else {
+                            td.innerHTML =field[prop]  ;
+                            }
+                            td.style.padding='10px';
+                            td.style.alignContent='center';
+                            td.style.borderRight='1px solid #ddd';
+                            tr.appendChild(td);
+                      });
+                      tbody.appendChild(tr);
+                }); // end of foreach
+            }); // end of fetch
+               
+                
+           
+        };
+    });
+
+
+    // 
+
+}
+
+function applyDBModal(button){
+    const contentDiv = button.closest('.modal').querySelector('#modaltableDetails').querySelector('tBody');
+    // get all the tr in contentDiv
+    const trs = contentDiv.querySelectorAll('tr');
+     // get the propertiesBar
+     const propertiesBar = document.getElementById('propertiesBar');
+     console.log('propertiesBar:', propertiesBar);
+     // gest Data div
+     const dataDiv = propertiesBar.querySelector('#Data');
+     console.log('dataDiv:', dataDiv);
+    trs.forEach(tr => {
+        console.log('tr:', tr);
+        // check if the checkbox is checked
+        if (tr.querySelector('input[name="fieldItem"]').checked) {
+            const json = JSON.parse(tr.getAttribute('filed-data'));            
+            addFieldToPropertiesBar(dataDiv, json);
+        }
+       
+    });
+   
+
+    // close the modal
+    const modal = button.closest('.modal');
+    const overl = document.getElementById('overlayModal');
+    modal.style.display = 'none';
+    overl.style.display = 'none';
 
 }
 
@@ -758,7 +937,13 @@ function closeModalDbStrct() {
     overl.style.display = 'none';
 }
 
+function closeDBModalEdit(button){
+    const modal = button.closest('.modal');
+    const overl = document.getElementById('overlayModal');
+    modal.style.display = 'none';
+    overl.style.display = 'none';
 
+}
 
 function searchtable(search,contentDivID)
 {

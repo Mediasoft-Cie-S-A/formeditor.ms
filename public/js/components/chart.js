@@ -96,19 +96,18 @@ class ChartManager {
         const dataConfig = JSON.parse(element.getAttribute("dataConfig"));
           const pivotConfig = JSON.parse(element.getAttribute("pivotConfig"));
         if (dataConfig){
-            dataConfig.forEach(config => addFieldToPropertiesBar(data, config));
+            dataConfig.forEach(config => addFieldToPropertiesBar(data, config,true));
         }
         if (pivotConfig) {
-            pivotConfig.forEach(config => addFieldToPropertiesBar(pivot, config));
+            pivotConfig.forEach(config => addFieldToPropertiesBar(pivot, config,true));
         }
         const legendInput = legend.querySelector('input');
-        legendInput.value = element.getAttribute("labels-data-field");
-        legendInput.setAttribute("dataset", element.getAttribute('dataset'));
-        legendInput.setAttribute("datatype", element.getAttribute('labels-data-type'));
-
+        const legendJson = JSON.parse(element.getAttribute("labels-json"));
+        legendInput.setAttribute("data-field", JSON.stringify(legendJson));
+        legendInput.value = legendJson.fieldName;
         const legendSelect = legend.querySelector('select');
-        const dataType = element.getAttribute("labels-data-type");
-        setOptionsByType(legendSelect, dataType);
+        const dataType = legendJson.dataType;
+        setOptionsByTypeChart(legendSelect, dataType);
         legendSelect.value = element.getAttribute("labels-data-function");
 
         switchView(event, content, 'standard');
@@ -130,15 +129,53 @@ class ChartManager {
 
     renderData(element)
      {
-        const chart = this.chartList[parseInt(element.getAttribute("chartNumber"))];
-        const labelName = element.getAttribute("labels-data-field");
+        console.log("renderData");
+        console.log("element", element);
+        const chartNumber = parseInt(element.getAttribute('chartNumber'));
+        let chart = this.chartList[chartNumber];
+        console.log("chart", chart);
+
+        if (chart) {
         chart.data.datasets = [];
+        } else // generate the chart
+        {
+            const canvas = element.querySelector('canvas');
+            console.log("canvas", canvas);
+            let ctx = canvas.getContext('2d');
+            console.log("ctx", ctx);   
+            let typeChart = this.getChartType(element.getAttribute("tagName"));
+            this.chartList.push(new Chart(ctx, {
+                type: typeChart,
+                data: {
+                    labels: [],
+                    datasets: []
+                },
+                options: {
+                    scales: typeChart !== 'treemap' ? {
+                        y: {
+                            beginAtZero: true
+                        }
+                    } : {},
+                    plugins: typeChart === 'treemap' ? {
+                        legend: {
+                            display: false
+                        }
+                    } : {}
+                }
+            }));
+            chart = this.chartList[this.chartList.length - 1];
+        } // end else
+
+
+
 
         const dataConfig = JSON.parse(element.getAttribute("dataConfig"));
+        const legendJson = JSON.parse(element.getAttribute("labels-json"));
         const pivotConfig = JSON.parse(element.getAttribute("pivotConfig"));
         const fieldsElaborated = [];
        
-        var functionName = dataConfig[0].functionName;
+        var functionName = legendJson.functionName;
+        var labelName = legendJson.fieldName;
         // generate colors for each dataset
         var colorCount = -1;
         const fieldsChart=[];
@@ -219,7 +256,7 @@ class ChartManager {
                     filters: filter, 
                     sort: sort, 
                     limit: limit,
-                    links: metadata.links
+                   // links: metadata.links
                 };
             request.send(JSON.stringify(body));
         } else {
@@ -231,7 +268,8 @@ class ChartManager {
                 filters: [], 
                 sort: sort, 
                 limit: limit,
-                links: metadata.links};
+               // links: metadata.links
+               };
             request.send(JSON.stringify(body));
         }
    
@@ -256,10 +294,12 @@ class ChartManager {
                         }));
                     } else {
                         chart.data.datasets[index].data = data.map(item => item[fieldsChart[index]]);
-                        chart.data.labels = data.map(item => functionName === 'value' ? item[labelName] : item['_id']);
+                        chart.data.labels = data.map(item => item[labelName] );
+                        
                     }
                 }
-            }
+            }  // end for
+            console.log("chart",chart);
         }
 
         chart.update();
@@ -269,7 +309,7 @@ class ChartManager {
     }
 
     getFilterUrl(element) {
-        return `/getDatasetDataByFilter?datasetName=${element.getAttribute("dataset")}`;
+        return `/getDatasetDataByFilter?tableName=${element.getAttribute("tableName")}`;
     }
 
     updateJsonData() {
@@ -282,25 +322,38 @@ class ChartManager {
         const legend = propertiesBar.querySelector('#Legend');
         const legendInput = legend.querySelector('input');
         const legendField = legendInput.value;
-        const dataset = legendInput.getAttribute("dataset");
-        const legendType = legendInput.getAttribute("datatype");
-        const legendSelect = legend.querySelector('select');
-        const legendfunction = legendSelect.options[legendSelect.selectedIndex].value;
-
-        currentChart.setAttribute("labels-data-field", legendField);
-        currentChart.setAttribute("labels-data-function", legendfunction);
-        currentChart.setAttribute("labels-data-type", legendType);
-        currentChart.setAttribute("dataset", dataset);
+        const selectFunction = legendInput.closest('div').querySelector('select');
+        var legendJson = JSON.parse(legendInput.getAttribute("data-field"));
+        console.log("selectFunction", selectFunction);
+        
+        //get the json form data-field
+       // const jsonDataset = JSON.parse(selectFunction.getAttribute('data-field'));
+       
+        var  legendfunction = "value";
+        if (selectFunction) {
+            legendfunction = selectFunction.value;
+            legendJson.functionName = legendfunction;
+           
+        }
+        currentChart.setAttribute("labels-json", JSON.stringify(legendJson));
+       
+    
         var pivotInput = propertiesBar.querySelector('#Pivot');
         const dataSelect = dataInput.querySelectorAll('div');
         const dataConfig = [];
         dataSelect.forEach(item => {
-            const selectFunction = item.querySelector('select');
-            const functionName = selectFunction[selectFunction.selectedIndex].value;
-            const fieldName = item.querySelector('span').getAttribute('data-field-name');
-            const dataType = item.querySelector('span').getAttribute('data-type');
-            const dataset = item.querySelector('span').getAttribute('dataset');
-            dataConfig.push({ fieldName: fieldName, functionName: functionName, dataType: dataType, dataset: dataset });
+            //get the json form data-field
+            if (item.getAttribute('data-field')) {
+                const jsonDataset = JSON.parse(item.getAttribute('data-field'));
+
+                dataConfig.push({
+                    fieldName: jsonDataset.fieldName, 
+                    functionName: jsonDataset.dataType,
+                    dataType: jsonDataset.fieldDataType,
+                    DBName: jsonDataset.DBName,
+                    tableName: jsonDataset.tableName
+                 });
+            }
         });
         currentChart.setAttribute("dataConfig", JSON.stringify(dataConfig));
 
@@ -308,13 +361,13 @@ class ChartManager {
     var pivotSelect = pivotInput.querySelectorAll('div');
     var pivotConfig = [];
     pivotSelect.forEach(item => {
-        var selectFunction = item.querySelector('select');
+        var selectFunction = item.querySelector('name[chartSelect]');
         var functionName = selectFunction[selectFunction.selectedIndex].value;
         var fieldName = item.querySelector('span').getAttribute('data-field-name');
         var dataType = item.querySelector('span').getAttribute('data-type');
-        var dataset = item.querySelector('span').getAttribute('dataset');
-        currentChart.setAttribute("dataset", dataset);
-        pivotConfig.push({ fieldName: fieldName, functionName: functionName, dataType: dataType, dataset: dataset });
+        var tableName = item.querySelector('span').getAttribute('tableName');
+        currentChart.setAttribute("tableName", tableName);
+        pivotConfig.push({ DBName: DBName, fieldName: fieldName, functionName: functionName, dataType: dataType, tableName: tableName });
     });
     currentChart.setAttribute("pivotConfig", JSON.stringify(pivotConfig));
 

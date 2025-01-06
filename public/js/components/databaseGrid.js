@@ -29,6 +29,7 @@ function createDatabaseGrid(type) {
 function editDatabaseGrid(type, element, content) {
   const button = document.createElement("button");
   button.textContent = "update";
+  button.style.width = "100%";
   button.onclick = function () {
     const propertiesBar = document.getElementById("propertiesBar");
     const gridID = propertiesBar.querySelector("label").textContent;
@@ -37,6 +38,18 @@ function editDatabaseGrid(type, element, content) {
     
   };
   content.appendChild(button);
+  // button showModalDbStrc for show the database structure
+  const buttonShowDbStrc = document.createElement("button");
+  buttonShowDbStrc.style.width = "100%";
+  buttonShowDbStrc.textContent = "Show DB";
+  buttonShowDbStrc.onclick = function () {
+    const propertiesBar = document.getElementById("propertiesBar");
+    const gridID = propertiesBar.querySelector("label").textContent;
+    const main = document.getElementById(gridID);
+    showModalDbStrc(content, type);
+  };
+  content.appendChild(buttonShowDbStrc);
+  
   content.appendChild(createMultiSelectItem("Data", "data", "data"));
   content.appendChild(createMultiSelectItem("Link", "link", "link"));
 

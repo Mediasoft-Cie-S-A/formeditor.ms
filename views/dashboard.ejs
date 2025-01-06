@@ -412,6 +412,29 @@
         </div>
       </div>
     </div>
+    <modal id="DatabaseDetailsModal" class="modal">
+      <div class="modal-content" style="padding: 10px">
+        <h6>Tables:</h6>
+        <button class="close" onclick="closeDBModalEdit(this)">X</button>
+        <button class="close" onclick="applyDBModal(this)">Apply</button>
+          
+        <div id="TablesListContent" style="display: flex;">
+          <div  class="tab-div" style="width: 10%;" >
+            <div>
+              <input
+                type="text"
+                placeholder="filter.. table"
+                name="searchtable"
+                onchange="searchtable(this.value,'modalTableListPanel')"
+              >
+            </div>
+            <div id="modalTableListPanel" style="overflow: auto"></div>
+            <!-- Tables will be listed here -->
+          </div>
+          <div id="modaltableDetails" style="width: 90%;"></div>
+
+        </div>
+      </div>
 
     <div id="toast-container"></div>
     <div id="hint-container"></div>
@@ -483,7 +506,8 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-treemap"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.1/mode/javascript/javascript.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/meta.min.js"></script>

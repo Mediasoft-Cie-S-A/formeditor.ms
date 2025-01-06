@@ -727,6 +727,194 @@ class dblayer{
             } 
           });
 
+          // get dataset data by dataset name and filter
+app.post('/getDatasetDataByFilter',dbs.checkAuthenticated, async (req, res) => {
+  console.log("getDatasetDataByFilter");
+
+  try {
+      const { groups, agg,  } = req.query;
+   
+   
+     
+      //if req.body is not defined, set it to an empty object
+      const filters = req.body.filters.filters || [];
+      // if req.body.view is not defined, set it to empty string
+      const view = req.body.view || '';
+      // if req.body.columns is not defined, set it to an empty array
+      const columns = req.body.columns || [];
+      // if req.body.pivot is not defined, set it to an empty array
+      const pivot = req.body.pivot || [];
+
+      
+      // check if in the colums exits the limit field
+      const limit = req.body.limit
+      // if limit not exits set it to 1000
+      const limitValue = limit ? limit.value : 100;
+      // check if in the colums exits the sort field
+      const sort = req.body.sort;
+      // check if in the colums exits the direction field
+      const links = req.body.links;
+     if (sort) {
+          var direction = sort.direction;
+          var sortfield = sort.field;
+      }
+      console.log("filterDocuments"); 
+      // get all the results by
+      var results = await filterDocuments( view, filters, columns, agg,sortfield,direction,limitValue);
+    
+
+      // get all the results by 
+      if ( pivot.length >0) {
+          // get pivot years
+          console.log("pivot data");
+          pFields = pivot.map(p => p.fieldName);
+          console.log(pFields);
+          pColumns = columns.map(p => p.fieldName);
+          console.log(pColumns);
+          results = pivotData(results,  pColumns,pFields);
+        //  console.log(results);
+      }
+      // limit the results
+      if (limitValue) {
+          results = results.slice(0, limitValue);
+      }
+      res.status(200).json(results);
+      
+  } catch (err) {
+      res.status(500).send({ error: err.message });
+  }
+});
+
+
+// get dataset data by dataset name and filter
+function flattenJSON(data,columns) {
+  const results = [];
+  for (let i = 0; i < data.length; i++) {
+      const obj = {};
+      for (const key in data[i]) {
+          if (!Array.isArray(data[i][key])) {
+              obj[key]= data[i][key] ;
+          }else{
+              // for each value in the array
+              for (let j = 0; j < data[i][key].length; j++) {
+                  //  the sub object
+                  const subObj = {};
+                  // add obj key,value to subObj
+                  for (const key1 in obj) {
+                      subObj[key1] = obj[key1];
+                  }
+                  for (const key1 in data[i][key][j]) {
+                      // if key1 exists in subObj, not add it
+                      if (key1 in subObj) {
+                          continue;
+                      }
+                      subObj[key1] = data[i][key][j][key1];
+                  }
+                  results.push(subObj);
+              }
+          }
+      }
+    //  results.push(obj);
+  
+  }
+
+  return results;
+}
+// Function to get data from a view
+
+async function filterDocuments( view, filters, columns, groups, sort, direction, limitValue) {
+   // generate the query string with columns columns fieldName and columns DBname colums dataset = table name
+    let query = `SELECT ${columns.map(column => column.fieldName).join(", ")} FROM PUB.${columns[0].tableName}`;
+    // add limit to the query
+    if (limitValue) {
+        query += ` FETCH FIRST ${limitValue} ROWS ONLY`;
+    }
+    else {
+        query += ` FETCH FIRST 100 ROWS ONLY`;
+    }
+    console.log(query);
+
+    // Connect to the database
+    const db= dbs.databases[columns[0].DBName];
+    await db.connect();
+    // Execute the query
+    const data = await db.queryData(query);
+  //  console.log(data);
+    // Close the database connection
+    await db.close();
+    // Flatten the JSON data
+   
+    // return the data
+    return data;
+}
+
+
+
+// Function to convert the operator to MongoDB operator
+function convertOperator(operator) {
+  switch (operator) {
+      case '=':
+          return '$eq';
+      case '!=':
+          return '$ne';
+      case '>':
+          return '$gt';
+      case '>=':
+          return '$gte';
+      case '<':
+          return '$lt';
+      case '<=':
+          return '$lte';
+      case 'in':
+          return '$in';
+      case 'not in':
+          return '$nin';
+      case 'like':
+          return '$regex';
+      default:
+          return '$eq';        
+  }
+}
+
+
+
+
+// Function to filter documents in a collection
+
+function pivotData(data,columnFields,pivotFields ) {
+  console.log("pivotData");
+
+  const pivotData = [];
+  const result = [];
+
+  // Get all the distinct values of the first pivot field
+  const pivotValues = Array.from(new Set(data.map(item => item[pivotFields[0]])));
+  console.log(pivotValues);
+
+  // Group data by the distinct values of the first pivot field
+  data.forEach(item => {
+          
+     pivotValues.forEach(value => {
+         if (item[pivotFields[0]] === value) {
+            item[value] = item[pivotFields[1]];
+            }
+          else {
+          item[value] = 0;
+          }
+      });
+      pivotFields.forEach(field => {
+          delete item[field];
+      });
+      // delete _id field
+      if (item._id) {
+          delete item._id;
+      }
+      result.push(item);
+  });
+
+  return result;
+}
+
           // app.get("/next-sequence", dbs.checkAuthenticated, async (req, res) => {
           //   try {
           //     console.log("step three is call");

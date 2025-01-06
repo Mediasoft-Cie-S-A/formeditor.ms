@@ -280,14 +280,14 @@ select {
 button {
     padding: 8px 15px;
     background-color:white;
-    color: gray;
+    color: #333;
     border: none;
     cursor: hand;
     box-shadow: 2px 9px 49px -17px rgba(0, 0, 0, 0.1);
 }
 
 button:hover {
-    background-color: #8d91fc;
+    background-color: #4d61fc;
     color: white;
     transition: 0.5s;
    
