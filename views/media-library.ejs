@@ -55,37 +55,66 @@
   <!-- Upload Form -->
   <form class="upload-form" id="uploadForm">
     <div class="form-group" class="row" style="background-color: #eee;align-items: center; text-align: center;">
+      <div class="row">
         <div class="col-md-12">
         <h2>Media Library</h2>
         </div>
+      </div>
+      <hr/>
+      <div class="row">
         <div class="col-md-6">
-        <input type="file" id="imageInput" name="image" accept="image/*" required style="width: 50%;" >
+          <input type="file" id="mediaInput" name="media" accept="image/*,video/mp4" required style="width: 50%;" >
         </div>
         <div class="col-md-6">
-        <button type="button"  class="button float-left" id="uploadButton" style="width: 150px; height: 50px;">Upload</button>
+          <button type="button"  class="button float-left" id="uploadButton" style="width: 150px; height: 50px;">Upload</button>
         </div>
+      </div>  
     </div>
   </form>
   <hr>
   <!-- Media Library -->
-   <div class="row">
-        <div class="col-md-12">
-            <div class="media-library" id="mediaLibrary" style="display: flex; flex-wrap: wrap; gap: 10px; padding: 10px;">
-                <!-- Images will be loaded dynamically here -->
-            </div>
-        </div>
+  <div class="container-fluid">
+    
+    <!-- Images -->
+    <div class="row">
+      <div class="col-md-12">
+        <h3>Images</h3>
+      </div>
     </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="media-library" id="mediaImagesLibrary" style="display: flex; flex-wrap: wrap; gap: 10px; padding: 10px;">
+          <!-- Images will be loaded dynamically here -->
+        </div>
+      </div>
+    </div>
+    <hr/>
+    <!-- Videos -->
+    <div class="row">
+      <div class="col-md-12">
+        <h3>Videos</h3>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="media-library" id="mediaVideosLibrary" style="display: flex; flex-wrap: wrap; gap: 10px; padding: 10px;">
+            Videos will be loaded dynamically here
+        </div>
+      </div>
+    </div>
+</div>  
     <!-- Script to fetch and render images -->
   <script>
     // Function to fetch images from the /images endpoint
-    async function fetchImages() {
+    async function fetchMedia() {
       try {
-        const response = await fetch('/images');
+        const response = await fetch('/media');
         if (!response.ok) {
           throw new Error('Failed to fetch images');
         }
         const data = await response.json();
         renderImages(data.images);
+        renderVideos(data.videos);
       } catch (error) {
         console.error('Error fetching images:', error);
       }
@@ -93,15 +122,15 @@
 
     // Function to render images in the media library
     function renderImages(images) {
-      const mediaLibrary = document.getElementById('mediaLibrary');
+      const mediaLibrary = document.getElementById('mediaImagesLibrary');
       mediaLibrary.innerHTML = ''; // Clear existing images
       images.forEach(image => {
         const mediaItem = document.createElement('div');
         mediaItem.className = 'media-item';
-        mediaItem.setAttribute('data-src', `/img/${image}`);
+        mediaItem.setAttribute('data-src', `/media/img/${image}`);
 
         const img = document.createElement('img');
-        img.src = `/img/${image}`;
+        img.src = `/media/img/${image}`;
         img.width = 150;
         img.height = 150;
         img.alt = image;
@@ -122,33 +151,67 @@
       });
     }
 
+     // Function to render images in the media library
+    function renderVideos(videos) {
+      const mediaLibrary = document.getElementById('mediaVideosLibrary');
+      mediaLibrary.innerHTML = ''; // Clear existing images
+      videos.forEach(video => {
+        const mediaItem = document.createElement('div');
+        mediaItem.className = 'media-item';
+        mediaItem.setAttribute('data-src', `/media/img/${video}`);
+
+        const vd = document.createElement('video');
+        const source = document.createElement('source')
+        source.src = `/media/video/${video}`;
+        source.type = 'video/mp4'
+        vd.width = 150;
+        vd.height = 150;
+        vd.autoplay = 'autoplay'
+        //img.alt = image;
+        vd.appendChild(source)
+        const caption = document.createElement('p');
+        caption.textContent = video;
+
+        mediaItem.appendChild(vd);
+        mediaItem.appendChild(caption);
+
+        /*mediaItem.addEventListener('click', () => {
+          const selectedImage = mediaItem.getAttribute('data-src');
+          window.opener.document.querySelector('#imageSrcInput').value = selectedImage;
+          window.close();
+        });*/
+
+        mediaLibrary.appendChild(mediaItem);
+      });
+    }
+
     // Function to handle image upload
-    async function uploadImage() {
+    async function uploadMedia() {
       const uploadForm = document.getElementById('uploadForm');
       const formData = new FormData(uploadForm);
-
       try {
-        const response = await fetch('/upload-image', {
+        const response = await fetch('/upload-media', {
           method: 'POST',
           body: formData,
         });
 
         if (!response.ok) {
-          throw new Error('Failed to upload image');
+          throw new Error('Failed to upload image/video');
         }
 
-        alert('Image uploaded successfully!');
-        fetchImages(); // Refresh the media library after upload
+        alert('Image/Video uploaded successfully!');
+        fetchMedia(); // Refresh the media library after upload
+        
       } catch (error) {
-        console.error('Error uploading image:', error);
-        alert('Error uploading image');
+        console.error('Error uploading image/video:', error);
+        alert('Error uploading image/video');
       }
     }
 
-    document.getElementById('uploadButton').addEventListener('click', uploadImage);
+    document.getElementById('uploadButton').addEventListener('click', uploadMedia);
 
     // Fetch and render images on page load
-    fetchImages();
+    fetchMedia();
   </script>
 </body>
 </html>
