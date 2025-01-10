@@ -30,18 +30,21 @@ module.exports = function (app, client, dbName) {
   const upload = multer({
     storage: multer.diskStorage({
       destination: (req, file, cb) => {
-        const uploadDir = path.join(__dirname, 'public/img'); // Replace with your target directory
+        if (file.mimetype.startsWith("image"))
+          uploadDir = path.join(__dirname, 'public/media/img'); // Replace with your target directory
+        else if (file.mimetype.startsWith("video"))
+          uploadDir = path.join(__dirname, 'public/media/video');
         if (!fs.existsSync(uploadDir)) {
           fs.mkdirSync(uploadDir, { recursive: true });
         }
         cb(null, uploadDir);
       },
       filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`);
+        cb(null, `${Date.now()}-${Buffer.from(file.originalname, 'latin1').toString('utf8')}`);
       }
     }),
     fileFilter: (req, file, cb) => {
-      const allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/bmp'];
+      const allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/bmp','video/mp4'];
       if (allowedTypes.includes(file.mimetype)) {
         cb(null, true);
       } else {
@@ -176,9 +179,10 @@ module.exports = function (app, client, dbName) {
   });
 
   // Web service to return all images
-  app.get('/images', checkAuthenticated, (req, res) => {
-    const imgDir = path.join(__dirname, 'public/img'); // Replace with your target directory
-
+  app.get('/media', checkAuthenticated, (req, res) => {
+    const imgDir = path.join(__dirname, 'public/media/img'); // Replace with your target directory
+    const videoDir = path.join(__dirname, 'public/media/video');
+    
     const getAllImages = (dir, baseDir = dir) => {
       const images = [];
       const supportedExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp']; // Add supported image extensions here
@@ -201,25 +205,52 @@ module.exports = function (app, client, dbName) {
       return images;
     };
 
+    const getAllVideos = (dir, baseDir = dir) => {
+      const videos = [];
+      const supportedExtensions = ['.mp4']; // Add supported video extensions here
+
+      // Read directory contents
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+
+      entries.forEach(entry => {
+        const fullPath = path.join(dir, entry.name);
+
+        if (entry.isDirectory()) {
+          // Recursively process subdirectories
+          videos.push(...getAllVideos(fullPath, baseDir));
+        } else if (entry.isFile() && supportedExtensions.includes(path.extname(entry.name).toLowerCase())) {
+          // Add relative path to images array
+          videos.push(path.relative(baseDir, fullPath));
+        }
+      });
+
+      return videos;
+    };
+    
+
     try {
+     
       const imagePaths = getAllImages(imgDir);
-      res.json({ images: imagePaths });
+      const videoPaths = getAllVideos(videoDir);
+      res.json({ images: imagePaths, videos: videoPaths });
     } catch (error) {
       console.error('Error reading directory:', error);
-      res.status(500).json({ error: 'Unable to retrieve images' });
+      res.status(500).json({ error: 'Unable to retrieve images/videosformData' });
     }
   });
 
   // Web service to upload images
-  app.post('/upload-image', checkAuthenticated, upload.single('image'), (req, res) => {
+  app.post('/upload-media', checkAuthenticated, upload.single('media'), (req, res) => {
+    console.log(req.file.mimetype)
     try {
-      // save the image in public/img
+      // save the image in public/media/img and video in public/media/video
+      console.log(req.file.filename)
       res.json({ imagePath: `${req.file.filename}` });
 
       
     } catch (error) {
-      console.error('Error uploading image:', error);
-      res.status(500).json({ error: 'Unable to upload image' });
+      console.error('Error uploading image/video:', error);
+      res.status(500).json({ error: 'Unable to upload mediaformData' });
     }
   });
 
