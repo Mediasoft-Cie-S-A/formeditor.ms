@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const { json } = require("body-parser");
 
 function createElementDateSet(type) {
   var main = document.createElement("div");
@@ -51,36 +52,11 @@ function editElementDataSet(type, element, content) {
   };
   content.appendChild(buttonShowDbStrc);
 
-  content.appendChild(
-    createMultiSelectItem(
-      "Data",
-      "data",
-      "data",
-      element.getAttribute("data"),
-      "text",
-      true
-    )
-  );
-  content.appendChild(
-    createMultiSelectItem(
-      "exception",
-      "exception",
-      "exception",
-      element.getAttribute("exception"),
-      "text",
-      true
-    )
-  );
-  content.appendChild(
-    createSelectItem(
-      "Filter",
-      "filter",
-      "filter",
-      element.getAttribute("filter"),
-      "text",
-      true
-    )
-  );
+  content.appendChild(createMultiSelectItem("Data", "data", "data"));
+  content.appendChild(createMultiSelectItem("Link", "link", "link"));
+  content.appendChild(createMultiSelectItem("Exception","exception","exception"));
+  content.appendChild(createSelectItem("Filter","filter","filter",element.getAttribute("filter"),"text",true));
+
 
   // load the data
   // check if jsonData is not empty
@@ -92,57 +68,70 @@ function editElementDataSet(type, element, content) {
         addFieldToPropertiesBar(target, fieldJson);
     });
   }
+
+  if (element.getAttribute("datalink") != null) {
+    var target = content.querySelector("#Link");
+    var jsonData = JSON.parse(element.getAttribute("datalink"));
+    jsonData.forEach((fieldJson) => {
+      addFieldToPropertiesBar(target, fieldJson);
+    });
+  }
+  // exception
+  if (element.getAttribute("exceptionSet") != null) {
+    var target = content.querySelector("#Exception");
+    var jsonData = JSON.parse(element.getAttribute("exceptionSet"));
+    jsonData.forEach((fieldJson) => {
+      addFieldToPropertiesBar(target, fieldJson);
+    });
+  }
+
+  // filter
+  if (element.getAttribute("filter") != null) {
+    var target = content.querySelector("#Filter");
+    target.value = element.getAttribute("filter");
+  }
 }
 
 function updateDataSet(main, content) {
   console.log("updateDataSet");
-
-  var data = content.querySelectorAll('span[name="dataContainer"]');
-  var exception = Array.from(data).filter((span) => span.closest("#exception"));
+  var jsonData = [];
+  var linkData = [];
+  var exceptionData = [];
+  var data = content.querySelector("#Data").querySelectorAll("span[name='dataContainer']");
+  var exception = content.querySelector("#Exception").querySelectorAll("span[name='dataContainer']");
+  var datalink = content.querySelector("#Link").querySelectorAll("span[name='dataContainer']");
   data = Array.from(data).filter((span) => !span.closest("#exception"));
 
   if (data.length == 0) return;
-  var firstJson = JSON.parse(data[0].getAttribute("data-field"));
-  var jsonData = [
-    {
-      DBName: firstJson.DBName,
-      tableName: firstJson.tableName,
-      fieldName: "rowid",
-      fieldType: "rowid",
-      fieldDataType: "rowid",
-      fieldLabel: "rowid",
-      fieldMandatory: "0",
-      fieldWidth: "0",
-      fieldDefaultValue: "0",
-      fieldValues: "",
-      fieldSQL: "",
-    },
-  ];
-  var exceptionData = [
-    {
-      DBName: firstJson.DBName,
-      tableName: firstJson.tableName,
-      fieldName: "rowid",
-      fieldType: "rowid",
-      fieldDataType: "rowid",
-      fieldLabel: "rowid",
-      fieldMandatory: "0",
-      fieldWidth: "0",
-      fieldDefaultValue: "0",
-      fieldValues: "",
-      fieldSQL: "",
-    },
-  ];
+ 
   data.forEach((span) => {
     var json = JSON.parse(span.getAttribute("data-field"));
-    jsonData.push(json);
+    // check if the field exists in the jsonData
+    if (jsonData.find((field) => field.fieldName === json.fieldName) == null)
+    {
+      jsonData.push(json);
+    }
+     
+  });
+  datalink.forEach((span) => {
+    var json = JSON.parse(span.getAttribute("data-field"));
+    // check if the field exists in the linkData
+    if (linkData.find((field) => field.fieldName === json.fieldName) == null)
+    {
+          linkData.push(json);
+    }
   });
   exception.forEach((span) => {
     var json = JSON.parse(span.getAttribute("data-field"));
+    // check if the field exists in the exceptionData
+    if (exceptionData.find((field) => field.fieldName === json.fieldName) == null)
+    {
     exceptionData.push(json);
+    }
   });
 
   main.setAttribute("dataSet", JSON.stringify(jsonData));
+  main.setAttribute("datalink", JSON.stringify(linkData));
   main.setAttribute("exceptionSet", JSON.stringify(exceptionData));
   renderDataSet(main);
 }
@@ -159,6 +148,26 @@ function renderDataSet(main) {
   dataset.setAttribute("data-table-name", jsonData[0].tableName);
   dataset.className = "dataSetContainer";
   var datasetFields = [];
+  // add rowid jsonData, in the first position if not exists
+  var rowid = jsonData.find((field) => field.fieldType === "rowid");
+  if (!rowid)
+  {
+    jsonData.unshift({
+      DBName: jsonData[0].DBName,
+      tableName: jsonData[0].tableName,
+      fieldLabel: "rowid",
+      fieldDataType: "rowid",
+      fieldDefaultValue: "0",
+      fieldName: "rowid",
+      fieldType: "rowid",
+      fieldSize: "10",
+      fieldMandatory: "0",
+      fieldValues: "",
+      fieldSQL: ""
+    });
+      
+  }
+
   jsonData.forEach((fieldJson) => {
     var createField = createFieldFromJson(fieldJson);
     dataset.appendChild(createField);
@@ -401,33 +410,78 @@ async function getRecords(action, DBName, tableName, datasetFields) {
 // use the fetch function to call the web service and update the inputs with the data
 // use the updateInputs function to update the inputs with the data
 // use the setRowID function to set the current row id in the navigation bar
-async function linkRecordToGrid(DBName, tableName, rowId, rowNum) {
+async function linkRecordToGrid(DBName, tableName, rowId, rowNum,dataset,link,rows) {
+  console.log("linkRecordToGrid");
+  console.log("DBName", DBName);
+  console.log("tableName", tableName);
+  console.log("rowId", rowId);
+  console.log("rowNum", rowNum);
+  console.log("dataset", dataset);
+  console.log("link", link);
+  console.log("rows", rows);
   const saveBtn = document.querySelector("[name=SaveDSBtn]");
   if (saveBtn) saveBtn.disabled = true;
   
   try {
     // get all the datasets
-    const datasets = document.querySelectorAll("#DataSet_" + tableName);
+    const datasetsDiv = document.querySelectorAll("#DataSet_" + tableName);
     // for all the datasets check the div with name DataSet
-    datasets.forEach((dataset) => {
+    datasetsDiv.forEach((datasetDiv) => {
       //get db name from the dataset
-      datasetDBName = dataset.getAttribute("DBName");
+      datasetDBName = datasetDiv.getAttribute("DBName");
       // get table name from the dataset
-      datasetTableName = dataset.getAttribute("data-table-name");
+      datasetTableName = datasetDiv.getAttribute("data-table-name");
       // if the table name is the same as the table name of the record
       if (datasetTableName == tableName) {
         // get the fields from the dataset
-        const datasetFields = dataset.getAttribute("dataset-fields-list");
+        const datasetFields = datasetDiv.getAttribute("dataset-fields-list");
+        if (!link) { // if link is not defined
+          link = [];
+        }
+        if (link.length ===0) {
+           console.log("link.length ===0");
+            const url = `/get-record-by-rowid/${DBName}/${tableName}/${rowId}?fields=${datasetFields}`;
+            fetch(url)
+              .then((response) => response.json())
+              .then((data) => {
+                updateInputs(data, DBName, tableName);
+              
+              })
+              .catch((error) => console.error("Error:", error));
+          } // end if link.length ===0
+          else {
+            console.log("link.length !==0");
+            // get the fields from the dataset and values from rows
+            // and generate indexes and values in order to pass to             "/get-records-by-idexes/:database/:tableName",
+            let indexes = [];
+            let values = [];
+            link.forEach((field) => {
+              indexes.push(field.fieldName);
+              // get id for filed by array index dataset
+              let idx = -1;
+              // get the index of the field in the dataset
+              dataset.forEach((f, i) => {
+                if (f.fieldName == field.fieldName) {
+                  idx = i+1;
+                }});
+              // idx+1 is the value of the field in the rows array considering 0 is the rowid
+              values.push(rows[idx]);
+            }
+            );
+            const url = `/get-records-by-indexes/${DBName}/${tableName}?indexes=${indexes}&values=${values}&fields=${datasetFields}`;
+            fetch(url)
+              .then((response) => response.json())
+              .then((data) => {
+                updateInputs(data, DBName, tableName);
+              
+              })
+              .catch((error) => console.error("Error:", error));
+          } // end else
 
-        const url = `/get-record-by-rowid/${DBName}/${tableName}/${rowId}?fields=${datasetFields}`;
-        fetch(url)
-          .then((response) => response.json())
-          .then((data) => {
-            updateInputs(data, DBName, tableName);
-          
-          })
-          .catch((error) => console.error("Error:", error));
-      }
+      
+
+        } // end if datasetTableName == tableName
+      
     });
   } catch (error) {
     console.error("Error:", error);

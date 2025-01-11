@@ -590,6 +590,7 @@ function dropInput(event, id) {
     fieldWidth: fieldWidth,
     fieldDefaultValue: fieldDefaultValue,
     functionName: "value",
+    isIndex: false,
   };
   // console.log(fieldJson);
   // Get the target element
@@ -1162,6 +1163,21 @@ function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false )
   // Adjust the height of the parent element to accommodate the new field
   var height = dataObjet.clientHeight + div.clientHeight;
   dataObjet.style.height = height + 30 + "px";
+   // generate checkbox for the fieldJson.isIndex
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.id = "isIndex";
+  checkbox.name = "isIndex";
+  checkbox.value = "isIndex";
+  checkbox.class="apple-switch";
+  checkbox.checked = fieldJson.isIndex;
+  checkbox.onclick = function (event) {
+    fieldJson.isIndex = event.target.checked;
+    // get span element
+    const span = div.querySelector("span[name='dataContainer']");
+    span.setAttribute("data-field", JSON.stringify(fieldJson));
+  };
+  div.appendChild(checkbox);
 
   // adding select datatype if 
   if (dataTypeVisble) {

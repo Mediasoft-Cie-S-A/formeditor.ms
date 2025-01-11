@@ -117,7 +117,7 @@ class dblayer{
     return obj;
     }
     // Function to execute a query on the appropriate database(s)
-    async  executeQuery(databases,  sqlQuery) {
+    async  executeQuery(databases,   sqlQuery) {
     console.log("executeQuery");
     // check if exist only one database
     console.log(databases.length );
@@ -363,6 +363,41 @@ class dblayer{
 
                 const record = await db.getRecordByRowID(tableName, fields, rowID);
                 res.json(record);
+                await db.close();
+              } catch (err) {
+                console.error("Error:", err);
+                res.status(500).send("Error moving to previous record");
+              } 
+            }
+          );
+
+          app.get(
+            "/get-records-by-indexes/:database/:tableName",
+            dbs.checkAuthenticated,
+            async (req, res) => {
+              try {
+                console.log("get-records-by-idexes");
+                const {database, tableName} = req.params;
+              const db= dbs.databases[database];
+              await db.connect();
+                // convert indexes,values from comma separted into array
+                const indexes = req.query.indexes.split(",");
+                const values = req.query.values.split(",");
+                // Get the fields from the query string. It's a comma-separated string.
+                const rowID = req.params.rowID;
+                // Get the fields from the query string. It's a comma-separated string.
+                const fields = req.query.fields ? req.query.fields.split(",") : "ROWID";
+                // check if in fields exits the ROWID field add rowID to fields in first position
+                if (!fields.includes("ROWID")) {
+                  fields.unshift("ROWID");
+                }
+                
+                // generate the where clause
+                const where = indexes.map((index, i) => `"${index}" = '${values[i]}'`).join(" AND ");
+                // generate the query with fields and where clause
+                const query = `SELECT ${fields} FROM PUB.${tableName} WHERE ${where}`;
+                const records = await db.queryData(query);
+                res.json(records);
                 await db.close();
               } catch (err) {
                 console.error("Error:", err);

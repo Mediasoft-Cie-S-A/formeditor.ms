@@ -52,12 +52,14 @@ function editDatabaseGrid(type, element, content) {
   
   content.appendChild(createMultiSelectItem("Data", "data", "data"));
   content.appendChild(createMultiSelectItem("Link", "link", "link"));
-
+  content.appendChild(createMultiSelectItem("OrderBy", "orderBy", "orderBy"));
   // load the data
+
+
   // check if jsonData is not empty
-  if (element.getAttribute("datasetgrid") != null) {
+  if (element.getAttribute("dataset") != null) {
     var target = content.querySelector("#Data");
-    var jsonData = JSON.parse(element.getAttribute("datasetgrid"));
+    var jsonData = JSON.parse(element.getAttribute("dataset"));
     jsonData.forEach((fieldJson) => {
       addFieldToPropertiesBar(target, fieldJson);
     });
@@ -66,8 +68,8 @@ function editDatabaseGrid(type, element, content) {
     content.appendChild(filter);
 
     // Initialize with the standard view
-    switchView(event, content, 'standard');
-    regenerateFilters(content, jsonData.filter);
+//    switchView(event, content, 'standard');
+ //   regenerateFilters(content, jsonData.filter);
   }
 
   if (element.getAttribute("datalink") != null) {
@@ -79,23 +81,55 @@ function editDatabaseGrid(type, element, content) {
   }
 
 
+  // orderBy
+  if (element.getAttribute("dataorderby") != null) {
+    var target = content.querySelector("#OrderBy");
+    var jsonData = JSON.parse(element.getAttribute("dataorderby"));
+    jsonData.forEach((fieldJson) => {
+      addFieldToPropertiesBar(target, fieldJson);
+    });
+  }
+
 
 } // editDatabaseGrid
 
 function updateGridData(main, content) {
   console.log("updateGridData");
-
-  // get all the span elements from data
-  var data = content.querySelectorAll('span[name="dataContainer"]');
-  // generate the json of all the data
   var jsonData = [];
+  var linkData = [];
+  var orderByData = [];
+  // get all the span elements from data
+  var data = content.querySelector("#Data").querySelectorAll("span[name='dataContainer']");
+  var link = content.querySelector("#Link").querySelectorAll("span[name='dataContainer']");$
+  var orderBy = content.querySelector("#OrderBy").querySelectorAll("span[name='dataContainer']");
+  // generate the json of all the data
+ 
   data.forEach((span) => {
     // get the json data from the span
     var json = JSON.parse(span.getAttribute("data-field"));
     // add the field to the json
     jsonData.push(json);
   });
-  main.setAttribute("dataSetGrid", JSON.stringify(jsonData));
+  main.setAttribute("dataSet", JSON.stringify(jsonData));
+
+  
+  link.forEach((span) => {
+    var json = JSON.parse(span.getAttribute("data-field"));
+    linkData.push(json);
+  });
+  main.setAttribute("datalink", JSON.stringify(linkData));
+ 
+ 
+  orderBy.forEach((span) => {
+    var json = JSON.parse(span.getAttribute("data-field"));
+    orderByData.push(json);
+  });
+  main.setAttribute("dataOrderByGrid", JSON.stringify(orderByData));
+  // get the filter
+  var filter = content.querySelector("#filter");
+  if (filter != null) {
+    var filterData = filter.value;
+  }
   // create intermedite div container
 
   renderGrid(main);
@@ -103,7 +137,7 @@ function updateGridData(main, content) {
 
 function renderGrid(main) {
   // get the data from the element
-  var data = main.getAttribute("dataSetGrid");
+  var data = main.getAttribute("dataSet");
   // parse the json
   var jsonData = JSON.parse(data);
   // get the main div
@@ -458,10 +492,12 @@ async function gridGetData(
   filter
 ) {
   // console.log(grid);
-  // get the filter from the datasetgrid json
+  // get the filter from the dataset json
   var mainID = grid.getAttribute("main-id");
   var main = document.getElementById(mainID);
   var filterJSON = JSON.parse(main.getAttribute("filter"));
+  var dataset = JSON.parse(main.getAttribute("dataset"));
+  var datalink = JSON.parse(main.getAttribute("datalink"));
 
   // check if filter is empty
   if (filterJSON == undefined || filterJSON == null || filterJSON == "") {
@@ -546,22 +582,21 @@ async function gridGetData(
           DBName,
           tableName,
           row[0],
-          record + (page - 1) * pageSize
+          record + (page - 1) * pageSize,
+          dataset,
+          datalink,
+          row
         );
-      }
+      } // end if
+
+      rowDiv.setAttribute("main-id", mainID);
       rowDiv.addEventListener("click", function (event) {
         event.preventDefault();
-        // find div in dataset
-        /* var datasetDivs = document.querySelectorAll('#DataSet_' + tableName);
-                  console.log(".----"+datasetDivs + " - " + tableName);
-                  // get the datasetFieldsLink
-                  datasetDivs.forEach(datasetDiv => {
-                      const datasetFieldsLink = datasetDiv.getAttribute("Dataset-Fields-List");
-                      console.log(datasetFieldsLink + " " + row.rowid + " " + j + page * pageSize);
-                      linkRecordToGrid(tableName, datasetFieldsLink, row.rowid, j + page * pageSize);
-                  });
-                  */
-        // 
+        // get main id
+        var mainID = event.target.closest(".grid-row").getAttribute("main-id");
+        var main = document.getElementById(mainID);
+        var dataset = JSON.parse(main.getAttribute("dataset"));
+        var datalink = JSON.parse(main.getAttribute("datalink"));
         // remove .grid-row-selected from all rows
         var gridRows = document.querySelectorAll('.grid-row');
         gridRows.forEach(row => {
@@ -573,27 +608,30 @@ async function gridGetData(
         if (event.target.classList.contains("grid-row")) {
           event.target.classList.add("grid-row-selected");
         }
-        var datasetDiv = document.getElementById("DataSet_" + tableName);
-        const datasetFieldsLink = datasetDiv.getAttribute(
-          "Dataset-Fields-List"
-        );
+       
+       
         linkRecordToGrid(
           DBName,
           tableName,
           row[0],
-          record + (page - 1) * pageSize
+          record + (page - 1) * pageSize,
+          dataset,
+          datalink,
+          row
         );
 
           // get the tab
           const tab = document.querySelector('[tagname="Tab"]');
-          console.log(tab);
-          // the header by class ctab_tabs-header
+          if (tab) {
+            
+            // the header by class ctab_tabs-header
           const header = tab.querySelector(".ctab_tabs-header");
-          if (header.childNodes.length > 0) {
-            // second tab
-            activateTab(event,header.childNodes[1],document.getElementById(header.childNodes[1].getAttribute("data-tab")));
+          
+            if (header.childNodes.length > 0) {
+              // second tab
+              activateTab(event,header.childNodes[1],document.getElementById(header.childNodes[1].getAttribute("data-tab")));
+            }
           }
-
       });
       var i = 0;
       row.forEach((field, index) => {
