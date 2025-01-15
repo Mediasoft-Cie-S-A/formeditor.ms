@@ -50,6 +50,8 @@ function editDatabaseGrid(type, element, content) {
   };
   content.appendChild(buttonShowDbStrc);
   
+  
+  content.appendChild(createSQLBox("SQL", "sql", "sql"));
   content.appendChild(createMultiSelectItem("Data", "data", "data"));
   content.appendChild(createMultiSelectItem("Link", "link", "link"));
   content.appendChild(createMultiSelectItem("OrderBy", "orderBy", "orderBy"));
@@ -76,7 +78,7 @@ function editDatabaseGrid(type, element, content) {
     var target = content.querySelector("#Link");
     var jsonData = JSON.parse(element.getAttribute("datalink"));
     jsonData.forEach((fieldJson) => {
-      addFieldToPropertiesBar(target, fieldJson);
+      addSelect(target, fieldJson);
     });
   }
 
@@ -90,11 +92,46 @@ function editDatabaseGrid(type, element, content) {
     });
   }
 
+        // sql
+        if (element.getAttribute("sql") != null) {
+          var target = content.querySelector("#SQL");
+          var jsonData = JSON.parse(element.getAttribute("sql"));
+        
+          // add the db name
+          if (jsonData.DBName != null) {
+            var dbinput = target.querySelector("[tagname='dbname']");
+            dbinput.value = jsonData.DBName;
+          }
+          // add the select
+          if (jsonData.select != null) {
+            var select = target.querySelector("[tagname='select']");
+            select.value = jsonData.select;
+          }
+          // add the update
+          if (jsonData.update != null) {
+            var update = target.querySelector("[tagname='update']");
+            update.value = jsonData.update
+          }
+          // add the insert
+          if (jsonData.insert != null) {
+            var insert = target.querySelector("[tagname='insert']");
+            insert.value = jsonData.insert;
+          }
+          // add the delete
+          if (jsonData.delete != null) {
+            var del = target.querySelector("[tagname='delete']");
+            del.value = jsonData.delete;
+
+        }
+      } // end if sql
+
+
 
 } // editDatabaseGrid
 
-function updateGridData(main, content) {
+async function updateGridData(main, content) {
   console.log("updateGridData");
+
   var jsonData = [];
   var linkData = [];
   var orderByData = [];
@@ -112,6 +149,59 @@ function updateGridData(main, content) {
   });
   main.setAttribute("dataSet", JSON.stringify(jsonData));
 
+
+
+// SQL
+var sqlJson = {}
+//update the sql json
+var sql = content.querySelector("#SQL");
+console.log(sql);
+var DBName = sql.querySelector("[tagname='dbname']");
+console.log(DBName);
+if (DBName != null) {
+  sqlJson["DBName"]=DBName.value;
+}
+// get the textarea with the tagname="select"
+var sqlData = sql.querySelector("[tagname='select']");
+console.log(sqlData);
+if (sqlData != null) {
+  sqlJson["select"]= sqlData.value;
+}
+var sqlData = sql.querySelector("[tagname='update']");
+if (sqlData != null) {
+  sqlJson["update"]= sqlData.value;
+}
+var sqlData = sql.querySelector("[tagname='insert']");
+if (sqlData != null) {
+  sqlJson["insert"]=sqlData.value;
+}
+
+main.setAttribute("sql", JSON.stringify(sqlJson));
+console.log(sqlJson);
+
+if (sqlJson.DBName != null) {
+  // get the db name
+
+      // get the data with query select "/table-data-sql/:database/:page/:pageSize"?sqlQuery=select * from table
+      const response = await fetch(`/table-data-sql/${sqlJson.DBName}/1/1?sqlQuery=${sqlJson.select}`).then((response) => {
+        if (!response.ok) {
+          showToast("Error retrieving data", 5000);
+        }
+        return response.json();
+      });
+
+      // if data is not empty, update the dataset
+      if (response.length > 0) {
+        // generate the json of all the data
+        const keys = Object.keys(response[0]);
+        jsonData = [];
+        keys.forEach((field) => {
+          jsonData.push({ DBName:sqlJson.DBName, fieldName: field, tabelName: "",  fieldType: "string" });
+        });
+        main.setAttribute("dataSet", JSON.stringify(jsonData));
+      } // end if data is not empty
+} // end if DBName is not empty
+ 
   
   link.forEach((span) => {
     var json = JSON.parse(span.getAttribute("data-field"));
@@ -131,6 +221,7 @@ function updateGridData(main, content) {
     var filterData = filter.value;
   }
   // create intermedite div container
+ 
 
   renderGrid(main);
 }
@@ -243,10 +334,6 @@ function insertNavBar(
   html += `</div>`;
 
   // get tagname="dataTable" from the gridContainer
-
-
-
-
   gridContainer.innerHTML += html;
 }
 
@@ -555,12 +642,18 @@ async function gridGetData(
   //get body form the table
   const body = grid.querySelector(".grid-body");
   // Prepare the URL
-  const url = `/table-data/${DBName}/${tableName}/${page}/${pageSize}?fields=${datasetFields}&filter=${encodeURIComponent(JSON.stringify(filterJSON))}`;
+  var url = `/table-data/${DBName}/${tableName}/${page}/${pageSize}?fields=${datasetFields}&filter=${encodeURIComponent(JSON.stringify(filterJSON))}`;
+  // get the sqljson from the main
+  var sqlJson = JSON.parse(main.getAttribute("sql"));
+  if (sqlJson.DBName != null) {
+    // get the db name
+     url = `/table-data-sql/${sqlJson.DBName}/${page}/${pageSize}?sqlQuery=${sqlJson.select}`;
+  }
   // Fetch the data from the web service
   try {
     const response = await fetch(url);
     if (!response.ok) {
-      throw new Error("Network response was not ok");
+      showToast("Error retrieving data", 5000);
     }
     const data = await response.json();
     // The data is now available

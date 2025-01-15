@@ -899,6 +899,133 @@ function createMultiSelectItemWeb(id, label, styleProperty, isId = false) {
   return div;
 }
 
+function createSQLBox(id, label, styleProperty, isId = false) {
+  var div = document.createElement("div");
+  div.style.display = "flex";
+  div.style.flexDirection = "column";
+  div.style.padding = "5px";
+  div.style.minHeight = "100px";
+  div.style.border = "1px solid #ccc";
+  // rounded corners
+  div.style.borderRadius = "5px";
+  div.id = id;
+  div.style.className = "multi-select";
+  div.setAttribute("ObjectType", id);
+  // set draggable attribute
+  div.setAttribute("draggable", "true");
+
+  div.id = id;
+ 
+
+  // adding button for reducing the size of the div or reactivate it
+  var button = document.createElement("i");
+  button.className = "fa fa-minus-square";
+  button.onclick = function () {
+    if (div.style.height > "20px") {
+      div.style.height = "20px";
+      // get the subDivs by tag
+      var subDivs = div.querySelectorAll("div");
+      // loop through the subDivs
+      subDivs.forEach((subDiv) => {
+        subDiv.style.display = "none";
+      });
+      // icon change
+      button.className = "fa fa-plus-square";
+    } else {
+      div.style.height = "auto";
+      // get the subDivs by tag
+      var subDivs = div.querySelectorAll("div");
+      // loop through the subDivs
+      subDivs.forEach((subDiv) => {
+        subDiv.style.display = "block";
+      });
+      // icon change
+      button.className = "fa fa-minus-square";
+    }
+  };
+  div.appendChild(button);
+
+  var lbl = document.createElement("span");
+
+  lbl.innerText = label;
+  div.appendChild(lbl);
+
+  var subDiv = document.createElement("div"); 
+  // add dbname input
+  var label = document.createElement("label");
+  label.setAttribute("for", id + "Input");
+  label.textContent = "DB Name";
+  var input = document.createElement("input");
+  input.type = "text";
+  input.id = id + "dbname";
+  input.setAttribute("tagname", "dbname");
+  input.className = "input-element";
+
+  input.value = "PUB";
+  subDiv.appendChild(label);
+  subDiv.appendChild(input);
+  div.appendChild(subDiv);
+
+  
+  var subDiv = document.createElement("div");
+  // add query 'select * from ' structure
+  var label = document.createElement("label");
+  label.setAttribute("for", id + "Input");
+  label.textContent = "Query";
+  var input = document.createElement("textarea");
+  input.type = "text";
+  input.id = id + "select";
+  input.setAttribute("tagname", "select");
+  input.className = "input-element";
+
+  input.value = "select * from PUB.";
+  subDiv.appendChild(label);
+  subDiv.appendChild(input);
+  div.appendChild(subDiv);
+  // add query for the update
+  var subDiv = document.createElement("div");
+  var label = document.createElement("label");
+  label.setAttribute("for", id + "Input");
+  label.textContent = "Update Query";
+  var input = document.createElement("textarea");
+  input.type = "text";
+  input.id = id + "update";
+  input.setAttribute("tagname", "update");
+  input.className = "input-element";
+ 
+  input.value = "update PUB.";
+  subDiv.appendChild(label);
+  subDiv.appendChild(input);
+  div.appendChild(subDiv);
+
+  // add query for the insert
+  var subDiv = document.createElement("div");
+  var label = document.createElement("label");
+  label.setAttribute("for", id + "Input");
+  label.textContent = "Insert Query";
+  var input = document.createElement("textarea");
+  input.type = "text";
+  input.id = id + "insert";
+  input.setAttribute("tagname", "insert");
+  input.className = "input-element";
+  
+  input.value = "insert into PUB.";
+  subDiv.appendChild(label);
+  subDiv.appendChild(input);
+  div.appendChild(subDiv);
+  
+
+
+
+  return div;
+}
+
+
+function updateElementSQLOnChange(t) {
+  var text = currentElement;
+  text.value = t;
+}
+
 function dropInputWeb(event, isId) {
   event.preventDefault();
   var elementId = event.dataTransfer.getData("text");

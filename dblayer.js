@@ -581,6 +581,38 @@ class dblayer{
               } 
             }
           );
+             //GRID
+             app.get(
+              "/table-data-sql/:database/:page/:pageSize",
+              dbs.checkAuthenticated,
+              async (req, res) => {
+                try {
+                  const {database, page, pageSize  } = req.params;
+                  var sqlQuery = req.query.sqlQuery;
+                  const db= dbs.databases[database];
+                  await db.connect();
+  
+                  // Convert page and pageSize to numbers
+                  const pageNum = parseInt(page, 10);
+                  const pageSizeNum = parseInt(pageSize, 10);
+                
+                  const filter = req.query.filter ? req.query.filter : null;
+                
+                  // decode the json filter              
+                  const filterObj = filter ? JSON.parse(filter): null;
+                  // add limit to the query
+                  const limit = req.query.limit ? req.query.limit : null;
+                  sqlQuery += ` FETCH FIRST ${pageSizeNum} ROWS ONLY`;
+                  // get data from the query
+                  const data = await db.queryData(sqlQuery);
+                  res.json(data);
+                  await db.close();
+                } catch (err) {
+                  console.error("Error:", err);
+                  res.status(500).send("Error fetching paginated data");
+                } 
+              }
+            );
 
           //Schema modification
           //Alter table

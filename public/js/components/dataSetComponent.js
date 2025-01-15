@@ -52,6 +52,7 @@ function editElementDataSet(type, element, content) {
   };
   content.appendChild(buttonShowDbStrc);
 
+  content.appendChild(createMultiSelectItem("SQL", "sql", "sql"));
   content.appendChild(createMultiSelectItem("Data", "data", "data"));
   content.appendChild(createMultiSelectItem("Link", "link", "link"));
   content.appendChild(createMultiSelectItem("Exception","exception","exception"));
