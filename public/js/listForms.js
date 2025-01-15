@@ -101,6 +101,7 @@ function loadForms(){
                     e.preventDefault();
                     // check if the event is a click on the delete,show or edit button
                     if (e.target.className === 'portal-list-item'){
+                        
                     showHint(`ID:${form.formId}<br>User:${form.userCreated}<br>Last mod:${form.modificationDate}`, 5000, event);
                     }
                 });

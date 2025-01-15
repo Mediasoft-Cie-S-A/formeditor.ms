@@ -192,9 +192,8 @@ function createSidebar(elementsData, components) {
         event.dataTransfer.setData("text/plain", JSON.stringify(data));
       });
       itemDiv.addEventListener("dblclick", doubleclick);
-      itemDiv.addEventListener("mouseover", function (event) {
-        showHint(elementData.description, 1000, event);
-      });
+      itemDiv.title = elementData.description;
+     
       divContainer.appendChild(itemDiv);
 
       // Check if the css exists

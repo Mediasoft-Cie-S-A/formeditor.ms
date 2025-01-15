@@ -737,10 +737,41 @@ function createMultiSelectItem(id, label, styleProperty) {
   div.setAttribute("draggable", "true");
 
   div.id = id;
+ 
+
+  // adding button for reducing the size of the div or reactivate it
+  var button = document.createElement("i");
+  button.className = "fa fa-minus-square";
+  button.onclick = function () {
+    if (div.style.height > "20px") {
+      div.style.height = "20px";
+      // get the subDivs by tag
+      var subDivs = div.querySelectorAll("div");
+      // loop through the subDivs
+      subDivs.forEach((subDiv) => {
+        subDiv.style.display = "none";
+      });
+      // icon change
+      button.className = "fa fa-plus-square";
+    } else {
+      div.style.height = "auto";
+      // get the subDivs by tag
+      var subDivs = div.querySelectorAll("div");
+      // loop through the subDivs
+      subDivs.forEach((subDiv) => {
+        subDiv.style.display = "block";
+      });
+      // icon change
+      button.className = "fa fa-minus-square";
+    }
+  };
+  div.appendChild(button);
+
   var lbl = document.createElement("span");
 
   lbl.innerText = label;
-
+  
+  div.appendChild(lbl);
   div.setAttribute("ondragover", "allowDrop(event)");
   // div.setAttribute("ondrop", "dropInput(event,'${id}')");
   div.addEventListener("drop", function (event) {
@@ -749,7 +780,6 @@ function createMultiSelectItem(id, label, styleProperty) {
 
   // get the object by id
 
-  div.appendChild(lbl);
   //div.appendChild(multi);
   //div.appendChild(select);
 

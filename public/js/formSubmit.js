@@ -93,7 +93,20 @@ document
   });
 
 function showToast(message, duration = 3000) {
+   console.log("showToast");
   const toastContainer = document.getElementById("toast-container");
+  if (!toastContainer) {
+    // Create the toast container if it doesn't exist
+    const container = document.createElement("div");
+    container.id = "toast-container";
+    container.style.position = "fixed";
+    container.style.bottom = "10px";
+    container.style.right = "10px";
+    container.style.zIndex = 1000;
+    container.style.pointerEvents = "none";
+    document.body.appendChild(container);
+    toastContainer = container;
+  }
   const toast = document.createElement("div");
   toast.classList.add("toast-message");
   toast.textContent = message;

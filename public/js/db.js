@@ -958,7 +958,7 @@ function searchtable(search,contentDivID)
         //var dbname = item.getAttribute('database-name').toUpperCase();
         var table = item.getAttribute('data-table-name').toUpperCase();
         if (table.indexOf(tables) > -1) {
-            item.style.display = 'table-row';
+            item.style.display = '';
         } else {
             item.style.display = 'none';
         }
