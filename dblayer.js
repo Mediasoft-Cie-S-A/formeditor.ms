@@ -366,7 +366,7 @@ class dblayer{
                 await db.close();
               } catch (err) {
                 console.error("Error:", err);
-                res.status(500).send("Error moving to previous record");
+                res.status(500).send({"Error moving to previous record":err});
               } 
             }
           );
@@ -401,7 +401,7 @@ class dblayer{
                 await db.close();
               } catch (err) {
                 console.error("Error:", err);
-                res.status(500).send("Error moving to previous record");
+                res.status(500).send({"Error moving to previous record":err});
               } 
             }
           );
@@ -447,7 +447,7 @@ class dblayer{
                 await db.close();
               } catch (err) {
                 console.error("Error:", err);
-                res.status(500).send("Error moving to next record");
+                res.status(500).send({"Error moving to next record":err});
               } 
             }
           );
@@ -513,7 +513,7 @@ class dblayer{
                 await this.trackAction(action, details);
               } catch (err) {
                 console.error(err);
-                res.status(500).send("Error updating record");
+                res.status(500).send({"Error updating record":err});
               } 
             }
           );
@@ -539,7 +539,7 @@ class dblayer{
                 await this.trackAction(action, details);
               } catch (err) {
                 console.error(err);
-                res.status(500).send("Error inserting record");
+                res.status(500).send({"Error inserting record":err});
               } 
             }
           );
@@ -577,7 +577,7 @@ class dblayer{
                 await db.close();
               } catch (err) {
                 console.error("Error:", err);
-                res.status(500).send("Error fetching paginated data");
+                res.status(500).send({"Error fetching paginated data":err});
               } 
             }
           );
@@ -609,7 +609,7 @@ class dblayer{
                   await db.close();
                 } catch (err) {
                   console.error("Error:", err);
-                  res.status(500).send("Error fetching paginated data");
+                  res.status(500).send({"Error fetching paginated data":err});
                 } 
               }
             );
@@ -643,7 +643,7 @@ class dblayer{
               await db.close();
             } catch (err) {
               console.error(err);
-              res.status(500).send("Error altering table");
+              res.status(500).send({"Error altering table":err});
             } 
           });
           //Create table
@@ -658,7 +658,7 @@ class dblayer{
               await db.close();
             } catch (err) {
               console.error(err);
-              res.status(500).send("Error creating table");
+              res.status(500).send({"Error creating table":err});
             } 
           });
 
@@ -698,7 +698,7 @@ class dblayer{
                 await db.close();
               } catch (err) {
                 console.error(err);
-                res.status(500).send("Error selecting distinct values");
+                res.status(500).send({"Error selecting distinct values":err});
               } 
             }
           );
@@ -729,7 +729,7 @@ class dblayer{
                 await db.close();
               } catch (err) {
                 console.error(err);
-                res.status(500).send("Error selecting distinct values");
+                res.status(500).send({"Error selecting distinct values":err});
               } 
             }
           );
