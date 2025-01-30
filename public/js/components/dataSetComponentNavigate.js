@@ -354,9 +354,9 @@ function navbar_CopyRecord() {
   document.querySelector("[name=SaveDSBtn]").disabled = false;
 }
 
-function CreateUpdated(DBName, tableName) {
+function CreateUpdated(DBName, tableName, divLine) {
 
-  const inputs = document.querySelectorAll(
+  const inputs = divLine.querySelectorAll(
     `#DataSet_${tableName} input[dataset-field-name]`
   );
 
@@ -436,37 +436,39 @@ async function navbar_SaveRecord() {
     }
     console.log("SaveRecord");
     const nextRowIds = document.querySelectorAll("[dataset-field-type='rowid']");
-    for (const nextRowId of nextRowIds) {
+    console.log(nextRowIds);
+   nextRowIds.forEach(async (nextRowId) => {
       console.log(nextRowId);
       const tableName = nextRowId.getAttribute("dataset-table-name");
       const dbName = nextRowId.getAttribute("dbname");
-
+      const divLine = nextRowId.closest("[dataset-fields-list]");
       const rowIdValue = nextRowId.value;
       let result;
+
       if (rowIdValue === "new") {
-        let data = await CreateInsert(dbName, tableName);
+        let data = await CreateInsert(dbName, tableName,divLine);
         result = await insertRecordDB(dbName, tableName, data);
       } else {
         const data = {
-          body: CreateUpdated(dbName, tableName),
+          body: CreateUpdated(dbName, tableName,divLine),
         };
         result = await updateRecordDB(dbName, tableName, rowIdValue, data);
       }
       document.querySelector("[name=SaveDSBtn]").disabled = true;
       return result;
 
-    }
+    });
   } catch (error) {
-    //showToast("Error:" + error);
     console.error("Error:", error);
-  }
+  } 
+
 }
 
 // create insert data structure
-async function CreateInsert(DBName, tableName) {
+async function CreateInsert(DBName, tableName,divLine) {
   // create data for insert following this structure  `INSERT INTO ${tableName} (${data.fields}) VALUES (${data.values})`;
   // return data with data.fields and data.values
-  const inputs = document.querySelectorAll(`#DataSet_${tableName} input`);
+  const inputs = divLine.querySelectorAll(`#DataSet_${tableName} input`);
   var insertFields = "";
   var insertValues = "";
   for (i = 0; i < inputs.length; i++) {

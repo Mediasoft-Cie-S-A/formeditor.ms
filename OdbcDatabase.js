@@ -117,6 +117,7 @@ class OdbcDatabase {
 
   async queryData(queryString) {
     try {
+      console.log(queryString);
       const result = await this.connection.query(queryString);
       return result;
     } catch (err) {

@@ -51,7 +51,8 @@ function readFolder(path,fileExplorer,filter) {
     const th0=document.createElement('th');    
     // directory path up
     th0.innerHTML="<i class='fas fa-folder-open' style='color:#FFC300'></i>";
-    th0.onmouseover=function(){showHint("Go to parent folder")};
+    th0.title="Go to parent folder";
+    
     th0.onclick=function(){readFolder(path.substring(0,path.lastIndexOf("/")),fileExplorer)};
     const th1=document.createElement('th');    
     // file filter input

@@ -590,6 +590,7 @@ function dropInput(event, id) {
     fieldWidth: fieldWidth,
     fieldDefaultValue: fieldDefaultValue,
     functionName: "value",
+    isIndex: false,
   };
   // console.log(fieldJson);
   // Get the target element
@@ -736,10 +737,41 @@ function createMultiSelectItem(id, label, styleProperty) {
   div.setAttribute("draggable", "true");
 
   div.id = id;
+ 
+
+  // adding button for reducing the size of the div or reactivate it
+  var button = document.createElement("i");
+  button.className = "fa fa-minus-square";
+  button.onclick = function () {
+    if (div.style.height > "20px") {
+      div.style.height = "20px";
+      // get the subDivs by tag
+      var subDivs = div.querySelectorAll("div");
+      // loop through the subDivs
+      subDivs.forEach((subDiv) => {
+        subDiv.style.display = "none";
+      });
+      // icon change
+      button.className = "fa fa-plus-square";
+    } else {
+      div.style.height = "auto";
+      // get the subDivs by tag
+      var subDivs = div.querySelectorAll("div");
+      // loop through the subDivs
+      subDivs.forEach((subDiv) => {
+        subDiv.style.display = "block";
+      });
+      // icon change
+      button.className = "fa fa-minus-square";
+    }
+  };
+  div.appendChild(button);
+
   var lbl = document.createElement("span");
 
   lbl.innerText = label;
-
+  
+  div.appendChild(lbl);
   div.setAttribute("ondragover", "allowDrop(event)");
   // div.setAttribute("ondrop", "dropInput(event,'${id}')");
   div.addEventListener("drop", function (event) {
@@ -748,7 +780,6 @@ function createMultiSelectItem(id, label, styleProperty) {
 
   // get the object by id
 
-  div.appendChild(lbl);
   //div.appendChild(multi);
   //div.appendChild(select);
 
@@ -866,6 +897,133 @@ function createMultiSelectItemWeb(id, label, styleProperty, isId = false) {
   div.appendChild(lbl);
 
   return div;
+}
+
+function createSQLBox(id, label, styleProperty, isId = false) {
+  var div = document.createElement("div");
+  div.style.display = "flex";
+  div.style.flexDirection = "column";
+  div.style.padding = "5px";
+  div.style.minHeight = "100px";
+  div.style.border = "1px solid #ccc";
+  // rounded corners
+  div.style.borderRadius = "5px";
+  div.id = id;
+  div.style.className = "multi-select";
+  div.setAttribute("ObjectType", id);
+  // set draggable attribute
+  div.setAttribute("draggable", "true");
+
+  div.id = id;
+ 
+
+  // adding button for reducing the size of the div or reactivate it
+  var button = document.createElement("i");
+  button.className = "fa fa-minus-square";
+  button.onclick = function () {
+    if (div.style.height > "20px") {
+      div.style.height = "20px";
+      // get the subDivs by tag
+      var subDivs = div.querySelectorAll("div");
+      // loop through the subDivs
+      subDivs.forEach((subDiv) => {
+        subDiv.style.display = "none";
+      });
+      // icon change
+      button.className = "fa fa-plus-square";
+    } else {
+      div.style.height = "auto";
+      // get the subDivs by tag
+      var subDivs = div.querySelectorAll("div");
+      // loop through the subDivs
+      subDivs.forEach((subDiv) => {
+        subDiv.style.display = "block";
+      });
+      // icon change
+      button.className = "fa fa-minus-square";
+    }
+  };
+  div.appendChild(button);
+
+  var lbl = document.createElement("span");
+
+  lbl.innerText = label;
+  div.appendChild(lbl);
+
+  var subDiv = document.createElement("div"); 
+  // add dbname input
+  var label = document.createElement("label");
+  label.setAttribute("for", id + "Input");
+  label.textContent = "DB Name";
+  var input = document.createElement("input");
+  input.type = "text";
+  input.id = id + "dbname";
+  input.setAttribute("tagname", "dbname");
+  input.className = "input-element";
+
+  input.value = "PUB";
+  subDiv.appendChild(label);
+  subDiv.appendChild(input);
+  div.appendChild(subDiv);
+
+  
+  var subDiv = document.createElement("div");
+  // add query 'select * from ' structure
+  var label = document.createElement("label");
+  label.setAttribute("for", id + "Input");
+  label.textContent = "Query";
+  var input = document.createElement("textarea");
+  input.type = "text";
+  input.id = id + "select";
+  input.setAttribute("tagname", "select");
+  input.className = "input-element";
+
+  input.value = "select * from PUB.";
+  subDiv.appendChild(label);
+  subDiv.appendChild(input);
+  div.appendChild(subDiv);
+  // add query for the update
+  var subDiv = document.createElement("div");
+  var label = document.createElement("label");
+  label.setAttribute("for", id + "Input");
+  label.textContent = "Update Query";
+  var input = document.createElement("textarea");
+  input.type = "text";
+  input.id = id + "update";
+  input.setAttribute("tagname", "update");
+  input.className = "input-element";
+ 
+  input.value = "update PUB.";
+  subDiv.appendChild(label);
+  subDiv.appendChild(input);
+  div.appendChild(subDiv);
+
+  // add query for the insert
+  var subDiv = document.createElement("div");
+  var label = document.createElement("label");
+  label.setAttribute("for", id + "Input");
+  label.textContent = "Insert Query";
+  var input = document.createElement("textarea");
+  input.type = "text";
+  input.id = id + "insert";
+  input.setAttribute("tagname", "insert");
+  input.className = "input-element";
+  
+  input.value = "insert into PUB.";
+  subDiv.appendChild(label);
+  subDiv.appendChild(input);
+  div.appendChild(subDiv);
+  
+
+
+
+  return div;
+}
+
+
+function updateElementSQLOnChange(t) {
+  var text = currentElement;
+  text.value = t;
 }
 
 function dropInputWeb(event, isId) {
@@ -1162,6 +1320,21 @@ function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false )
   // Adjust the height of the parent element to accommodate the new field
   var height = dataObjet.clientHeight + div.clientHeight;
   dataObjet.style.height = height + 30 + "px";
+   // generate checkbox for the fieldJson.isIndex
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.id = "isIndex";
+  checkbox.name = "isIndex";
+  checkbox.value = "isIndex";
+  checkbox.class="apple-switch";
+  checkbox.checked = fieldJson.isIndex;
+  checkbox.onclick = function (event) {
+    fieldJson.isIndex = event.target.checked;
+    // get span element
+    const span = div.querySelector("span[name='dataContainer']");
+    span.setAttribute("data-field", JSON.stringify(fieldJson));
+  };
+  div.appendChild(checkbox);
 
   // adding select datatype if 
   if (dataTypeVisble) {

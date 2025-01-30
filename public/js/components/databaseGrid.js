@@ -50,14 +50,18 @@ function editDatabaseGrid(type, element, content) {
   };
   content.appendChild(buttonShowDbStrc);
   
+  
+  content.appendChild(createSQLBox("SQL", "sql", "sql"));
   content.appendChild(createMultiSelectItem("Data", "data", "data"));
   content.appendChild(createMultiSelectItem("Link", "link", "link"));
-
+  content.appendChild(createMultiSelectItem("OrderBy", "orderBy", "orderBy"));
   // load the data
+
+
   // check if jsonData is not empty
-  if (element.getAttribute("datasetgrid") != null) {
+  if (element.getAttribute("dataset") != null) {
     var target = content.querySelector("#Data");
-    var jsonData = JSON.parse(element.getAttribute("datasetgrid"));
+    var jsonData = JSON.parse(element.getAttribute("dataset"));
     jsonData.forEach((fieldJson) => {
       addFieldToPropertiesBar(target, fieldJson);
     });
@@ -66,44 +70,165 @@ function editDatabaseGrid(type, element, content) {
     content.appendChild(filter);
 
     // Initialize with the standard view
-    switchView(event, content, 'standard');
-    regenerateFilters(content, jsonData.filter);
+//    switchView(event, content, 'standard');
+ //   regenerateFilters(content, jsonData.filter);
   }
 
   if (element.getAttribute("datalink") != null) {
     var target = content.querySelector("#Link");
     var jsonData = JSON.parse(element.getAttribute("datalink"));
     jsonData.forEach((fieldJson) => {
+      addSelect(target, fieldJson);
+    });
+  }
+
+
+  // orderBy
+  if (element.getAttribute("dataorderby") != null) {
+    var target = content.querySelector("#OrderBy");
+    var jsonData = JSON.parse(element.getAttribute("dataorderby"));
+    jsonData.forEach((fieldJson) => {
       addFieldToPropertiesBar(target, fieldJson);
     });
   }
+
+        // sql
+        if (element.getAttribute("sql") != null) {
+          var target = content.querySelector("#SQL");
+          var jsonData = JSON.parse(element.getAttribute("sql"));
+        
+          // add the db name
+          if (jsonData.DBName != null) {
+            var dbinput = target.querySelector("[tagname='dbname']");
+            dbinput.value = jsonData.DBName;
+          }
+          // add the select
+          if (jsonData.select != null) {
+            var select = target.querySelector("[tagname='select']");
+            select.value = jsonData.select;
+          }
+          // add the update
+          if (jsonData.update != null) {
+            var update = target.querySelector("[tagname='update']");
+            update.value = jsonData.update
+          }
+          // add the insert
+          if (jsonData.insert != null) {
+            var insert = target.querySelector("[tagname='insert']");
+            insert.value = jsonData.insert;
+          }
+          // add the delete
+          if (jsonData.delete != null) {
+            var del = target.querySelector("[tagname='delete']");
+            del.value = jsonData.delete;
+
+        }
+      } // end if sql
 
 
 
 } // editDatabaseGrid
 
-function updateGridData(main, content) {
+async function updateGridData(main, content) {
   console.log("updateGridData");
 
-  // get all the span elements from data
-  var data = content.querySelectorAll('span[name="dataContainer"]');
-  // generate the json of all the data
   var jsonData = [];
+  var linkData = [];
+  var orderByData = [];
+  // get all the span elements from data
+  var data = content.querySelector("#Data").querySelectorAll("span[name='dataContainer']");
+  var link = content.querySelector("#Link").querySelectorAll("span[name='dataContainer']");$
+  var orderBy = content.querySelector("#OrderBy").querySelectorAll("span[name='dataContainer']");
+  // generate the json of all the data
+ 
   data.forEach((span) => {
     // get the json data from the span
     var json = JSON.parse(span.getAttribute("data-field"));
     // add the field to the json
     jsonData.push(json);
   });
-  main.setAttribute("dataSetGrid", JSON.stringify(jsonData));
+  main.setAttribute("dataSet", JSON.stringify(jsonData));
+
+
+
+// SQL
+var sqlJson = {}
+//update the sql json
+var sql = content.querySelector("#SQL");
+console.log(sql);
+var DBName = sql.querySelector("[tagname='dbname']");
+console.log(DBName);
+if (DBName != null) {
+  sqlJson["DBName"]=DBName.value;
+}
+// get the textarea with the tagname="select"
+var sqlData = sql.querySelector("[tagname='select']");
+console.log(sqlData);
+if (sqlData != null) {
+  sqlJson["select"]= sqlData.value;
+}
+var sqlData = sql.querySelector("[tagname='update']");
+if (sqlData != null) {
+  sqlJson["update"]= sqlData.value;
+}
+var sqlData = sql.querySelector("[tagname='insert']");
+if (sqlData != null) {
+  sqlJson["insert"]=sqlData.value;
+}
+
+main.setAttribute("sql", JSON.stringify(sqlJson));
+console.log(sqlJson);
+
+if (sqlJson.DBName != null) {
+  // get the db name
+
+      // get the data with query select "/table-data-sql/:database/:page/:pageSize"?sqlQuery=select * from table
+      const response = await fetch(`/table-data-sql/${sqlJson.DBName}/1/1?sqlQuery=${sqlJson.select}`).then((response) => {
+        if (!response.ok) {
+          showToast("Error retrieving data", 5000);
+        }
+        return response.json();
+      });
+
+      // if data is not empty, update the dataset
+      if (response.length > 0) {
+        // generate the json of all the data
+        const keys = Object.keys(response[0]);
+        jsonData = [];
+        keys.forEach((field) => {
+          jsonData.push({ DBName:sqlJson.DBName, fieldName: field, tabelName: "",  fieldType: "string" });
+        });
+        main.setAttribute("dataSet", JSON.stringify(jsonData));
+      } // end if data is not empty
+} // end if DBName is not empty
+ 
+  
+  link.forEach((span) => {
+    var json = JSON.parse(span.getAttribute("data-field"));
+    linkData.push(json);
+  });
+  main.setAttribute("datalink", JSON.stringify(linkData));
+ 
+ 
+  orderBy.forEach((span) => {
+    var json = JSON.parse(span.getAttribute("data-field"));
+    orderByData.push(json);
+  });
+  main.setAttribute("dataOrderByGrid", JSON.stringify(orderByData));
+  // get the filter
+  var filter = content.querySelector("#filter");
+  if (filter != null) {
+    var filterData = filter.value;
+  }
   // create intermedite div container
+ 
 
   renderGrid(main);
 }
 
 function renderGrid(main) {
   // get the data from the element
-  var data = main.getAttribute("dataSetGrid");
+  var data = main.getAttribute("dataSet");
   // parse the json
   var jsonData = JSON.parse(data);
   // get the main div
@@ -209,10 +334,6 @@ function insertNavBar(
   html += `</div>`;
 
   // get tagname="dataTable" from the gridContainer
-
-
-
-
   gridContainer.innerHTML += html;
 }
 
@@ -458,10 +579,12 @@ async function gridGetData(
   filter
 ) {
   // console.log(grid);
-  // get the filter from the datasetgrid json
+  // get the filter from the dataset json
   var mainID = grid.getAttribute("main-id");
   var main = document.getElementById(mainID);
   var filterJSON = JSON.parse(main.getAttribute("filter"));
+  var dataset = JSON.parse(main.getAttribute("dataset"));
+  var datalink = JSON.parse(main.getAttribute("datalink"));
 
   // check if filter is empty
   if (filterJSON == undefined || filterJSON == null || filterJSON == "") {
@@ -519,12 +642,18 @@ async function gridGetData(
   //get body form the table
   const body = grid.querySelector(".grid-body");
   // Prepare the URL
-  const url = `/table-data/${DBName}/${tableName}/${page}/${pageSize}?fields=${datasetFields}&filter=${encodeURIComponent(JSON.stringify(filterJSON))}`;
+  var url = `/table-data/${DBName}/${tableName}/${page}/${pageSize}?fields=${datasetFields}&filter=${encodeURIComponent(JSON.stringify(filterJSON))}`;
+  // get the sqljson from the main
+  var sqlJson = JSON.parse(main.getAttribute("sql"));
+  if (sqlJson.DBName != null) {
+    // get the db name
+     url = `/table-data-sql/${sqlJson.DBName}/${page}/${pageSize}?sqlQuery=${sqlJson.select}`;
+  }
   // Fetch the data from the web service
   try {
     const response = await fetch(url);
     if (!response.ok) {
-      throw new Error("Network response was not ok");
+      showToast("Error retrieving data", 5000);
     }
     const data = await response.json();
     // The data is now available
@@ -546,22 +675,21 @@ async function gridGetData(
           DBName,
           tableName,
           row[0],
-          record + (page - 1) * pageSize
+          record + (page - 1) * pageSize,
+          dataset,
+          datalink,
+          row
         );
-      }
+      } // end if
+
+      rowDiv.setAttribute("main-id", mainID);
       rowDiv.addEventListener("click", function (event) {
         event.preventDefault();
-        // find div in dataset
-        /* var datasetDivs = document.querySelectorAll('#DataSet_' + tableName);
-                  console.log(".----"+datasetDivs + " - " + tableName);
-                  // get the datasetFieldsLink
-                  datasetDivs.forEach(datasetDiv => {
-                      const datasetFieldsLink = datasetDiv.getAttribute("Dataset-Fields-List");
-                      console.log(datasetFieldsLink + " " + row.rowid + " " + j + page * pageSize);
-                      linkRecordToGrid(tableName, datasetFieldsLink, row.rowid, j + page * pageSize);
-                  });
-                  */
-        // 
+        // get main id
+        var mainID = event.target.closest(".grid-row").getAttribute("main-id");
+        var main = document.getElementById(mainID);
+        var dataset = JSON.parse(main.getAttribute("dataset"));
+        var datalink = JSON.parse(main.getAttribute("datalink"));
         // remove .grid-row-selected from all rows
         var gridRows = document.querySelectorAll('.grid-row');
         gridRows.forEach(row => {
@@ -573,27 +701,30 @@ async function gridGetData(
         if (event.target.classList.contains("grid-row")) {
           event.target.classList.add("grid-row-selected");
         }
-        var datasetDiv = document.getElementById("DataSet_" + tableName);
-        const datasetFieldsLink = datasetDiv.getAttribute(
-          "Dataset-Fields-List"
-        );
+       
+       
         linkRecordToGrid(
           DBName,
           tableName,
           row[0],
-          record + (page - 1) * pageSize
+          record + (page - 1) * pageSize,
+          dataset,
+          datalink,
+          row
         );
 
           // get the tab
           const tab = document.querySelector('[tagname="Tab"]');
-          console.log(tab);
-          // the header by class ctab_tabs-header
+          if (tab) {
+            
+            // the header by class ctab_tabs-header
           const header = tab.querySelector(".ctab_tabs-header");
-          if (header.childNodes.length > 0) {
-            // second tab
-            activateTab(event,header.childNodes[1],document.getElementById(header.childNodes[1].getAttribute("data-tab")));
+          
+            if (header.childNodes.length > 0) {
+              // second tab
+              activateTab(event,header.childNodes[1],document.getElementById(header.childNodes[1].getAttribute("data-tab")));
+            }
           }
-
       });
       var i = 0;
       row.forEach((field, index) => {

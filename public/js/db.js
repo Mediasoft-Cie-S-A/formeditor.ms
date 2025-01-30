@@ -948,27 +948,19 @@ function closeDBModalEdit(button){
 function searchtable(search,contentDivID)
 {
     var filter=search.toUpperCase().split(' ');
-    var dbnames = filter[0];
-    var tables = filter[1];
-
+    var tables = filter[0].trim();
+    //var fields = filter[1].trim();
+    contentDivID.innerHTML = '';    
     var list=document.getElementById(contentDivID);
-    var items = list.getElementsByClassName('tables-list-item');
-    for (var i = 0; i < items.length; i++) {
-        var txtValue = items[i].getAttribute('data-table-name');
-        if (txtValue.toUpperCase().indexOf(dbnames) > -1) {
-            items[i].style.display = "";
-            var tableDetailsDiv=items[i].getElementsByClassName('field-item');
-            for (var j = 0; j < tableDetailsDiv.length; j++) {
-                var txtValue = tableDetailsDiv[j].getAttribute('data-table-name');
-                if (txtValue.toUpperCase().indexOf(tables) > -1) {
-                    tableDetailsDiv[j].style.display = "";
-                } else {
-                    tableDetailsDiv[j].style.display = "none";
-                }
-            }
-
+    // get all the divs in the list with the property data-table-name
+    var items = list.querySelectorAll('[data-table-name]');
+    items.forEach(item => {
+        //var dbname = item.getAttribute('database-name').toUpperCase();
+        var table = item.getAttribute('data-table-name').toUpperCase();
+        if (table.indexOf(tables) > -1) {
+            item.style.display = '';
         } else {
-            items[i].style.display = "none";
+            item.style.display = 'none';
         }
-    }
+    });
 }

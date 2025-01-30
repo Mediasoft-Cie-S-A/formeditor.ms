@@ -117,7 +117,7 @@ class dblayer{
     return obj;
     }
     // Function to execute a query on the appropriate database(s)
-    async  executeQuery(databases,  sqlQuery) {
+    async  executeQuery(databases,   sqlQuery) {
     console.log("executeQuery");
     // check if exist only one database
     console.log(databases.length );
@@ -366,7 +366,42 @@ class dblayer{
                 await db.close();
               } catch (err) {
                 console.error("Error:", err);
-                res.status(500).send("Error moving to previous record");
+                res.status(500).send({"Error moving to previous record":err});
+              } 
+            }
+          );
+
+          app.get(
+            "/get-records-by-indexes/:database/:tableName",
+            dbs.checkAuthenticated,
+            async (req, res) => {
+              try {
+                console.log("get-records-by-idexes");
+                const {database, tableName} = req.params;
+              const db= dbs.databases[database];
+              await db.connect();
+                // convert indexes,values from comma separted into array
+                const indexes = req.query.indexes.split(",");
+                const values = req.query.values.split(",");
+                // Get the fields from the query string. It's a comma-separated string.
+                const rowID = req.params.rowID;
+                // Get the fields from the query string. It's a comma-separated string.
+                const fields = req.query.fields ? req.query.fields.split(",") : "ROWID";
+                // check if in fields exits the ROWID field add rowID to fields in first position
+                if (!fields.includes("ROWID")) {
+                  fields.unshift("ROWID");
+                }
+                
+                // generate the where clause
+                const where = indexes.map((index, i) => `"${index}" = '${values[i]}'`).join(" AND ");
+                // generate the query with fields and where clause
+                const query = `SELECT ${fields} FROM PUB.${tableName} WHERE ${where}`;
+                const records = await db.queryData(query);
+                res.json(records);
+                await db.close();
+              } catch (err) {
+                console.error("Error:", err);
+                res.status(500).send({"Error moving to previous record":err});
               } 
             }
           );
@@ -412,7 +447,7 @@ class dblayer{
                 await db.close();
               } catch (err) {
                 console.error("Error:", err);
-                res.status(500).send("Error moving to next record");
+                res.status(500).send({"Error moving to next record":err});
               } 
             }
           );
@@ -478,7 +513,7 @@ class dblayer{
                 await this.trackAction(action, details);
               } catch (err) {
                 console.error(err);
-                res.status(500).send("Error updating record");
+                res.status(500).send({"Error updating record":err});
               } 
             }
           );
@@ -504,7 +539,7 @@ class dblayer{
                 await this.trackAction(action, details);
               } catch (err) {
                 console.error(err);
-                res.status(500).send("Error inserting record");
+                res.status(500).send({"Error inserting record":err});
               } 
             }
           );
@@ -542,10 +577,42 @@ class dblayer{
                 await db.close();
               } catch (err) {
                 console.error("Error:", err);
-                res.status(500).send("Error fetching paginated data");
+                res.status(500).send({"Error fetching paginated data":err});
               } 
             }
           );
+             //GRID
+             app.get(
+              "/table-data-sql/:database/:page/:pageSize",
+              dbs.checkAuthenticated,
+              async (req, res) => {
+                try {
+                  const {database, page, pageSize  } = req.params;
+                  var sqlQuery = req.query.sqlQuery;
+                  const db= dbs.databases[database];
+                  await db.connect();
+  
+                  // Convert page and pageSize to numbers
+                  const pageNum = parseInt(page, 10);
+                  const pageSizeNum = parseInt(pageSize, 10);
+                
+                  const filter = req.query.filter ? req.query.filter : null;
+                
+                  // decode the json filter              
+                  const filterObj = filter ? JSON.parse(filter): null;
+                  // add limit to the query
+                  const limit = req.query.limit ? req.query.limit : null;
+                  sqlQuery += ` FETCH FIRST ${pageSizeNum} ROWS ONLY`;
+                  // get data from the query
+                  const data = await db.queryData(sqlQuery);
+                  res.json(data);
+                  await db.close();
+                } catch (err) {
+                  console.error("Error:", err);
+                  res.status(500).send({"Error fetching paginated data":err});
+                } 
+              }
+            );
 
           //Schema modification
           //Alter table
@@ -576,7 +643,7 @@ class dblayer{
               await db.close();
             } catch (err) {
               console.error(err);
-              res.status(500).send("Error altering table");
+              res.status(500).send({"Error altering table":err});
             } 
           });
           //Create table
@@ -591,7 +658,7 @@ class dblayer{
               await db.close();
             } catch (err) {
               console.error(err);
-              res.status(500).send("Error creating table");
+              res.status(500).send({"Error creating table":err});
             } 
           });
 
@@ -631,7 +698,7 @@ class dblayer{
                 await db.close();
               } catch (err) {
                 console.error(err);
-                res.status(500).send("Error selecting distinct values");
+                res.status(500).send({"Error selecting distinct values":err});
               } 
             }
           );
@@ -662,7 +729,7 @@ class dblayer{
                 await db.close();
               } catch (err) {
                 console.error(err);
-                res.status(500).send("Error selecting distinct values");
+                res.status(500).send({"Error selecting distinct values":err});
               } 
             }
           );
