@@ -20,11 +20,19 @@
     "static": [
       {
         "username": "admin",
-        "password": "admin"
-      },
+        "password": "admin",
+        "checkPoints": [
+          "*"
+          ] 
+         },
       {
         "username": "user",
-        "password": "user"
+        "password": "user",
+        "checkPoints": [
+          "0001100001",
+          "00011000200001",
+          "00011000200002"
+        ]
       }
     ],
     "ldap": {

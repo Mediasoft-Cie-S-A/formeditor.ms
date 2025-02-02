@@ -20,11 +20,28 @@ const path = require('path');
 
 module.exports = function (app, client, dbName) {
   const checkAuthenticated = (req, res, next) => {
+  //  console.log(app.passport);
     if (req.isAuthenticated()) {
       return next();
     }
     res.redirect("/login");
   };
+
+  const requireCheckpoint = (requiredCheckPoint) => {
+    return (req, res, next) => {
+        if (!req.isAuthenticated()) {
+          res.redirect("/login");
+        }
+        console.log(req.user.checkPoints);
+        const userCheckpoints = req.user.checkPoints || [];
+
+        if (userCheckpoints.includes('*') || userCheckpoints.includes(requiredCheckPoint)) {
+            return next(); // User has access
+        } else {
+            return res.status(403).json({ message: 'Access Denied. Insufficient privileges.' });
+        }
+    };
+};
 
   // Configure multer for file uploads
   const upload = multer({
@@ -87,7 +104,9 @@ module.exports = function (app, client, dbName) {
     }
   });
 
-  app.get("/list-forms", checkAuthenticated, async (req, res) => {
+  app.get("/list-forms", 
+    requireCheckpoint("0001100001"), // Require specific checkpoint
+    async (req, res) => {
     try {
       await client.connect();
       const db = client.db(dbName);

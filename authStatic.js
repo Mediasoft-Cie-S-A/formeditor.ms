@@ -31,13 +31,18 @@ module.exports = function(app,session, passport) {
             // 3. If both are correct, return user
             // 4. If not, return false
             // 5. If error, return error
-        user = app.config.authentication.static.find( u => u.username === user && u.password === password) ;
-            if (user) {
-                console.log(`-------> User ${user} authenticated`)    
+        const foundUser  = app.config.authentication.static.find( u => u.username === user && u.password === password) ;
+            if (foundUser) {
+                console.log(`User ${foundUser.username} authenticated`);
                 // define authenticated_user object
-                let authenticated_user = {}
-                authenticated_user.oid = user.username;   
-                authenticated_user.username=user.username;
+                // Include checkpoints in the authenticated user object
+                let authenticated_user = {
+                    oid: foundUser.username,
+                    username: foundUser.username,
+                    checkPoints: foundUser.checkPoints || [] // Ensure it exists
+                };
+
+                console.log(authenticated_user);
                 return done (null, authenticated_user ) 
             }
             else {
@@ -48,9 +53,6 @@ module.exports = function(app,session, passport) {
      
     passport.use(new LocalStrategy (authUser))
 
-     
-    
-    
     
     
     app.get("/login", (req, res) => {
@@ -70,10 +72,7 @@ module.exports = function(app,session, passport) {
     }))
     
     
-    app.post ("/login", passport.authenticate('local', {
-        successRedirect: "/dahsboard.ejs",
-        failureRedirect: "/login",
-     }))
+  
     
 
 
