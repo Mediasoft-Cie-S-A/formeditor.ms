@@ -309,12 +309,16 @@ function navbar_InsertRecord() {
     input.readOnly = false;
     input.disabled = false;
     const field = input.getAttribute("dataset-field-name");
-    if (field === "rowid") {
-      input.value = "new";
-    } else {
+    switch (input.type) {
+      case "hidden":
+          if (field === "rowid") {
+          input.value = "new";
+        } 
+        break;
+    default:
       input.value = "";
+    break;
     }
-
   });
   document.querySelector("[name=SaveDSBtn]").disabled = false;
 }
@@ -477,12 +481,14 @@ async function CreateInsert(DBName, tableName,divLine) {
       continue; // Skip this iteration
     }
     switch (inputs[i].type) {
-      case "hidden":
-        break;
+    
       default:
+
         // get the field name from the input
         var field = inputs[i].getAttribute("dataset-field-name");
         var subtype = inputs[i].getAttribute("dataset-field-type");
+        if (field === "rowid")  continue; // Skip rowid field
+        
         insertFields += `"${field}"`;
         // get sequence value from the the attribute dataset-field-values
         if (subtype === "sequence") {

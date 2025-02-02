@@ -659,14 +659,13 @@ async function gridGetData(
     // The data is now available
     for (var j = 0; j < data.length; j++) {
       let record = j;
-      const row = Object.values(data[j]);
-      const keys = Object.keys(data[j]);
-
+      const rowid = Object.values(data[j])[0];
+      const rowData = data[j];
       var rowDiv = document.createElement("div");
       if (j % 2 == 0) rowDiv.style.backgroundColor = "#f2f2f2";
       else rowDiv.style.backgroundColor = "#ffffff";
       rowDiv.className = "grid-row";
-      rowDiv.setAttribute("rowid", row[0]);
+      rowDiv.setAttribute("rowid",  rowid);
       // add click event to row to call linkRecordToGrid(tableName, rowId)
 
       if (j == 0) {
@@ -674,11 +673,11 @@ async function gridGetData(
         linkRecordToGrid(
           DBName,
           tableName,
-          row[0],
+          rowid,
           record + (page - 1) * pageSize,
           dataset,
           datalink,
-          row
+          rowData
         );
       } // end if
 
@@ -706,11 +705,11 @@ async function gridGetData(
         linkRecordToGrid(
           DBName,
           tableName,
-          row[0],
+          rowid,
           record + (page - 1) * pageSize,
           dataset,
           datalink,
-          row
+          rowData 
         );
 
           // get the tab
@@ -727,7 +726,7 @@ async function gridGetData(
           }
       });
       var i = 0;
-      row.forEach((field, index) => {
+      Object.values(data[j]).forEach((field, index) => {
         const cell = document.createElement("div");
         cell.className = "grid-cell";
 

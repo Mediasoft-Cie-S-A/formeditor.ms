@@ -119,6 +119,7 @@ class OdbcDatabase {
     try {
       console.log(queryString);
       const result = await this.connection.query(queryString);
+     
       return result;
     } catch (err) {
       console.log("Error querying data:", queryString, err);

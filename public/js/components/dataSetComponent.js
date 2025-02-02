@@ -337,6 +337,7 @@ function createFieldFromJson(fieldJson) {
       einput = element.querySelector("input");
       break;
     case "rowid":
+    case "hidden":
       element = createElementInput("hidden");
       einput = element.querySelector("input");
       element.style.display = "none";
@@ -468,6 +469,7 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum,dataset,link,ro
     
         // get the fields from the dataset
         const datasetFields = datasetDiv.getAttribute("dataset-fields-list");
+
         if (!link) { // if link is not defined
           link = [];
         }
@@ -486,23 +488,45 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum,dataset,link,ro
           } // end if link.length ===0
           else {
             console.log("link.length !==0");
+            // check if the link exists in the dataset 
+                    
             // get the fields from the dataset and values from rows
             // and generate indexes and values in order to pass to             "/get-records-by-idexes/:database/:tableName",
+          
+          
             let indexes = [];
             let values = [];
-            link.forEach((field) => {
+          for (let j = 0; j < link.length; j++) {
+            const field = link[j];
               indexes.push(field.fieldName);
               // get id for filed by array index dataset
               let idx = -1;
               // get the index of the field in the dataset
-              dataset.forEach((f, i) => {
-                if (f.fieldName == field.fieldName) {
-                  idx = i+1;
-                }});
-              // idx+1 is the value of the field in the rows array considering 0 is the rowid
-              values.push(rows[idx]);
-            }
-            );
+               console.log("rows", rows); 
+               
+              for (let i = 0; i < dataset.length; i++) {
+                let f = dataset[i];
+                
+                if (f.fieldName === field.fieldName) {
+                  console.log("f", f);
+           
+                  f.fieldType = "hidden";
+                  // search the iput with the fieldname
+                  const input = datasetDiv.querySelector(`[dataset-field-name=${f.fieldName}]`);
+                  // convert the input to hidden
+                  input.type = "hidden";
+                  // set the parent to display none
+                  input.parentElement.style.display = "none";
+                     // idx+1 is the value of the field in the rows array considering 0 is the rowid
+                  values.push(rows[field.fieldName]);
+                }  // end if
+                
+          }// end for i
+        } // end for j
+           console.log("indexes", indexes);
+            console.log("values", values);
+
+
             const url = `/get-records-by-indexes/${dataset[0].DBName}/${dataset[0].tableName}?indexes=${indexes}&values=${values}&fields=${datasetFields}`;
             fetch(url)
               .then((response) => response.json())
@@ -771,7 +795,7 @@ async function updateInputs(data, DBName, tableName,dataset) {
               data[fieldLabel]
             );
             break;
-          
+         
           default:
             // if (fieldType === "input") {
             input.value = data[fieldLabel]?.toString().trim() || "";

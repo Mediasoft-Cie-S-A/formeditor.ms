@@ -386,17 +386,17 @@ class dblayer{
                 // Get the fields from the query string. It's a comma-separated string.
                 const rowID = req.params.rowID;
                 // Get the fields from the query string. It's a comma-separated string.
-                const fields = req.query.fields ? req.query.fields.split(",") : "ROWID";
+                const fields = req.query.fields ? req.query.fields.split(",") : "rowid";
                 // check if in fields exits the ROWID field add rowID to fields in first position
-                if (!fields.includes("ROWID")) {
-                  fields.unshift("ROWID");
+                if (!fields.includes("rowid")) {
+                  fields.unshift("rowid");
                 }
                 
                 // generate the where clause
                 const where = indexes.map((index, i) => `"${index}" = '${values[i]}'`).join(" AND ");
                 // generate the query with fields and where clause
                 const query = `SELECT ${fields} FROM PUB.${tableName} WHERE ${where}`;
-                const records = await db.queryData(query);
+                const records = await db.queryData(query);              
                 res.json(records);
                 await db.close();
               } catch (err) {
@@ -494,8 +494,6 @@ class dblayer{
             "/update-record/:database/:tableName/:rowID",
             dbs.checkAuthenticated,
             async (req, res) => {
-        
-        
               const {database, tableName, rowID } = req.params;
               const db= dbs.databases[database];
               await db.connect();
@@ -508,7 +506,7 @@ class dblayer{
                 res.json({ message: "Record updated successfully", result });
                 await db.close();
                 const action = "event_triggered";
-                const details = { tableName, data, rowID, event: "Update" };
+                const details = { tableName, data,  event: "Update" };
                 // Track the action in MongoDB
                 await this.trackAction(action, details);
               } catch (err) {
@@ -534,7 +532,7 @@ class dblayer{
                 res.json({ message: "Record inserted successfully", result });
                 await db.close();
                 const action = "event_triggered";
-                const details = { tableName, data, rowID, event: "Insert" };
+                const details = { tableName, data, event: "Insert" };
                 // Track the action in MongoDB
                 await this.trackAction(action, details);
               } catch (err) {
