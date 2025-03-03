@@ -178,8 +178,8 @@ if (sqlData != null) {
 
 main.setAttribute("sql", JSON.stringify(sqlJson));
 console.log(sqlJson);
-
-if (sqlJson.DBName != null) {
+// check if DBName is not empty 
+if (sqlJson.DBName != "") {
   // get the db name
 
       // get the data with query select "/table-data-sql/:database/:page/:pageSize"?sqlQuery=select * from table
@@ -330,7 +330,7 @@ function insertNavBar(
   html += `<option value='50'>50</option>`;
   html += `<option value='100'>100</option>`;
   html += `</select>`; // record count
-
+  html += `<span class="miniLoader" style="display: none;">⏳</span>`;
   html += `</div>`;
 
   // get tagname="dataTable" from the gridContainer
@@ -578,6 +578,8 @@ async function gridGetData(
   datasetFields,
   filter
 ) {
+  // activate the loaders
+  activateLoaders();
   // console.log(grid);
   // get the filter from the dataset json
   var mainID = grid.getAttribute("main-id");
@@ -645,7 +647,7 @@ async function gridGetData(
   var url = `/table-data/${DBName}/${tableName}/${page}/${pageSize}?fields=${datasetFields}&filter=${encodeURIComponent(JSON.stringify(filterJSON))}`;
   // get the sqljson from the main
   var sqlJson = JSON.parse(main.getAttribute("sql"));
-  if (sqlJson.DBName != null) {
+  if (sqlJson.DBName != "") {
     // get the db name
      url = `/table-data-sql/${sqlJson.DBName}/${page}/${pageSize}?sqlQuery=${sqlJson.select}`;
   }
@@ -701,7 +703,8 @@ async function gridGetData(
           event.target.classList.add("grid-row-selected");
         }
        
-       
+        // desactivate the loaders
+        deactivateLoaders();
         linkRecordToGrid(
           DBName,
           tableName,

@@ -335,6 +335,8 @@ function createFieldFromJson(fieldJson) {
     case "fixchar":
       element = createElementInput("text");
       einput = element.querySelector("input");
+    
+      
       break;
     case "rowid":
     case "hidden":
@@ -395,6 +397,9 @@ function createFieldFromJson(fieldJson) {
     einput.setAttribute("dataset-field-mandatory", fieldJson.fieldMandatory);
     einput.setAttribute("dataset-field-values", fieldJson.fieldValues);
     einput.setAttribute("dataset-field-SQL", fieldJson.fieldSQL);
+      // set einput disabled and readonly
+    einput.disabled = true;
+    einput.readOnly = true;
     if (fieldJson.fieldMandatory) {
       einput.required = true;
     }
@@ -453,6 +458,8 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum,dataset,link,ro
   if (saveBtn) saveBtn.disabled = true;
   
   try {
+    // activate all the loaders by class name miniLoader
+    activateLoaders();
     // get all the datasets
     var datasetsDiv = document.querySelectorAll("[tagname='dataSet']");
       // check if the datasetDiv exists
@@ -525,7 +532,7 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum,dataset,link,ro
         } // end for j
            console.log("indexes", indexes);
             console.log("values", values);
-
+            
 
             const url = `/get-records-by-indexes/${dataset[0].DBName}/${dataset[0].tableName}?indexes=${indexes}&values=${values}&fields=${datasetFields}`;
             fetch(url)

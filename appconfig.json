@@ -1,9 +1,10 @@
 {
+  "dbtype" : "odbc",
   "port": 3000,
   "dblist": {
-
-    "complus" :"DSN=complus;UID=thesis;PWD=alpha"
-   
+           "complus" : {
+            "ConnectionString" :"DSN=complus;UID=thesis;PWD=alpha"
+           }
         },
 
   "mongoDbUrl": "mongodb://0.0.0.0:27017",

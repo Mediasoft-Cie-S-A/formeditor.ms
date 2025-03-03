@@ -300,6 +300,7 @@ function navbar_EditRecord(action) {
   });
 
   document.querySelector("[name=SaveDSBtn]").disabled = action;
+  deactivateLoaders();
 }
 
 function navbar_InsertRecord() {

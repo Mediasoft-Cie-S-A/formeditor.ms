@@ -18,7 +18,8 @@ const odbc = require("odbc");
 
 class OdbcDatabase {
   constructor(connectionString) {
-    this.connectionString = connectionString;
+    console.log("connectionString", connectionString.ConnectionString);
+    this.connectionString = connectionString.ConnectionString;
   }
 
   async connect() {

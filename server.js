@@ -108,7 +108,7 @@ require('./authentication')(app,session, passport);
 require('./authCustom')(app,session, passport);
 require('./authStatic')(app,session, passport);
 
-const dblayer = require('./dblayer');
+const dblayer = require('./dblayer').default;
 const dbs= new dblayer(app,session, passport,client);
 dbs.init();
 try

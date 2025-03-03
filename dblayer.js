@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import OdbcDatabase from './OdbcDatabase.js';
+import MySqlDatabase from './MySqlDatabase.js';
+
 class dblayer{
 
     
@@ -37,6 +40,7 @@ class dblayer{
           this.checkAuthenticated = this.checkAuthenticated.bind(this);
           this.mongoClient=client;
           this.mongoDbName=dbname;
+          this.dbtype = app.config.dbtype;
           // get key value from dblist           
       }
 
@@ -44,16 +48,30 @@ class dblayer{
       {
           for (const [key, value] of Object.entries(this.dbList)) {
               console.log(`${key}: ${value}`);
-              const OdbcDatabase = require('./OdbcDatabase'); 
-              this.databases[key] = new OdbcDatabase(value);
-              // store the db structure in the cache
-              
-              await this.databases[key].connect();                
-              this.dbCache[key] = await  this.databases[key].getTablesList();   
+              var DatabaseClass=null;
+              switch (this.dbtype) {
+
+                case "mysql2":
+                  this.databases[key] = new MySqlDatabase(value);
+                  await this.databases[key].connect();    
+                
+                  this.dbCache[key] = await  this.databases[key].getTablesList();   
             //  console.log(this.dbCache[key]);     
-              await  this.databases[key].close();    
-              this.tableToDatabaseMapping = this.createTableDatabaseMapping(this.dbCache);
-          }
+            this.tableToDatabaseMapping = this.createTableDatabaseMapping(this.dbCache);
+              await  this.databases[key].close();   
+                  break;
+                case "odbc":
+                  this.databases[key] = new OdbcDatabase(value);
+                  await this.databases[key].connect();     
+                 
+                  this.dbCache[key] = await  this.databases[key].getTablesList();   
+                //  console.log(this.dbCache[key]);     
+                  await  this.databases[key].close();  
+                  this.tableToDatabaseMapping = this.createTableDatabaseMapping(this.dbCache);
+                  break;              
+              }
+              // store the db structure in the cache
+         }
       }
 
               // Function to get all table names from a given database cache
@@ -1082,4 +1100,4 @@ function pivotData(data,columnFields,pivotFields ) {
         }
 }
 
-module.exports = dblayer;
+export default dblayer;

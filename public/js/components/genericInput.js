@@ -47,7 +47,7 @@ function createElementInput(type) {
             input.placeholder = "";
             main.appendChild(input)
         }
-
+    main.innerHTML+=`<span class="miniLoader" style="display: none;">⏳</span>`;
     return main;
 }
 
@@ -57,4 +57,22 @@ function editElementInput(type,element,content)
    
    
 
+}
+
+// activate the loaders 
+function activateLoaders() {
+    const loaders = document.querySelectorAll(".miniLoader");
+    loaders.forEach((loader) => {
+      loader.style.display = "inline-block";
+    });
+    
+}
+
+// deactivate the loaders
+function deactivateLoaders() {
+    const loaders = document.querySelectorAll(".miniLoader");
+    loaders.forEach((loader) => {
+      loader.style.display = "none";
+    }
+    );
 }
