@@ -1,7 +1,7 @@
-#miniLoader {
-    font-size: 24px;
+.miniLoader {
+    width: 32px;
+    height: 32px;
     margin-left: 10px;
-    animation: spin 1s linear infinite;
     display: none;
 }
 

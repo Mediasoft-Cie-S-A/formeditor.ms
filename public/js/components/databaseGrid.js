@@ -330,7 +330,7 @@ function insertNavBar(
   html += `<option value='50'>50</option>`;
   html += `<option value='100'>100</option>`;
   html += `</select>`; // record count
-  html += `<span class="miniLoader" style="display: none;">⏳</span>`;
+  html += `<img class="miniLoader" style="display: none;" src="/img/loader.gif" alt="Loading...">`;
   html += `</div>`;
 
   // get tagname="dataTable" from the gridContainer
@@ -418,7 +418,6 @@ function grid_page_size(e, dataGridId) {
   const dataTable = dataGrid.querySelector('[tagName="dataTable"]');
   const DBName = dataTable.getAttribute("DBName");
   var pageSize = e.target[e.target.selectedIndex].value;
-
   dataTable.setAttribute("page_size", pageSize);
   dataTable.setAttribute("current_page", 1);
   searchGrid(DBName, "", "", "", dataGridId);
@@ -426,7 +425,6 @@ function grid_page_size(e, dataGridId) {
 
 function gridPrev(e, DBName, tableName) {
   e.preventDefault();
-
   // get parent grid n
   const mainID = e.target.getAttribute("grid-id");
   const grid = document
@@ -437,10 +435,8 @@ function gridPrev(e, DBName, tableName) {
     if (currentPage > 1) {
       currentPage--;
     }
-
     grid.setAttribute("current_page", currentPage);
     grid.parentElement.querySelector("#current_page").textContent = "Page: " + currentPage;
-
     searchGrid(DBName, "", "", "", mainID);
   }
 }
@@ -486,8 +482,6 @@ function searchGrid(DBName, filterName, FilterOp, filterValue, gridID) {
     case "standard":
       tableGrid.innerHTML = "";
       generateHeaderRow(tableGrid, datasetFields.split(","));
-
-
       gridGetData(tableGrid, DBName, tableName, page, pageSize, datasetFields, filter);
       break;
     case "panel":
@@ -496,8 +490,6 @@ function searchGrid(DBName, filterName, FilterOp, filterValue, gridID) {
     default:
       tableGrid.innerHTML = "";
       generateHeaderRow(tableGrid, datasetFields.split(","));
-
-
       gridGetData(tableGrid, DBName, tableName, page, pageSize, datasetFields, filter);
       break;
   }
@@ -519,7 +511,6 @@ function export2CSV(e, DBName, tabelName) {
 function gridFetchData(grid, body) {
   var DBName = grid.getAttribute("DBName");
   var tableName = grid.getAttribute("Table-Name");
-
   var currentPage = parseInt(grid.getAttribute("current_page"));
   var pageSize = parseInt(grid.getAttribute("page_size"));
   var datasetFields = grid.getAttribute("dataset-fields-names");

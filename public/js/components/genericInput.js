@@ -47,7 +47,7 @@ function createElementInput(type) {
             input.placeholder = "";
             main.appendChild(input)
         }
-    main.innerHTML+=`<span class="miniLoader" style="display: none;">⏳</span>`;
+    main.innerHTML+=`<img class="miniLoader" style="display: none;" src="/img/loader.gif" alt="Loading...">`;
     return main;
 }
 
