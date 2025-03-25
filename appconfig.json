@@ -2,8 +2,8 @@
   "dbtype" : "odbc",
   "port": 3000,
   "dblist": {
-           "complus" : {
-            "ConnectionString" :"DSN=complus;UID=thesis;PWD=alpha"
+           "msdb" : {
+            "ConnectionString" :"DSN=msdb;UID=sysprogress;PWD=sysprogress"
            }
         },
 

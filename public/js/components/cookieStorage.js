@@ -1,3 +1,4 @@
+const { Db } = require("mongodb");
 
 
 function createCookieStorage(type) {
@@ -62,7 +63,7 @@ function renderCookieStorage(main) {
     variables = JSON.parse(main.getAttribute("data-cookies"));
     // Retrieve or initialize the variables from cookies
     // Render each variable as a <select> element with the stored cookie value
-    variables.forEach(({ name,description, type, value  }) => {
+    variables.forEach(({ name,description, type, value , DBName }) => {
         // Create a container for each variable
         const varContainer = document.createElement("div");
         varContainer.className = "variable-container";
@@ -119,8 +120,8 @@ function renderCookieStorage(main) {
             break;
             case "Query":
                 // execute the query and write the result in select
-                let SQL = value.split("|")[1];
-                let DBName = value.split("|")[0];
+                let SQL = value;
+                
                 select = document.createElement("select");
                 select.setAttribute("var_name", name);  
                 select.style.width = "150px";
@@ -244,6 +245,14 @@ function addVariableInput(element, content, name = "") {
         // drop input
       });
     
+    const valueDB = document.createElement("input");
+    valueDB.type = "text";
+    valueDB.placeholder = "Database Name";
+    valueDB.value = currentVariables?.DBName!=undefined?currentVariables?.DBName:"";
+    valueDB.setAttribute("tag", "db_name");
+
+
+    
     valueInput = document.createElement("input");
     valueInput.type = "text";
     valueInput.placeholder = "Variable Value";
@@ -267,6 +276,7 @@ function addVariableInput(element, content, name = "") {
     varContainer.appendChild(description);   
     varContainer.appendChild(valueSelect);
     varContainer.appendChild(valueInput);
+    varContainer.appendChild(valueDB);
     varContainer.appendChild(removeButton);
 
     // Add the container to the property bar
@@ -285,6 +295,7 @@ function saveAllCookies(element,content) {
             name: container.querySelector("[tag=var_name]").value,
             type: container.querySelector("[tag=var_type]").value,
             value: container.querySelector("[tag=var_value]").value
+            
         };
     });
     // set the cookie for each variable
@@ -300,7 +311,8 @@ function updateStoredVariables(element,content) {
             name: container.querySelector("[tag=var_name]").value,
             type: container.querySelector("[tag=var_type]").value,
             description: container.querySelector("[tag=var_description]").value,
-            value: container.querySelector("[tag=var_value]").value
+            value: container.querySelector("[tag=var_value]").value,
+            DBName: container.querySelector("[tag=db_name]").value
         };
     });
 
