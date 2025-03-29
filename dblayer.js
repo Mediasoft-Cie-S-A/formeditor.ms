@@ -380,7 +380,9 @@ class dblayer{
                 const fields = req.query.fields ? req.query.fields.split(",") : "ROWID";
 
                 const record = await db.getRecordByRowID(tableName, fields, rowID);
-                res.json(record);
+                res.json(JSON.parse(JSON.stringify(record, (key, value) =>
+                  typeof value === 'bigint' ? value.toString() : value
+                )));
                 await db.close();
               } catch (err) {
                 console.error("Error:", err);
