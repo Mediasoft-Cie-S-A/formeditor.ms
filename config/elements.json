@@ -46,7 +46,7 @@
   "dataSetNavigation": {
     "type": "dataSetNavigation",
     "description": "Navigate component dataSet",
-    "category": "Bussiness Logic",
+    "category": "Business Logic",
     "scriptName": "dataSetComponentNavigate.js",
     "createFunction": "createDataSetComponentNavigate",
     "editFunction": "editDataSetComponentNavigate",
@@ -57,7 +57,7 @@
   "dataSet": {
     "type": "dataSet",
     "description": "Data Set",
-    "category": "Bussiness Logic",
+    "category": "Business Logic",
     "scriptName": "dataSetComponent.js",
     "createFunction": "createElementDateSet",
     "editFunction": "editElementDataSet",
@@ -68,7 +68,7 @@
   "dataGrid": {
     "type": "dataGrid",
     "description": "Data Grid",
-    "category": "Bussiness Logic",
+    "category": "Business Logic",
     "scriptName": "databaseGrid.js",
     "createFunction": "createDatabaseGrid",
     "editFunction": "editDatabaseGrid",
@@ -79,7 +79,7 @@
   "dataSearch": {
     "type": "dataSearch",
     "description": "Search field",
-    "category": "Bussiness Logic",
+    "category": "Business Logic",
     "scriptName": "databaseSearch.js",
     "createFunction": "createDatabaseSearch",
     "editFunction": "editDatabaseSearch",
@@ -90,7 +90,7 @@
   "dataCombox": {
     "type": "dataCombox",
     "description": "dataCombox",
-    "category": "Bussiness Logic",
+    "category": "Business Logic",
     "scriptName": "comboxComponent.js",
     "createFunction": "createElementCombox",
     "editFunction": "editElementCombox",
@@ -146,7 +146,7 @@
   "jscode": {
     "type": "jscode",
     "description": "javascript code",
-    "category": "Bussiness  Logic",
+    "category": "Business  Logic",
     "scriptName": "jscode.js",
     "createFunction": "createJScode",
     "editFunction": "editJScode",
@@ -157,7 +157,7 @@
   "planning": {
     "type": "planning",
     "description": "Planning",
-    "category": "Bussiness Logic",
+    "category": "Business Logic",
     "scriptName": "planning.js",
     "createFunction": "createPlanning",
     "editFunction": "editPlanning",
@@ -168,7 +168,7 @@
   "qrcode": {
     "type": "qrcode",
     "description": "QR Code",
-    "category": "Bussiness Logic",
+    "category": "Business Logic",
     "scriptName": "qrcodeComponent.js",
     "createFunction": "createQRCode",
     "editFunction": "editQRCode",
@@ -179,7 +179,7 @@
   "qrcodeScanner": {
     "type": "qrcodeScanner",
     "description": "QR Code Scanner",
-    "category": "Bussiness Logic",
+    "category": "Business Logic",
     "scriptName": "qrcodeScannerComponent.js",
     "createFunction": "createQRCodeScanner",
     "editFunction": "editQRCodeScanner",

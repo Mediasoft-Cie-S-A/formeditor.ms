@@ -170,6 +170,7 @@ function updateGrid(name,select){
                       const gridDiv = document.getElementById(idObject.id);
                      
                       const datasetJSON =JSON.parse( gridDiv.getAttribute("datasetgrid"));
+                      if (!datasetJSON) return;
                     if (datasetJSON.length > 0) {
                       const var_name = select.getAttribute("var_name");
                         searchGrid(datasetJSON[0].DBName, var_name, "=", cookieValue, idObject.id);
