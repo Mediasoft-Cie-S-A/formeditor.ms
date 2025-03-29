@@ -233,9 +233,14 @@ function renderGrid(main) {
   var jsonData = JSON.parse(data);
   // get the main div
   var datasetFields = ["rowid"];
+  var datasetLabels = ["rowid"];
+
   var datasetFieldsTypes = ["rowid"];
   jsonData.forEach((field) => {
     datasetFields.push(field.fieldName);
+    // replace in lable the ","
+    var label = field.fieldLabel.replace(/,/g, " ");
+    datasetLabels.push(label);
     datasetFieldsTypes.push(field.fieldType);
   });
   main.innerHTML = "";
@@ -260,6 +265,7 @@ function renderGrid(main) {
     jsonData[0].DBName,
     jsonData[0].tableName,
     datasetFields,
+    datasetLabels,
     datasetFieldsTypes
   );
 
@@ -268,6 +274,7 @@ function renderGrid(main) {
     jsonData[0].DBName,
     jsonData[0].tableName,
     datasetFields,
+    datasetLabels,
     datasetFieldsTypes,
     main
   );
@@ -279,6 +286,7 @@ function insertNavBar(
   DBName,
   tableName,
   datasetFields,
+  datasetLabels,
   datasetFieldsTypes
 ) {
   // create search structure
@@ -343,6 +351,7 @@ function createGrid(
   DBName,
   tableName,
   datasetFields,
+  datasetLabels,
   datasetFieldsTypes,
   main
 ) {
@@ -357,7 +366,9 @@ function createGrid(
   // search inputs
 
   grid.setAttribute("Dataset-Fields-Names", datasetFields);
+  grid.setAttribute("Dataset-Fields-Labels", datasetLabels);
   grid.setAttribute("Dataset-Fields-Types", datasetFieldsTypes);
+
   const body = document.createElement("div");
   body.className = "grid-body";
   grid.appendChild(body);
@@ -380,7 +391,7 @@ function switchView(e, DBName, gridID, view) {
   searchGrid(DBName, "", "", "", gridID); // refresh the grid
 }
 
-function generateHeaderRow(grid, datasetFields) {
+function generateHeaderRow(grid, datasetLabels) {
   // table header
   var header = document.createElement("div");
   header.className = "grid-header";
@@ -389,11 +400,11 @@ function generateHeaderRow(grid, datasetFields) {
   var row = document.createElement("div");
   row.className = "grid-row";
 
-  datasetFields.forEach((field) => {
+  datasetLabels.forEach((field) => {
     if (field !== "rowid") {
       const cell = document.createElement("div");
       cell.className = "grid-cell-header";
-      cell.textContent = field !== "rowid" ? field : "";
+      cell.textContent = field !== "rowid" ? field.trim() : "";
       row.appendChild(cell);
     } else {
       const cell = document.createElement("div");
@@ -470,6 +481,7 @@ function searchGrid(DBName, filterName, FilterOp, filterValue, gridID) {
 
   var tableName = tableGrid.getAttribute("Table-Name");
   var datasetFields = tableGrid.getAttribute("Dataset-Fields-Names");
+  var datasetLabels = tableGrid.getAttribute("Dataset-Fields-Labels");
   var datasetFieldsTypes = tableGrid.getAttribute("Dataset-Fields-Types");
   var page = parseInt(tableGrid.getAttribute("current_page")) || 1;
   var pageSize = parseInt(tableGrid.getAttribute("page_size"));
@@ -481,7 +493,7 @@ function searchGrid(DBName, filterName, FilterOp, filterValue, gridID) {
   switch (view) {
     case "standard":
       tableGrid.innerHTML = "";
-      generateHeaderRow(tableGrid, datasetFields.split(","));
+      generateHeaderRow(tableGrid, datasetLabels.split(","));
       gridGetData(tableGrid, DBName, tableName, page, pageSize, datasetFields, filter);
       break;
     case "panel":
@@ -489,7 +501,7 @@ function searchGrid(DBName, filterName, FilterOp, filterValue, gridID) {
       break;
     default:
       tableGrid.innerHTML = "";
-      generateHeaderRow(tableGrid, datasetFields.split(","));
+      generateHeaderRow(tableGrid, datasetLabels.split(","));
       gridGetData(tableGrid, DBName, tableName, page, pageSize, datasetFields, filter);
       break;
   }
