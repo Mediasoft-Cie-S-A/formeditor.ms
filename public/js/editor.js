@@ -16,6 +16,52 @@
 
 var moveElementEvent = false;
 const labelheight = 20;
+
+// floating window for the editor
+interact('#editorDataInfos')
+  .draggable({
+    inertia: true,
+    modifiers: [
+      interact.modifiers.restrictRect({ restriction: 'parent' })
+    ],
+    listeners: {
+      move(event) {
+        event.preventDefault();
+        // remove float  to the event.target
+
+        const target = event.target;
+        const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+        const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+        target.style.transform = `translate(${x}px, ${y}px)`;
+        target.setAttribute('data-x', x);
+        target.setAttribute('data-y', y);
+      }
+    }
+  });
+
+  interact('#editorPropertyInfos')
+  .draggable({
+    inertia: true,
+    modifiers: [
+      interact.modifiers.restrictRect({ restriction: 'parent' })
+    ],
+    listeners: {
+      move(event) {
+        event.preventDefault();
+        // remove float  to the event.target
+
+        const target = event.target;
+        const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+        const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+        target.style.transform = `translate(${x}px, ${y}px)`;
+        target.setAttribute('data-x', x);
+        target.setAttribute('data-y', y);
+      }
+    }
+  });
+
 function removeAllChildNodes(parent) {
   while (parent.firstChild) {
     parent.removeChild(parent.firstChild);
@@ -157,7 +203,7 @@ function editElement(element) {
       box.className = "editor-box";
       box.style.border = "1px solid #ccc";
       box.style.marginBottom = "10px";
-      box.style.padding = "10px";
+      box.style.padding = "5px";
       box.style.fontSize = "9px";
       box.style.borderRadius = "5px";
       box.innerHTML = `<div style='font-weight: bold; width:100%'>${category}</div>`;
@@ -336,6 +382,10 @@ function getAbsoluteOffset(element) {
 
 // showproperties of the element
 function showProperties() {
+  //show editorPropertyInfos
+  const editorPropertyInfos = document.getElementById("editorPropertyInfos");
+  editorPropertyInfos.style.display = "block";
+  
   const inputElementSelected = document.getElementById("editorElementSelected");
   var editorElementSelected = document.getElementById(
     inputElementSelected.value

@@ -88,7 +88,7 @@ function RenderDataSearch(main) {
       "<div class='search' id='search_" + field.tableName + "_searchDiv'>";
     html +=
       "<input type='text' id='search_" +
-      field.tableName +
+      field.tableName +  "_" + field.fieldName +
       "_input' list='searchList' placeholder='" +
       field.fieldLabel +
       "'  autocomplete='off' ";
@@ -105,7 +105,7 @@ function RenderDataSearch(main) {
     // button to clear the search
     html +=
       "<button type='button' onclick='document.getElementById(\"search_" +
-      field.tableName +
+      field.tableName + "_" + field.fieldName +
       "_input\").value=\"\";'  >";
     html += "<i class='fas fa-times'></i> </button>";
     html +=
@@ -208,7 +208,18 @@ function searchAutoComplete(event, element) {
       default:
         url = url + "&filter=" + fieldName + " like '%" + searchValue + "%'";
     }
-  
+    // get all the cookieStorage by tagname=cookieStorage
+    var cookieStorage = document.querySelectorAll("div[tagname=cookieStorage]");
+    // foreach cookieStorage extract the field name and value = select.value
+    cookieStorage.forEach((storage) => {
+      select=storage.querySelectorAll("select");
+      select.forEach((select) => {
+        var fieldName = select.getAttribute("var_name");
+        var fieldValue = select.value;
+        // add the field to the url
+        url = url + " and " + fieldName + "='" + fieldValue+ "'";
+      });
+    });
       fetch(url)
         .then((response) => response.json())
         .then((data) => {

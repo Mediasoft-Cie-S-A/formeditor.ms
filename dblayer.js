@@ -728,6 +728,8 @@ class dblayer{
             async (req, res) => {
               try {
                 const {database, tableName, fieldName } = req.params;
+                // delete duplicate values in fieldName
+               
                 const db= dbs.databases[database];
                 await db.connect();
 

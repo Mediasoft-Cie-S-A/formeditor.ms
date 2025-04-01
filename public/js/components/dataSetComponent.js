@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-const { json } = require("body-parser");
-const e = require("express");
-
+// This function creates a new HTML element of a given type, sets its ID and tag name, and makes it draggable.
 function createElementDateSet(type) {
   var main = document.createElement("div");
   main.className = "form-container";

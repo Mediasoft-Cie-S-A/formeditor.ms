@@ -131,7 +131,6 @@ function createSidebar(elementsData, components) {
     button.style.backgroundColor = "#fff";
     button.style.borderRight = "3px solid green";
     button.style.justifyContent = "center";
-    button.style.padding = "10px 10px";
     button.style.boxShadow = "0 2px 5px rgba(0, 0, 0, 0.3)";
    
     categoryDiv.appendChild(button);
@@ -140,6 +139,7 @@ function createSidebar(elementsData, components) {
     divContainer.style.flexWrap = "wrap";
     divContainer.style.justifyContent = "center";
     divContainer.style.flexDirection = "row";
+    divContainer.style.width = "100%";
     categoryDiv.appendChild(divContainer);
 
     button.addEventListener("click", function () {

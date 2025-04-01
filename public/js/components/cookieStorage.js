@@ -1,6 +1,24 @@
-const { Db } = require("mongodb");
+/*
+ * Copyright (c) 2023 Mediasoft & Cie S.A.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-
+/*This function createElementButton creates a new HTML element of a given type,
+sets its text content to the type, adds two event listeners to it, and returns the created element. 
+The double-click event listener calls the editElement function with the element and its type as arguments,
+ and the click event listener calls the selectElement function with the element as an argument.
+*/
 function createCookieStorage(type) {
     const main = document.createElement("div");
     main.className = "form-element";
@@ -18,7 +36,7 @@ function createCookieStorage(type) {
 function editCookieStorage(type, element, content) {
     // Clear the content area to prevent duplicates
     const div = document.createElement("div");
-    div.style.width = "150px";
+    div.style.width = "100%";
     div.style.height = "100%";
     div.style.border = "1px solid #ccc";
     div.style.borderRadius = "5px";
@@ -110,10 +128,10 @@ function renderCookieStorage(main) {
                 }
                 );
                 // excute the search when the select changes
-                updateGrid(name,select);
+                updateGrid(name,select,DBName);
                 // change the value of the variable when the select changes
                 select.onchange = () => {
-                    updateGrid(name,select);
+                    updateGrid(name,select,DBName);
                 };
 
                 varContainer.appendChild(select);
@@ -143,10 +161,10 @@ function renderCookieStorage(main) {
                     });
                 });
                // excute the search when the select changes
-               updateGrid(name,select);
+               updateGrid(name,select,DBName);
                // change the value of the variable when the select changes
                select.onchange = () => {
-                   updateGrid(name,select);
+                   updateGrid(name,select,DBName);
                };
 
                varContainer.appendChild(select);
@@ -159,7 +177,7 @@ function renderCookieStorage(main) {
     });
 }
 
-function updateGrid(name,select){
+function updateGrid(name,select,DBName){
     cookieValue = select.value;
                     setCookie(name, cookieValue, 1);
                     //let test = getDataGridObject();
@@ -167,14 +185,11 @@ function updateGrid(name,select){
                      let idObjects = document.querySelectorAll("div[tagname='dataGrid']");
                                        
                     idObjects.forEach((idObject) => {{
-                      const gridDiv = document.getElementById(idObject.id);
-                     
-                      const datasetJSON =JSON.parse( gridDiv.getAttribute("datasetgrid"));
-                      if (!datasetJSON) return;
-                    if (datasetJSON.length > 0) {
+                      console.log(idObject.id);
+                      // get data from 
+                   
                       const var_name = select.getAttribute("var_name");
-                        searchGrid(datasetJSON[0].DBName, var_name, "=", cookieValue, idObject.id);
-                    }
+                        searchGrid(DBName, var_name, "=", cookieValue, idObject.id);
                     
                     }
                 });

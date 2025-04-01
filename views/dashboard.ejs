@@ -121,7 +121,7 @@
           <!-- Rendered form will be displayed here -->
         </div>
         <div id="editForm" class="tab-pane fade">
-          <div id="formProperties" class="col">
+          <div id="formProperties" class="row display-flex" style="width: 100%; padding: 10px; ">
             <!-- Form properties will be added here -->
             <form id="formDataForm" class="container-fluid">
               <div
@@ -234,12 +234,15 @@
               </div>
             </form>
           </div>
-          <div class="row" style="padding: 10px; margin: 5px">
+          <div class="row display-flex" style="padding: 10px; margin: 5px;width: 100%;">
             <!-- Sidebar -->
 
                 
-                  <div id="componentsSidebar" style="float: left; width: 9%;" ></div>
-                  <div style="float: left; width: 71%;">
+                  <div id="componentsSidebar" class="col-md-1 col-sm-12 grid-element" style="background-color: white;" ></div>
+                  <div class="col-md-11 col-sm-12 grid-element" style="width: 100%;" >
+                    <div class="title-element">
+                      <h2>Form Editor</h2>
+                    </div>
                   <div
                     id="formContainer"
                     
@@ -249,7 +252,8 @@
                     <!-- Form elements will be added here -->
                   </div>
                 </div>
-                  <div style="float: left; width: 10%;" >
+              </div>
+                  <div id="editorPropertyInfos" style="position:fixed; display: none; top:100px; right:0;  width: 300px; background-color: white; border: 1px solid silver; z-index: 1000;"  >
                           
                         <div id="propertiesBar" >
                           <div>
@@ -257,7 +261,7 @@
                           </div>
                         </div>
                   </div>
-                  <div  style="float: left; width: 10%;"   >
+                  <div id="editorDataInfos"   style="position:fixed; top:100px; left:300px; width: 250px; background-color: white; border: 1px solid silver; z-index: 1000;"   >
                   
                   <div class="button-container" style="border-bottom: 2px solid #ccc; padding: 10px;">
                    
@@ -297,7 +301,7 @@
                 </div>
             
           </div>
-        </div>
+
         <div id="DatabaseForm" class="tab-pane fade">
           <!-- Rendered form will be displayed here -->
           <div class="container-fluid">
@@ -518,6 +522,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/htmlmixed/htmlmixed.min.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 
     <script src="/js/components/qrcode.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
@@ -532,5 +537,6 @@
     <script src="js/webserver.js"></script>
     <script src="js/constant/index.js"></script>
     <script src="js/listBusinessComponent.js"></script>
+    
   </body>
 </html>

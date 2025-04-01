@@ -84,10 +84,13 @@ class OdbcDatabase {
       if (filter && filter.length > 0) {
         sql += ` WHERE ${filter} `;
       }
+      // order by columnId
+      sql += ` ORDER BY "${columnId}"`;
+      //  FETCH FIRST 10 ROWS ONLY 
+      sql += ` FETCH FIRST 10 ROWS ONLY`;
       console.log(sql);
       // Execute the query
       const result = await this.connection.query(sql);
-
       return result;
     } catch (err) {
       console.log("Error selecting distinct values:", err);
