@@ -227,6 +227,7 @@ if (sqlJson.DBName != "") {
 }
 
 function renderGrid(main) {
+  main.innerHTML = ""; // clear the main div
   // get the data from the element
   var data = main.getAttribute("dataSet");
   // parse the json
@@ -243,7 +244,7 @@ function renderGrid(main) {
     datasetLabels.push(label);
     datasetFieldsTypes.push(field.fieldType);
   });
-  main.innerHTML = "";
+
   main.style.padding = "10px";
   main.style.display = "flex";
   main.style.flexDirection = "column";
@@ -289,13 +290,19 @@ function insertNavBar(
   datasetLabels,
   datasetFieldsTypes
 ) {
+  
+  console.log(gridContainer);
+  // check if the class="right-panel" exists in the gridContainer
+  // if it exists, remove it
+  var rightPanel = gridContainer.querySelector(".right-panel");
+  if (rightPanel) {
+    return;
+  }
+  
   // create search structure
-  // search header
-  var search = document.createElement("div");
-  search.style.display = "flex";
+  
 
-
-  var html = `<div class="right-panel">`;
+  var html = `<div class="right-panel" tagname="GridPanel">`;
   // html += `<div class="navigation-bar-title">Record: </div>`;
   // adding page number
   html += `<div id="current_page" >Page: 1 </div>`;
@@ -393,8 +400,15 @@ function switchView(e, DBName, gridID, view) {
 
 function generateHeaderRow(grid, datasetLabels) {
   // table header
-  var header = document.createElement("div");
-  header.className = "grid-header";
+  var header = null;
+  // check if grid has class grid-header
+  if (grid.querySelector(".grid-header") == null) {
+    header = document.createElement("div");
+    header.className = "grid-header";
+  } else {
+    header = grid.querySelector(".grid-header");
+    header.innerHTML = ""; // clear the header
+  }
 
   // header
   var row = document.createElement("div");
@@ -477,36 +491,39 @@ function gridNext(e, DBName, tableName) {
 
 function searchGrid(DBName, filterName, FilterOp, filterValue, gridID) {
   const grid = document.getElementById(gridID);
+  // get the dataset from the main in json format
+  const dataset = JSON.parse(grid.getAttribute("dataset"));
 
- // console.log(grid);
   const tableGrid = grid.querySelector('[tagname="dataTable"]');
+  // get the dataset labels
+  
   if (tableGrid.getAttribute("current_page") == null) {
     tableGrid.setAttribute("current_page", 1);
   }
   var tableName = tableGrid.getAttribute("Table-Name");
-  var datasetFields = tableGrid.getAttribute("Dataset-Fields-Names");
-  var datasetLabels = tableGrid.getAttribute("Dataset-Fields-Labels");
-  var datasetFieldsTypes = tableGrid.getAttribute("Dataset-Fields-Types");
+  var datasetFields = tableGrid.getAttribute("Dataset-Fields-Names"); 
+  const datasetLabels=dataset.map((field) => field.fieldLabel);
   var page = parseInt(tableGrid.getAttribute("current_page")) || 1;
   var pageSize = parseInt(tableGrid.getAttribute("page_size"));
+  // 
   // check if filter is empty
   var filter = filterName + "|" + FilterOp + "|" + filterValue;
-
+ 
   // get the view type
   var view = grid.getAttribute("view");
   switch (view) {
     case "standard":
-      tableGrid.innerHTML = "";
-      generateHeaderRow(tableGrid, datasetLabels.split(","));
+     
+      generateHeaderRow(tableGrid, datasetLabels);
       gridGetData(tableGrid, DBName, tableName, page, pageSize, datasetFields, filter,0);
       break;
     case "panel":
-      console.log("panel view");
+     
       gridGetData(tableGrid, DBName, tableName, page, pageSize, datasetFields, filter,1);
       break;
     default:
-      tableGrid.innerHTML = "";
-      generateHeaderRow(tableGrid, datasetLabels.split(","));
+     
+      generateHeaderRow(tableGrid, datasetLabels);
       gridGetData(tableGrid, DBName, tableName, page, pageSize, datasetFields, filter,0);
       break;
   }
@@ -578,15 +595,16 @@ function getFilterType(fieldType) {
 }
 
 async function gridGetData(
-  grid,
-  DBName,
-  tableName,
-  page,
-  pageSize,
-  datasetFields,
-  filter,
-  gridType
-) {
+                  grid,
+                  DBName,
+                  tableName,
+                  page,
+                  pageSize,
+                  datasetFields,
+                  filter,
+                  gridType
+                ) 
+{
   // activate the loaders
   activateLoaders();
   // console.log(grid);
@@ -656,8 +674,9 @@ async function gridGetData(
   // if gridType is 1, clear the header, body
   if (gridType == 1) {
     header.innerHTML = "";
-    body.innerHTML = "";
+   
   }
+  body.innerHTML = "";
   // Prepare the URL
   var url = `/table-data/${DBName}/${tableName}/${page}/${pageSize}?fields=${datasetFields}&filter=${encodeURIComponent(JSON.stringify(filterJSON))}`;
   // get the sqljson from the main
@@ -667,16 +686,25 @@ async function gridGetData(
      url = `/table-data-sql/${sqlJson.DBName}/${page}/${pageSize}?sqlQuery=${sqlJson.select}`;
   }
   // Fetch the data from the web service
-  try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      showToast("Error retrieving data", 5000);
-    }
-    const data = await response.json();
+
+    const request = new XMLHttpRequest();
+    request.open("GET", url, true);
+    request.setRequestHeader("Content-Type", "application/json");
+    request.setRequestHeader("Accept", "application/json");
+    request.setRequestHeader("Access-Control-Allow-Origin", "*");
+    request.setRequestHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    request.send();
+    request.onload = function () {
+      // Check if the request was successful (status code 200)
+      if (request.status >= 200 && request.status < 300) {
+        // Parse the response as JSON
+         
+      const data = JSON.parse(request.responseText);
     // The data is now available
-    for (var j = 0; j < data.length; j++) {
-      switch (gridType) {
-        case 0:
+      for (var j = 0; j < data.length; j++) {
+        switch (gridType) {
+          default:
+         case 0:
             drawGridRow(
               mainID,
               DBName,
@@ -730,13 +758,33 @@ async function gridGetData(
       } // end if
     });
     body.appendChild(newbutton);
-  } catch (error) {
-    console.error("Error:", error);
-  }
+      } else {
+        // Handle error response
+        console.error("Error fetching data:", request.statusText);
+        showToast("Error fetching data", 5000);
+      }
+    };
+    request.onerror = function () {
+      // Handle network error
+      console.error("Network error:", request.statusText);
+      showToast("Network error", 5000);
+    };
+    request.onabort = function () {
+      // Handle request abort
+      console.error("Request aborted:", request.statusText);
+      showToast("Request aborted", 5000);
+    };
+    request.ontimeout = function () {
+      // Handle request timeout
+      console.error("Request timed out:", request.statusText);
+      showToast("Request timed out", 5000);
+    };
+  // end fetch
+  
 }
 
 function drawGridRow(
-  mainID,
+             mainID,
               DBName,
               tableName,
               data,
@@ -750,6 +798,7 @@ function drawGridRow(
 )
 
 {
+   console.log("drawGridRow");
         let record = j;
         const rowid = Object.values(data[j])[0];
         const rowData = data[j];
@@ -759,7 +808,7 @@ function drawGridRow(
         rowDiv.className = "grid-row";
         rowDiv.setAttribute("rowid",  rowid);
         // add click event to row to call linkRecordToGrid(tableName, rowId)
-
+         console.log(rowData);
         if (j == 0) {
           // call linkRecordToGrid(tableName, rowId)
           linkRecordToGrid(

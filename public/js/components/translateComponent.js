@@ -125,6 +125,7 @@ function editTranslateComponent(type, element, content) {
 
 function renderTranslationComponent( mainDiv) {
    
+    mainDiv.innerHTML = ''; // Clear the mainDiv content
     const floatButton = document.createElement('div');
    // floatButton.style.position = 'fixed';
    
