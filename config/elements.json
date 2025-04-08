@@ -196,7 +196,7 @@
     "editFunction": "editMenuComponent",
     "styles": "menuComponent.css",
     "icon": "fa fa-bars",
-    "renderFunction": ""
+    "renderFunction": "rendenderMenuComponent"
   },
   "translate": {
     "type": "translate",

@@ -78,7 +78,7 @@ function createTranslateComponent(type) {
     mainDiv.className = "form-element";
     mainDiv.id = `translateComponent-${Date.now()}`;
  
-    renderTranslationComponent(type, mainDiv);
+    renderTranslationComponent(mainDiv);
     return mainDiv;
 }
 
@@ -123,7 +123,7 @@ function editTranslateComponent(type, element, content) {
 }
 
 
-function renderTranslationComponent(type, mainDiv) {
+function renderTranslationComponent( mainDiv) {
    
     const floatButton = document.createElement('div');
    // floatButton.style.position = 'fixed';

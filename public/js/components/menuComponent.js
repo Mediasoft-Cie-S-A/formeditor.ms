@@ -52,7 +52,7 @@ function createMenuComponent(type) {
     internalDiv.appendChild(menu);
     mainDiv.appendChild(internalDiv);
     mainDiv.setAttribute("items", JSON.stringify(menuItems));
-    rendenderMenuComponent(type, mainDiv);
+    rendenderMenuComponent( mainDiv);
     return mainDiv;
 }
 
@@ -86,6 +86,7 @@ function editMenuComponent(type, element, content) {
 }
 
 function addmenuItems(element, itemdiv, itemObj) {
+    console.log(itemObj);
     const internalDiv = document.createElement('div');
     internalDiv.style.marginBottom = "5px";
     internalDiv.style.border = "1px solid #ccc";
@@ -151,44 +152,46 @@ function saveMenuItems(element) {
         for (let i = 0; i < children.length; i++) {
             const item = children[i].querySelector("input:nth-child(1)").value;
             const url = children[i].querySelector("input:nth-child(2)").value;
+            const icon = children[i].querySelector("input:nth-child(3)").value;
+            const target = children[i].querySelector("input:nth-child(4)").value;
+            const checkpoint = children[i].querySelector("input:nth-child(5)").value;
 
             const subMenuDiv = children[i].querySelector("div");
             const childrenItems = subMenuDiv ? parseMenuItems(subMenuDiv) : [];
-            items.push({ item, url, children: childrenItems });
+            items.push({
+                item: item,
+                url: url,
+                icon: icon,
+                target: target,
+                checkpoint: checkpoint,
+                children: childrenItems.length > 0 ? childrenItems : null
+            });
         }
         return items;
     };
     const itemdiv = document.getElementById("menu-items");
     const items = parseMenuItems(itemdiv);
     element.setAttribute("items", JSON.stringify(items));
-    rendenderMenuComponent(element.getAttribute("tagName"), element);
+    rendenderMenuComponent( element);
 }
 
-function rendenderMenuComponent(type, content) {
+function rendenderMenuComponent(content) {
     const items = JSON.parse(content.getAttribute("items"));
     const menu = content.querySelector('ul');
     menu.innerHTML = "";
-
+    console.log(items);
+    // Create a function to generate menu items recursively
     const createMenuItem = (item) => {
         const li = document.createElement('li');
         const a = document.createElement('a');
         const i = document.createElement('i');
 
-        a.href = item.url;
         a.textContent = item.item;
-        a.target = item.target;
+       
         i.className = item.icon;
         li.appendChild(i);
+        li.appendChild(a);
        
-        if (item.children==null) 
-        {
-            li.appendChild(a);
-            
-        }
-        else
-        {
-            li.appendChild(document.createTextNode(" " + item.item));
-        }
         
         // Create sub-menu if there are children
         if (item.children && item.children.length > 0) {

@@ -72,7 +72,7 @@ function jsonToDom(json, parent) {
   // planning
 
 function renderElements(parent){
-  var planningElements = parent.querySelectorAll('div[tagname="planning"]');
+  /*  var planningElements = parent.querySelectorAll('div[tagname="planning"]');
   for (var i = 0; i < planningElements.length; i++) {
     console.log("planning:" + planningElements[i]);
     gantrender(planningElements[i]);
@@ -96,6 +96,51 @@ function renderElements(parent){
     console.log("cookieStorage:" + cookieStorageElements[i]);
     renderCookieStorage(cookieStorageElements[i]);    
   }
+
+  var menuElements = parent.querySelectorAll('div[tagname="menuComponent"]');
+  for (var i = 0; i < menuElements.length; i++) {
+    console.log("menuComponent:" + menuElements[i]);
+    rendenderMenuComponent(menuElements[i].getAttribute("tagName"), menuElements[i]);
+  } */
+ // load the config in the element.json
+ loadJson("/elementsConfig")
+  .then((data) => {
+     console.log(data);
+
+    
+    // Loop through each element in the data
+    for (const elementId in data) {
+      {
+        const element = data[elementId];
+       
+        
+            // Check if the element has a tagname attribute
+            if (element.type) {
+              // Find all elements with the specified tagname
+              var elements = parent.querySelectorAll('div[tagname="' + element.type + '"]');
+              // Loop through each found element and apply the configuration
+              for (var j = 0; j < elements.length; j++) {
+                      var el = elements[j];
+                      console.log("el:" + el);
+                      // Apply the configuration to the element
+                    // get the render function from the config
+                      var renderFunction = element.renderFunction;
+                      if (renderFunction) {
+                        console.log("renderFunction:" + renderFunction);
+                        // Call the render function with the element as a parameter
+                        window[renderFunction](el);
+                        } else {
+                        console.log("No render function found for tagname: " + element.type);
+                      } // end if renderFunction
+                  } // end for (var j = 0; j < elements.length; j++)
+              } // end  
+        } // end if (element.tagname)  
+      }
+  })
+  .catch((err) => {
+    console.error(err);
+  });
+
 }
 // Function to create DOM element from JSON
 function createDomElement(json, parent) {
