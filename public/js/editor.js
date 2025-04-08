@@ -18,49 +18,6 @@ var moveElementEvent = false;
 const labelheight = 20;
 
 // floating window for the editor
-interact('#editorDataInfos')
-  .draggable({
-    inertia: true,
-    modifiers: [
-      interact.modifiers.restrictRect({ restriction: 'parent' })
-    ],
-    listeners: {
-      move(event) {
-        event.preventDefault();
-        // remove float  to the event.target
-
-        const target = event.target;
-        const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-        const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-
-        target.style.transform = `translate(${x}px, ${y}px)`;
-        target.setAttribute('data-x', x);
-        target.setAttribute('data-y', y);
-      }
-    }
-  });
-
-  interact('#editorPropertyInfos')
-  .draggable({
-    inertia: true,
-    modifiers: [
-      interact.modifiers.restrictRect({ restriction: 'parent' })
-    ],
-    listeners: {
-      move(event) {
-        event.preventDefault();
-        // remove float  to the event.target
-
-        const target = event.target;
-        const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-        const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-
-        target.style.transform = `translate(${x}px, ${y}px)`;
-        target.setAttribute('data-x', x);
-        target.setAttribute('data-y', y);
-      }
-    }
-  });
 
 function removeAllChildNodes(parent) {
   while (parent.firstChild) {
@@ -169,22 +126,25 @@ function editElement(element) {
   dialog.style.display = "block";
   const content = dialog.querySelector("div");
   content.innerHTML = "";
-  content.style.padding = "5px";
   const closeIcon = document.createElement("i");
+ 
+  closeIcon.style.color = "red";
+  closeIcon.style.fontSize = "18px";
   closeIcon.className = "fa fa-close remove-item";
  // closeIcon.style.float = "right";
   closeIcon.onclick = () => (dialog.style.display = "none");
-  content.appendChild(closeIcon);
+ 
 
   const label = document.createElement("label");
   label.textContent = element.id;
   dialog.setAttribute("data-element-id", element.id);
   dialog.setAttribute("data-element-type", element.getAttribute("tagName"));
  // label.style.float = "left";
-  label.style.backgroundColor = "grey";
-  label.style.color = "white";
-  label.style.fontSize = "10px";
+  
+  label.style.color = "gray";
+  label.style.fontSize = "18px";
   content.appendChild(label);
+  content.appendChild(closeIcon);
 // Get the type of the element
   // if type is null get the element type
   var type = element.getAttribute("tagName");
