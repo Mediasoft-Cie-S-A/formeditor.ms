@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import OdbcDatabase from './OdbcDatabase.js';
-import MySqlDatabase from './MySqlDatabase.js';
+ const OdbcDatabase = require("./OdbcDatabase.js");
+ const MySqlDatabase = require("./MySqlDatabase.js");
 
 class dblayer{
 
@@ -53,20 +53,18 @@ class dblayer{
 
                 case "mysql2":
                   this.databases[key] = new MySqlDatabase(value);
-                  await this.databases[key].connect();    
+                  // await this.databases[key].connect();    
                 
                   this.dbCache[key] = await  this.databases[key].getTablesList();   
             //  console.log(this.dbCache[key]);     
             this.tableToDatabaseMapping = this.createTableDatabaseMapping(this.dbCache);
-              await  this.databases[key].close();   
+              // await  this.databases[key].close();   
                   break;
                 case "odbc":
                   this.databases[key] = new OdbcDatabase(value);
-                  await this.databases[key].connect();     
-                 
-                  this.dbCache[key] = await  this.databases[key].getTablesList();   
+                  this.dbCache[key] = await this.databases[key].getTablesList();   
                 //  console.log(this.dbCache[key]);     
-                  await  this.databases[key].close();  
+                  // await  this.databases[key].close();  
                   this.tableToDatabaseMapping = this.createTableDatabaseMapping(this.dbCache);
                   break;              
               }
@@ -146,9 +144,9 @@ class dblayer{
     if (keys.length === 1) {
       console.log("databases:"+databases[0]);
       const db = databases[keys[0]];
-      await db.connect();
+     
       const result = await db.queryData(sqlQuery);
-      await db.close();
+      
       return result;
     }
 
@@ -252,10 +250,13 @@ class dblayer{
                   console.log(tableName);
                 // console.log(dbs);
                   const db= dbs.databases[database];
-                  await db.connect();             
-                  const structure = await db.getTableFields(tableName);
-                  res.json(structure);
-                  await db.close();
+                              
+                  db.getTableFields(tableName).then(structure => {
+                   // Convert BigInt to int or string
+                  const convertedData = this.convertBigIntToInt(structure);
+                  res.json(convertedData);
+                });
+                  
               } catch (err) {
                   console.log('Error:', err);
                   res.status(500).send('Internal Server Error');
@@ -319,10 +320,14 @@ class dblayer{
                   console.log("table-fields");
                   const {database, tableName } = req.params;
                   const db= dbs.databases[database];
-                  await db.connect();              
-                  const fields = await db.getTableFields(tableName);
-                  res.json(fields);
-                  await db.close();
+                               
+                 db.getTableFields(tableName).then(fields => {
+                  // Convert BigInt to int or string
+                  const convertedData = this.convertBigIntToInt(fields);
+                  res.json(convertedData);
+                });
+                 
+                  
               } catch (err) {
                   res.status(500).send(`Error retrieving fields for table ${tableName}`);
               } 
@@ -354,10 +359,13 @@ class dblayer{
                   console.log("table-indexes");
                   const {database, tableName } = req.params;
                   const db= dbs.databases[database];
-                  await db.connect();
-                  const indexes = await db.getTableIndexes(tableName);
-                  res.json(indexes);
-                  await db.close();
+                 
+                 db.getTableIndexes(tableName).then(indexes => {
+                  // Convert BigInt to int or string
+                  const convertedData = this.convertBigIntToInt(indexes);
+                  res.json(convertedData);
+                });
+                                   
               } catch (err) {
                   res.status(500).send(`Error retrieving indexes for table ${tableName}`);
               } 
@@ -373,17 +381,19 @@ class dblayer{
               try {
                 const {database, tableName } = req.params;
               const db= dbs.databases[database];
-              await db.connect();
+             
 
                 const rowID = req.params.rowID;
                 // Get the fields from the query string. It's a comma-separated string.
                 const fields = req.query.fields ? req.query.fields.split(",") : "ROWID";
 
-                const record = await db.getRecordByRowID(tableName, fields, rowID);
-                res.json(JSON.parse(JSON.stringify(record, (key, value) =>
-                  typeof value === 'bigint' ? value.toString() : value
-                )));
-                await db.close();
+                db.getRecordByRowID(tableName, fields, rowID).then(data => {
+                  // Convert BigInt to int or string
+                  const convertedData = this.convertBigIntToInt(data);
+                  res.json(convertedData);
+                });
+              
+                
               } catch (err) {
                 console.error("Error:", err);
                 res.status(500).send({"Error moving to previous record":err});
@@ -399,7 +409,7 @@ class dblayer{
                 console.log("get-records-by-idexes");
                 const {database, tableName} = req.params;
               const db= dbs.databases[database];
-              await db.connect();
+             
                 // convert indexes,values from comma separted into array
                 const indexes = req.query.indexes.split(",");
                 const values = req.query.values.split(",");
@@ -416,9 +426,12 @@ class dblayer{
                 const where = indexes.map((index, i) => `"${index}" = '${values[i]}'`).join(" AND ");
                 // generate the query with fields and where clause
                 const query = `SELECT ${fields} FROM PUB.${tableName} WHERE ${where}`;
-                const records = await db.queryData(query);              
-                res.json(records);
-                await db.close();
+                 db.queryData(query).then(data => {
+                  // Convert BigInt to int or string
+                  const convertedData = this.convertBigIntToInt(data);
+                  res.json(convertedData);              
+                });
+                
               } catch (err) {
                 console.error("Error:", err);
                 res.status(500).send({"Error moving to previous record":err});
@@ -459,12 +472,15 @@ class dblayer{
               try {
                 const {database, tableName } = req.params;
               const db= dbs.databases[database];
-              await db.connect();
+             
 
                 const currentRowId = req.params.currentRowId;
-                const nextRecord = await db.getROWID(tableName, currentRowId);
-                res.json(nextRecord);
-                await db.close();
+                db.getROWID(tableName, currentRowId).then(data => {
+                  // Convert BigInt to int or string
+                  const convertedData = this.convertBigIntToInt(data);
+                  res.json(convertedData);
+                });
+                
               } catch (err) {
                 console.error("Error:", err);
                 res.status(500).send({"Error moving to next record":err});
@@ -516,15 +532,15 @@ class dblayer{
             async (req, res) => {
               const {database, tableName, rowID } = req.params;
               const db= dbs.databases[database];
-              await db.connect();
+             
 
               const data = req.body; // Assuming the updated data is sent in the request body
               console.log(data);
               try {
-                await db.connectWrite();
+                
                 const result = await db.updateRecord(tableName, data, rowID);
                 res.json({ message: "Record updated successfully", result });
-                await db.close();
+                
                 const action = "event_triggered";
                 const details = { tableName, data,  event: "Update" };
                 // Track the action in MongoDB
@@ -547,10 +563,10 @@ class dblayer{
               const data = req.body; // Assuming the updated data is sent in the request body
               console.log(data);
               try {
-                await db.connectWrite();
+                
                 const result = await db.insertRecord(tableName, data);
                 res.json({ message: "Record inserted successfully", result });
-                await db.close();
+                
                 const action = "event_triggered";
                 const details = { tableName, data, event: "Insert" };
                 // Track the action in MongoDB
@@ -568,9 +584,10 @@ class dblayer{
             dbs.checkAuthenticated,
             async (req, res) => {
               try {
+                
                 const {database, tableName, page, pageSize  } = req.params;
                 const db= dbs.databases[database];
-                await db.connect();
+               
 
                 // Convert page and pageSize to numbers
                 const pageNum = parseInt(page, 10);
@@ -584,15 +601,19 @@ class dblayer{
                 const filterObj = filter ? JSON.parse(filter): null;
               
           
-                const data = await db.queryDataWithPagination(
+                 db.queryDataWithPagination(
                   tableName,
                   pageNum,
                   pageSizeNum,
                   fields,
                   filterObj
-                );
-                res.json(data);
-                await db.close();
+                ).then(data => {
+                  // Convert BigInt to int or string
+                  const convertedData = this.convertBigIntToInt(data);
+                  res.json(convertedData);
+                });
+                
+                
               } catch (err) {
                 console.error("Error:", err);
                 res.status(500).send({"Error fetching paginated data":err});
@@ -608,7 +629,7 @@ class dblayer{
                   const {database, page, pageSize  } = req.params;
                   var sqlQuery = req.query.sqlQuery;
                   const db= dbs.databases[database];
-                  await db.connect();
+                 
   
                   // Convert page and pageSize to numbers
                   const pageNum = parseInt(page, 10);
@@ -622,9 +643,12 @@ class dblayer{
                   const limit = req.query.limit ? req.query.limit : null;
                   sqlQuery += ` FETCH FIRST ${pageSizeNum} ROWS ONLY`;
                   // get data from the query
-                  const data = await db.queryData(sqlQuery);
-                  res.json(data);
-                  await db.close();
+                 db.queryData(sqlQuery).then(data => {
+                  // Convert BigInt to int or string
+                  const convertedData = this.convertBigIntToInt(data);
+                  res.json(convertedData);
+                });
+                  
                 } catch (err) {
                   console.error("Error:", err);
                   res.status(500).send({"Error fetching paginated data":err});
@@ -638,7 +662,7 @@ class dblayer{
             try {
               const {database, tableName } = req.params;
               const db= dbs.databases[database];
-              await db.connectWrite();
+              
               
               const { action, columnName, columnType, newColumnName, newColumnType } =
                 req.body;
@@ -658,7 +682,7 @@ class dblayer{
               }
 
               res.json({ message: "Table altered successfully", result });
-              await db.close();
+              
             } catch (err) {
               console.error(err);
               res.status(500).send({"Error altering table":err});
@@ -669,11 +693,11 @@ class dblayer{
             try {
               const {database, tableName } = req.params;
               const db= dbs.databases[database];
-              await db.connectWrite();
+              
               const columns = req.body.columns;
               const result = await db.createTable(tableName, columns);
               res.json({ message: "Table created successfully", result });
-              await db.close();
+              
             } catch (err) {
               console.error(err);
               res.status(500).send({"Error creating table":err});
@@ -703,7 +727,7 @@ class dblayer{
               try {
                 const {database, tableName, fieldName } = req.params;
                 const db= dbs.databases[database];
-                await db.connect();
+               
 
                 // convert html code to special characters
 
@@ -711,9 +735,13 @@ class dblayer{
                   ? decodeSpecialChars(req.query.filter)
                   : null;
 
-                const result = await db.selectDistinct(tableName, fieldName, filter);
-                res.json(result);
-                await db.close();
+                db.selectDistinct(tableName, fieldName, filter).then(data => {
+                  // Convert BigInt to int or string
+                  const convertedData = this.convertBigIntToInt(data);
+                  res.json(convertedData);
+                });
+                
+                
               } catch (err) {
                 console.error(err);
                 res.status(500).send({"Error selecting distinct values":err});
@@ -731,7 +759,7 @@ class dblayer{
                 // delete duplicate values in fieldName
                
                 const db= dbs.databases[database];
-                await db.connect();
+               
 
                 // convert html code to special characters
                 const fieldid = req.query.id;
@@ -739,14 +767,17 @@ class dblayer{
                   ? decodeSpecialChars(req.query.filter)
                   : null;
 
-                const result = await db.selectDistinctIdValue(
+               db.selectDistinctIdValue(
                   tableName,
                   fieldid,
                   fieldName,
                   filter
-                );
-                res.json(result);
-                await db.close();
+                ).then(data => {
+                  // Convert BigInt to int or string
+                  const convertedData = this.convertBigIntToInt(data);
+                  res.json(convertedData);
+                });
+                
               } catch (err) {
                 console.error(err);
                 res.status(500).send({"Error selecting distinct values":err});
@@ -760,14 +791,14 @@ class dblayer{
             try {
               const {database, tableName } = req.params;
               const db= dbs.databases[database];
-              await db.connect();
+             
               const fields = req.query.fields ? req.query.fields.split(",") : null;
               const result = await db.exportTableToCSV(tableName, fields);
               // res set header
               res.set("Content-Type", "text/csv");
               res.set("Content-Disposition", `attachment; filename=${tableName}.csv`);
               res.status(200).send(result);
-              await db.close();
+              
             } catch (err) {
               console.error(err);
               res.status(500).send("Error exporting table");
@@ -782,12 +813,15 @@ class dblayer{
               try {
                 const {database, tableName } = req.params;
                 const db= dbs.databases[database];
-                await db.connect();
+               
                 const fields = req.query.fields ? req.query.fields.split(",") : null;
                 const filter = req.query.filter ? req.query.filter : null;
-                const result = await db.selectDistinct(tableName, fields, filter);
-                res.json(result);
-                await db.close();
+                db.selectDistinct(tableName, fields, filter).then(data => {
+                  // Convert BigInt to int or string
+                  const convertedData = this.convertBigIntToInt(data);
+                  res.json(convertedData);
+                }
+                );                
               } catch (err) {
                 console.error(err);
                 res.status(500).send("Error selecting data");
@@ -801,13 +835,17 @@ class dblayer{
               // connect to database
               const {database, tableName } = req.params;  
               const db= dbs.databases[database];
-              await db.connect();
+             
 
               // filter
               const filter = req.query.filter ? req.query.filter : null;
-              const result = await db.count(tableName, filter);
-              res.json(result);
-              await db.close();
+             db.count(tableName, filter).then(data => {
+                // Convert BigInt to int or string
+                const convertedData = this.convertBigIntToInt(data);
+                res.json(convertedData);
+              }
+              );
+              
             } catch (err) {
               console.error(err);
               res.status(500).send("Error selecting count");
@@ -923,12 +961,12 @@ async function filterDocuments( view, filters, columns, groups, sort, direction,
 
     // Connect to the database
     const db= dbs.databases[columns[0].DBName];
-    await db.connect();
+   
     // Execute the query
     const data = await db.queryData(query);
   //  console.log(data);
     // Close the database connection
-    await db.close();
+    
     // Flatten the JSON data
    
     // return the data
@@ -1005,7 +1043,7 @@ function pivotData(data,columnFields,pivotFields ) {
           // app.get("/next-sequence", dbs.checkAuthenticated, async (req, res) => {
           //   try {
           //     console.log("step three is call");
-          //     await db.connect();
+          //    
           //     const sequence = await db.nextSequence();
           //     console.log(sequence);
           //     console.log("result Above");
@@ -1013,7 +1051,7 @@ function pivotData(data,columnFields,pivotFields ) {
           //   } catch (err) {
           //     res.status(500).send(`Error retrieving fields for table }`);
           //   } finally {
-          //     await db.close();
+          //     
           //   }
           // });
           function convertBigIntToString(obj) {
@@ -1038,17 +1076,16 @@ function pivotData(data,columnFields,pivotFields ) {
               const {database,table, seq } = req.params;
               console.log("Step three is called");
               const db= dbs.databases[database];
-              await db.connect();
+             
 
-              const sequence = await db.nextSequence(table,seq);
-              console.log(sequence);
-              console.log("Result above");
-
-              // Convert BigInt values in the sequence to strings
-              const sanitizedSequence = convertBigIntToString(sequence);
-
-              res.json(sanitizedSequence);
-              await db.close();
+            db.nextSequence(table,seq).then(sequence => {
+              // Convert BigInt to int or string
+              const convertedData = convertBigIntToString(sequence);
+              res.json(convertedData);
+            }
+            );
+              
+              
             } catch (err) {
               console.error("Error retrieving sequence:", err);
               res.status(500).json({ error: "Error retrieving fields for the table" });
@@ -1060,10 +1097,14 @@ function pivotData(data,columnFields,pivotFields ) {
             try {
               const {database, sqlQuery } = req.params;
               const db= dbs.databases[database];
-              await db.connect();
-              const result = await db.queryData(sqlQuery);
-              res.json(result);
-              await db.close();
+             
+              db.queryData(sqlQuery).then(result => {
+                // Convert BigInt to int or string
+                const convertedData = convertBigIntToString(result);
+                res.json(convertedData);
+              }
+              );
+              
             } catch (err) {
               console.error(err);
               res.status(500).send("Error querying data");
@@ -1077,7 +1118,7 @@ function pivotData(data,columnFields,pivotFields ) {
               try {
               const {database, tableName } = req.params;
               const db= dbs.databases[database];
-              await db.connect();
+             
 
                 // Get the fields from the query string. It's a comma-separated string.
                 const fields = req.query.fields ? req.query.fields.split(",") : null;
@@ -1092,9 +1133,12 @@ function pivotData(data,columnFields,pivotFields ) {
                     }
                   : null;
 
-                const groupe = await db.getAllGroupe(tableName, fields, filterObj);
-                res.json(groupe);
-                await db.close();
+               db.getAllGroupe(tableName, fields, filterObj).then(data => {
+                  // Convert BigInt to int or string
+                  const convertedData = convertBigIntToString(data);
+                  res.json(convertedData);
+                }
+                );
               } catch (err) {
                 console.error("Error:", err);
                 res.status(500).send("Error moving to first record");
@@ -1104,4 +1148,4 @@ function pivotData(data,columnFields,pivotFields ) {
         }
 }
 
-export default dblayer;
+module.exports = dblayer;

@@ -92,7 +92,7 @@ const url = app.config.mongoDbUrl;
 const dbName = app.config.mongoDbName;
 const port = app.config.port;
 // Create a new MongoClient
-const client = new MongoClient(url, { useUnifiedTopology: true });
+const client = new MongoClient(url, { });
 require("./mongodb")(app, client, dbName);
 
 app.use(express.urlencoded({ extended: false }));
@@ -108,7 +108,7 @@ require('./authentication')(app,session, passport);
 require('./authCustom')(app,session, passport);
 require('./authStatic')(app,session, passport);
 
-const dblayer = require('./dblayer').default;
+const dblayer = require('./dblayer');
 const dbs= new dblayer(app,session, passport,client);
 dbs.init();
 try
@@ -168,6 +168,61 @@ app.get("/elementsConfig", (req, res) => {
 // add routes for send email
 // require('./smtpAzureAd')(app,session, passport);
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+// Add process listeners BEFORE starting the server
+process.on('exit', (code) => {
+  console.log(`🔚 Process exiting with code: ${code}`);
 });
+
+process.on('SIGINT', () => {
+  console.log('🛑 Caught SIGINT (Ctrl+C). Shutting down gracefully...');
+  process.exit();
+});
+
+process.on('SIGTERM', () => {
+  console.log('🔒 Caught SIGTERM (kill). Cleaning up...');
+  process.exit();
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('💥 Uncaught Exception:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection:', reason);
+  process.exit(1);
+});
+
+process.on('warning', (warning) => {
+  console.warn('⚠️ Warning:', warning.name, warning.message, warning.stack);
+});
+
+process.on('message', (msg) => {
+  console.log('📬 Message from parent:', msg);
+});
+
+process.on('SIGUSR1', () => {
+  console.log('📩 Received SIGUSR1 signal. Performing custom action...');
+  // Custom action here
+} );
+
+process.on('SIGUSR2', () => {
+  console.log('📩 Received SIGUSR2 signal. Performing custom action...');
+  // Custom action here
+});
+
+process.on('multipleResolves', (type, promise, reason) => {
+  console.error('🔁 Multiple Resolves:', type, promise, reason);
+} );
+
+process.on('rejectionHandled', (promise) => {
+  console.warn('🔁 Rejection Handled:', promise);
+});
+
+try {
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+} catch (e) {
+  console.error("Server failed to start:", e);
+}

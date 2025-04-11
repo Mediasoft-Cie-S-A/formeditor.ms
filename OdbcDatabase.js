@@ -22,38 +22,7 @@ class OdbcDatabase {
     this.connectionString = connectionString.ConnectionString;
   }
 
-  async connect() {
-    try {
-      const connectionConfig = {
-        connectionString: this.connectionString,
-        connectionTimeout: 10,
-        loginTimeout: 10,
-      };
-      this.connection = await odbc.connect(connectionConfig);
-      this.connection.setIsolationLevel(odbc.SQL_TXN_READ_COMMITTED);
-      // set pool size
-     this.connection.poolSize = 10;
 
-    } catch (err) {
-      console.log("Error connecting to the database:", err);
-      //  throw err;
-    }
-  }
-
-  async connectWrite() {
-    try {
-      const connectionConfig = {
-        connectionString: this.connectionString,
-        connectionTimeout: 10,
-        loginTimeout: 10,
-      };
-      this.connection = await odbc.connect(connectionConfig);
-      this.connection.setIsolationLevel(odbc.SQL_TXN_READ_COMMITTED);
-    } catch (err) {
-      console.log("Error connecting to the database:", err);
-      //  throw err;
-    }
-  }
 
   async selectDistinct(tableName, columnName, filter) {
     try {
@@ -66,8 +35,12 @@ class OdbcDatabase {
       }
       console.log(sql);
       // Execute the query
+    
+      
+       this.connection =  await odbc.connect(this.connectionString);  
+       await this.connection.setIsolationLevel(odbc.SQL_TXN_READ_UNCOMMITTED);
       const result = await this.connection.query(sql);
-
+      // await this.connection.close();
       return result;
     } catch (err) {
       console.log("Error selecting distinct values:", err);
@@ -90,13 +63,18 @@ class OdbcDatabase {
       sql += ` FETCH FIRST 10 ROWS ONLY`;
       console.log(sql);
       // Execute the query
+     
+       this.connection =  await odbc.connect(this.connectionString);
+       await this.connection.setIsolationLevel(odbc.SQL_TXN_READ_UNCOMMITTED);
       const result = await this.connection.query(sql);
+      // await this.connection.close();
       return result;
     } catch (err) {
       console.log("Error selecting distinct values:", err);
       throw err;
     }
   }
+
 
   // count records
   async count(tableName, filter) {
@@ -110,8 +88,12 @@ class OdbcDatabase {
       }
       console.log(sql);
       // Execute the query
-      const result = await this.connection.query(sql);
 
+      
+       this.connection =  await odbc.connect(this.connectionString);
+       await this.connection.setIsolationLevel(odbc.SQL_TXN_READ_UNCOMMITTED);
+      const result = await this.connection.query(sql);
+      // await this.connection.close();
       return result;
     } catch (err) {
       console.log("Error counting records:", err);
@@ -122,8 +104,12 @@ class OdbcDatabase {
   async queryData(queryString) {
     try {
       console.log(queryString);
+      // Execute the query
+  
+       this.connection =  await odbc.connect(this.connectionString);
+       await this.connection.setIsolationLevel(odbc.SQL_TXN_READ_UNCOMMITTED);
       const result = await this.connection.query(queryString);
-     
+      // await this.connection.close();
       return result;
     } catch (err) {
       console.log("Error querying data:", queryString, err);
@@ -133,7 +119,13 @@ class OdbcDatabase {
 
   async updateData(updateQuery) {
     try {
+      // Execute the update query
+  
+      this.connection =  await odbc.connect(this.connectionString);
+      await this.connection.setIsolationLevel(odbc.SQL_TXN_READ_COMMITTED);
       const result = await this.connection.query(updateQuery);
+      // await this.connection.close();
+      
       return result;
     } catch (err) {
       console.log("Error updating data:", err);
@@ -143,7 +135,12 @@ class OdbcDatabase {
 
   async deleteData(deleteQuery) {
     try {
+      // Execute the delete query
+      
+      this.connection =  await odbc.connect(this.connectionString);  
+      await this.connection.setIsolationLevel(odbc.SQL_TXN_READ_COMMITTED);
       const result = await this.connection.query(deleteQuery);
+      // await this.connection.close();
       return result;
     } catch (err) {
       console.log("Error deleting data:", err);
@@ -151,20 +148,17 @@ class OdbcDatabase {
     }
   }
 
-  async close() {
-    try {
-      await this.connection.close();
-    } catch (err) {
-      console.log("Error closing the database connection:", err);
-    }
-  }
-
+  
   async getTablesList() {
     try {
       // Query to get list of tables in OpenEdge
       console.log("getTablesList");
       const query = `SELECT "_File-Name" name, "_Desc" label FROM PUB."_File" WHERE "_file-Number">0 and "_file-Number"<32768 ORDER BY "_File-Name"`;
+      
+      this.connection =  await odbc.connect(this.connectionString);
+      await this.connection.setIsolationLevel(odbc.SQL_TXN_READ_UNCOMMITTED);
       const result = await this.connection.query(query);
+      // await this.connection.close();
       return result;
     } catch (err) {
       console.log("Error retrieving tables list:", err);
@@ -179,7 +173,11 @@ class OdbcDatabase {
       query += ` "_Format" 'FORMAT', "_Decimals" 'DECIMAL', "_Width" 'WIDTH', "_Initial" 'DEFAULT' FROM PUB."_Field" `;
       query += ` WHERE PUB."_Field"."_File-Recid" = (SELECT ROWID FROM PUB."_File" WHERE "_File-Name" = '${tableName}')`;
       console.log(query);
+      
+      this.connection =  await odbc.connect(this.connectionString);
+      await this.connection.setIsolationLevel(odbc.SQL_TXN_READ_UNCOMMITTED);
       const result = await this.connection.query(query);
+      // await this.connection.close();
       return result;
     } catch (err) {
       console.log(`Error retrieving fields for table ${tableName}:`, err);
@@ -192,7 +190,11 @@ class OdbcDatabase {
       // Query to get indexes of a table in OpenEdge
       const query = `select "_index-name" Name from PUB."_index" idx, PUB."_file" fi where fi."_file-name"='${tableName}' and idx.rowid =(select"_file"."_prime-index" from PUB."_file" fs where fs."_file-name"='${tableName}')`;
       console.log(query);
+      
+      this.connection =  await odbc.connect(this.connectionString);
+      await this.connection.setIsolationLevel(odbc.SQL_TXN_READ_UNCOMMITTED);
       const result = await this.connection.query(query);
+      // await this.connection.close();
       return result;
     } catch (err) {
       console.log(`Error retrieving indexes for table ${tableName}:`, err);
@@ -221,7 +223,15 @@ class OdbcDatabase {
         }
         paginatedQuery += ` OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
         console.log(paginatedQuery);
+        // Execute the paginated query
+        
+        this.connection =  await odbc.connect(this.connectionString);
+        await this.connection.setIsolationLevel(odbc.SQL_TXN_READ_UNCOMMITTED);
         const result = await this.connection.query(paginatedQuery);
+      
+        // await this.connection.close();
+        console.log("close connection");
+        // Return the result
         return result;
       }
       return null;
@@ -424,8 +434,11 @@ class OdbcDatabase {
 
       console.log(sql);
       // Execute the query
+     
+      this.connection =  await odbc.connect(this.connectionString);
+      await this.connection.setIsolationLevel(odbc.SQL_TXN_READ_COMMITTED);
       const result = await this.connection.query(sql);
-
+      // await this.connection.close();
       return result;
     } catch (err) {
       console.log("Error updating record:", err);
@@ -441,8 +454,12 @@ class OdbcDatabase {
       const sql = `INSERT INTO PUB.${tableName} (${data.fields}) VALUES (${data.values})`;
       console.log(sql);
       // Execute the query
-      const result = await this.connection.query(sql);
+      this.connection = await odbc.connect(this.connectionString);
+      await this.connection.setIsolationLevel(odbc.SQL_TXN_READ_COMMITTED);
+      
 
+      const result = await this.connection.query(sql);
+      // await this.connection.close();
       return result;
     } catch (err) {
       console.log("Error inserting record:", err);
@@ -459,8 +476,10 @@ class OdbcDatabase {
       const sql = `ALTER TABLE PUB.${tableName} ADD ${columnName} ${columnType}`;
       console.log(sql);
       // Execute the query
+      this.connection =  await odbc.connect(this.connectionString);
+      await this.connection.setIsolationLevel(odbc.SQL_TXN_READ_COMMITTED);
       const result = await this.connection.query(sql);
-
+      // await this.connection.close();
       return result;
     } catch (err) {
       console.log("Error altering table:", err);
@@ -475,6 +494,9 @@ class OdbcDatabase {
       let sql = `ALTER TABLE PUB.${tableName} RENAME COLUMN ${columnName} TO ${newColumnName}`;
 
       // Execute the query
+      console.log(sql);
+      this.connection =  await odbc.connect(this.connectionString);
+      await this.connection.setIsolationLevel(odbc.SQL_TXN_READ_COMMITTED);
       let result = await this.connection.query(sql);
 
       return result;
@@ -491,8 +513,10 @@ class OdbcDatabase {
       const sql = `CREATE TABLE PUB.${tableName} (${columns.join(", ")})`;
       console.log(sql);
       // Execute the query
+      this.connection =  await odbc.connect(this.connectionString);
+      await this.connection.setIsolationLevel(odbc.SQL_TXN_READ_COMMITTED);
       const result = await this.connection.query(sql);
-
+      // await this.connection.close();
       return result;
     } catch (err) {
       console.log("Error creating table:", err);
@@ -512,8 +536,10 @@ class OdbcDatabase {
       }
       console.log(sql);
       // Execute the query
+      this.connection =  await odbc.connect(this.connectionString);
+      await this.connection.setIsolationLevel(odbc.SQL_TXN_READ_UNCOMMITTED);
       const result = await this.connection.query(sql);
-
+      // await this.connection.close();
       return result;
     } catch (err) {
       console.log("Error selecting distinct values:", err);
@@ -531,7 +557,10 @@ class OdbcDatabase {
       const sql = `SELECT ${fieldList} FROM PUB.${tableName}`;
       console.log(sql);
       // Execute the query
+      this.connection =  await odbc.connect(this.connectionString);
+      await this.connection.setIsolationLevel(odbc.SQL_TXN_READ_UNCOMMITTED);
       const result = await this.connection.query(sql);
+      // await this.connection.close();
       // convert result form json to csv
       const json2csv = require("json2csv").parse;
       const csv = json2csv(result);
