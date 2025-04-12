@@ -16,6 +16,41 @@
 
 var moveElementEvent = false;
 const labelheight = 20;
+const htmlEditor =  document.getElementById('formContainer');
+let undoStack = [];
+let redoStack = [];
+let isRestoring = false;
+
+// Save initial state
+undoStack.push(htmlEditor.innerHTML);
+
+
+// Undo
+function EditorUndo() {
+  if (undoStack.length <= 1) return;  
+  redoStack.push(htmlEditor.innerHTML);
+  const previousState = undoStack[undoStack.length - 1];  
+  isRestoring = true;
+  htmlEditor.innerHTML = previousState;
+  undoStack.pop(); // Remove the last state after restoring
+  isRestoring = false;
+  console.log(redoStack);
+}
+
+// Redo
+function EditorRedo() {
+  if (redoStack.length <= 1) return;  
+  undoStack.push(htmlEditor.innerHTML);
+  const previousState = redoStack[redoStack.length - 1];  
+  isRestoring = true;
+  htmlEditor.innerHTML = previousState;
+  redoStack.pop(); // Remove the last state after restoring
+  isRestoring = false;
+}
+
+
+
+
 
 // floating window for the editor
 
@@ -220,20 +255,35 @@ function editElement(element) {
 
           inputsContainer.appendChild(input);
           return input;
-      });
+      }); // forEach
 
       box.appendChild(inputsContainer);
 
       const updateButton = document.createElement("button");
       updateButton.textContent = "Update";
+      updateButton.style.marginTop = "5px";
+      updateButton.style.fontSize = "9px";
+      updateButton.style.width = "100%";
+      updateButton.style.backgroundColor = "#4CAF50";
+      updateButton.style.color = "white";
+      updateButton.style.border = "1px solid #ccc";
+      updateButton.onmouseover = () => {
+          updateButton.style.backgroundColor = "#45a049";
+          updateButton.style.cursor = "pointer";
+      };
       updateButton.onclick = () => {
+         // put the htmlEditor in undo stack
+          undoStack.push(htmlEditor.innerHTML);
+          // console.log(undoStack);
           inputElements.forEach((input) => {
               const prop = input.querySelector("select, input").getAttribute("data-style-property");
               const value = input.querySelector("select, input").value;
               updateElementStyle(prop, value);
           });
       };
-      box.appendChild(updateButton);
+      // insert the button at the beginning of the box
+      box.insertBefore(updateButton, box.firstChild);
+      
 
       content.appendChild(box);
   }
@@ -384,6 +434,7 @@ function showHTMLCodeEditor() {
 }
 
 function saveHTMLCode() {
+  undoStack.push(htmlEditor.innerHTML);
   const CodeDialog = document.getElementById("HTMLCodeDialog");
   const codeEditorArea = document.getElementById("HTMLCodeEditorArea");
   const elementId = CodeDialog.getAttribute("data-element-id");
@@ -497,12 +548,14 @@ function findClosestChildToMouse(element, mouseX, mouseY) {
 
 
 function moveElement() {
+  undoStack.push(htmlEditor.innerHTML);
   moveElementEvent = true;
   console.log("moveElement");
 }
 
 
 function deleteElement() {
+  undoStack.push(htmlEditor.innerHTML);
   const inputElementSelected = document.getElementById("editorElementSelected");
   var editorElementSelected = document.getElementById(
     inputElementSelected.value
@@ -572,7 +625,7 @@ function drag(ev) {
 
 function dropInput(event, id) {
   event.preventDefault();
-
+  undoStack.push(htmlEditor.innerHTML);
   // Get the dragged element's ID and its attributes
   var elementId = event.dataTransfer.getData("text");
   var source = document.getElementById(elementId);

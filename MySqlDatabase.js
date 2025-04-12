@@ -3,12 +3,12 @@ const mysql = require("mysql2/promise");
 class MySqlDatabase {
   constructor(connectionConfig) 
   {
-    this.connectionConfig = connectionConfig;
+    connectionConfig = connectionConfig;
   }
 
   async connect() {
     try {
-      this.connection = await mysql.createConnection(this.connectionConfig);
+      connection = await mysql.createConnection(connectionConfig);
       console.log("Connected to MySQL database");
     } catch (err) {
       console.log("Error connecting to the database:", err);
@@ -19,7 +19,7 @@ class MySqlDatabase {
   async queryData(queryString, params = []) {
     try {
       console.log(queryString);
-      const [result] = await this.connection.execute(queryString, params);
+      const [result] = await connection.execute(queryString, params);
       return result;
     } catch (err) {
       console.log("Error querying data:", queryString, err);
@@ -60,7 +60,7 @@ class MySqlDatabase {
 
   async close() {
     try {
-      await this.connection.end();
+      await connection.end();
       console.log("MySQL connection closed");
     } catch (err) {
       console.log("Error closing the database connection:", err);

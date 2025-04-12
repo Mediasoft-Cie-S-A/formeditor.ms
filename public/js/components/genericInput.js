@@ -54,7 +54,7 @@ function createElementInput(type) {
 function editElementInput(type,element,content)
 {
     // Create and append the elements
-   
+     // add to the editor the properties of the element for modify the 
    
 
 }

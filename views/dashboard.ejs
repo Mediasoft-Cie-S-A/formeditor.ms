@@ -241,8 +241,7 @@
                   <div id="componentsSidebar" class="col-md-1 col-sm-12 grid-element" style="background-color: white;" ></div>
                                
                   <div class="col-md-11 col-sm-12 grid-element" style="width: 100%;"
-                    id="formContainer"
-                    
+                    id="formContainer" contenteditable="true"                    
                     ondrop="drop(event)"
                     ondragover="allowDrop(event)"
                   >
@@ -413,6 +412,12 @@
         </div>
         <div class="gjs-toolbar-item" onclick="deleteElement()"  title="Delete Element">
           <i class="bi bi-trash"></i>
+        </div>
+        <div class="gjs-toolbar-item" onclick="EditorUndo()" title="Undo">
+          <i class="bi bi-arrow-counterclockwise"></i>
+      </div>
+       <div class="gjs-toolbar-item" onclick="EditorRedo()" title="Redo">
+          <i class="bi bi-arrow-clockwise"></i>
         </div>
       </div>
     </div>
