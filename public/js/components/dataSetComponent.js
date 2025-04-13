@@ -395,6 +395,7 @@ function createFieldFromJson(fieldJson) {
     einput.setAttribute("dataset-field-mandatory", fieldJson.fieldMandatory);
     einput.setAttribute("dataset-field-values", fieldJson.fieldValues);
     einput.setAttribute("dataset-field-SQL", fieldJson.fieldSQL);
+    einput.setAttribute("tagname", fieldJson.fieldType);
       // set einput disabled and readonly
     einput.disabled = true;
     einput.readOnly = true;

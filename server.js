@@ -92,7 +92,7 @@ const url = app.config.mongoDbUrl;
 const dbName = app.config.mongoDbName;
 const port = app.config.port;
 // Create a new MongoClient
-const client = new MongoClient(url, { });
+const client = new MongoClient(url, {  });
 require("./mongodb")(app, client, dbName);
 
 app.use(express.urlencoded({ extended: false }));

@@ -96,10 +96,20 @@ function createInputItem(id, label, styleProperty, text, type, attribute) {
   input.type = type;
   input.className = "input-element";
   input.id = id;
- 
+  input.setAttribute("data-style-property", styleProperty);
   input.value = text;
   div.appendChild(lbl);
   div.appendChild(input);
+  // set the attribute if exists in currentElement
+  if (currentElement) {
+    // get the real value of the attribute 
+    var attributeValue = currentElement.getAttribute(attribute);
+    if (attributeValue) {
+      input.value = attributeValue;
+    } else {
+      input.value = currentElement.style[styleProperty] || "";
+    }
+  }
 
   return div;
 }
@@ -145,7 +155,7 @@ function editElement(element) {
     "Transitions & Animations": ["transition", "transition-property", "transition-duration", "transition-timing-function", "transition-delay", "animation", "animation-name", "animation-duration", "animation-timing-function", "animation-delay", "animation-iteration-count", "animation-direction"],
     "Filters & Effects": ["clip-path", "filter"],
     "Cursor & Interaction": ["cursor", "pointer-events"]
-};
+      };
 
 
   const predefinedValues = {
@@ -155,7 +165,7 @@ function editElement(element) {
       "flex-direction": ["row", "row-reverse", "column", "column-reverse"],
       "justify-content": ["flex-start", "center", "flex-end", "space-between", "space-around"],
       "align-items": ["flex-start", "center", "flex-end", "stretch", "baseline"]
-  };
+      };
 
   const dialog = document.getElementById("propertiesBar");
   dialog.style.display = "block";
@@ -222,8 +232,20 @@ function editElement(element) {
               colorInput.type = "color";
               colorInput.value = value || "#ffffff";
               colorInput.setAttribute("data-style-property", prop);
+              
               input.appendChild(label);
               input.appendChild(colorInput);
+              // get the value from currentElement if exists
+              if (currentElement) {
+                 // get the real value of the attribute 
+                  var attributeValue = currentElement.getAttribute(prop);
+                    if (attributeValue) {
+                        colorInput.value = attributeValue;
+                    } else {
+                        colorInput.value = currentElement.style[prop] || "";
+                    }
+              }
+
           } else if (predefinedValues[prop]) {
               input = document.createElement("div");
               const label = document.createElement("label");
@@ -238,7 +260,13 @@ function editElement(element) {
               emptyOption.textContent = "(none)";
               if (!value) emptyOption.selected = true;
               select.appendChild(emptyOption);
-
+              // add "" option to the select
+              const emptyOption2 = document.createElement("option");
+              emptyOption2.value = "";
+              emptyOption2.textContent = "(empty)";
+              if (value === "") emptyOption2.selected = true;
+              select.appendChild(emptyOption2);
+              // add the predefined values to the select
               predefinedValues[prop].forEach((option) => {
                   const optionElement = document.createElement("option");
                   optionElement.value = option;
@@ -249,6 +277,16 @@ function editElement(element) {
 
               input.appendChild(label);
               input.appendChild(select);
+              // get the value from currentElement if exists
+              if (currentElement) {
+                  // get the real value of the attribute 
+                  var attributeValue = currentElement.getAttribute(prop);
+                  if (attributeValue) {
+                      select.value = attributeValue;
+                  } else {
+                      select.value = currentElement.style[prop] || "";
+                  }
+              }
           } else {
               input = createInputItem(prop, prop.replace(/-/g, " ").toUpperCase(), prop, value, "text");
           }
@@ -268,16 +306,20 @@ function editElement(element) {
       updateButton.style.color = "white";
       updateButton.style.border = "1px solid #ccc";
       updateButton.onmouseover = () => {
-          updateButton.style.backgroundColor = "#45a049";
+          updateButton.style.backgroundColor = "green";
           updateButton.style.cursor = "pointer";
-      };
+          updateButton.style.color = "white";
+                };
       updateButton.onclick = () => {
+      
          // put the htmlEditor in undo stack
           undoStack.push(htmlEditor.innerHTML);
           // console.log(undoStack);
           inputElements.forEach((input) => {
               const prop = input.querySelector("select, input").getAttribute("data-style-property");
               const value = input.querySelector("select, input").value;
+              // Check if the property is a style property or an attribute
+             
               updateElementStyle(prop, value);
           });
       };
@@ -311,6 +353,12 @@ function updateElementTxtC(t) {
 }
 
 function updateElementStyle(type, t) {
+  // type == null return
+  if (type == null) return;
+  if (t == null) return;
+  if (t == "") return;
+  console.log("updateElementStyle", type, t);
+  
   currentElement.style.setProperty(type, t);
 }
 
@@ -402,6 +450,17 @@ function showProperties() {
   );
 
   editElement(editorElementSelected);
+  // put all the input elements in the editorElementSelected in writing mode
+  // get all the input elements in the editorElementSelected
+  var inputElements = editorElementSelected.querySelectorAll("input");
+  // loop through the input elements and set them in writing mode
+  for (var i = 0; i < inputElements.length; i++) {
+    inputElements[i].removeAttribute("readonly");
+    inputElements[i].removeAttribute("disabled"); // remove the disabled attribute
+    // disable 
+
+    inputElements[i].style.backgroundColor = "#ffffff";
+  }
 }
 
 function copyHTMLElement() {
