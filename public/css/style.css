@@ -287,19 +287,58 @@ button:hover {
     position: fixed;
     left: 20px;
     top: 20px;
-    min-width: 200px;
+    width: 80%;
+    min-height: 50px;
+    justify-content: left;
+    align-items: center;
+    vertical-align: middle;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
     z-index: 9999;
+    display: none;
 }
 
 .toast-message {
-    background-color: #333;
-    color: white;
+    background-color: #4ED164;
+    color: black;
     padding: 10px;
     border-radius: 5px;
     margin-top: 10px;
     opacity: 0;
     transition: opacity 0.5s;
 }
+/* Variants */
+.toast-info {
+    background-color: #f0f4ff;
+    color: #1e3a8a;
+    border-left: 4px solid #3b82f6;
+  }
+  .toast-success {
+    background-color: #ecfdf5;
+    color: #065f46;
+    border-left: 4px solid #10b981;
+  }
+  .toast-warning {
+    background-color: #fef3c7;
+    color: #92400e;
+    border-left: 4px solid #f59e0b;
+  }
+  .toast-error {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border-left: 4px solid #ef4444;
+  }
+  
+  /* Close button */
+  .toast-close {
+
+    border: 1px solid #293cca;
+
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    color: inherit;
+    right: 10px;
+  }
 
 #hint-container {
     position: fixed;
@@ -311,14 +350,36 @@ button:hover {
 }
 
 .hint-message {
-    background-color:yellow;
-    color: black;
-    padding: 10px;
-    border-radius: 5px;
-    margin-top: 10px;
-    opacity: 0;
-    transition: opacity 0.5s;
-    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Add a shadow effect */
+  /* light yellow background (like Tailwind's blue-100) */
+    background-color: #fefcbf; /* light modern background */
+  
+    color: #1e3a8a; /* dark modern text color */
+  padding: 12px 16px;
+ /* border yellow border (like Tailwind's blue-200) */
+    border: 1px solid #fbbf24; /* light modern border */
+    /* light modern border dark yello */
+  border-left: 4px solid darkgoldenrod; /* dark modern border */
+  border-radius: 8px;
+  margin-top: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  opacity: 0;
+  transition: opacity 0.4s ease-in-out, transform 0.3s ease;
+  transform: translateY(8px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.hint-message.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.hint-message::before {
+  content: "💡"; /* You can replace with inline SVG or icon font */
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
 }
 
 
@@ -1113,12 +1174,10 @@ input.apple-switch:checked:after {
                 }
 
 .tables-list-item{
-    margin: 10px;
-    margin-bottom: 20px;
+    margin-top: 10px;
+    margin-bottom: 10px;
     border: 1px solid #ccc;
-    border-top: #4d61fc 7px solid;
-    padding: 10px;
-    border-radius: 5px;
+    padding: 5px;
     cursor: pointer;
     transition: 0.5s;
     text-align: center;      
@@ -1126,8 +1185,10 @@ input.apple-switch:checked:after {
     justify-content: center;
     vertical-align: top !important;
     box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
-    max-height: 400px;
-    overflow-y: auto;
+    
+    width: 100%;
+    border-left: #4d61fc 2px solid;
+    border-radius: 5px;
 
 }
 

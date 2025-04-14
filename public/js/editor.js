@@ -1332,11 +1332,15 @@ function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false )
   const elementId = fieldJson.fieldName + "-" + fieldJson.tableName;
   div.id = elementId;
   div.style.display = "block";
+  div.style.flexDirection = "column";
+  div.style.height = "60px";
   // Set up the inner HTML for the div, including a span and a remove button
   div.innerHTML = `<i class="fa fa-trash" onclick="removeItem(event)" style="color:red" title="Remove"></i>`;
   div.innerHTML += `<i class="fa fa-arrow-up" onclick="moveUp(event)" style="color:blue" title="Move Up"></i>`;
-  div.innerHTML += `<i class="fa fa-arrow-down" onclick="moveDown(event)" style="color:blue"  title="Move Up"></i><hr style="margin: 0px;">`;
-
+  div.innerHTML += `<i class="fa fa-arrow-down" onclick="moveDown(event)" style="color:blue"  title="Move Up"></i>`;
+    // add expand the div size and reduce it button
+  div.innerHTML += `<i class="fa fa-plus-square" onclick="expandReduceDiv(event,'${elementId}')" style="color:blue" title="Expand"></i>`;
+  div.innerHTML += `<hr style="margin: 0px;"></hr>`;
   div.innerHTML += `<span name='dataContainer' data-field='${JSON.stringify(fieldJson)}' style="  font-weight: bold;">${
     fieldJson.fieldName
   }</span>`;
@@ -1469,6 +1473,51 @@ function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false )
     setOptionsByTypeChart(selectType, fieldJson.fieldDataType);
     div.appendChild(selectType);
   }
+  // hide all the subDivs, input and select elements
+  var subDivs = div.querySelectorAll("div,input,select");
+  // loop through the subDivs
+  subDivs.forEach((subDiv) => {
+    subDiv.style.display = "none";
+  });
+  // set the height of the parent div
+}
+
+// function to expand or reduce the div size
+function expandReduceDiv(event, elementId) {
+
+  var div = document.getElementById(elementId);
+  if (div.style.height > "60px") {
+    div.style.height = "60px";
+    // get the subDivs by tag
+    var subDivs = div.querySelectorAll("div,input,select");
+    // loop through the subDivs
+    subDivs.forEach((subDiv) => {
+      subDiv.style.display = "none";
+    });
+    // icon change
+    event.target.className = "fa fa-plus-square";
+  } else {
+    div.style.height = "auto";
+    // get the subDivs by tag
+    var subDivs = div.querySelectorAll("div,input,select");
+    // loop through the subDivs
+    subDivs.forEach((subDiv) => {
+      subDiv.style.display = "block";
+    });
+    // icon change
+    event.target.className = "fa fa-minus-square";
+  }
+  // Calculate the new height of the parent div
+  var dataObjet = div.parentNode;
+  // for each subDiv get the height
+  var height = 0;
+  var subDivs = dataObjet.querySelectorAll("div");
+  // loop through the subDivs
+  subDivs.forEach((subDiv) => {
+    height += subDiv.clientHeight+20;
+  });
+  // set the height of the parent div
+  dataObjet.style.height = height + "px";
 }
 
 // function get options by type

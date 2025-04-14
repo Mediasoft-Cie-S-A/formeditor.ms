@@ -92,7 +92,7 @@ document
     }
   });
 
-function showToast(message, duration = 3000) {
+function showToast(message, duration = 5000,type = 'info') {
    console.log("showToast");
   const toastContainer = document.getElementById("toast-container");
   if (!toastContainer) {
@@ -100,26 +100,41 @@ function showToast(message, duration = 3000) {
     const container = document.createElement("div");
     container.id = "toast-container";
     container.style.position = "fixed";
-    container.style.bottom = "10px";
-    container.style.right = "10px";
     container.style.zIndex = 1000;
-    container.style.pointerEvents = "none";
+    container.style.pointerEvents = "none";    
+    container.style.display = "flex";
+    container.style.flexDirection = "column";
     document.body.appendChild(container);
+
     toastContainer = container;
   }
+  toastContainer.style.display = "flex";
+  toastContainer.style.flexDirection = "column";
   const toast = document.createElement("div");
-  toast.classList.add("toast-message");
-  toast.textContent = message;
+
+  toast.innerHTML = `
+  <span>${message}</span>
+  <button class="toast-close">&times;</button>`;
+
+
+  toast.classList.add("toast-message", `toast-${type}`);
 
   // Add the toast to the container
+  toastContainer.appendChild(toast); 
+
+
+  // Add styling and interactivity
+  toast.querySelector(".toast-close").onclick = () => {
+    toast.style.opacity = 0;
+    toast.addEventListener("transitionend", () => toast.remove());
+  };
+
   toastContainer.appendChild(toast);
 
-  // Make the toast visible
-  setTimeout(() => {
-    toast.style.opacity = 1;
-  }, 100);
+  // Fade in
+  setTimeout(() => toast.style.opacity = 1, 50);
 
-  // Hide and remove the toast after 'duration'
+  // Auto-dismiss
   setTimeout(() => {
     toast.style.opacity = 0;
     toast.addEventListener("transitionend", () => toast.remove());
