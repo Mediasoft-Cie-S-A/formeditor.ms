@@ -290,6 +290,7 @@ function editElement(element) {
 
       const updateButton = document.createElement("button");
       updateButton.textContent = "Update";
+
 	updateButton.style.marginTop = "5px";
       updateButton.style.fontSize = "9px";
       updateButton.style.width = "100%";
@@ -300,21 +301,24 @@ function editElement(element) {
           updateButton.style.backgroundColor = "green";
           updateButton.style.cursor = "pointer";
           updateButton.style.color = "white";
-                };      updateButton.onclick = () => {
+                };     
+      updateButton.onclick = () => {
 	// put the htmlEditor in undo stack
           undoStack.push(htmlEditor.innerHTML);
-          // console.log(undoStack);          inputElements.forEach((input) => {
+          // console.log(undoStack);          
+          inputElements.forEach((input) => {
               const prop = input.querySelector("select, input").getAttribute("data-style-property");
               const value = input.querySelector("select, input").value;
 	      // Check if the property is a style property or an attribute
               updateElementStyle(prop, value);
-          }
-           // insert the button at the beginning of the box
+          });// insert the button at the beginning of the box
+    
+      }; // onclick
+      
+           
       box.insertBefore(updateButton, box.firstChild);
       content.appendChild(box);
-      };
-     
-
+    }
     
   }
 
