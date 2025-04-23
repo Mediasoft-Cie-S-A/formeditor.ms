@@ -141,6 +141,7 @@ function showToast(message, duration = 5000,type = 'info') {
   }, duration);
 }
 
+
 // show hint like a toastmessage wiht absolute position, based on the mouse position
 function showHint(message, duration = 1000, event) {
   const hintContainer = document.getElementById("hint-container");

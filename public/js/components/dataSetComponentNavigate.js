@@ -304,25 +304,42 @@ function navbar_EditRecord(action) {
 }
 
 function navbar_InsertRecord() {
-  const inputs = document.querySelectorAll(`[data-table-name] input,select`);
+  // 🔍 Récupère tous les champs input et select associés à une table
+  const inputs = document.querySelectorAll(`[data-table-name] input, select`);
   console.log(inputs);
+
   inputs.forEach((input) => {
+    // 🔓 Active les champs pour permettre la saisie
     input.readOnly = false;
     input.disabled = false;
+
+    // ✅ Ajoute dynamiquement l’attribut dataset-field-type (nécessaire à la validation)
+    // Il est basé sur la valeur existante de dataset-field-dataType
+    const type = input.getAttribute("dataset-field-dataType");
+    if (type && !input.hasAttribute("dataset-field-type")) {
+      input.setAttribute("dataset-field-type", type); // exemple : "integer", "character"
+    }
+
+    // 🔄 Gère le comportement spécifique du champ "rowid"
     const field = input.getAttribute("dataset-field-name");
     switch (input.type) {
       case "hidden":
-          if (field === "rowid") {
+        // Si c’est un champ caché "rowid", on le marque comme "new" pour insertion
+        if (field === "rowid") {
           input.value = "new";
-        } 
+        }
         break;
-    default:
-      input.value = "";
-    break;
+      default:
+        // Tous les autres champs sont vidés pour permettre une nouvelle saisie
+        input.value = "";
+        break;
     }
   });
+
+  // ✅ Active le bouton "Save"
   document.querySelector("[name=SaveDSBtn]").disabled = false;
 }
+
 
 function navbar_CopyRecord() {
   const inputs = document.querySelectorAll(`[data-table-name] input`);
@@ -439,35 +456,56 @@ async function navbar_SaveRecord() {
       showToast("Save button is disabled");
       return;
     }
-    console.log("SaveRecord");
+
+    console.log("✅ SaveRecord triggered");
+
     const nextRowIds = document.querySelectorAll("[dataset-field-type='rowid']");
-    console.log(nextRowIds);
-   nextRowIds.forEach(async (nextRowId) => {
-      console.log(nextRowId);
+    console.log("🧩 Found row ID inputs:", nextRowIds);
+
+    // ✅ Utilisation de for...of au lieu de forEach
+    // Pourquoi : forEach ne gère pas bien await -> cela peut lancer les requêtes en parallèle (doublons).
+    // for...of permet de traiter les enregistrements un à un, de façon asynchrone et séquentielle.
+    for (const nextRowId of nextRowIds) {
       const tableName = nextRowId.getAttribute("dataset-table-name");
       const dbName = nextRowId.getAttribute("dbname");
       const divLine = nextRowId.closest("[dataset-fields-list]");
       const rowIdValue = nextRowId.value;
+
+      console.log("📄 Traitement d’un enregistrement:", { dbName, tableName, rowIdValue });
+
+      // ✅ Vérification des champs AVANT toute insertion
+      const isValid = validateInputFields(divLine);
+      if (!isValid) {
+        console.warn("🚫 Validation échouée — insertion annulée");
+        showToast("Erreur de validation : veuillez corriger les champs", 5000);
+        return;
+      }
+      console.log("✅ Validation réussie");
+
       let result;
 
       if (rowIdValue === "new") {
-        let data = await CreateInsert(dbName, tableName,divLine);
+        let data = await CreateInsert(dbName, tableName, divLine);
+        console.log("📤 Données à insérer :", data);
         result = await insertRecordDB(dbName, tableName, data);
       } else {
         const data = {
-          body: CreateUpdated(dbName, tableName,divLine),
+          body: CreateUpdated(dbName, tableName, divLine),
         };
+        console.log("📤 Données à mettre à jour :", data);
         result = await updateRecordDB(dbName, tableName, rowIdValue, data);
       }
+
       document.querySelector("[name=SaveDSBtn]").disabled = true;
+
       return result;
-
-    });
+    }
   } catch (error) {
-    console.error("Error:", error);
-  } 
-
+    console.error("❌ Erreur dans navbar_SaveRecord:", error);
+    showToast("Erreur technique lors de l'enregistrement", 5000);
+  }
 }
+
 
 // create insert data structure
 async function CreateInsert(DBName, tableName,divLine) {
@@ -600,3 +638,52 @@ async function insertRecordDB(DBName, tableName, data) {
 }
 
 
+// ✅ Fonction de validation des champs input AVANT l'insertion ou la mise à jour
+function validateInputFields(divLine) {
+  // Récupère tous les <input> ayant la classe "input-element" à l’intérieur du bloc concerné
+  const inputs = divLine.querySelectorAll("input.input-element");
+
+  // Parcourt chaque champ input pour valider son contenu
+  for (const input of inputs) {
+    // Récupère le type de donnée attendu (ex: integer, character, decimal)
+    const type = input.getAttribute("dataset-field-type");
+
+    // Tente de récupérer un label lisible depuis l’élément <label> précédent, sinon utilise l’ID
+    const label = input.previousElementSibling?.innerText || input.id;
+
+    // Valeur entrée par l’utilisateur
+    const value = input.value;
+
+    // Vérification selon le type de champ attendu
+    switch (type) {
+      case "integer":
+        // Vérifie que la valeur est bien un entier (ex: 123)
+        if (!/^\d+$/.test(value)) {
+          showToast(`Le champ "${label}" doit contenir un entier.`);
+          return false;
+        }
+        break;
+
+      case "character":
+        // Vérifie que la valeur est bien une chaîne de caractères
+        if (typeof value !== "string") {
+          showToast(`Le champ "${label}" doit être une chaîne de caractères.`);
+          return false;
+        }
+        break;
+
+      case "decimal":
+        // Vérifie que la valeur est un nombre décimal (ex: 12.34 ou 45)
+        if (!/^\d+(\.\d+)?$/.test(value)) {
+          showToast(`Le champ "${label}" doit contenir un nombre décimal.`);
+          return false;
+        }
+        break;
+
+      // 💡 Tu peux ajouter ici d'autres cas (ex: date, email, boolean, etc.)
+    }
+  }
+
+  // ✅ Tous les champs sont valides
+  return true;
+}

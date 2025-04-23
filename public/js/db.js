@@ -16,6 +16,7 @@
 
 const header=['NAME','TYPE','LABEL' ,'FORMAT','MANDATORY', 'DECIMAL', 'WIDTH', 'DEFAULT'];
 
+
 var tableList=[];
 // The 'DOMContentLoaded' event fires when the initial HTML document has been completely loaded and parsed,
 // without waiting for stylesheets, images, and subframes to finish loading.
@@ -133,10 +134,18 @@ function drageDroptableTableList(list) {
                             listItem.appendChild(tableDetailsDiv);
                             listItem.ondragstart = function(event) { drag(event); };
                             listItem.onclick = function(event) {
-                                        event.preventDefault();
-                                        const tableName = event.target.getAttribute('data-table-name');                                    
-                                        fetchTableFields(dbname,tableName,tableDetailsDiv);
-                            }
+                                event.preventDefault();
+                                const tableName = event.target.getAttribute('data-table-name');
+                            
+                                // Toggle behavior: if fields are already shown, hide them
+                                if (tableDetailsDiv.hasChildNodes()) {
+                                    removeAllChildNodes(tableDetailsDiv);  // hide columns
+                                } else {
+                                    fetchTableFields(dbname, tableName, tableDetailsDiv);  // show columns
+                                }
+                            };
+                            
+                            
                             list.appendChild(listItem);
                             tableList.push(table.NAME);
                             i++;
@@ -148,19 +157,28 @@ function drageDroptableTableList(list) {
 
 
 
-
-function fetchTableFields(database,tableName,detailsDiv) {
+function fetchTableFields(database, tableName, detailsDiv) {
     removeAllChildNodes(detailsDiv);
     fetch(`/table-fields/${database}/${tableName}`)
         .then(response => response.json())
-        .then(fields => {
-           fields.forEach(field => {
+        .then(data => {
+            window.deletedIds = data.deletedIds || [];
+
+            data.fields.forEach(field => {
                 const fieldDiv = document.createElement('div');
-                fieldDiv.className='field-item';
-                fieldDiv.id=field.NAME+'_'+tableName+'_Editor';
-                fieldDiv.draggable=true;
-                fieldDiv.ondragstart = function(event) { drag(event); };
-                fieldDiv.textContent = field.NAME; // Adjust based on your API response
+                const fieldId = field.NAME + '_' + tableName + '_Editor';
+
+                // ✅ Ne pas afficher si ce champ est dans la liste des éléments supprimés
+                if (window.deletedIds.includes(fieldId)) return;
+
+                fieldDiv.className = 'field-item';
+                fieldDiv.id = fieldId;
+                fieldDiv.draggable = true;
+                fieldDiv.ondragstart = function (event) { drag(event); };
+
+                const prefix = tableName.slice(0, 5).toLowerCase() + '_';
+                fieldDiv.textContent = tableName.slice(0, 5).toLowerCase() + '_' + field.NAME;
+
                 fieldDiv.setAttribute('database-name', database);
                 fieldDiv.setAttribute('data-table-name', tableName);
                 fieldDiv.setAttribute('data-field-name', field.NAME);
@@ -172,12 +190,13 @@ function fetchTableFields(database,tableName,detailsDiv) {
                 fieldDiv.setAttribute('data-field-width', field.WIDTH);
                 fieldDiv.setAttribute('data-field-default', field.DEFAULT);
                 fieldDiv.setAttribute('title', field.LABEL);
+
                 detailsDiv.appendChild(fieldDiv);
             });
-            
         })
         .catch(error => console.error('Error:', error));
 }
+
 
 // table structure
 function fetchTableDetails(DBName,tableName,tableLabel,detailsDiv) {

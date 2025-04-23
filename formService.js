@@ -17,6 +17,9 @@
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+const { deletedComponents } = require('./utils/deletedStore');
+
+
 
 module.exports = function (app, client, dbName) {
   const checkAuthenticated = (req, res, next) => {
@@ -141,6 +144,17 @@ module.exports = function (app, client, dbName) {
       res.status(500).send("Error retrieving form");
     } finally {
       await client.close();
+    }
+  });
+
+  app.post('/api/delete-component', (req, res) => {
+    const { id } = req.body;
+    if (id) {
+      deletedComponents.add(id);
+      console.log('Component deleted:', id);
+      res.sendStatus(200);
+    } else {
+      res.status(400).send('Missing id');
     }
   });
 

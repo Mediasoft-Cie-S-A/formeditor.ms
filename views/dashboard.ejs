@@ -216,10 +216,18 @@
                   <button
                     class="button form-edit-button"
                     type="button"
-                    onclick="document.getElementById('formContainer').innerHTML=''"
+                    onclick="showClearConfirmation()"
                   >
                     Clear
-                  </button>
+                  </button>                
+                </div>
+                <div class="col">
+                  <button       
+                  id="undoDeleteBtn"               
+                    class="button form-edit-button"
+                    type="button"
+                    onclick="undoDelete()">Undo Delete</button>
+
                 </div>
 
                 <div class="col">
@@ -241,7 +249,8 @@
                   <div id="componentsSidebar" class="col-md-1 col-sm-12 grid-element" style="background-color: white;" ></div>
                                
                   <div class="col-md-11 col-sm-12 grid-element" style="width: 100%;"
-                    id="formContainer" contenteditable="true"                    
+                    id="formContainer"
+                    
                     ondrop="drop(event)"
                     ondragover="allowDrop(event)"
                   >
@@ -249,7 +258,7 @@
                   </div>
                
               
-                  <div id="editorPropertyInfos" class="col-md-2 col-sm-12 grid-element"  >
+                  <div id="editorPropertyInfos" class="col-md-2 col-sm-12 grid-element" style="overflow: auto;"  >
                           
                         <div id="propertiesBar" >
                           <div>
@@ -413,13 +422,12 @@
         <div class="gjs-toolbar-item" onclick="deleteElement()"  title="Delete Element">
           <i class="bi bi-trash"></i>
         </div>
-        <div class="gjs-toolbar-item" onclick="EditorUndo()" title="Undo">
+	<div class="gjs-toolbar-item" onclick="EditorUndo()" title="Undo">
           <i class="bi bi-arrow-counterclockwise"></i>
       </div>
        <div class="gjs-toolbar-item" onclick="EditorRedo()" title="Redo">
           <i class="bi bi-arrow-clockwise"></i>
-        </div>
-      </div>
+        </div>      </div>
     </div>
     <modal id="DatabaseDetailsModal" class="modal">
       <div class="modal-content" style="padding: 10px">
@@ -484,6 +492,7 @@
         </div>
       </div>
     </div>
+    
     <!-- Footer -->
     <footer class="fixed-bottom mt-auto">
       <!-- Grid container -->
@@ -542,6 +551,19 @@
     <script src="js/webserver.js"></script>
     <script src="js/constant/index.js"></script>
     <script src="js/listBusinessComponent.js"></script>
-    
+    <script src="js/ui/clearConfirmation.js"></script>
+
+    <div id="confirmClearModal" class="modal-overlay" style="display: none;">
+      <div class="modal-box">
+        <p>Are you sure you want to clear the form?</p>
+        <div class="modal-actions">
+          <button id="confirmClearYes">Yes</button>
+          <button id="confirmClearCancel">Cancel</button>
+        </div>
+      </div>
+    </div>
   </body>
+
+  
+
 </html>

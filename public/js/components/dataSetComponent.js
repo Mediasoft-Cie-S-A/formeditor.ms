@@ -482,6 +482,8 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum,dataset,link,ro
         if (link.length ===0) {
            console.log("link.length ===0");
             const url = `/get-record-by-rowid/${dataset[0].DBName}/${dataset[0].tableName}/${rowId}?fields=${datasetFields}`;
+            console.log("[FETCH by ROWID] URL:", url);
+
             fetch(url)
               .then((response) => response.json())
               .then((data) => {

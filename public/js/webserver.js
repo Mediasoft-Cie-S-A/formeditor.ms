@@ -314,10 +314,29 @@ function retrievePropertiesFromRef(ref, schemas) {
 async function fetchAndParseOpenApiJson(url) {
   try {
     const response = await fetch(url);
-    const openApiJson = await response.json();
+
+    if (!response.ok) {
+      throw new Error(`Fetch failed: ${response.status} ${response.statusText}`);
+    }
+
+    const contentType = response.headers.get("content-type");
+    if (!contentType.includes("application/json") && !contentType.includes("yaml")) {
+      const text = await response.text(); // utile pour afficher le contenu HTML renvoyé
+      throw new Error(`Expected JSON or YAML but got: ${contentType}\nResponse:\n${text}`);
+    }
+
+    const text = await response.text();
+    let openApiJson;
+
+    try {
+      openApiJson = JSON.parse(text);
+    } catch {
+      openApiJson = jsyaml.load(text);
+    }
+
     return parseOpenApiJson(openApiJson);
   } catch (error) {
-    console.error("Error fetching or parsing OpenAPI JSON:", error);
+    console.error("❌ Error fetching or parsing OpenAPI JSON:", error);
     return null;
   }
 }

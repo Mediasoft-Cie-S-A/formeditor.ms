@@ -942,7 +942,6 @@ a.brand-logo {
     border-radius: 5px;
     transition: 0.5s;
 }
-
 .gjs-toolbar-item svg {
     fill: currentColor;
     vertical-align: middle
@@ -1177,7 +1176,9 @@ input.apple-switch:checked:after {
     margin-top: 10px;
     margin-bottom: 10px;
     border: 1px solid #ccc;
-    padding: 5px;
+    border-top: #4d61fc 7px solid;
+    padding: 10px;
+    border-radius: 5px;
     cursor: pointer;
     transition: 0.5s;
     text-align: center;      
@@ -1185,7 +1186,6 @@ input.apple-switch:checked:after {
     justify-content: center;
     vertical-align: top !important;
     box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
-    
     width: 100%;
     border-left: #4d61fc 2px solid;
     border-radius: 5px;
@@ -1354,3 +1354,38 @@ input.apple-switch:checked:after {
   .filter-item:nth-child(even) {
         background-color: #F1d4aA 
     }
+
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+      }
+    
+      .modal-box {
+        background: white;
+        padding: 20px 30px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px #333;
+        text-align: center;
+      }
+    
+      .modal-actions button {
+        margin: 0 10px;
+        padding: 6px 16px;
+        border: none;
+        background-color: #007bff;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+    
+      .modal-actions button:hover {
+        background-color: #0056b3;
+      }

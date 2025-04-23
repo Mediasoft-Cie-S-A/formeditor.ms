@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+let lastDeletedElement = null;
 var moveElementEvent = false;
 const labelheight = 20;
 const htmlEditor =  document.getElementById('formContainer');
@@ -47,10 +47,6 @@ function EditorRedo() {
   redoStack.pop(); // Remove the last state after restoring
   isRestoring = false;
 }
-
-
-
-
 
 // floating window for the editor
 
@@ -96,7 +92,7 @@ function createInputItem(id, label, styleProperty, text, type, attribute) {
   input.type = type;
   input.className = "input-element";
   input.id = id;
-  input.setAttribute("data-style-property", styleProperty);
+  input.setAttribute("data-style-property", styleProperty); 
   input.value = text;
   div.appendChild(lbl);
   div.appendChild(input);
@@ -110,7 +106,6 @@ function createInputItem(id, label, styleProperty, text, type, attribute) {
       input.value = currentElement.style[styleProperty] || "";
     }
   }
-
   return div;
 }
 
@@ -155,7 +150,7 @@ function editElement(element) {
     "Transitions & Animations": ["transition", "transition-property", "transition-duration", "transition-timing-function", "transition-delay", "animation", "animation-name", "animation-duration", "animation-timing-function", "animation-delay", "animation-iteration-count", "animation-direction"],
     "Filters & Effects": ["clip-path", "filter"],
     "Cursor & Interaction": ["cursor", "pointer-events"]
-      };
+};
 
 
   const predefinedValues = {
@@ -165,7 +160,7 @@ function editElement(element) {
       "flex-direction": ["row", "row-reverse", "column", "column-reverse"],
       "justify-content": ["flex-start", "center", "flex-end", "space-between", "space-around"],
       "align-items": ["flex-start", "center", "flex-end", "stretch", "baseline"]
-      };
+  };
 
   const dialog = document.getElementById("propertiesBar");
   dialog.style.display = "block";
@@ -232,10 +227,9 @@ function editElement(element) {
               colorInput.type = "color";
               colorInput.value = value || "#ffffff";
               colorInput.setAttribute("data-style-property", prop);
-              
               input.appendChild(label);
               input.appendChild(colorInput);
-              // get the value from currentElement if exists
+	      // get the value from currentElement if exists
               if (currentElement) {
                  // get the real value of the attribute 
                   var attributeValue = currentElement.getAttribute(prop);
@@ -244,9 +238,7 @@ function editElement(element) {
                     } else {
                         colorInput.value = currentElement.style[prop] || "";
                     }
-              }
-
-          } else if (predefinedValues[prop]) {
+              }          } else if (predefinedValues[prop]) {
               input = document.createElement("div");
               const label = document.createElement("label");
               label.textContent = prop.replace(/-/g, " ").toLocaleLowerCase();
@@ -260,7 +252,7 @@ function editElement(element) {
               emptyOption.textContent = "(none)";
               if (!value) emptyOption.selected = true;
               select.appendChild(emptyOption);
-              // add "" option to the select
+ 		// add "" option to the select
               const emptyOption2 = document.createElement("option");
               emptyOption2.value = "";
               emptyOption2.textContent = "(empty)";
@@ -277,7 +269,7 @@ function editElement(element) {
 
               input.appendChild(label);
               input.appendChild(select);
-              // get the value from currentElement if exists
+		// get the value from currentElement if exists
               if (currentElement) {
                   // get the real value of the attribute 
                   var attributeValue = currentElement.getAttribute(prop);
@@ -286,20 +278,19 @@ function editElement(element) {
                   } else {
                       select.value = currentElement.style[prop] || "";
                   }
-              }
-          } else {
+              }          } else {
               input = createInputItem(prop, prop.replace(/-/g, " ").toUpperCase(), prop, value, "text");
           }
 
           inputsContainer.appendChild(input);
           return input;
-      }); // forEach
+      });
 
       box.appendChild(inputsContainer);
 
       const updateButton = document.createElement("button");
       updateButton.textContent = "Update";
-      updateButton.style.marginTop = "5px";
+	updateButton.style.marginTop = "5px";
       updateButton.style.fontSize = "9px";
       updateButton.style.width = "100%";
       updateButton.style.backgroundColor = "#4CAF50";
@@ -309,23 +300,18 @@ function editElement(element) {
           updateButton.style.backgroundColor = "green";
           updateButton.style.cursor = "pointer";
           updateButton.style.color = "white";
-                };
-      updateButton.onclick = () => {
-      
-         // put the htmlEditor in undo stack
+                };      updateButton.onclick = () => {
+	// put the htmlEditor in undo stack
           undoStack.push(htmlEditor.innerHTML);
-          // console.log(undoStack);
-          inputElements.forEach((input) => {
+          // console.log(undoStack);          inputElements.forEach((input) => {
               const prop = input.querySelector("select, input").getAttribute("data-style-property");
               const value = input.querySelector("select, input").value;
-              // Check if the property is a style property or an attribute
-             
+	      // Check if the property is a style property or an attribute
               updateElementStyle(prop, value);
           });
       };
       // insert the button at the beginning of the box
       box.insertBefore(updateButton, box.firstChild);
-      
 
       content.appendChild(box);
   }
@@ -460,8 +446,7 @@ function showProperties() {
     // disable 
 
     inputElements[i].style.backgroundColor = "#ffffff";
-  }
-}
+  }}
 
 function copyHTMLElement() {
   const inputElementSelected = document.getElementById("editorElementSelected");
@@ -614,14 +599,58 @@ function moveElement() {
 
 
 function deleteElement() {
-  undoStack.push(htmlEditor.innerHTML);
+ undoStack.push(htmlEditor.innerHTML);
   const inputElementSelected = document.getElementById("editorElementSelected");
-  var editorElementSelected = document.getElementById(
-    inputElementSelected.value
-  );
-  editorElementSelected.parentNode.removeChild(editorElementSelected);
+  const editorElementSelected = document.getElementById(inputElementSelected.value);
+  if (!editorElementSelected) return;
+
+  const parent = editorElementSelected.parentNode;
+  const index = Array.from(parent.children).indexOf(editorElementSelected);
+
+  // Sauvegarder l'élément supprimé pour undo
+  lastDeletedElement = {
+    node: editorElementSelected,
+    parent: parent,
+    index: index
+  };
+
+  parent.removeChild(editorElementSelected);
+
+  // 🔁 Envoie la suppression au serveur
+  fetch('/api/delete-component', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      id: editorElementSelected.id
+    })
+  });
+
   hideEditMenu();
+  // ✅ Activer le bouton Undo
+  document.getElementById("undoDeleteBtn").disabled = false;
 }
+
+window.undoDelete = function() {
+  if (lastDeletedElement && lastDeletedElement.node && lastDeletedElement.parent) {
+    const { node, parent, index } = lastDeletedElement;
+    const siblings = Array.from(parent.children);
+
+    // Réinsère à la même position qu'avant
+    if (index >= siblings.length) {
+      parent.appendChild(node);
+    } else {
+      parent.insertBefore(node, siblings[index]);
+    }
+
+    // Réinitialiser après usage
+    lastDeletedElement = null;
+  }
+  document.getElementById("undoDeleteBtn").disabled = true;
+
+}
+
 
 function hideEditMenu() {
   var editorFloatMenu = document.getElementById("editorFloatMenu");
@@ -1212,18 +1241,19 @@ function addFieldToPropertiesBarWeb(target, fieldJson, isId) {
   var div = document.createElement("div");
   div.classList.add("tables-list-item");
   const elementId = fieldJson.fieldName + "_" + fieldJson.fieldId;
+  fieldJson.displayName = fieldJson.tableName.slice(0, 5).toLowerCase() + '_' + fieldJson.fieldName;
+
   div.id = elementId;
   // get field name
   if (isId)
     div.innerHTML = `<button class='remove-item' onclick='removeItem(event)'>x</button><span name='dataContainerId' data-field='${JSON.stringify(
       fieldJson
-    )}' >${fieldJson.fieldName}</span>`;
+    )}' >${fieldJson.displayName}</span>`;
   else
     div.innerHTML = `<button class='remove-item' onclick='removeItem(event)'>x</button><span name='dataContainer' data-field='${JSON.stringify(
       fieldJson
-    )}' >${fieldJson.fieldName}</span>`;
-  dataObjet.appendChild(div);
-
+    )}' >${fieldJson.displayName}</span>`;
+  
   div.innerHTML += `<div>Mandatory:<input type="checkbox" class="apple-switch" id="mandatory" name="mandatory" value="mandatory" ${
     fieldJson.fieldMandatory === "true" ? "checked" : ""
   } onclick="updateMandatory(event, '${elementId}')"> </div>`;
@@ -1337,14 +1367,16 @@ function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false )
   // Set up the inner HTML for the div, including a span and a remove button
   div.innerHTML = `<i class="fa fa-trash" onclick="removeItem(event)" style="color:red" title="Remove"></i>`;
   div.innerHTML += `<i class="fa fa-arrow-up" onclick="moveUp(event)" style="color:blue" title="Move Up"></i>`;
-  div.innerHTML += `<i class="fa fa-arrow-down" onclick="moveDown(event)" style="color:blue"  title="Move Up"></i>`;
+  div.innerHTML += `<i class="fa fa-arrow-down" onclick="moveDown(event)" style="color:blue"  title="Move Up"></i><hr style="margin: 0px;">`;
     // add expand the div size and reduce it button
   div.innerHTML += `<i class="fa fa-plus-square" onclick="expandReduceDiv(event,'${elementId}')" style="color:blue" title="Expand"></i>`;
   div.innerHTML += `<hr style="margin: 0px;"></hr>`;
-  div.innerHTML += `<span name='dataContainer' data-field='${JSON.stringify(fieldJson)}' style="  font-weight: bold;">${
-    fieldJson.fieldName
-  }</span>`;
- 
+  const prefix = fieldJson.tableName.slice(0, 3).toLowerCase() + '_';
+  fieldJson.displayName = prefix + fieldJson.fieldName;
+  
+  
+  div.innerHTML += `<span name='dataContainer' data-field='${JSON.stringify(fieldJson)}' style="  font-weight: bold;">${fieldJson.displayName}</span>`;
+  
   dataObjet.appendChild(div);
 
   // adding verification triggers mandatories fields checkbox

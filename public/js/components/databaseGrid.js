@@ -808,7 +808,7 @@ function drawGridRow(
         rowDiv.className = "grid-row";
         rowDiv.setAttribute("rowid",  rowid);
         // add click event to row to call linkRecordToGrid(tableName, rowId)
-        // console.log(rowData);
+         console.log(rowData);
         if (j == 0) {
           // call linkRecordToGrid(tableName, rowId)
           linkRecordToGrid(
