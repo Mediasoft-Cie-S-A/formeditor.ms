@@ -3,6 +3,7 @@
  * response returned from redirect flow. For more information, visit:
  * https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-browser/docs/acquire-token.md
  */
+
 myMSALObj.handleRedirectPromise()
     .then(handleResponse)
     .catch((error) => {
@@ -48,6 +49,10 @@ function signIn() {
     myMSALObj.loginRedirect(loginRequest);
 }
 
+
+
+const myMSALObj = new msal.PublicClientApplication(msalConfig);
+
 function signOut() {
 
     /**
@@ -58,9 +63,22 @@ function signOut() {
     const logoutRequest = {
         account: myMSALObj.getAccountByUsername(username),
         postLogoutRedirectUri: msalConfig.auth.redirectUri,
+        
     };
 
-    myMSALObj.logoutRedirect(logoutRequest);
+  // 🔐 Déconnexion Azure
+  myMSALObj.logoutPopup(logoutRequest).then(() => {
+    // 🔐 Déconnexion backend (Express)
+    fetch('/logout', { credentials: 'include' })
+      .then(() => {
+        window.location.href = '../../../../views/login.ejs'; // ← chemin vers ton vrai login
+      })
+      .catch(err => {
+        console.error("Erreur logout serveur :", err);
+      });
+  }).catch(err => {
+    console.error("Erreur logout Azure AD :", err);
+  });
 }
 
 

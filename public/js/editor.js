@@ -308,14 +308,16 @@ function editElement(element) {
               const value = input.querySelector("select, input").value;
 	      // Check if the property is a style property or an attribute
               updateElementStyle(prop, value);
-          });
-      };
-      // insert the button at the beginning of the box
+          }
+           // insert the button at the beginning of the box
       box.insertBefore(updateButton, box.firstChild);
-
       content.appendChild(box);
+      };
+     
+
+    
   }
-}
+
 
 
 function closeModalDbStrct() {
