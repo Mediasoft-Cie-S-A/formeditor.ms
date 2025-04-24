@@ -162,9 +162,10 @@ function fetchTableFields(database, tableName, detailsDiv) {
     fetch(`/table-fields/${database}/${tableName}`)
         .then(response => response.json())
         .then(data => {
+            console.log(data);
             window.deletedIds = data.deletedIds || [];
 
-            data.fields.forEach(field => {
+            data.forEach(field => {
                 const fieldDiv = document.createElement('div');
                 const fieldId = field.NAME + '_' + tableName + '_Editor';
 
