@@ -202,12 +202,12 @@ class OdbcDatabase {
     }
   }
 
-  async queryDataWithPagination(tableName, page, pageSize, fields, filter) {
+  async queryDataWithPagination(tableName, page, pageSize, fields, filter, orderBy) {
     try {
       // create filter base on filer paramenter, for search based on the input values,
       //with field name and value separated by | and each filter separated by ,
       // and build the query where clause
-
+      console.log(orderBy);
       if (fields && fields.length > 0) {
         // Construct the SQL query based on the fields provided by fieldList and adding "" to the field name
         const fieldList = fields
@@ -221,8 +221,19 @@ class OdbcDatabase {
           console.log("filter", filter);
           paginatedQuery += this.jsonToWhereClause(filter);
         }
+        // order by
+        // paginatedQuery += ` ORDER BY ....
+        if (orderBy && Array.isArray(orderBy) && orderBy.length > 0) {
+          const orderClause = orderBy
+            .map((order) => `"${order.fieldName}" ASC`)
+            .join(", ");
+          paginatedQuery += ` ORDER BY ${orderClause}`;
+        }
+
         paginatedQuery += ` OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
         console.log(paginatedQuery);
+
+      
         // Execute the paginated query
         
         const connection =  await odbc.connect(this.connectionString);
@@ -234,6 +245,18 @@ class OdbcDatabase {
         // Return the result
         return result;
       }
+        // sum up of what filter has
+      if (!filterJSON || !filterJSON.filters || filterJSON.filters.length === 0) {
+        console.log("[FILTRES] Aucun filtre actif.");
+      } else {
+        console.table(
+          filterJSON.filters.map(f => ({
+            Champ: `${f.tableName}.${f.field}`,
+            Valeur: f.value,
+          }))
+        );
+      }
+
       return null;
     } catch (err) {
       console.error("Error querying data with pagination:", err);

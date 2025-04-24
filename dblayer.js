@@ -585,7 +585,7 @@ class dblayer{
             async (req, res) => {
               try {
                 
-                const {database, tableName, page, pageSize  } = req.params;
+                const {database, tableName, page, pageSize,orderby  } = req.params;
                 const db= dbs.databases[database];
                
 
@@ -599,14 +599,15 @@ class dblayer{
               
                 // decode the json filter              
                 const filterObj = filter ? JSON.parse(filter): null;
-              
+                // orderby generation 
           
                  db.queryDataWithPagination(
                   tableName,
                   pageNum,
                   pageSizeNum,
                   fields,
-                  filterObj
+                  filterObj,
+                  orderby
                 ).then(data => {
                   // Convert BigInt to int or string
                   const convertedData = this.convertBigIntToInt(data);

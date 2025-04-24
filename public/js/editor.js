@@ -190,7 +190,6 @@ function editElement(element) {
   var type = element.getAttribute("tagName");
   currentElement = element;
     // Execute the function editor delcared in the components js if exists type
-    console.log(type);
     if (elementsData[type]) {
       if (elementsData[type].editFunction) {
         var functionName = elementsData[type].editFunction;
