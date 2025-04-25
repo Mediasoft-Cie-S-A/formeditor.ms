@@ -643,6 +643,7 @@ class dblayer{
                   // add limit to the query
                   const limit = req.query.limit ? req.query.limit : null;
                   sqlQuery += ` FETCH FIRST ${pageSizeNum} ROWS ONLY`;
+                 
                   // get data from the query
                  db.queryData(sqlQuery).then(data => {
                   // Convert BigInt to int or string

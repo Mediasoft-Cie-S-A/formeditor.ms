@@ -1117,7 +1117,7 @@ function createSQLBox(id, label, styleProperty, isId = false) {
   input.setAttribute("tagname", "dbname");
   input.className = "input-element";
 
-  input.value = "PUB";
+  input.value = "";
   subDiv.appendChild(label);
   subDiv.appendChild(input);
   div.appendChild(subDiv);

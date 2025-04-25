@@ -215,7 +215,7 @@ if (sqlJson.DBName != "") {
     orderByData.push({ fieldName: json.fieldName });
   });
   main.setAttribute("dataOrderByGrid", JSON.stringify(orderByData));
-  console.log("[DEBUG] Champs tri simplifiés:", json);
+
   // get the filter
   var filter = content.querySelector("#filter");
   if (filter != null) {
@@ -606,6 +606,7 @@ async function gridGetData(
                   gridType
                 ) 
 {
+  console.log("I am gridGetDatat");
   // activate the loaders
   activateLoaders();
   // console.log(grid);
@@ -616,12 +617,12 @@ async function gridGetData(
   var dataset = JSON.parse(main.getAttribute("dataset"));
   var datalink = JSON.parse(main.getAttribute("datalink"));
   var orderBy =JSON.parse(main.getAttribute("dataorderbygrid"));
- console.log(orderBy);
+  console.log("ORDERBY",orderBy);
   // check if filter is empty
   if (filterJSON == undefined || filterJSON == null || filterJSON == "") {
     filterJSON = {};
   }
-  console.log(filter);
+  console.log("hellloooooo:",filter);
   // if filter is not empty, add the filter to the filterJSON
   if (filter != "") {
     var filterArray = filter.split("|");
@@ -681,6 +682,7 @@ async function gridGetData(
   body.innerHTML = "";
   // Prepare the URL
   var url = `/table-data/${DBName}/${tableName}/${page}/${pageSize}?fields=${datasetFields}&filter=${encodeURIComponent(JSON.stringify(filterJSON))}&orderBy=${JSON.stringify(orderBy)}`;
+  console.log("urillllll:",url);
   // get the sqljson from the main
   var sqlJson = JSON.parse(main.getAttribute("sql"));
   if (sqlJson.DBName != "") {

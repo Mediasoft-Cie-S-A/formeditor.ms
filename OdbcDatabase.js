@@ -223,6 +223,7 @@ class OdbcDatabase {
         }
         // order by
         // paginatedQuery += ` ORDER BY ....
+       
         if (orderBy && Array.isArray(orderBy) && orderBy.length > 0) {
           const orderClause = orderBy
             .map((order) => `"${order.fieldName}" ASC`)
