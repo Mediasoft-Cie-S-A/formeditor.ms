@@ -1376,8 +1376,10 @@ function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false )
     // add expand the div size and reduce it button
   div.innerHTML += `<i class="fa fa-plus-square" onclick="expandReduceDiv(event,'${elementId}')" style="color:blue" title="Expand"></i>`;
   div.innerHTML += `<hr style="margin: 0px;"></hr>`;
-  const prefix = fieldJson.tableName.slice(0, 3).toLowerCase() + '_';
-  fieldJson.displayName = prefix + fieldJson.fieldName;
+  var tableName = fieldJson.tableName || "unk"; 
+  var fieldName = fieldJson.fieldName || "unknownField"; 
+  const prefix = tableName.slice(0, 3).toLowerCase() + '_';
+  fieldJson.displayName = prefix + fieldName; 
   
   
   div.innerHTML += `<span name='dataContainer' data-field='${JSON.stringify(fieldJson)}' style="  font-weight: bold;">${fieldJson.displayName}</span>`;

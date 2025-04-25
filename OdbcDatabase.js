@@ -203,7 +203,10 @@ class OdbcDatabase {
   }
 
   async queryDataWithPagination(tableName, page, pageSize, fields, filter, orderBy) {
+    console.log("appelle de la fonction: queryDataWithPagination()1");
+
     try {
+      console.log("appelle de la fonction: queryDataWithPagination()2");
       // create filter base on filer paramenter, for search based on the input values,
       //with field name and value separated by | and each filter separated by ,
       // and build the query where clause
@@ -226,7 +229,7 @@ class OdbcDatabase {
        
         if (orderBy && Array.isArray(orderBy) && orderBy.length > 0) {
           const orderClause = orderBy
-            .map((order) => `"${order.fieldName}" ASC`)
+            .map((order) => `"${order.fieldName}" DESC`)
             .join(", ");
           paginatedQuery += ` ORDER BY ${orderClause}`;
         }

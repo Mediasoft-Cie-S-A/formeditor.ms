@@ -606,7 +606,6 @@ async function gridGetData(
                   gridType
                 ) 
 {
-  console.log("I am gridGetDatat");
   // activate the loaders
   activateLoaders();
   // console.log(grid);
@@ -617,12 +616,10 @@ async function gridGetData(
   var dataset = JSON.parse(main.getAttribute("dataset"));
   var datalink = JSON.parse(main.getAttribute("datalink"));
   var orderBy =JSON.parse(main.getAttribute("dataorderbygrid"));
-  console.log("ORDERBY",orderBy);
   // check if filter is empty
   if (filterJSON == undefined || filterJSON == null || filterJSON == "") {
     filterJSON = {};
   }
-  console.log("hellloooooo:",filter);
   // if filter is not empty, add the filter to the filterJSON
   if (filter != "") {
     var filterArray = filter.split("|");
