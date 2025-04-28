@@ -783,136 +783,149 @@ async function gridGetData(
   // end fetch
   
 }
-
 function drawGridRow(
-             mainID,
-              DBName,
-              tableName,
-              data,
-              datasetFields,
-              dataset,
-              datalink,
-              j,
-              body,
-              page,
-              pageSize
-)
+  mainID,
+  DBName,
+  tableName,
+  data,
+  datasetFields,
+  dataset,
+  datalink,
+  j,
+  body,
+  page,
+  pageSize
+) {
+  console.log("drawGridRow");
 
-{
-   console.log("drawGridRow");
-        let record = j;
-        const rowid = Object.values(data[j])[0];
-        const rowData = data[j];
-        var rowDiv = document.createElement("div");
-        if (j % 2 == 0) rowDiv.style.backgroundColor = "#f2f2f2";
-        else rowDiv.style.backgroundColor = "#ffffff";
-        rowDiv.className = "grid-row";
-        rowDiv.setAttribute("rowid",  rowid);
-        // add click event to row to call linkRecordToGrid(tableName, rowId)
-         console.log(rowData);
-        if (j == 0) {
-          // call linkRecordToGrid(tableName, rowId)
-          linkRecordToGrid(
-            DBName,
-            tableName,
-            rowid,
-            record + (page - 1) * pageSize,
-            dataset,
-            datalink,
-            rowData
-          );
-        } // end if (j == 0)
+  let record = j;
+  const rowid = Object.values(data[j])[0];
+  const rowData = data[j];
 
-        rowDiv.setAttribute("main-id", mainID);
-        rowDiv.addEventListener("click", function (event) {
-                          event.preventDefault();
-                          // get main id
-                          var mainID = event.target.closest(".grid-row").getAttribute("main-id");
-                          var main = document.getElementById(mainID);
-                          var dataset = JSON.parse(main.getAttribute("dataset"));
-                          var datalink = JSON.parse(main.getAttribute("datalink"));
-                          // remove .grid-row-selected from all rows
-                          var gridRows = document.querySelectorAll('.grid-row');
-                          gridRows.forEach(row => {
-                            row.classList.remove("grid-row-selected");
-                          });
-                          if (event.target.parentElement.classList.contains("grid-row")) {
-                            event.target.parentElement.classList.add("grid-row-selected");
-                          }
-                          if (event.target.classList.contains("grid-row")) {
-                            event.target.classList.add("grid-row-selected");
-                          }
-                        
-                          // desactivate the loaders
-                          deactivateLoaders();
-                          linkRecordToGrid(
-                            DBName,
-                            tableName,
-                            rowid,
-                            record + (page - 1) * pageSize,
-                            dataset,
-                            datalink,
-                            rowData 
-                          );
+  // Create the main div for the row
+  var rowDiv = document.createElement("div");
+  
+  // Alternate row background colors (zebra effect)
+  if (j % 2 == 0) {
+      rowDiv.style.backgroundColor = "#f2f2f2"; // Light grey for even rows
+  } else {
+      rowDiv.style.backgroundColor = "#ffffff"; // White for odd rows
+  }
 
-                            // get the tab
-                            const tab = document.querySelector('[tagname="Tab"]');
-                            if (tab) {
-                              
-                              // the header by class ctab_tabs-header
-                            const header = tab.querySelector(".ctab_tabs-header");
-                            
-                              if (header.childNodes.length > 0) {
-                                // second tab
-                                activateTab(event,header.childNodes[1],document.getElementById(header.childNodes[1].getAttribute("data-tab")));
-                              } // end if
-                            } // end if (tab)
-                      } // end addEventListener
-                      );
-        var i = 0;
-        Object.values(data[j]).forEach((field, index) => {
-          const cell = document.createElement("div");
-          cell.className = "grid-cell";
+  rowDiv.className = "grid-row"; // Set the class for styling
+  rowDiv.setAttribute("rowid", rowid); // Store the unique row ID
+  rowDiv.setAttribute("main-id", mainID); // Store the grid main ID
 
-          rowDiv.appendChild(cell);
-          // skip rowid field
-          if (i == 0) {
-            cell.style.display = "none";
-            cell.textContent = field;
-              } else {
-                let subField = field?.toString().trim().split(";");
-                // check if the subField is not null or undefined
-                if (subField == null || subField == undefined) {
-                  subField = [field];
-                }
-                else if (subField.length > 1) {
-                  // Clear any previous content
-                  cell.innerHTML = "";
+  console.log("rowData display:",rowData);
 
-                  // Create a container for the content
-                  const contentDiv = document.createElement("div");
-                  contentDiv.style.maxHeight = "200px"; // Adjust height as needed
-                  contentDiv.style.overflowY = "auto";
-                  contentDiv.style.whiteSpace = "pre-wrap"; // Preserve white spaces and line breaks
+  // Auto-link the first row when loading
+  if (j == 0) {
+      linkRecordToGrid(
+          DBName,
+          tableName,
+          rowid,
+          record + (page - 1) * pageSize,
+          dataset,
+          datalink,
+          rowData
+      );
+  }
 
-                  subField.forEach((item, subIndex) => {
-                    const line = document.createElement("div");
-                    line.textContent = `${keys[index] == "gama"}: ${item}`;
-                    contentDiv.appendChild(line);
-                  });
+  // Add click event listener to select the row
+  rowDiv.addEventListener("click", function (event) {
+      event.preventDefault();
 
-                  cell.appendChild(contentDiv);
-                } else {
-                  cell.textContent = field;
-                } // end if (subField.length > 1)
-                } // end if (i == 0)
-                i++;
-              }// end forEach
-            );
-        body.appendChild(rowDiv);
-      
-     
+      // Find the closest parent with class 'grid-row'
+      const closestRow = event.target.closest(".grid-row");
+      if (!closestRow) return; // If no 'grid-row' found, safely exit
+
+      // Retrieve the main ID of the grid
+      var mainID = closestRow.getAttribute("main-id");
+      var main = document.getElementById(mainID);
+      var dataset = JSON.parse(main.getAttribute("dataset"));
+      var datalink = JSON.parse(main.getAttribute("datalink"));
+
+      // Remove the 'grid-row-selected' class from all rows
+      var gridRows = document.querySelectorAll('.grid-row');
+      gridRows.forEach(row => {
+          row.classList.remove("grid-row-selected");
+      });
+
+      // Add the 'grid-row-selected' class to the clicked row
+      closestRow.classList.add("grid-row-selected");
+
+      // Deactivate loading indicators
+      deactivateLoaders();
+
+      // Link the clicked record to the grid
+      linkRecordToGrid(
+          DBName,
+          tableName,
+          rowid,
+          record + (page - 1) * pageSize,
+          dataset,
+          datalink,
+          rowData
+      );
+
+      // Try switching to the second tab if it exists
+      const tab = document.querySelector('[tagname="Tab"]');
+      if (tab) {
+          const header = tab.querySelector(".ctab_tabs-header");
+          if (header.childNodes.length > 0) {
+              activateTab(event, header.childNodes[1], document.getElementById(header.childNodes[1].getAttribute("data-tab")));
+          }
+      }
+  });
+
+  // Now create cells inside the row
+  var i = 0;
+  Object.values(data[j]).forEach((field, index) => {
+      const cell = document.createElement("div");
+      cell.className = "grid-cell";
+
+      rowDiv.appendChild(cell);
+
+      // Hide the cell if it's the rowid field (first field)
+      if (i == 0) {
+          cell.style.display = "none";
+          cell.textContent = field;
+      } else {
+          // If field contains multiple values separated by ';', handle it
+          let subField = field?.toString().trim().split(";");
+
+          if (!subField || subField.length === 0) {
+              subField = [field];
+          }
+
+          if (subField.length > 1) {
+              // Create a nice vertical layout for multi-values
+              cell.innerHTML = "";
+
+              const contentDiv = document.createElement("div");
+              contentDiv.style.maxHeight = "200px";
+              contentDiv.style.overflowY = "auto";
+              contentDiv.style.whiteSpace = "pre-wrap"; // Keep line breaks
+
+              subField.forEach((item, subIndex) => {
+                  const line = document.createElement("div");
+                  line.textContent = `${item}`;
+                  contentDiv.appendChild(line);
+              });
+
+              cell.appendChild(contentDiv);
+          } else {
+              // Standard single value
+              cell.textContent = field;
+          }
+      }
+      i++;
+  });
+
+  // Finally, add the row to the grid body
+  body.appendChild(rowDiv);
 }
+
 
 function drawPanelRow(
   mainID,
