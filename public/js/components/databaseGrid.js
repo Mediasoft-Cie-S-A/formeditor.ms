@@ -291,67 +291,68 @@ function insertNavBar(
   datasetLabels,
   datasetFieldsTypes
 ) {
-  
   console.log(gridContainer);
+
   // check if the class="right-panel" exists in the gridContainer
   // if it exists, remove it
   var rightPanel = gridContainer.querySelector(".right-panel");
   if (rightPanel) {
     return;
   }
-  
+
   // create search structure
-  
-
   var html = `<div class="right-panel" tagname="GridPanel">`;
-  // html += `<div class="navigation-bar-title">Record: </div>`;
-  // adding page number
-  html += `<div id="current_page" >Page: 1 </div>`;
-
+  html += `<div id="current_page">Page: 1</div>`;
 
   html += `<div style='display: flex; align-items: center; gap: 10px;'>`;
-  html +=
-    `<button name='revGRIDBtn' title='Previous Page' grid-id='${gridContainer.parentElement.id}' onclick='gridPrev(event,"${DBName}","${tableName}")'>` +
+
+  html += `<button name='revGRIDBtn' title='Previous Page' grid-id='${gridContainer.parentElement.id}' onclick='gridPrev(event,"${DBName}","${tableName}")'>` +
     `<i class='fa fa-chevron-left' grid-id='${gridContainer.parentElement.id}' style='color:#4d61fc;'></i>` +
     `</button>`;
-  html +=
-    `<button name='NextGRIDBtn' title='Next Page' grid-id='${gridContainer.parentElement.id}' onclick='gridNext(event,"${DBName}","${tableName}")'>` +
+
+  html += `<button name='NextGRIDBtn' title='Next Page' grid-id='${gridContainer.parentElement.id}' onclick='gridNext(event,"${DBName}","${tableName}")'>` +
     `<i class='fa fa-chevron-right' grid-id='${gridContainer.parentElement.id}' style='color:#4d61fc;'></i>` +
     `</button>`;
 
-  html +=
-    `<button name='RefreshGRIDBtn' title='Refresh' grid-id='${gridContainer.parentElement.id}' onclick='searchGrid("${DBName}","","","","${gridContainer.parentElement.id}")'>` +
+  html += `<button name='RefreshGRIDBtn' title='Refresh' grid-id='${gridContainer.parentElement.id}' onclick='searchGrid("${DBName}","","","","${gridContainer.parentElement.id}")'>` +
     `<i class='fa fa-refresh' grid-id='${gridContainer.parentElement.id}' style='color:#4d61fc;'></i>` +
     `</button>`;
-  html +=
-    `<button name='PostitGRIDBtn' title='Postit' grid-id='${gridContainer.parentElement.id}' onclick='postit(event,"${DBName}","${tableName}")'>` +
+
+  html += `<button name='PostitGRIDBtn' title='Postit' grid-id='${gridContainer.parentElement.id}' onclick='postit(event,"${DBName}","${tableName}")'>` +
     `<i class='bi bi-card-text' grid-id='${gridContainer.parentElement.id}' style='color:#4d61fc;'></i>` +
     `</button>`;
-  html +=
-    `<button name='ExportGRIDBtn' title='Export Data' grid-id='${gridContainer.parentElement.id}' onclick='export2CSV(event,"${DBName}","${tableName}")'>` +
+
+  html += `<button name='ExportGRIDBtn' title='Export Data' grid-id='${gridContainer.parentElement.id}' onclick='export2CSV(event,"${DBName}","${tableName}")'>` +
     `<i class='fa fa-download' grid-id='${gridContainer.parentElement.id}' style='color:#4d61fc;'></i>` +
     `</button>`;
+
   // adding button for grid or panel 
   html += `<button name='gridView' title='Grid View' grid-id='${gridContainer.parentElement.id}' onclick='switchView(event,"${DBName}","${gridContainer.parentElement.id}","standard")'>` +
     `<i class='fa fa-th' grid-id='${gridContainer.parentElement.id}' style='color:green;'></i>` +
     `</button>`;
+
   html += `<button name='panelView' title='Panel View' grid-id='${gridContainer.parentElement.id}' onclick='switchView(event,"${DBName}","${gridContainer.parentElement.id}","panel")'>` +
     `<i class='bi bi-card-list' grid-id='${gridContainer.parentElement.id}' style='color:green;'></i>` +
     `</button>`;
+
   html += `</div>`;
-  html += `<select id="gridPage" class="input-element" onchange='grid_page_size(event,"${gridContainer.parentElement.id}")' style='width:60px;font-size:14px'>`;
-  html += `<option value='5'>5</option>`;
-  html += `<option value='10'>10</option>`;
-  html += `<option value='20'>20</option>`;
+
+  // 📌 MODIFICATION : Only allow 15, 50, 100 options for page size, default to 15
+  html += `<select id="gridPage" class="input-element" onchange='grid_page_size(event,"${gridContainer.parentElement.id}")' style='width:60px;font-size:14px; cursor: pointer;'>`;
+  html += `<option value='15' selected>15</option>`;
   html += `<option value='50'>50</option>`;
   html += `<option value='100'>100</option>`;
-  html += `</select>`; // record count
+  html += `</select>`; // record count options
+  
+
   html += `<img class="miniLoader" style="display: none;" src="/img/loader.gif" alt="Loading...">`;
   html += `</div>`;
 
   // get tagname="dataTable" from the gridContainer
   gridContainer.innerHTML += html;
 }
+
+
 
 //Grid code
 function createGrid(
