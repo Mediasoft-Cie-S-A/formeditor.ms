@@ -747,6 +747,7 @@ function dropInput(event, id) {
     fieldDefaultValue: fieldDefaultValue,
     functionName: "value",
     isIndex: false,
+    validation: ""
   };
   // console.log(fieldJson);
   // Get the target element
@@ -1391,8 +1392,7 @@ function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false )
     fieldJson.fieldMandatory === "true" ? "checked" : ""
   } onclick="updateMandatory(event, '${elementId}')"> </div>`;
   // adding verification triggers not null fields checkbox
-  div.innerHTML += `<div>regexp<input type="text"  tagname="regexp" id="regexp" name="regexp" 
-} onclick="regexp(event, '${elementId}')"></div>`;
+  div.innerHTML += `<div>regexp<input type="text"  tagname="regexp" id="regexp" name="regexp" onchange="regexp(event, '${elementId}')" value="${fieldJson.validation}"></div>`;
 
   // Create a select dropdown
   var select = document.createElement("select");

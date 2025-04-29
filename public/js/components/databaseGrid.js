@@ -84,9 +84,9 @@ function editDatabaseGrid(type, element, content) {
 
 
   // orderBy
-  if (element.getAttribute("dataorderby") != null) {
+  if (element.getAttribute("dataorderbygrid") != null) {
     var target = content.querySelector("#OrderBy");
-    var jsonData = JSON.parse(element.getAttribute("dataorderby"));
+    var jsonData = JSON.parse(element.getAttribute("dataorderbygrid"));
     jsonData.forEach((fieldJson) => {
       addFieldToPropertiesBar(target, fieldJson);
     });
