@@ -797,7 +797,6 @@ function drawGridRow(
   page,
   pageSize
 ) {
-  console.log("drawGridRow");
 
   let record = j;
   const rowid = Object.values(data[j])[0];

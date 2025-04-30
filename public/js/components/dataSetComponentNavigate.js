@@ -432,6 +432,8 @@ function addIdToData(data, id, value) {
   data.values = valuesArray.map((v) => `'${v}'`).join(",");
   return data;
 }
+
+
 async function navbar_SaveRecord() {
   try {
     if (document.querySelector("[name=SaveDSBtn]").disabled) {
@@ -441,76 +443,88 @@ async function navbar_SaveRecord() {
     console.log("SaveRecord");
 
     // validation
-       // Select all row ID elements (one per dataset record)
-       const nextRowIds = document.querySelectorAll("[dataset-field-type='rowid']");
+    // Select all row ID elements (one per dataset record)
+    const nextRowIds = document.querySelectorAll("[dataset-field-type='rowid']");
 
-       nextRowIds.forEach(async (nextRowId) => {
-         console.log("Row being processed:", nextRowId);
-   
-         const tableName = nextRowId.getAttribute("dataset-table-name");
-         const dbName = nextRowId.getAttribute("dbname");
-         const divLine = nextRowId.closest("[tagname='dataSet']");
-         const rowIdValue = nextRowId.value;
-         console.log(divLine);
+    for (const nextRowId of nextRowIds) {
+      console.log("Row being processed:", nextRowId);
 
-         // Select all fields in the current record with a data-field-type attribute
-         const fields = divLine.querySelectorAll("input,select");
-         console.log(fields);
-         let validationFailed = false;
-   
-         fields.forEach((fieldElement) => {
+      const tableName = nextRowId.getAttribute("dataset-table-name");
+      const dbName = nextRowId.getAttribute("dbname");
+      const divLine = nextRowId.closest("[tagname='dataSet']");
+      const rowIdValue = nextRowId.value;
 
-           const closestDataSet = fieldElement.closest('[tagname="dataSet"]');
-           const dataFieldContainer = fieldElement.closest('[data-field]');
+      // Select all fields in the current record with a data-field-type attribute
+      const fields = divLine.querySelectorAll("input,select");
+      console.log("fields where are you: ", fields);
 
-            console.log("I want to see :",closestDataSet," AND ",dataFieldContainer);
-           // Ensure the field is within a dataset and has a data-field JSON config
-           if (closestDataSet && dataFieldContainer) {
-             const datasetTableName = closestDataSet.getAttribute("data-table-name");
-   
-             try {
-               const fieldJson = JSON.parse(dataFieldContainer.getAttribute("data-field"));
-              console.log(fieldJson);
-               // Compare the tableName in JSON with the dataset container's table name
-               if (fieldJson.tableName !== datasetTableName) {
-                 validationFailed = true;
-                 fieldElement.style.border = "2px solid red";
-                 showToast(`Field "${fieldJson.fieldName}" does not match dataset "${datasetTableName}".`);
-               } else {
-                 fieldElement.style.border = "";
-               }
-             } catch (error) {
-               console.warn("Invalid JSON in data-field:", error);
-               validationFailed = true;
-             }
-           }
-         });
-   
-         // If any mismatch or error occurred, skip the save for this record
-         if (validationFailed) {
-           console.warn("Validation failed. Record will not be saved.");
-           return;
-         }
+      let validationFailed = false;
+
+      for (const fieldElement of fields) {
+        const closestDataSet = fieldElement.closest('[tagname="dataSet"]');
+        const dataFieldContainer = fieldElement.closest('[data-field]');
+        const validationField = fieldElement.getAttribute("validation");
+
+        // Make sure we have a valid JSON field definition
+        let fieldJson = {};
+        if (dataFieldContainer) {
+          try {
+            fieldJson = JSON.parse(dataFieldContainer.getAttribute("data-field"));
+          } catch (error) {
+            console.warn("Invalid JSON in data-field:", error);
+            validationFailed = true;
+          }
+        }
+
+        // display to see the datas
+        console.log("rowIdValue: ", rowIdValue);
+        console.log("every element: ", fieldElement);
+        console.log("fieldJson : ", fieldJson);
+        console.log("Attribut validation: ", validationField);
+
+        // Ensure the field is within a dataset and has a data-field JSON config
+        if (validationField == "undefined" || validationField == fieldElement.getAttribute("validation")) {
+          const datasetTableName = closestDataSet.getAttribute("data-table-name");
+
+          console.log("in 1st condition !!");
+
+          // Compare the tableName in JSON with the dataset container's table name
+          if (fieldJson.tableName !== datasetTableName) {
+            console.log("in 2nd condition !!");
+            validationFailed = true;
+            showToast(`Field "${fieldJson.fieldName}" does not match dataset "${datasetTableName}".`);
+          }
+        } else {
+          console.log("else condition !!!");
+          validationFailed = true;
+        }
+      }
+
+      // If any mismatch or error occurred, skip the save for this record
+      if (validationFailed) {
+        console.warn("Validation failed. Record will not be saved.");
+      }
+
       let result;
-
+      console.log("before verifiying rowIsValue if new");
       if (rowIdValue === "new") {
-        let data = await CreateInsert(dbName, tableName,divLine);
+        let data = await CreateInsert(dbName, tableName, divLine);
         result = await insertRecordDB(dbName, tableName, data);
       } else {
         const data = {
-          body: CreateUpdated(dbName, tableName,divLine),
+          body: CreateUpdated(dbName, tableName, divLine),
         };
         result = await updateRecordDB(dbName, tableName, rowIdValue, data);
       }
+
       document.querySelector("[name=SaveDSBtn]").disabled = true;
       return result;
-
-    });
+    }
   } catch (error) {
     console.error("Error:", error);
-  } 
-
+  }
 }
+
 
 // create insert data structure
 async function CreateInsert(DBName, tableName,divLine) {
