@@ -18,6 +18,11 @@ function createInputField(type) {
 }
 
 function editInputField(type, element, content) {
+  const tableName = element.getAttribute('dataset-table-name') || "";
+  const tablePrefix = tableName.substring(0, 5); // Prend maximum 5 lettres
+  const columnName  = element.getAttribute('dataset-field-name') || "data";
+  const nameColumn = `${tablePrefix}_${columnName}`; 
+
   const button = document.createElement("button");
   button.textContent = "update";
   button.style.width = "100%";
@@ -35,8 +40,7 @@ function editInputField(type, element, content) {
 
   content.appendChild(button);
 
-  const nameColumn = element.getAttribute('dataset-field-name') || "data";
-  const multiSelectDiv = createMultiSelectItem("Data", nameColumn, "data");
+  const multiSelectDiv = createMultiSelectItem("Data", nameColumn , "data");
 
   // ✨ Ajouter les nouvelles infos ici :
   const fieldJson = generateFieldsJSON(element)[0];
