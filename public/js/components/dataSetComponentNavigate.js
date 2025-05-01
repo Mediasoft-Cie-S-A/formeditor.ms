@@ -458,51 +458,81 @@ async function navbar_SaveRecord() {
       const fields = divLine.querySelectorAll("input,select");
       console.log("fields where are you: ", fields);
 
-      let validationFailed = false;
 
+      let validationFailed = true;
+
+      console.log("Before Loop")
       for (const fieldElement of fields) {
-        const closestDataSet = fieldElement.closest('[tagname="dataSet"]');
-        const dataFieldContainer = fieldElement.closest('[data-field]');
-        const validationField = fieldElement.getAttribute("validation");
+      
+    
+        const dataFieldContainer = fieldElement.getAttribute('validation');
+        const datasetTableName = fieldElement.getAttribute("dataset-table-name");
+        const datasetChampName = fieldElement.getAttribute("dataset-field-name");
 
-        // Make sure we have a valid JSON field definition
-        let fieldJson = {};
-        if (dataFieldContainer) {
+     
+
+        /*const fieldInfo = {
+          validation: dataFieldContainer,
+          tableName: datasetTableName,
+          fieldName: datasetChampName
+        };*/
+     
+        //console.log("DataFied: ",dataFieldContainer);
+        //let fieldJson = {};
+       /* if (dataFieldContainer != null && dataFieldContainer != "") {
           try {
-            fieldJson = JSON.parse(dataFieldContainer.getAttribute("data-field"));
+            fieldJson = JSON.stringify(fieldInfo);
+            console.log("In FieldJson :",fieldJson);
           } catch (error) {
             console.warn("Invalid JSON in data-field:", error);
             validationFailed = true;
+            fieldElement.style.border = "2px solid red";
+            continue; // skip to next field
           }
-        }
+        }*/
 
-        // display to see the datas
-        console.log("rowIdValue: ", rowIdValue);
-        console.log("every element: ", fieldElement);
-        console.log("fieldJson : ", fieldJson);
-        console.log("Attribut validation: ", validationField);
+          if (fieldElement.value == null || fieldElement.value == "") continue;
+          console.log(dataFieldContainer);
+          if (dataFieldContainer == undefined || dataFieldContainer == "undefined" || dataFieldContainer == null || dataFieldContainer == "") continue;
+          const regexValidation = new RegExp(dataFieldContainer);
 
-        // Ensure the field is within a dataset and has a data-field JSON config
-        if (validationField == "undefined" || validationField == fieldElement.getAttribute("validation")) {
-          const datasetTableName = closestDataSet.getAttribute("data-table-name");
-
-          console.log("in 1st condition !!");
-
-          // Compare the tableName in JSON with the dataset container's table name
-          if (fieldJson.tableName !== datasetTableName) {
-            console.log("in 2nd condition !!");
-            validationFailed = true;
-            showToast(`Field "${fieldJson.fieldName}" does not match dataset "${datasetTableName}".`);
+          console.log(regexValidation.test(fieldElement.value));
+          console.log("Valeur field: " ,fieldElement.value);
+          if (!regexValidation.test(fieldElement.value)) {
+            validationFailed = false;
+            fieldElement.style.border = "2px solid red";
+            console.log("in condition")
+          
+            continue;
+          } else {
+            fieldElement.style.border = ""; // champ valide, on enlève la bordure rouge
           }
-        } else {
-          console.log("else condition !!!");
+        
+
+          
+
+
+        
+
+        // Vérification que le champ appartient à la bonne table
+       /* if (fieldJson.tableName && fieldJson.tableName !== dataFieldContainer) {
+          console.warn(`Mismatch tableName: expected "${datasetTableName}", got "${fieldJson.tableName}"`);
           validationFailed = true;
-        }
-      }
+          fieldElement.style.border = "2px solid red";
+          showToast(`Champ "${fieldJson.fieldName}" mal associé à la table "${datasetTableName}".`);
+        } else {
+          fieldElement.style.border = "";
+        }*/
+      
+        // Tu peux ici rajouter d'autres règles de validation par type ou attribut
 
-      // If any mismatch or error occurred, skip the save for this record
-      if (validationFailed) {
-        console.warn("Validation failed. Record will not be saved.");
+
+      }
+      
+
+      if (validationFailed === false) {
+        showToast("validation error, please fixes");
+        return;
       }
 
       let result;
@@ -514,6 +544,7 @@ async function navbar_SaveRecord() {
         const data = {
           body: CreateUpdated(dbName, tableName, divLine),
         };
+
         result = await updateRecordDB(dbName, tableName, rowIdValue, data);
       }
 
@@ -631,6 +662,7 @@ async function updateRecordDB(DBName, tableName, nextRowId, updateData) {
     console.error("Error:", error);
   }
 }
+
 
 async function insertRecordDB(DBName, tableName, data) {
   try {

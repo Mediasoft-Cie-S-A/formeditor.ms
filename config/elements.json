@@ -87,6 +87,17 @@
     "icon": "fa fa-search",
     "renderFunction": ""
   },
+  "inputField": {
+    "type": "input field",
+    "description": "input field",
+    "category": "Business Logic",
+    "scriptName": "inputField.js",
+    "createFunction": "createInputField",
+    "editFunction": "editInputField",
+    "styles": "",
+    "icon": "fa fa-font",
+    "renderFunction": ""
+  },
   "dataCombox": {
     "type": "dataCombox",
     "description": "dataCombox",

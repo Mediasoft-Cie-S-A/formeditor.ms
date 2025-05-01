@@ -448,6 +448,10 @@ function showProperties() {
   for (var i = 0; i < inputElements.length; i++) {
     inputElements[i].removeAttribute("readonly");
     inputElements[i].removeAttribute("disabled"); // remove the disabled attribute
+    if (inputElements[i].getAttribute("tagname")==null || inputElements[i].getAttribute("tagname")=="text")
+    {
+      inputElements[i].setAttribute("tagname","inputField");
+    }
     // disable 
 
     inputElements[i].style.backgroundColor = "#ffffff";
