@@ -22,7 +22,7 @@ function editInputField(type, element, content) {
 
   const tableName = element.getAttribute('dataset-table-name') || "";
   const tablePrefix = tableName.substring(0, 5); // Prend maximum 5 lettres
-  const columnName  = element.getAttribute('dataset-field-name') || "data";
+  const columnName  = element.getAttribute('dataset-field-name') || "";
   const nameColumn = `${tablePrefix}_${columnName}`; 
 
   const button = document.createElement("button");
@@ -33,7 +33,7 @@ function editInputField(type, element, content) {
     const propertiesBar = document.getElementById("propertiesBar");
     const gridID = propertiesBar.querySelector("label").textContent;
     const main = document.getElementById(gridID);
-    updateDataSet(main, content);
+    updatefieldDataSet(main, content);
   };
 
   content.appendChild(button);
@@ -52,3 +52,46 @@ function editInputField(type, element, content) {
 
 
 
+async function updatefieldDataSet(main, content) {
+  console.log("updatefieldDataSet");
+  const columnName  = main.getAttribute('dataset-field-name') || "";
+  var data = content.querySelector("#Data").querySelectorAll("span[name='dataContainer']");
+  
+  if (data.length == 0) return;
+  const fields = {};
+
+  data.forEach((span) => {
+    const field = JSON.parse(span.getAttribute("data-field"));
+    const fieldName = field.fieldName; // on prend le nom de la colonne comme clé
+    fields[fieldName] = field; // on ajoute au format clé/valeur
+  });
+  
+  console.log(fields); // tu as un objet JSON { fieldName1: {...}, fieldName2: {...} }
+  
+
+  const maindiv = main.closest("[dataset]");
+  //console.log("maindiv:", maindiv);
+  let jsonDataset= JSON.parse(maindiv.getAttribute("dataset"));
+ 
+  jsonDataset= updateFieldInDataset(jsonDataset,columnName,fields);
+ 
+  maindiv.setAttribute("dataset",JSON.stringify(jsonDataset));
+  // get the data from the main
+}
+
+function updateFieldInDataset(jsonDataset, columnName, jsonData) {
+  const fieldIndex = jsonDataset.findIndex(field => field.fieldName === columnName);
+
+  if (fieldIndex !== -1) {
+    // Correct merge: update only the matching field, not all the jsonData object
+    const updatedField = jsonData[columnName];
+    jsonDataset[fieldIndex] = {
+      ...jsonDataset[fieldIndex],  // keep existing properties
+      ...updatedField              // overwrite with the updated field values
+    };
+  } else {
+    console.error(`Field "${columnName}" not found in dataset.`);
+  }
+
+  return jsonDataset; // Return the updated dataset
+}
