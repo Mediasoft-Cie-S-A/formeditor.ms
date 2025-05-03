@@ -190,7 +190,6 @@ function editElement(element) {
   var type = element.getAttribute("tagName");
   currentElement = element;
     // Execute the function editor delcared in the components js if exists type
-    console.log(type);
     if (elementsData[type]) {
       if (elementsData[type].editFunction) {
         var functionName = elementsData[type].editFunction;
@@ -290,6 +289,7 @@ function editElement(element) {
 
       const updateButton = document.createElement("button");
       updateButton.textContent = "Update";
+
 	updateButton.style.marginTop = "5px";
       updateButton.style.fontSize = "9px";
       updateButton.style.width = "100%";
@@ -300,21 +300,24 @@ function editElement(element) {
           updateButton.style.backgroundColor = "green";
           updateButton.style.cursor = "pointer";
           updateButton.style.color = "white";
-                };      updateButton.onclick = () => {
+                };     
+      updateButton.onclick = () => {
 	// put the htmlEditor in undo stack
           undoStack.push(htmlEditor.innerHTML);
-          // console.log(undoStack);          inputElements.forEach((input) => {
+          // console.log(undoStack);          
+          inputElements.forEach((input) => {
               const prop = input.querySelector("select, input").getAttribute("data-style-property");
               const value = input.querySelector("select, input").value;
 	      // Check if the property is a style property or an attribute
               updateElementStyle(prop, value);
-          }
-           // insert the button at the beginning of the box
+          });// insert the button at the beginning of the box
+    
+      }; // onclick
+      
+           
       box.insertBefore(updateButton, box.firstChild);
       content.appendChild(box);
-      };
-     
-
+    }
     
   }
 
@@ -445,6 +448,10 @@ function showProperties() {
   for (var i = 0; i < inputElements.length; i++) {
     inputElements[i].removeAttribute("readonly");
     inputElements[i].removeAttribute("disabled"); // remove the disabled attribute
+    if (inputElements[i].getAttribute("tagname")==null || inputElements[i].getAttribute("tagname")=="text")
+    {
+      inputElements[i].setAttribute("tagname","inputField");
+    }
     // disable 
 
     inputElements[i].style.backgroundColor = "#ffffff";
@@ -744,6 +751,7 @@ function dropInput(event, id) {
     fieldDefaultValue: fieldDefaultValue,
     functionName: "value",
     isIndex: false,
+    validation: ""
   };
   // console.log(fieldJson);
   // Get the target element
@@ -1114,7 +1122,7 @@ function createSQLBox(id, label, styleProperty, isId = false) {
   input.setAttribute("tagname", "dbname");
   input.className = "input-element";
 
-  input.value = "PUB";
+  input.value = "";
   subDiv.appendChild(label);
   subDiv.appendChild(input);
   div.appendChild(subDiv);
@@ -1373,8 +1381,10 @@ function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false )
     // add expand the div size and reduce it button
   div.innerHTML += `<i class="fa fa-plus-square" onclick="expandReduceDiv(event,'${elementId}')" style="color:blue" title="Expand"></i>`;
   div.innerHTML += `<hr style="margin: 0px;"></hr>`;
-  const prefix = fieldJson.tableName.slice(0, 3).toLowerCase() + '_';
-  fieldJson.displayName = prefix + fieldJson.fieldName;
+  var tableName = fieldJson.tableName || "unk"; 
+  var fieldName = fieldJson.fieldName || "unknownField"; 
+  const prefix = tableName.slice(0, 3).toLowerCase() + '_';
+  fieldJson.displayName = prefix + fieldName; 
   
   
   div.innerHTML += `<span name='dataContainer' data-field='${JSON.stringify(fieldJson)}' style="  font-weight: bold;">${fieldJson.displayName}</span>`;
@@ -1386,8 +1396,7 @@ function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false )
     fieldJson.fieldMandatory === "true" ? "checked" : ""
   } onclick="updateMandatory(event, '${elementId}')"> </div>`;
   // adding verification triggers not null fields checkbox
-  div.innerHTML += `<div>regexp<input type="text"  tagname="regexp" id="regexp" name="regexp" 
-} onclick="regexp(event, '${elementId}')"></div>`;
+  div.innerHTML += `<div>regexp<input type="text"  tagname="regexp" id="regexp" name="regexp" onchange="regexp(event, '${elementId}')" value="${fieldJson.validation}"></div>`;
 
   // Create a select dropdown
   var select = document.createElement("select");

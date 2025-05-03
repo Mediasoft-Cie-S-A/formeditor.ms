@@ -141,6 +141,7 @@ async function updateDataSet(main, content) {
   data.forEach((span) => {
     var json = JSON.parse(span.getAttribute("data-field"));
     // check if the field exists in the jsonData
+    console.log(json);
     if (jsonData.find((field) => field.fieldName === json.fieldName) == null)
     {
       jsonData.push(json);
@@ -172,6 +173,7 @@ var sqlData = sql.querySelector("[tagname='insert']");
 if (sqlData != null) {
   sqlJson["insert"]=sqlData.value;
 }
+
 
 main.setAttribute("sql", JSON.stringify(sqlJson));
 console.log(sqlJson);
@@ -256,6 +258,9 @@ function renderDataSet(main) {
   }
 
   jsonData.forEach((fieldJson) => {
+
+    // get the regexp
+
     var createField = createFieldFromJson(fieldJson);
     dataset.appendChild(createField);
     datasetFields.push(fieldJson.fieldName);
@@ -327,13 +332,41 @@ function createFieldFromJson(fieldJson) {
       };
       element.appendChild(searchButton);
       break;
-    case "character":
-    case "varchar":
-    case "text":
-    case "fixchar":
-      element = createElementInput("text");
-      einput = element.querySelector("input");
     
+    case "text":
+         switch(fieldJson.fieldDataType)
+         {
+          case "integer":
+          case "bigint":
+          case "float":
+          case "double":
+          case "decimal":
+          case "int64":
+            element = createElementInput("number");
+            einput = element.querySelector("input");
+            break;
+          case "date":
+          case "datetime":
+                element = createElementInput("date");
+                einput = element.querySelector("input");
+          break;
+          case "time":
+                element = createElementInput("time");
+                einput = element.querySelector("input");
+                break;
+          case "boolean":
+          case "bool":
+          case "bit":
+                element = createElementInput("checkbox");
+                einput = element.querySelector("input");
+                einput.className = "apple-switch";
+                break;
+          default:
+            element = createElementInput("text");
+            einput = element.querySelector("input");
+            break;
+         }
+   
       
       break;
     case "rowid":
@@ -341,33 +374,8 @@ function createFieldFromJson(fieldJson) {
       element = createElementInput("hidden");
       einput = element.querySelector("input");
       element.style.display = "none";
-      break;
-    case "INT":
-    case "integer":
-    case "bigint":
-    case "float":
-    case "double":
-    case "decimal":
-      element = createElementInput("number");
-      einput = element.querySelector("input");
-      break;
-    case "date":
-    case "datetime":
-      element = createElementInput("date");
-      einput = element.querySelector("input");
-      break;
-    case "time":
-      element = createElementInput("time");
-      einput = element.querySelector("input");
-      break;
-    case "boolean":
-    case "bool":
-    case "bit":
-      element = createElementInput("checkbox");
-      einput = element.querySelector("input");
-      einput.className = "apple-switch";
-      break;
-
+   break;
+   
     default:
       // Handle default case or unknown types
       element = createElementInput("text");
@@ -396,6 +404,8 @@ function createFieldFromJson(fieldJson) {
     einput.setAttribute("dataset-field-values", fieldJson.fieldValues);
     einput.setAttribute("dataset-field-SQL", fieldJson.fieldSQL);
     einput.setAttribute("tagname", fieldJson.fieldType);
+    einput.setAttribute("validation", fieldJson.validation);
+
       // set einput disabled and readonly
     einput.disabled = true;
     einput.readOnly = true;
@@ -946,3 +956,49 @@ function getRowNum(tabelName) {
   rowNum = parseInt(navbar.getAttribute("dataset-current-row"));
   return rowNum;
 }
+
+/*
+function regexp(event, fieldtable)
+{
+  console.log(event);
+  const closestDataFieldElement = event.target.closest('[data-field]');
+
+  console.log(closestDataFieldElement);
+
+  // 
+}
+  */
+function regexp(event, fieldtable) {
+  // Log the event object for debugging
+  console.log(event);
+
+  // Find the closest parent element that has the 'data-field' attribute
+  const closestDataFieldElement = event.target.closest('[data-field]');
+  const dataContainer = closestDataFieldElement.querySelector('[name="dataContainer"]');
+  // If no matching element is found, exit the function
+  if (!closestDataFieldElement) {
+    console.warn("No [data-field] element found.");
+    return;
+  }
+
+  // Parse the JSON data stored in the 'data-field' attribute
+  const fieldJson = JSON.parse(closestDataFieldElement.getAttribute('data-field'));
+
+  // Get the new regular expression string from the input
+  const newRegexp = event.target.value.trim();
+  console.log(newRegexp);
+
+  fieldJson['validation']=newRegexp;
+  
+  // Save the updated JSON back into the 'data-field' attribute
+  closestDataFieldElement.setAttribute('data-field', JSON.stringify(fieldJson));
+  dataContainer.setAttribute('data-field', JSON.stringify(fieldJson));
+  // Update the 'dataset-field-regexp' attribute on the actual input or select element
+  const inputElement = closestDataFieldElement.querySelector('input, select');
+  if (inputElement) {
+    inputElement.setAttribute('dataset-field-regexp', newRegexp);
+  }
+  // Log the updated regular expression to the console
+  console.log("Regular expression updated:", newRegexp);
+}
+

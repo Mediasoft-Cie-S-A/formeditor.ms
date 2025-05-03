@@ -304,42 +304,25 @@ function navbar_EditRecord(action) {
 }
 
 function navbar_InsertRecord() {
-  // 🔍 Récupère tous les champs input et select associés à une table
-  const inputs = document.querySelectorAll(`[data-table-name] input, select`);
+  const inputs = document.querySelectorAll(`[data-table-name] input,select`);
   console.log(inputs);
-
   inputs.forEach((input) => {
-    // 🔓 Active les champs pour permettre la saisie
     input.readOnly = false;
     input.disabled = false;
-
-    // ✅ Ajoute dynamiquement l’attribut dataset-field-type (nécessaire à la validation)
-    // Il est basé sur la valeur existante de dataset-field-dataType
-    const type = input.getAttribute("dataset-field-dataType");
-    if (type && !input.hasAttribute("dataset-field-type")) {
-      input.setAttribute("dataset-field-type", type); // exemple : "integer", "character"
-    }
-
-    // 🔄 Gère le comportement spécifique du champ "rowid"
     const field = input.getAttribute("dataset-field-name");
     switch (input.type) {
       case "hidden":
-        // Si c’est un champ caché "rowid", on le marque comme "new" pour insertion
-        if (field === "rowid") {
+          if (field === "rowid") {
           input.value = "new";
-        }
+        } 
         break;
-      default:
-        // Tous les autres champs sont vidés pour permettre une nouvelle saisie
-        input.value = "";
-        break;
+    default:
+      input.value = "";
+    break;
     }
   });
-
-  // ✅ Active le bouton "Save"
   document.querySelector("[name=SaveDSBtn]").disabled = false;
 }
-
 
 function navbar_CopyRecord() {
   const inputs = document.querySelectorAll(`[data-table-name] input`);
@@ -450,59 +433,126 @@ function addIdToData(data, id, value) {
   return data;
 }
 
+
 async function navbar_SaveRecord() {
   try {
     if (document.querySelector("[name=SaveDSBtn]").disabled) {
       showToast("Save button is disabled");
       return;
     }
+    console.log("SaveRecord");
 
-    console.log("✅ SaveRecord triggered");
-
+    // validation
+    // Select all row ID elements (one per dataset record)
     const nextRowIds = document.querySelectorAll("[dataset-field-type='rowid']");
-    console.log("🧩 Found row ID inputs:", nextRowIds);
 
-    // ✅ Utilisation de for...of au lieu de forEach
-    // Pourquoi : forEach ne gère pas bien await -> cela peut lancer les requêtes en parallèle (doublons).
-    // for...of permet de traiter les enregistrements un à un, de façon asynchrone et séquentielle.
     for (const nextRowId of nextRowIds) {
+      console.log("Row being processed:", nextRowId);
+
       const tableName = nextRowId.getAttribute("dataset-table-name");
       const dbName = nextRowId.getAttribute("dbname");
-      const divLine = nextRowId.closest("[dataset-fields-list]");
+      const divLine = nextRowId.closest("[tagname='dataSet']");
       const rowIdValue = nextRowId.value;
 
-      console.log("📄 Traitement d’un enregistrement:", { dbName, tableName, rowIdValue });
+      // Select all fields in the current record with a data-field-type attribute
+      const fields = divLine.querySelectorAll("input,select");
+      console.log("fields where are you: ", fields);
 
-      // ✅ Vérification des champs AVANT toute insertion
-      const isValid = validateInputFields(divLine);
-      if (!isValid) {
-        console.warn("🚫 Validation échouée — insertion annulée");
-        showToast("Erreur de validation : veuillez corriger les champs", 5000);
+
+      let validationFailed = true;
+
+      console.log("Before Loop")
+      for (const fieldElement of fields) {
+      
+    
+        const dataFieldContainer = fieldElement.getAttribute('validation');
+        const datasetTableName = fieldElement.getAttribute("dataset-table-name");
+        const datasetChampName = fieldElement.getAttribute("dataset-field-name");
+
+     
+
+        /*const fieldInfo = {
+          validation: dataFieldContainer,
+          tableName: datasetTableName,
+          fieldName: datasetChampName
+        };*/
+     
+        //console.log("DataFied: ",dataFieldContainer);
+        //let fieldJson = {};
+       /* if (dataFieldContainer != null && dataFieldContainer != "") {
+          try {
+            fieldJson = JSON.stringify(fieldInfo);
+            console.log("In FieldJson :",fieldJson);
+          } catch (error) {
+            console.warn("Invalid JSON in data-field:", error);
+            validationFailed = true;
+            fieldElement.style.border = "2px solid red";
+            continue; // skip to next field
+          }
+        }*/
+
+          if (fieldElement.value == null || fieldElement.value == "") continue;
+          console.log(dataFieldContainer);
+          if (dataFieldContainer == undefined || dataFieldContainer == "undefined" || dataFieldContainer == null || dataFieldContainer == "") continue;
+          const regexValidation = new RegExp(dataFieldContainer);
+
+          console.log(regexValidation.test(fieldElement.value));
+          console.log("Valeur field: " ,fieldElement.value);
+          if (!regexValidation.test(fieldElement.value)) {
+            validationFailed = false;
+            fieldElement.style.border = "2px solid red";
+            console.log("in condition")
+          
+            continue;
+          } else {
+            fieldElement.style.border = ""; // champ valide, on enlève la bordure rouge
+          }
+        
+
+          
+
+
+        
+
+        // Vérification que le champ appartient à la bonne table
+       /* if (fieldJson.tableName && fieldJson.tableName !== dataFieldContainer) {
+          console.warn(`Mismatch tableName: expected "${datasetTableName}", got "${fieldJson.tableName}"`);
+          validationFailed = true;
+          fieldElement.style.border = "2px solid red";
+          showToast(`Champ "${fieldJson.fieldName}" mal associé à la table "${datasetTableName}".`);
+        } else {
+          fieldElement.style.border = "";
+        }*/
+      
+        // Tu peux ici rajouter d'autres règles de validation par type ou attribut
+
+
+      }
+      
+
+      if (validationFailed === false) {
+        showToast("validation error, please fixes");
         return;
       }
-      console.log("✅ Validation réussie");
 
       let result;
-
+      console.log("before verifiying rowIsValue if new");
       if (rowIdValue === "new") {
         let data = await CreateInsert(dbName, tableName, divLine);
-        console.log("📤 Données à insérer :", data);
         result = await insertRecordDB(dbName, tableName, data);
       } else {
         const data = {
           body: CreateUpdated(dbName, tableName, divLine),
         };
-        console.log("📤 Données à mettre à jour :", data);
+
         result = await updateRecordDB(dbName, tableName, rowIdValue, data);
       }
 
       document.querySelector("[name=SaveDSBtn]").disabled = true;
-
       return result;
     }
   } catch (error) {
-    console.error("❌ Erreur dans navbar_SaveRecord:", error);
-    showToast("Erreur technique lors de l'enregistrement", 5000);
+    console.error("Error:", error);
   }
 }
 
@@ -613,6 +663,7 @@ async function updateRecordDB(DBName, tableName, nextRowId, updateData) {
   }
 }
 
+
 async function insertRecordDB(DBName, tableName, data) {
   try {
     const payload = JSON.stringify(data);
@@ -638,52 +689,3 @@ async function insertRecordDB(DBName, tableName, data) {
 }
 
 
-// ✅ Fonction de validation des champs input AVANT l'insertion ou la mise à jour
-function validateInputFields(divLine) {
-  // Récupère tous les <input> ayant la classe "input-element" à l’intérieur du bloc concerné
-  const inputs = divLine.querySelectorAll("input.input-element");
-
-  // Parcourt chaque champ input pour valider son contenu
-  for (const input of inputs) {
-    // Récupère le type de donnée attendu (ex: integer, character, decimal)
-    const type = input.getAttribute("dataset-field-type");
-
-    // Tente de récupérer un label lisible depuis l’élément <label> précédent, sinon utilise l’ID
-    const label = input.previousElementSibling?.innerText || input.id;
-
-    // Valeur entrée par l’utilisateur
-    const value = input.value;
-
-    // Vérification selon le type de champ attendu
-    switch (type) {
-      case "integer":
-        // Vérifie que la valeur est bien un entier (ex: 123)
-        if (!/^\d+$/.test(value)) {
-          showToast(`Le champ "${label}" doit contenir un entier.`);
-          return false;
-        }
-        break;
-
-      case "character":
-        // Vérifie que la valeur est bien une chaîne de caractères
-        if (typeof value !== "string") {
-          showToast(`Le champ "${label}" doit être une chaîne de caractères.`);
-          return false;
-        }
-        break;
-
-      case "decimal":
-        // Vérifie que la valeur est un nombre décimal (ex: 12.34 ou 45)
-        if (!/^\d+(\.\d+)?$/.test(value)) {
-          showToast(`Le champ "${label}" doit contenir un nombre décimal.`);
-          return false;
-        }
-        break;
-
-      // 💡 Tu peux ajouter ici d'autres cas (ex: date, email, boolean, etc.)
-    }
-  }
-
-  // ✅ Tous les champs sont valides
-  return true;
-}
