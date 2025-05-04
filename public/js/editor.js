@@ -1375,11 +1375,11 @@ function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false )
   div.style.flexDirection = "column";
   div.style.height = "60px";
   // Set up the inner HTML for the div, including a span and a remove button
+  div.innerHTML += `<i class="fa fa-plus-square" onclick="expandReduceDiv(event,'${elementId}')" style="color:blue" title="Expand"></i>`;
   div.innerHTML = `<i class="fa fa-trash" onclick="removeItem(event)" style="color:red" title="Remove"></i>`;
   div.innerHTML += `<i class="fa fa-arrow-up" onclick="moveUp(event)" style="color:blue" title="Move Up"></i>`;
-  div.innerHTML += `<i class="fa fa-arrow-down" onclick="moveDown(event)" style="color:blue"  title="Move Up"></i><hr style="margin: 0px;">`;
+  div.innerHTML += `<i class="fa fa-arrow-down" onclick="moveDown(event)" style="color:blue"  title="Move Up"></i>`;
     // add expand the div size and reduce it button
-  div.innerHTML += `<i class="fa fa-plus-square" onclick="expandReduceDiv(event,'${elementId}')" style="color:blue" title="Expand"></i>`;
   div.innerHTML += `<hr style="margin: 0px;"></hr>`;
   var tableName = fieldJson.tableName || "unk"; 
   var fieldName = fieldJson.fieldName || "unknownField"; 

@@ -224,13 +224,14 @@ function searchAutoComplete(event, element) {
         .then((response) => response.json())
         .then((data) => {
           autocomplete.innerHTML = "";
+          // current element position
+          var elementPosition = getAbsoluteOffset(element);
           autocomplete.setAttribute(
             "style",
             "display:block;top:" +
-              (parseInt(getAbsoluteOffset(element).top) +
-                parseInt(element.offsetHeight)) +
-              "px;width:" +
-              element.offsetWidth +
+              (elementPosition.top  - element.offsetTop - 15) +
+              "px;left:" +
+              (elementPosition.left - element.offsetLeft - element.offsetWidth/3) +
               "px;"
           );
 
@@ -258,13 +259,4 @@ function searchAutoComplete(event, element) {
    }
 }
 
-function getAbsoluteOffset(element) {
-  let top = 0,
-    left = 0;
-  do {
-    top += element.offsetTop || 0;
-    left += element.offsetLeft || 0;
-    element = element.offsetParent;
-  } while (element);
-  return { top, left };
-}
+

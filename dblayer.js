@@ -23,8 +23,7 @@ class dblayer{
       dbList = [];
       databases = [];
       dbCache = [];
-      mongoClient = null;
-      mongoDbName = "";
+     
     checkAuthenticated = (req, res, next) => {
               if (req.isAuthenticated()) { return next(); }
               res.redirect("/login");
@@ -32,14 +31,13 @@ class dblayer{
 
 
       // for each dns entre create a db object
-    constructor(app,session, passport,client,dbname)
+    constructor(app,session, passport)
       {
           console.log("dblayer constructor");           
           this.dbList = app.config.dblist;
           this.generateRoutes = this.generateRoutes.bind(this);
           this.checkAuthenticated = this.checkAuthenticated.bind(this);
-          this.mongoClient=client;
-          this.mongoDbName=dbname;
+        
           this.dbtype = app.config.dbtype;
           // get key value from dblist           
       }
@@ -78,7 +76,7 @@ class dblayer{
     }
 
     async trackAction(action, details) {
-      try {
+     /* try {
           this.mongoClient.connect();
           const db = this.mongoClient.db(this.mongoDbName); // Database name          
           const collection = db.collection("actions"); // Collection name
@@ -99,6 +97,7 @@ class dblayer{
       finally{
         await this.mongoClient.close();
       }
+        */
   }
 
     // Function to generate a mapping of tables to their databases
@@ -537,7 +536,12 @@ class dblayer{
               const data = req.body; // Assuming the updated data is sent in the request body
               console.log(data);
               try {
-                
+                // repalce in data ' with `
+                for (const key in data) {
+                  if (data.hasOwnProperty(key)) {
+                    data[key] = data[key].replace(/'/g, "`");
+                  }
+                }
                 const result = await db.updateRecord(tableName, data, rowID);
                 res.json({ message: "Record updated successfully", result });
                 
@@ -563,7 +567,12 @@ class dblayer{
               const data = req.body; // Assuming the updated data is sent in the request body
               console.log(data);
               try {
-                
+                  // repalce in data ' with `
+                  for (const key in data) {
+                    if (data.hasOwnProperty(key)) {
+                      data[key] = data[key].replace(/'/g, "`");
+                    }
+                  }
                 const result = await db.insertRecord(tableName, data);
                 res.json({ message: "Record inserted successfully", result });
                 
@@ -585,7 +594,7 @@ class dblayer{
             async (req, res) => {
               try {
                 
-                const {database, tableName, page, pageSize,orderby  } = req.params;
+                const {database, tableName, page, pageSize  } = req.params;
                 const db= dbs.databases[database];
                
 
@@ -596,9 +605,10 @@ class dblayer{
                 // Get the fields from the query string. It's a comma-separated string.
                 const fields = req.query.fields ? req.query.fields.split(",") : null;
                 const filter = req.query.filter ? req.query.filter : null;
-              
+                const orderBy = req.query.orderBy ?  req.query.orderBy : null;
                 // decode the json filter              
                 const filterObj = filter ? JSON.parse(filter): null;
+                const orderByObj = orderBy ? JSON.parse(orderBy): null; 
                 // orderby generation 
           
                  db.queryDataWithPagination(
@@ -607,7 +617,7 @@ class dblayer{
                   pageSizeNum,
                   fields,
                   filterObj,
-                  orderby
+                  orderByObj
                 ).then(data => {
                   // Convert BigInt to int or string
                   const convertedData = this.convertBigIntToInt(data);

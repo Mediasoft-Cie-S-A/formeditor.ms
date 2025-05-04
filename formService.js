@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const mongoClient = require("mongodb").MongoClient;
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
@@ -21,7 +22,7 @@ const { deletedComponents } = require('./utils/deletedStore');
 
 
 
-module.exports = function (app, client, dbName) {
+module.exports = function (app, mongoDbUrl, dbName) {
   const checkAuthenticated = (req, res, next) => {
   //  console.log(app.passport);
     if (req.isAuthenticated()) {
@@ -79,6 +80,8 @@ module.exports = function (app, client, dbName) {
 
   app.post("/store-json", checkAuthenticated, async (req, res) => {
     try {
+      // create a new MongoClient
+      const client = new mongoClient(mongoDbUrl, {});
       await client.connect();
       const db = client.db(dbName);
       const col = db.collection("forms");
@@ -110,11 +113,14 @@ module.exports = function (app, client, dbName) {
   app.get("/list-forms", 
     requireCheckpoint("0001100001"), // Require specific checkpoint
     async (req, res) => {
+      const client = new mongoClient(mongoDbUrl, {});
     try {
+       // create a new MongoClient
+    
       await client.connect();
+     
       const db = client.db(dbName);
       const col = db.collection("forms");
-
       const forms = await col.find({}).toArray();
 
       res.send(forms);
@@ -126,8 +132,13 @@ module.exports = function (app, client, dbName) {
     }
   });
 
-  app.get("/get-form/:formId", checkAuthenticated, async (req, res) => {
-    try {
+  app.get("/get-form/:formId", 
+    requireCheckpoint("0001100002"), // Require specific checkpoint 
+    async (req, res) => {
+       // create a new MongoClient
+       const client = new mongoClient(mongoDbUrl, {});
+      try {
+
       await client.connect();
       const db = client.db(dbName);
       const col = db.collection("forms");
@@ -159,7 +170,10 @@ module.exports = function (app, client, dbName) {
   });
 
   app.put("/update-form/:formId", checkAuthenticated, async (req, res) => {
+           // create a new MongoClient
+           const client = new mongoClient(mongoDbUrl, {});
     try {
+
       await client.connect();
       const db = client.db(dbName);
       const col = db.collection("forms");
@@ -191,7 +205,10 @@ module.exports = function (app, client, dbName) {
   });
 
   app.delete("/delete-form/:formId", checkAuthenticated, async (req, res) => {
+       // create a new MongoClient
+       const client = new MongoClient(mongoDbUrl, {});
     try {
+
       await client.connect();
       const db = client.db(dbName);
       const col = db.collection("forms");

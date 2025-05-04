@@ -313,6 +313,9 @@ function retrievePropertiesFromRef(ref, schemas) {
 
 async function fetchAndParseOpenApiJson(url) {
   try {
+    if (!url) {
+      return null;
+    }
     const response = await fetch(url);
 
     if (!response.ok) {

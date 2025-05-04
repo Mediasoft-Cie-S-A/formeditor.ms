@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const { MongoClient } = require("mongodb");
 
-module.exports = function (app, client, dbName) {
+module.exports = function (app, mongoDbUrl, dbName) {
   const checkAuthenticated = (req, res, next) => {
     if (req.isAuthenticated()) {
       return next();
@@ -55,7 +56,10 @@ module.exports = function (app, client, dbName) {
   });
 
   app.get("/list-business-component", checkAuthenticated, async (req, res) => {
+        // create a new MongoClient
+        const client = new MongoClient(mongoDbUrl, {});
     try {
+  
       await client.connect();
       const db = client.db(dbName);
       const col = db.collection("businessComponent");
@@ -73,7 +77,10 @@ module.exports = function (app, client, dbName) {
     "/get-business-component/:componentId",
     checkAuthenticated,
     async (req, res) => {
+          // create a new MongoClient
+          const client = new MongoClient(mongoDbUrl, {});
       try {
+     
         await client.connect();
         const db = client.db(dbName);
         const col = db.collection("businessComponent");
@@ -96,7 +103,10 @@ module.exports = function (app, client, dbName) {
     "/update-business-component/:componentId",
     checkAuthenticated,
     async (req, res) => {
+         // create a new MongoClient
+         const client = new MongoClient(mongoDbUrl, {});
       try {
+       
         await client.connect();
         const db = client.db(dbName);
         const col = db.collection("businessComponent");
@@ -129,7 +139,10 @@ module.exports = function (app, client, dbName) {
     "/delete-business-component/:componentId",
     checkAuthenticated,
     async (req, res) => {
+          // create a new MongoClient
+          const client = new MongoClient(mongoDbUrl, {});
       try {
+
         await client.connect();
         const db = client.db(dbName);
         const col = db.collection("businessComponent");

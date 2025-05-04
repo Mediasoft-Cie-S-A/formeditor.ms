@@ -20,7 +20,6 @@ const passport = require("passport");
 const session = require("express-session");
 //Import the secondary "Strategy" library
 const LocalStrategy = require("passport-local").Strategy;
-const MongoClient = require("mongodb").MongoClient;
 const bodyParser = require("body-parser");
 const swaggerUi = require("swagger-ui-express");
 const swaggerJSDoc = require("swagger-jsdoc");
@@ -87,13 +86,13 @@ try {
 }
 
 // mongodb Connection URL
-const url = app.config.mongoDbUrl;
+const mongoDbUrl = app.config.mongoDbUrl;
 // Database Name
 const dbName = app.config.mongoDbName;
 const port = app.config.port;
 // Create a new MongoClient
-const client = new MongoClient(url, {  });
-require("./mongodb")(app, client, dbName);
+
+
 
 app.use(express.urlencoded({ extended: false }));
 
@@ -109,7 +108,7 @@ require('./authCustom')(app,session, passport);
 require('./authStatic')(app,session, passport);
 
 const dblayer = require('./dblayer');
-const dbs= new dblayer(app,session, passport,client);
+const dbs= new dblayer(app,session, passport);
 dbs.init();
 try
 {
@@ -120,8 +119,8 @@ catch(err)
     console.log(err);
 }
 // Import routes
-require('./formService')(app, client,  dbName);
-require('./businessComponentService')(app, client,  dbName);
+require('./formService')(app, mongoDbUrl,  dbName);
+require('./businessComponentService')(app, mongoDbUrl,  dbName);
 require('./GED')(app,session, passport);
 
 // Swagger definition

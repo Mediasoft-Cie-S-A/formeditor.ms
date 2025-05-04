@@ -117,8 +117,17 @@ function renderCookieStorage(main) {
                 array.forEach((val) => {
                     
                     let option = document.createElement("option");
+                    // check if in val there is a |
+                    if (val.includes("|")) {
+                        // split the val to get the value and the text
+                        let splitVal = val.split("|");
+                        option.textContent = splitVal[1];   
+                        option.value = splitVal[0];
+                    } else {
                     option.textContent = val;
                     option.value = val;
+                    }
+                    // set the value of the variable to the selected value
                     select.appendChild(option);
                     // set the value of the variable to the selected value
                     if (val === cookieValue) {
@@ -148,10 +157,20 @@ function renderCookieStorage(main) {
                 fetch(url)
                 .then(response => response.json())
                 .then(data => {
-                    data.forEach((idx,val) => {
+                    data.forEach((val) => {
                         let option = document.createElement("option");
-                        option.textContent = val;
-                        option.value = val;
+                        // convert the val json in array
+                        val = Object.values(val);
+                        // check if in val there is a , 
+                        if (val.length > 1) {
+                            
+                            option.textContent = val[1];
+                            option.value = val[0]; 
+                        } else {
+                        option.textContent = val[0];
+                        option.value = val[0];
+                        }
+                        // set the value of the variable to the selected value
                         select.appendChild(option);
                         // set the value of the variable to the selected value
                         if (val === cookieValue) {
