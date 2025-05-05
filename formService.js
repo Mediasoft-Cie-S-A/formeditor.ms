@@ -79,9 +79,10 @@ module.exports = function (app, mongoDbUrl, dbName) {
   });
 
   app.post("/store-json", checkAuthenticated, async (req, res) => {
+     // create a new MongoClient
+     const client = new mongoClient(mongoDbUrl, {});
     try {
-      // create a new MongoClient
-      const client = new mongoClient(mongoDbUrl, {});
+   
       await client.connect();
       const db = client.db(dbName);
       const col = db.collection("forms");

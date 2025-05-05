@@ -26,6 +26,7 @@ module.exports = function (app, mongoDbUrl, dbName) {
     res.render("dashboard.ejs", { name: req.user.name });
   });
   app.post("/store-business-json", checkAuthenticated, async (req, res) => {
+    const client = new MongoClient(mongoDbUrl, {});
     try {
       await client.connect();
       const db = client.db(dbName);
