@@ -92,80 +92,9 @@ document
     }
   });
 
-function showToast(message, duration = 5000,type = 'info') {
-   console.log("showToast");
-  const toastContainer = document.getElementById("toast-container");
-  if (!toastContainer) {
-    // Create the toast container if it doesn't exist
-    const container = document.createElement("div");
-    container.id = "toast-container";
-    container.style.position = "fixed";
-    container.style.zIndex = 1000;
-    container.style.pointerEvents = "none";    
-    container.style.display = "flex";
-    container.style.flexDirection = "column";
-    document.body.appendChild(container);
-
-    toastContainer = container;
-  }
-  toastContainer.style.display = "flex";
-  toastContainer.style.flexDirection = "column";
-  const toast = document.createElement("div");
-
-  toast.innerHTML = `
-  <span>${message}</span>
-  <button class="toast-close">&times;</button>`;
 
 
-  toast.classList.add("toast-message", `toast-${type}`);
-
-  // Add the toast to the container
-  toastContainer.appendChild(toast); 
 
 
-  // Add styling and interactivity
-  toast.querySelector(".toast-close").onclick = () => {
-    toast.style.opacity = 0;
-    toast.addEventListener("transitionend", () => toast.remove());
-  };
-
-  toastContainer.appendChild(toast);
-
-  // Fade in
-  setTimeout(() => toast.style.opacity = 1, 50);
-
-  // Auto-dismiss
-  setTimeout(() => {
-    toast.style.opacity = 0;
-    toast.addEventListener("transitionend", () => toast.remove());
-  }, duration);
-}
-
-
-// show hint like a toastmessage wiht absolute position, based on the mouse position
-function showHint(message, duration = 1000, event) {
-  const hintContainer = document.getElementById("hint-container");
-  hintContainer.style.top = 10 + event.clientY + "px";
-  hintContainer.style.left = 10 + event.clientX + "px";
-  const hint = document.createElement("div");
-  hint.classList.add("hint-message");
-  hint.innerHTML = message;
-
-  hintContainer.innerHTML = "";
-
-  // Add the toast to the container
-  hintContainer.appendChild(hint);
-
-  // Make the toast visible
-  setTimeout(() => {
-    hint.style.opacity = 1;
-  }, 100);
-
-  // Hide and remove the toast after 'duration'
-  setTimeout(() => {
-    hint.style.opacity = 0;
-    hint.addEventListener("transitionend", () => hint.remove());
-  }, duration);
-}
 
 loadForms();

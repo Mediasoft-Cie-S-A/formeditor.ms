@@ -292,9 +292,9 @@ button:hover {
     justify-content: left;
     align-items: center;
     vertical-align: middle;
-    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+    
     z-index: 9999;
-    display: none;
+
 }
 
 .toast-message {
@@ -305,6 +305,7 @@ button:hover {
     margin-top: 10px;
     opacity: 0;
     transition: opacity 0.5s;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
 }
 /* Variants */
 .toast-info {
@@ -366,8 +367,7 @@ button:hover {
   opacity: 0;
   transition: opacity 0.4s ease-in-out, transform 0.3s ease;
   transform: translateY(8px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-  display: flex;
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);  display: flex;
   align-items: flex-start;
   gap: 12px;
 }

@@ -810,11 +810,11 @@ function createSelectItem(id, label, styleProperty) {
     // get the select element type
     var tagName = propertiesBar.getAttribute("data-element-type");
     if (tagName === "BarChart") {
-      var dataType = this.getAttribute("fieldDataType");
+      var dataType = this.getAttribute("dataset-field-type");
       setOptionsByTypeChart(select, dataType);
     } else {
       // get type of the field
-      var dataType = this.getAttribute("fieldType");
+      var dataType = this.getAttribute("dataset-field-type");
       // empty the select
       setOptionsByType(select, dataType);
       }
@@ -848,6 +848,9 @@ function setOptionsByType(select, fieldDataType) {
     opt.value = option;
     opt.innerHTML = option;
     select.appendChild(opt);
+    if (option === fieldDataType) {
+      opt.selected = true;
+    }
   });
 
 
@@ -1403,7 +1406,7 @@ function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false )
   div.appendChild(select);
 
   // Populate select options based on field's data type
-  setOptionsByType(select, fieldJson.fieldDataType);
+  setOptionsByType(select, fieldJson.fieldType);
 
   // Set the selected value as an attribute in the div
   div.setAttribute("selectedValue", select.value);

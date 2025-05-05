@@ -536,12 +536,7 @@ class dblayer{
               const data = req.body; // Assuming the updated data is sent in the request body
               console.log(data);
               try {
-                // repalce in data ' with `
-                for (const key in data) {
-                  if (data.hasOwnProperty(key)) {
-                    data[key] = data[key].replace(/'/g, "`");
-                  }
-                }
+               
                 const result = await db.updateRecord(tableName, data, rowID);
                 res.json({ message: "Record updated successfully", result });
                 

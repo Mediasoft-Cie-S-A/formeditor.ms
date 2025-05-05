@@ -354,12 +354,31 @@ function createFieldFromJson(fieldJson) {
                 element = createElementInput("time");
                 einput = element.querySelector("input");
                 break;
+          case "logical":
           case "boolean":
           case "bool":
           case "bit":
-                element = createElementInput("checkbox");
-                einput = element.querySelector("input");
-                einput.className = "apple-switch";
+            element = createElementInput("checkbox");
+            einput = element.querySelector("input");
+            einput.className = "apple-switch";
+            
+            // Set initial state
+            if (fieldJson.fieldValues == "1") {
+              einput.checked = true;
+              einput.value = "1";
+            } else {
+              einput.checked = false;
+              einput.value = "0";
+            }
+            
+            // Listen to changes
+            einput.addEventListener("change", function () {
+              if (einput.checked) {
+                einput.value = "1";
+              } else {
+                einput.value = "0";
+              }
+            });
                 break;
           default:
             element = createElementInput("text");
@@ -481,7 +500,7 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum,dataset,link,ro
     
       // get the datasetJSON from the datasetDiv
       const dataset = JSON.parse(datasetDiv.getAttribute("dataSet"));
-      console.log("dataset", dataset);
+    //  console.log("dataset", dataset);
     
         // get the fields from the dataset
         const datasetFields = datasetDiv.getAttribute("dataset-fields-list");
@@ -818,6 +837,13 @@ async function updateInputs(data, DBName, tableName,dataset) {
             // if (fieldType === "input") {
             input.value = data[fieldLabel]?.toString().trim() || "";
             input.disabled = false;
+            if (input.type === "checkbox") {
+              input.checked = data[fieldLabel] == 1 ? true : false;
+            }
+            if (input.tagName.toLowerCase() === "select") {
+              input.value = data[fieldLabel]?.toString().trim() || "";
+            }
+
             // }
             break;
         } // end switch
@@ -849,10 +875,25 @@ function handleSelectField(input, options, selectedValue) {
     // Add options to the select element
     options.forEach((option) => {
       const optionElement = document.createElement("option");
-      if (typeof option === "object") {
-        optionElement.value = option.value;
-        optionElement.text = option.text;
-      } else {
+      //check if the option has pipe | and split it
+      if (option.includes("|")) {
+        const [value, text] = option.split("|");
+        optionElement.value = value.trim();
+        optionElement.text = text.trim();
+      } else if (option.includes("=")) {
+        const [value, text] = option.split("=");  
+        optionElement.value = value.trim();
+        optionElement.text = text.trim();
+      } else if (option.includes(":")) {
+        const [value, text] = option.split(":");
+        optionElement.value = value.trim();
+        optionElement.text = text.trim();
+      } else if (option.includes(";")) {
+        const [value, text] = option.split(";");
+        optionElement.value = value.trim();
+        optionElement.text = text.trim();
+      }
+       else {
         optionElement.value = option;
         optionElement.text = option;
       }
