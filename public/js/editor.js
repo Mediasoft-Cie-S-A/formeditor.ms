@@ -1526,6 +1526,13 @@ function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false )
     subDiv.style.display = "none";
   });
   // set the height of the parent div
+    // ✅ NEW : Add scroll if too many fields
+    if (dataObjet.scrollHeight > 600) { // You can adjust 600px as needed
+      dataObjet.style.maxHeight = "600px";
+      dataObjet.style.overflowY = "auto";
+      dataObjet.style.paddingBottom = "80px"; // ✅ Add bottom padding for easier drop
+    }
+  
 }
 
 // function to expand or reduce the div size
