@@ -109,51 +109,62 @@ function drageDroptableTableList(list) {
         .then(response => response.json())
         .then(dbs => {
             // Clear the list
-            
             list.innerHTML = '';
-             // add new table button
-                for(key in dbs)
-                {
-                    
-                    const dbname = key;
-                    tables=dbs[key];
-                tableList=[];
-                var i=0;
+
+            // 🔵 Iterate over each database and its tables
+            for (const key in dbs) {
+                const dbname = key;
+                const tables = dbs[key];
+                const tableList = [];
+
                 tables.forEach(table => {
-                
-                            var listItem = document.createElement('div');
-                            
-                            listItem.className='tables-list-item';
-                        
-                            listItem.textContent = table.NAME; // Adjust based on your API response
-                            listItem.setAttribute('database-name', dbname);
-                            listItem.setAttribute('data-table-name', table.NAME);
-                            listItem.setAttribute('data-table-label', table.LABEL);
-                            listItem.setAttribute('title', table.LABEL);
-                            var tableDetailsDiv=document.createElement('div');
-                            listItem.appendChild(tableDetailsDiv);
-                            listItem.ondragstart = function(event) { drag(event); };
-                            listItem.onclick = function(event) {
-                                event.preventDefault();
-                                const tableName = event.target.getAttribute('data-table-name');
-                            
-                                // Toggle behavior: if fields are already shown, hide them
-                                if (tableDetailsDiv.hasChildNodes()) {
-                                    removeAllChildNodes(tableDetailsDiv);  // hide columns
-                                } else {
-                                    fetchTableFields(dbname, tableName, tableDetailsDiv);  // show columns
-                                }
-                            };
-                            
-                            
-                            list.appendChild(listItem);
-                            tableList.push(table.NAME);
-                            i++;
+                    // Create a list item for each table
+                    const listItem = document.createElement('div');
+                    listItem.className = 'tables-list-item';
                     
+                    listItem.textContent = table.NAME; // Display table name
+                    listItem.setAttribute('database-name', dbname);
+                    listItem.setAttribute('data-table-name', table.NAME);
+                    listItem.setAttribute('data-table-label', table.LABEL);
+                    listItem.setAttribute('title', table.LABEL);
+
+                    // 🔵 Create a container for showing table fields (columns)
+                    const tableDetailsDiv = document.createElement('div');
+
+                    // 🔵 NEW: Apply scroll and height limit ONLY for the fields list (not for the table names)
+                    tableDetailsDiv.style.maxHeight = '300px';      // Limit max height for fields
+                    tableDetailsDiv.style.overflowY = 'auto';       // Enable vertical scrolling
+                    tableDetailsDiv.style.marginTop = '5px';        // Small spacing
+                    tableDetailsDiv.style.paddingLeft = '10px';     // Indent fields visually
+                    tableDetailsDiv.style.borderLeft = '2px solid #ccc'; // Light left border
+
+                    listItem.appendChild(tableDetailsDiv);
+
+                    // Make the table name draggable
+                    listItem.ondragstart = function(event) {
+                        drag(event);
+                    };
+
+                    // Handle click on table name: show or hide fields
+                    listItem.onclick = function(event) {
+                        event.preventDefault();
+                        const tableName = event.target.getAttribute('data-table-name');
+
+                        // Toggle fields display
+                        if (tableDetailsDiv.hasChildNodes()) {
+                            removeAllChildNodes(tableDetailsDiv);  // Hide fields
+                        } else {
+                            fetchTableFields(dbname, tableName, tableDetailsDiv);  // Show fields
+                        }
+                    };
+
+                    list.appendChild(listItem);
+                    tableList.push(table.NAME);
                 });
             }
-        }).catch(error => console.error('Error:', error));
-}   
+        })
+        .catch(error => console.error('Error loading tables:', error));
+}
 
 
 
