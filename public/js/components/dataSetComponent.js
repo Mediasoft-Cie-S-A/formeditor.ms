@@ -241,13 +241,16 @@ function renderDataSet(main) {
   dataset.id = "DataSet_" + (jsonData[0]?.tableName || "");
   dataset.setAttribute("data-table-name", jsonData[0]?.tableName || "");
   dataset.className = "dataSetContainer";
+
+  // 🌟 Make the grid flexible and responsive
   dataset.style.display = "grid";
   dataset.style.gridTemplateColumns = "repeat(auto-fill, minmax(200px, 1fr))";
   dataset.style.gap = "12px";
   dataset.style.padding = "16px";
-  dataset.style.border = "2px solid #ccc"; // Bordure fine et discrète
+  dataset.style.border = "2px solid #ccc";
   dataset.style.borderRadius = "10px";
   dataset.style.backgroundColor = "#fafafa";
+  dataset.style.alignItems = "stretch"; // 🌟 Important to stretch items evenly
 
   var datasetFields = [];
 
@@ -273,6 +276,14 @@ function renderDataSet(main) {
   if (jsonData.length > 0) {
     jsonData.forEach((fieldJson) => {
       var createField = createFieldFromJson(fieldJson);
+
+      // 🌟 Force each field to stretch properly inside the grid
+      createField.style.minHeight = "100px"; // Example minimum height
+      createField.style.display = "flex";
+      createField.style.flexDirection = "column";
+      createField.style.justifyContent = "center";
+      createField.style.boxSizing = "border-box";
+
       dataset.appendChild(createField);
       datasetFields.push(fieldJson.fieldName);
     });
@@ -292,7 +303,6 @@ function renderDataSet(main) {
   // Ajouter le dataset au main
   main.appendChild(dataset);
 }
-
 
 function createFieldFromJson(fieldJson) {
   var element = null;
