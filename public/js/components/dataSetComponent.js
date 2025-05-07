@@ -226,21 +226,34 @@ if (sqlJson.DBName != null) {
 }
 
 function renderDataSet(main) {
+  // Nettoyer le contenu
   main.innerHTML = "";
   main.style.height = "auto";
   main.style.display = "flex";
-  // get the data from the main
+  main.style.flexDirection = "column";
+  main.style.alignItems = "center";
+
+  // Récupérer les données du main
   var jsonData = JSON.parse(main.getAttribute("dataSet"));
-  // generate the div for the dataset
+
+  // Générer le conteneur du dataset
   var dataset = document.createElement("div");
-  dataset.id = "DataSet_" + jsonData[0].tableName;
-  dataset.setAttribute("data-table-name", jsonData[0].tableName);
+  dataset.id = "DataSet_" + (jsonData[0]?.tableName || "");
+  dataset.setAttribute("data-table-name", jsonData[0]?.tableName || "");
   dataset.className = "dataSetContainer";
+  dataset.style.display = "grid";
+  dataset.style.gridTemplateColumns = "repeat(auto-fill, minmax(200px, 1fr))";
+  dataset.style.gap = "12px";
+  dataset.style.padding = "16px";
+  dataset.style.border = "2px solid #ccc"; // Bordure fine et discrète
+  dataset.style.borderRadius = "10px";
+  dataset.style.backgroundColor = "#fafafa";
+
   var datasetFields = [];
-  // add rowid jsonData, in the first position if not exists
+
+  // Ajouter un champ rowid s'il n'existe pas
   var rowid = jsonData.find((field) => field.fieldType === "rowid");
-  if (!rowid)
-  {
+  if (!rowid && jsonData.length > 0) {
     jsonData.unshift({
       DBName: jsonData[0].DBName,
       tableName: jsonData[0].tableName,
@@ -254,23 +267,32 @@ function renderDataSet(main) {
       fieldValues: "",
       fieldSQL: ""
     });
-      
   }
 
-  jsonData.forEach((fieldJson) => {
+  // Remplir le dataset ou afficher "dataset vide"
+  if (jsonData.length > 0) {
+    jsonData.forEach((fieldJson) => {
+      var createField = createFieldFromJson(fieldJson);
+      dataset.appendChild(createField);
+      datasetFields.push(fieldJson.fieldName);
+    });
+  } else {
+    var emptyMsg = document.createElement("div");
+    emptyMsg.textContent = "Dataset vide...";
+    emptyMsg.style.fontStyle = "italic";
+    emptyMsg.style.color = "#777";
+    emptyMsg.style.padding = "20px";
+    dataset.appendChild(emptyMsg);
+  }
 
-    // get the regexp
-
-    var createField = createFieldFromJson(fieldJson);
-    dataset.appendChild(createField);
-    datasetFields.push(fieldJson.fieldName);
-  });
+  // Mettre à jour les attributs du main
   dataset.setAttribute("DataSet-Fields-List", datasetFields);
   main.setAttribute("DataSet-Fields-List", datasetFields);
-  main.appendChild(dataset);
 
-  // get the data from the main
+  // Ajouter le dataset au main
+  main.appendChild(dataset);
 }
+
 
 function createFieldFromJson(fieldJson) {
   var element = null;
