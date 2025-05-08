@@ -271,10 +271,11 @@ function renderDataSet(main) {
       fieldSQL: ""
     });
   }
+  const visibleFields = jsonData.filter(field => field.fieldName !== "rowid");
 
   // Remplir le dataset ou afficher "dataset vide"
   if (jsonData.length > 0) {
-    jsonData.forEach((fieldJson) => {
+    visibleFields.forEach((fieldJson) => {
       var createField = createFieldFromJson(fieldJson);
 
       // 🌟 Force each field to stretch properly inside the grid
