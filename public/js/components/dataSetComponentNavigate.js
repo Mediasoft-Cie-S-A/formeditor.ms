@@ -177,7 +177,7 @@ function renderNavigationBar(main) {
 }
 
 function navbar_movePrev() {
-  let allPanels = document.querySelectorAll("[tagname='dataTable'] div.panel");
+  let allPanels = document.querySelectorAll("[tagname='dataTable'] div.grid-row");
   let selectedPanel = document.querySelector(".selected-panel");
 
   if (!selectedPanel && allPanels.length > 0) {
@@ -234,7 +234,7 @@ function navbar_movePrev() {
 function navbar_moveNext() {
   console.log("next has been pressed");
   // Handle selected-panel logic
-  let allPanels = document.querySelectorAll("[tagname='dataTable'] div.panel");
+  let allPanels = document.querySelectorAll("[tagname='dataTable'] div.grid-row");
   let selectedPanel = document.querySelector(".selected-panel");
 
   if (!selectedPanel && allPanels.length > 0) {

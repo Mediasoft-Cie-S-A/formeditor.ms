@@ -226,35 +226,34 @@ if (sqlJson.DBName != null) {
 }
 
 function renderDataSet(main) {
-  // Nettoyer le contenu
+  // Clear the main content
   main.innerHTML = "";
   main.style.height = "auto";
   main.style.display = "flex";
   main.style.flexDirection = "column";
   main.style.alignItems = "center";
 
-  // Récupérer les données du main
+  // Retrieve dataset JSON from the main element
   var jsonData = JSON.parse(main.getAttribute("dataSet"));
 
-  // Générer le conteneur du dataset
+  // Generate the dataset container
   var dataset = document.createElement("div");
   dataset.id = "DataSet_" + (jsonData[0]?.tableName || "");
   dataset.setAttribute("data-table-name", jsonData[0]?.tableName || "");
   dataset.className = "dataSetContainer";
 
-  // 🌟 Make the grid flexible and responsive
+  // Style the dataset container as a responsive grid
   dataset.style.display = "grid";
   dataset.style.gridTemplateColumns = "repeat(auto-fill, minmax(200px, 1fr))";
   dataset.style.gap = "12px";
   dataset.style.padding = "16px";
-  dataset.style.border = "2px solid #ccc";
-  dataset.style.borderRadius = "10px";
-  dataset.style.backgroundColor = "#fafafa";
-  dataset.style.alignItems = "stretch"; // 🌟 Important to stretch items evenly
+  dataset.style.border = "2px solid #ccc"; // Light border
+  dataset.style.borderRadius = "10px"; // Rounded corners
+  dataset.style.backgroundColor = "#fafafa"; // Light background
 
   var datasetFields = [];
 
-  // Ajouter un champ rowid s'il n'existe pas
+  // Add a 'rowid' field at the beginning if it does not exist
   var rowid = jsonData.find((field) => field.fieldType === "rowid");
   if (!rowid && jsonData.length > 0) {
     jsonData.unshift({
@@ -271,27 +270,33 @@ function renderDataSet(main) {
       fieldSQL: ""
     });
   }
+
+  // Filter fields to avoid displaying the rowid
   const visibleFields = jsonData.filter(field => field.fieldName !== "rowid");
 
-  // Remplir le dataset ou afficher "dataset vide"
+  // Fill the dataset or display "dataset empty" if no data
   if (jsonData.length > 0) {
     visibleFields.forEach((fieldJson) => {
       var createField = createFieldFromJson(fieldJson);
 
       // 🌟 Force each field to stretch properly inside the grid
-      createField.style.minHeight = "100px"; // Example minimum height
+      createField.style.minHeight = "100px";
       createField.style.display = "flex";
       createField.style.flexDirection = "column";
       createField.style.justifyContent = "center";
       createField.style.boxSizing = "border-box";
-      
+
+      // 🌟 Wrap each field inside a 'panel' div for navigation compatibility
       var panel = document.createElement("div");
-      panel.className = "panel";
+      panel.className = "panel"; // Important for navbar_movePrev and moveNext
+      panel.style.border = "1px solid #ddd"; // Light border around each panel
+      panel.style.borderRadius = "6px";
+      panel.style.padding = "8px";
+      panel.style.backgroundColor = "#fff";
+      panel.style.boxSizing = "border-box";
       panel.style.display = "flex";
       panel.style.flexDirection = "column";
       panel.style.justifyContent = "center";
-      panel.style.alignItems = "center";
-      panel.style.height = "100%";
 
       panel.appendChild(createField);
       dataset.appendChild(panel);
@@ -299,6 +304,7 @@ function renderDataSet(main) {
       datasetFields.push(fieldJson.fieldName);
     });
   } else {
+    // Case when no data available
     var emptyMsg = document.createElement("div");
     emptyMsg.textContent = "Dataset vide...";
     emptyMsg.style.fontStyle = "italic";
@@ -307,13 +313,14 @@ function renderDataSet(main) {
     dataset.appendChild(emptyMsg);
   }
 
-  // Mettre à jour les attributs du main
+  // Update attributes of the main element
   dataset.setAttribute("DataSet-Fields-List", datasetFields);
   main.setAttribute("DataSet-Fields-List", datasetFields);
 
-  // Ajouter le dataset au main
+  // Append the dataset to the main container
   main.appendChild(dataset);
 }
+
 
 function createFieldFromJson(fieldJson) {
   var element = null;
