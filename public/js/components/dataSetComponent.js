@@ -284,8 +284,18 @@ function renderDataSet(main) {
       createField.style.flexDirection = "column";
       createField.style.justifyContent = "center";
       createField.style.boxSizing = "border-box";
+      
+      var panel = document.createElement("div");
+      panel.className = "panel";
+      panel.style.display = "flex";
+      panel.style.flexDirection = "column";
+      panel.style.justifyContent = "center";
+      panel.style.alignItems = "center";
+      panel.style.height = "100%";
 
-      dataset.appendChild(createField);
+      panel.appendChild(createField);
+      dataset.appendChild(panel);
+
       datasetFields.push(fieldJson.fieldName);
     });
   } else {
@@ -507,6 +517,7 @@ function RefreshRecord(DBName, tableName) {
 // use the updateInputs function to update the inputs with the data
 // use the setRowID function to set the current row id in the navigation bar
 async function linkRecordToGrid(DBName, tableName, rowId, rowNum,dataset,link,rows) {
+  /*
   console.log("linkRecordToGrid");
   console.log("DBName", DBName);
   console.log("tableName", tableName);
@@ -515,6 +526,7 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum,dataset,link,ro
   console.log("dataset", dataset);
   console.log("link", link);
   console.log("rows", rows);
+  */
   const saveBtn = document.querySelector("[name=SaveDSBtn]");
   if (saveBtn) saveBtn.disabled = true;
   
@@ -542,9 +554,9 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum,dataset,link,ro
           link = [];
         }
         if (link.length ===0) {
-           console.log("link.length ===0");
+           //console.log("link.length ===0");
             const url = `/get-record-by-rowid/${dataset[0].DBName}/${dataset[0].tableName}/${rowId}?fields=${datasetFields}`;
-            console.log("[FETCH by ROWID] URL:", url);
+            //console.log("[FETCH by ROWID] URL:", url);
 
             fetch(url)
               .then((response) => response.json())
@@ -655,8 +667,10 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum,dataset,link,ro
 }
 
 async function updateInputs(data, DBName, tableName,dataset) {
+  /*
   console.log("updateInputs");
   console.log("data", data);
+  */
     const datasetTableName = dataset.getAttribute("data-table-name");
  
       const inputs = dataset.querySelectorAll("input, select");

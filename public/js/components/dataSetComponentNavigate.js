@@ -232,6 +232,7 @@ function navbar_movePrev() {
 
 
 function navbar_moveNext() {
+  console.log("next has been pressed");
   // Handle selected-panel logic
   let allPanels = document.querySelectorAll("[tagname='dataTable'] div.panel");
   let selectedPanel = document.querySelector(".selected-panel");
