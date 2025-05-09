@@ -228,10 +228,12 @@ if (sqlJson.DBName != null) {
 function renderDataSet(main) {
   // Clear the main content
   main.innerHTML = "";
-  main.style.height = "auto";
   main.style.display = "flex";
   main.style.flexDirection = "column";
   main.style.alignItems = "center";
+  main.style.padding = "16px"; // Add inner spacing
+  main.style.boxSizing = "border-box";
+  main.style.overflowX = "hidden"; // Prevent overflow
 
   // Retrieve dataset JSON from the main element
   var jsonData = JSON.parse(main.getAttribute("dataSet"));
@@ -244,12 +246,16 @@ function renderDataSet(main) {
 
   // Style the dataset container as a responsive grid
   dataset.style.display = "grid";
-  dataset.style.gridTemplateColumns = "repeat(auto-fill, minmax(200px, 1fr))";
-  dataset.style.gap = "12px";
+  dataset.style.gridTemplateColumns = "repeat(auto-fill, minmax(250px, 1fr))"; // Wider min-width
+  dataset.style.gap = "16px";
+  dataset.style.width = "100%"; // Take full available width
+  dataset.style.maxWidth = "1200px"; // Limit maximum width for better readability
+  dataset.style.margin = "0 auto"; // Center horizontally
   dataset.style.padding = "16px";
-  dataset.style.border = "2px solid #ccc"; // Light border
-  dataset.style.borderRadius = "10px"; // Rounded corners
-  dataset.style.backgroundColor = "#fafafa"; // Light background
+  dataset.style.border = "1px solid #ccc";
+  dataset.style.borderRadius = "10px";
+  dataset.style.backgroundColor = "#fafafa";
+  dataset.style.boxSizing = "border-box";
 
   var datasetFields = [];
 
@@ -279,17 +285,17 @@ function renderDataSet(main) {
     visibleFields.forEach((fieldJson) => {
       var createField = createFieldFromJson(fieldJson);
 
-      // 🌟 Force each field to stretch properly inside the grid
+      // Style each field to be flexible inside the grid
       createField.style.minHeight = "100px";
       createField.style.display = "flex";
       createField.style.flexDirection = "column";
       createField.style.justifyContent = "center";
       createField.style.boxSizing = "border-box";
 
-      // 🌟 Wrap each field inside a 'panel' div for navigation compatibility
+      // Wrap the field inside a panel for navigation compatibility
       var panel = document.createElement("div");
-      panel.className = "panel"; // Important for navbar_movePrev and moveNext
-      panel.style.border = "1px solid #ddd"; // Light border around each panel
+      panel.className = "panel";
+      panel.style.border = "1px solid #ddd";
       panel.style.borderRadius = "6px";
       panel.style.padding = "8px";
       panel.style.backgroundColor = "#fff";
@@ -304,7 +310,7 @@ function renderDataSet(main) {
       datasetFields.push(fieldJson.fieldName);
     });
   } else {
-    // Case when no data available
+    // Case when no data is available
     var emptyMsg = document.createElement("div");
     emptyMsg.textContent = "Dataset vide...";
     emptyMsg.style.fontStyle = "italic";
@@ -320,6 +326,7 @@ function renderDataSet(main) {
   // Append the dataset to the main container
   main.appendChild(dataset);
 }
+
 
 
 function createFieldFromJson(fieldJson) {
