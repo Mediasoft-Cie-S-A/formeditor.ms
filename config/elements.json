@@ -209,6 +209,17 @@
     "icon": "fa fa-bars",
     "renderFunction": "rendenderMenuComponent"
   },
+  "menuComponentHorizontal": {
+    "type": "menuComponentHorizontal",
+    "description": "Menu Component Horizontal",
+    "category": "UI",
+    "scriptName": "menuComponentHorizontal.js",
+    "createFunction": "createMenuComponentHorizontal",
+    "editFunction": "editMenuComponentHorizontal",
+    "styles": "menuComponentHorizontal.css",
+    "icon": "fa fa-bars",
+    "renderFunction": "renderMenuComponentHorizontal"
+  },
   "translate": {
     "type": "translate",
     "description": "Translate",
