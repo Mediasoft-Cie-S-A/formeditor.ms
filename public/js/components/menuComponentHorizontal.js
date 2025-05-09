@@ -28,6 +28,7 @@ function editMenuComponentHorizontal(type, element, content) {
 
     // Create a wrapper div for the editor panel
     const div = document.createElement("div");
+    div.className = "menu-editor-container";
     div.style.width = "100%";                        // Take full width of parent
     div.style.boxSizing = "border-box";              // Include padding inside the width
     div.style.display = "flex";                      // Use flex layout

@@ -245,6 +245,14 @@ function renderGrid(main) {
   table.id = "Data-Grid_" + dataset[0].tableName;
   table.setAttribute("DBName", dataset[0].DBName);
 
+    // Apply responsive grid styles
+    table.style.gridTemplateColumns = "repeat(auto-fill, minmax(200px, 1fr))";
+    table.style.gap = "12px";
+    table.style.padding = "16px";
+    table.style.border = "2px solid #ccc"; // Light border
+    table.style.borderRadius = "10px"; // Rounded corners
+    table.style.backgroundColor = "#fafafa"; // Light background
+
   // generate div for the dataset
   var datasetDiv = document.createElement("div");
   // datasetDiv.className = "dataset-container";
