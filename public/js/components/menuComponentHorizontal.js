@@ -23,34 +23,48 @@ function createMenuComponentHorizontal(type) {
 }
 
 function editMenuComponentHorizontal(type, element, content) {
+    // Parse the menu items from the element's "items" attribute
     const items = JSON.parse(element.getAttribute("items"));
-    const div = document.createElement("div");
-    div.style.width = "150px";
-    div.style.padding = "10px";
 
+    // Create a wrapper div for the editor panel
+    const div = document.createElement("div");
+    div.style.width = "100%";                        // Take full width of parent
+    div.style.boxSizing = "border-box";              // Include padding inside the width
+    div.style.display = "flex";                      // Use flex layout
+    div.style.flexDirection = "column";              // Stack children vertically
+    div.style.gap = "10px";                          // Add spacing between children
+    div.style.padding = "10px";                      // Add padding inside the editor
+
+    // Create the "Update" button to save changes
     const saveButton = document.createElement("button");
     saveButton.textContent = "Update";
-    saveButton.onclick = () => saveMenuItemsHorizontal(element);
-    saveButton.style.width = "100%";
+    saveButton.onclick = () => saveMenuItemsHorizontal(element); // Save logic
+    saveButton.style.width = "100%";                 // Full-width button
     div.appendChild(saveButton);
 
+    // Create the container that holds all menu items
     const itemdiv = document.createElement("div");
     itemdiv.id = "menu-items";
     itemdiv.draggable = true;
+    itemdiv.style.width = "100%";                    // Make it take full width
     div.appendChild(itemdiv);
 
+    // Create the "Add Item" button to insert a new menu item
     const addButton = document.createElement("button");
     addButton.textContent = "Add Item";
-    addButton.onclick = () => addMenuItemsHorizontal(element, itemdiv, {});
-    addButton.style.width = "100%";
+    addButton.onclick = () => addMenuItemsHorizontal(element, itemdiv, {}); // Add logic
+    addButton.style.width = "100%";                  // Full-width button
     div.appendChild(addButton);
 
+    // Add the editor to the provided content panel
     content.appendChild(div);
 
+    // Render all existing menu items inside the editor panel
     items.forEach(item => {
         addMenuItemsHorizontal(element, itemdiv, item);
     });
 }
+
 
 function addMenuItemsHorizontal(element, itemdiv, itemObj) {
     const internalDiv = document.createElement('div');
