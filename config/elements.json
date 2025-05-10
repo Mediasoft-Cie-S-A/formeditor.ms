@@ -131,7 +131,28 @@
     "icon": "fa fa-search",
     "renderFunction": ""
   },
-
+ "DataPanel": {
+    "type": "DataPanel",
+    "description": "Data Panel",
+    "category": "Business Logic",
+    "scriptName": "dataPanel.js",
+    "createFunction": "createDataPanel",
+    "editFunction": "editDataPanel",
+    "styles": "dataPanel.css",
+    "icon": "fa fa-th-large",
+    "renderFunction": "renderDataPanel"
+  },
+  "dataPanelWeb": {
+    "type": "DataPanelWeb",
+    "description": "Data Panel Web",
+    "category": "Web Server",
+    "scriptName": "dataPanelWeb.js",
+    "createFunction": "createDataPanelWeb",
+    "editFunction": "editDataPanelWeb",
+    "styles": "dataPanelWeb.css",
+    "icon": "fa fa-th-large",
+    "renderFunction": ""
+  },
   "workflow": {
     "type": "workflow",
     "description": "Workflow",
