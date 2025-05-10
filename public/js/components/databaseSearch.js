@@ -66,7 +66,7 @@ function updateDataSearch(main, content) {
   RenderDataSearch(main);
 }
 
-function search(event) {}
+
 function RenderDataSearch(main) {
   main.innerHTML = "";
   var searchMainDiv = document.createElement("div");
@@ -191,7 +191,7 @@ function searchAutoComplete(event, element) {
     const isWhitespaceString = str => !str.replace(/\s/g, '').length
     console.log(isWhitespaceString(searchValue))
   // generate filter from searchValue if fieldType is text with openedge syntax
-  if (searchValue.length > 2 && !isWhitespaceString(searchValue)) {
+  if (searchValue.length > 0 && !isWhitespaceString(searchValue)) {
     switch (fieldType) {
       case "character":
         url = url + "&filter=" + fieldName + " like '%" + searchValue + "%'";

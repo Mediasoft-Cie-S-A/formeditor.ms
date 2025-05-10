@@ -226,21 +226,42 @@ if (sqlJson.DBName != null) {
 }
 
 function renderDataSet(main) {
+  // Clear the main content
   main.innerHTML = "";
-  main.style.height = "auto";
   main.style.display = "flex";
-  // get the data from the main
+  main.style.flexDirection = "column";
+  main.style.alignItems = "center";
+  main.style.padding = "16px"; // Add inner spacing
+  main.style.boxSizing = "border-box";
+  main.style.overflowX = "hidden"; // Prevent overflow
+
+  // Retrieve dataset JSON from the main element
   var jsonData = JSON.parse(main.getAttribute("dataSet"));
-  // generate the div for the dataset
+
+  // Generate the dataset container
   var dataset = document.createElement("div");
-  dataset.id = "DataSet_" + jsonData[0].tableName;
-  dataset.setAttribute("data-table-name", jsonData[0].tableName);
+  dataset.id = "DataSet_" + (jsonData[0]?.tableName || "");
+  dataset.setAttribute("data-table-name", jsonData[0]?.tableName || "");
   dataset.className = "dataSetContainer";
+
+  // Style the dataset container as a responsive grid
+  dataset.style.display = "grid";
+  dataset.style.gridTemplateColumns = "repeat(auto-fill, minmax(250px, 1fr))"; // Wider min-width
+  dataset.style.gap = "16px";
+  dataset.style.width = "100%"; // Take full available width
+  dataset.style.maxWidth = "1200px"; // Limit maximum width for better readability
+  dataset.style.margin = "0 auto"; // Center horizontally
+  dataset.style.padding = "16px";
+  dataset.style.border = "1px solid #ccc";
+  dataset.style.borderRadius = "10px";
+  dataset.style.backgroundColor = "#fafafa";
+  dataset.style.boxSizing = "border-box";
+
   var datasetFields = [];
-  // add rowid jsonData, in the first position if not exists
+
+  // Add a 'rowid' field at the beginning if it does not exist
   var rowid = jsonData.find((field) => field.fieldType === "rowid");
-  if (!rowid)
-  {
+  if (!rowid && jsonData.length > 0) {
     jsonData.unshift({
       DBName: jsonData[0].DBName,
       tableName: jsonData[0].tableName,
@@ -254,23 +275,59 @@ function renderDataSet(main) {
       fieldValues: "",
       fieldSQL: ""
     });
-      
   }
 
-  jsonData.forEach((fieldJson) => {
+  // Filter fields to avoid displaying the rowid
+  const visibleFields = jsonData.filter(field => field.fieldName !== "rowid");
 
-    // get the regexp
+  // Fill the dataset or display "dataset empty" if no data
+  if (jsonData.length > 0) {
+    visibleFields.forEach((fieldJson) => {
+      var createField = createFieldFromJson(fieldJson);
 
-    var createField = createFieldFromJson(fieldJson);
-    dataset.appendChild(createField);
-    datasetFields.push(fieldJson.fieldName);
-  });
+      // Style each field to be flexible inside the grid
+      createField.style.minHeight = "100px";
+      createField.style.display = "flex";
+      createField.style.flexDirection = "column";
+      createField.style.justifyContent = "center";
+      createField.style.boxSizing = "border-box";
+
+      // Wrap the field inside a panel for navigation compatibility
+      var panel = document.createElement("div");
+      panel.className = "panel";
+      panel.style.border = "1px solid #ddd";
+      panel.style.borderRadius = "6px";
+      panel.style.padding = "8px";
+      panel.style.backgroundColor = "#fff";
+      panel.style.boxSizing = "border-box";
+      panel.style.display = "flex";
+      panel.style.flexDirection = "column";
+      panel.style.justifyContent = "center";
+
+      panel.appendChild(createField);
+      dataset.appendChild(panel);
+
+      datasetFields.push(fieldJson.fieldName);
+    });
+  } else {
+    // Case when no data is available
+    var emptyMsg = document.createElement("div");
+    emptyMsg.textContent = "Dataset vide...";
+    emptyMsg.style.fontStyle = "italic";
+    emptyMsg.style.color = "#777";
+    emptyMsg.style.padding = "20px";
+    dataset.appendChild(emptyMsg);
+  }
+
+  // Update attributes of the main element
   dataset.setAttribute("DataSet-Fields-List", datasetFields);
   main.setAttribute("DataSet-Fields-List", datasetFields);
-  main.appendChild(dataset);
 
-  // get the data from the main
+  // Append the dataset to the main container
+  main.appendChild(dataset);
 }
+
+
 
 function createFieldFromJson(fieldJson) {
   var element = null;
@@ -354,12 +411,31 @@ function createFieldFromJson(fieldJson) {
                 element = createElementInput("time");
                 einput = element.querySelector("input");
                 break;
+          case "logical":
           case "boolean":
           case "bool":
           case "bit":
-                element = createElementInput("checkbox");
-                einput = element.querySelector("input");
-                einput.className = "apple-switch";
+            element = createElementInput("checkbox");
+            einput = element.querySelector("input");
+            einput.className = "apple-switch";
+            
+            // Set initial state
+            if (fieldJson.fieldValues == "1") {
+              einput.checked = true;
+              einput.value = "1";
+            } else {
+              einput.checked = false;
+              einput.value = "0";
+            }
+            
+            // Listen to changes
+            einput.addEventListener("change", function () {
+              if (einput.checked) {
+                einput.value = "1";
+              } else {
+                einput.value = "0";
+              }
+            });
                 break;
           default:
             element = createElementInput("text");
@@ -455,6 +531,7 @@ function RefreshRecord(DBName, tableName) {
 // use the updateInputs function to update the inputs with the data
 // use the setRowID function to set the current row id in the navigation bar
 async function linkRecordToGrid(DBName, tableName, rowId, rowNum,dataset,link,rows) {
+  /*
   console.log("linkRecordToGrid");
   console.log("DBName", DBName);
   console.log("tableName", tableName);
@@ -463,6 +540,7 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum,dataset,link,ro
   console.log("dataset", dataset);
   console.log("link", link);
   console.log("rows", rows);
+  */
   const saveBtn = document.querySelector("[name=SaveDSBtn]");
   if (saveBtn) saveBtn.disabled = true;
   
@@ -481,7 +559,7 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum,dataset,link,ro
     
       // get the datasetJSON from the datasetDiv
       const dataset = JSON.parse(datasetDiv.getAttribute("dataSet"));
-      console.log("dataset", dataset);
+    //  console.log("dataset", dataset);
     
         // get the fields from the dataset
         const datasetFields = datasetDiv.getAttribute("dataset-fields-list");
@@ -490,9 +568,9 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum,dataset,link,ro
           link = [];
         }
         if (link.length ===0) {
-           console.log("link.length ===0");
+           //console.log("link.length ===0");
             const url = `/get-record-by-rowid/${dataset[0].DBName}/${dataset[0].tableName}/${rowId}?fields=${datasetFields}`;
-            console.log("[FETCH by ROWID] URL:", url);
+            //console.log("[FETCH by ROWID] URL:", url);
 
             fetch(url)
               .then((response) => response.json())
@@ -603,8 +681,10 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum,dataset,link,ro
 }
 
 async function updateInputs(data, DBName, tableName,dataset) {
+  /*
   console.log("updateInputs");
   console.log("data", data);
+  */
     const datasetTableName = dataset.getAttribute("data-table-name");
  
       const inputs = dataset.querySelectorAll("input, select");
@@ -818,6 +898,13 @@ async function updateInputs(data, DBName, tableName,dataset) {
             // if (fieldType === "input") {
             input.value = data[fieldLabel]?.toString().trim() || "";
             input.disabled = false;
+            if (input.type === "checkbox") {
+              input.checked = data[fieldLabel] == 1 ? true : false;
+            }
+            if (input.tagName.toLowerCase() === "select") {
+              input.value = data[fieldLabel]?.toString().trim() || "";
+            }
+
             // }
             break;
         } // end switch
@@ -849,10 +936,25 @@ function handleSelectField(input, options, selectedValue) {
     // Add options to the select element
     options.forEach((option) => {
       const optionElement = document.createElement("option");
-      if (typeof option === "object") {
-        optionElement.value = option.value;
-        optionElement.text = option.text;
-      } else {
+      //check if the option has pipe | and split it
+      if (option.includes("|")) {
+        const [value, text] = option.split("|");
+        optionElement.value = value.trim();
+        optionElement.text = text.trim();
+      } else if (option.includes("=")) {
+        const [value, text] = option.split("=");  
+        optionElement.value = value.trim();
+        optionElement.text = text.trim();
+      } else if (option.includes(":")) {
+        const [value, text] = option.split(":");
+        optionElement.value = value.trim();
+        optionElement.text = text.trim();
+      } else if (option.includes(";")) {
+        const [value, text] = option.split(";");
+        optionElement.value = value.trim();
+        optionElement.text = text.trim();
+      }
+       else {
         optionElement.value = option;
         optionElement.text = option;
       }

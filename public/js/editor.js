@@ -810,11 +810,11 @@ function createSelectItem(id, label, styleProperty) {
     // get the select element type
     var tagName = propertiesBar.getAttribute("data-element-type");
     if (tagName === "BarChart") {
-      var dataType = this.getAttribute("fieldDataType");
+      var dataType = this.getAttribute("dataset-field-type");
       setOptionsByTypeChart(select, dataType);
     } else {
       // get type of the field
-      var dataType = this.getAttribute("fieldType");
+      var dataType = this.getAttribute("dataset-field-type");
       // empty the select
       setOptionsByType(select, dataType);
       }
@@ -848,6 +848,9 @@ function setOptionsByType(select, fieldDataType) {
     opt.value = option;
     opt.innerHTML = option;
     select.appendChild(opt);
+    if (option === fieldDataType) {
+      opt.selected = true;
+    }
   });
 
 
@@ -1376,7 +1379,7 @@ function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false )
   div.style.height = "60px";
   // Set up the inner HTML for the div, including a span and a remove button
   div.innerHTML += `<i class="fa fa-plus-square" onclick="expandReduceDiv(event,'${elementId}')" style="color:blue" title="Expand"></i>`;
-  div.innerHTML = `<i class="fa fa-trash" onclick="removeItem(event)" style="color:red" title="Remove"></i>`;
+  div.innerHTML += `<i class="fa fa-trash" onclick="removeItem(event)" style="color:red" title="Remove"></i>`;
   div.innerHTML += `<i class="fa fa-arrow-up" onclick="moveUp(event)" style="color:blue" title="Move Up"></i>`;
   div.innerHTML += `<i class="fa fa-arrow-down" onclick="moveDown(event)" style="color:blue"  title="Move Up"></i>`;
     // add expand the div size and reduce it button
@@ -1403,7 +1406,7 @@ function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false )
   div.appendChild(select);
 
   // Populate select options based on field's data type
-  setOptionsByType(select, fieldJson.fieldDataType);
+  setOptionsByType(select, fieldJson.fieldType);
 
   // Set the selected value as an attribute in the div
   div.setAttribute("selectedValue", select.value);
@@ -1523,6 +1526,13 @@ function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false )
     subDiv.style.display = "none";
   });
   // set the height of the parent div
+    // ✅ NEW : Add scroll if too many fields
+    if (dataObjet.scrollHeight > 600) { // You can adjust 600px as needed
+      dataObjet.style.maxHeight = "600px";
+      dataObjet.style.overflowY = "auto";
+      dataObjet.style.paddingBottom = "80px"; // ✅ Add bottom padding for easier drop
+    }
+  
 }
 
 // function to expand or reduce the div size

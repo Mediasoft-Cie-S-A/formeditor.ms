@@ -177,7 +177,7 @@ function renderNavigationBar(main) {
 }
 
 function navbar_movePrev() {
-  let allPanels = document.querySelectorAll("[tagname='dataTable'] div.panel");
+  let allPanels = document.querySelectorAll("[tagname='dataTable'] div.grid-row");
   let selectedPanel = document.querySelector(".selected-panel");
 
   if (!selectedPanel && allPanels.length > 0) {
@@ -232,8 +232,9 @@ function navbar_movePrev() {
 
 
 function navbar_moveNext() {
+  console.log("next has been pressed");
   // Handle selected-panel logic
-  let allPanels = document.querySelectorAll("[tagname='dataTable'] div.panel");
+  let allPanels = document.querySelectorAll("[tagname='dataTable'] div.grid-row");
   let selectedPanel = document.querySelector(".selected-panel");
 
   if (!selectedPanel && allPanels.length > 0) {
@@ -366,7 +367,7 @@ function CreateUpdated(DBName, tableName, divLine) {
   );
 
 
-  let updateFields = [];
+  let updateFields = "";
   let fieldGroups = {};
 
   inputs.forEach((input) => {
@@ -393,7 +394,7 @@ function CreateUpdated(DBName, tableName, divLine) {
       // Handle fields without a detectable prefix
       if (value) {
         // Only add fields with non-empty values
-        updateFields.push(`"${field}" = '${value}'`);
+        updateFields+=`"${field}" = '${value}',`;
       }
     }
 
@@ -409,12 +410,16 @@ function CreateUpdated(DBName, tableName, divLine) {
 
     // Add to updateFields only if valuesString is not empty
     if (valuesString) {
-      updateFields.push(`"${prefix}" = '${valuesString}'`);
+      updateFields+=`"${prefix}" = '${valuesString}',`;
     }
+  }
+  // Remove the last comma if it exists
+  if (updateFields.endsWith(",")) {
+    updateFields = updateFields.slice(0, -1); // Remove last comma  
   }
 
   // Return the final formatted string
-  return updateFields.join(", ");
+  return updateFields;
 }
 
 function addIdToData(data, id, value) {
