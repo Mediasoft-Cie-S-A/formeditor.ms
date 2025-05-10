@@ -1,0 +1,31 @@
+.DataPanel{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.DataPanel.DataPanel:h3{
+    margin: 0;
+    padding: 16px;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #333;
+}
+
+.DataPanel:h1{
+    margin: 0;
+    padding: 16px;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #333;
+}
