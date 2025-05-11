@@ -39,6 +39,60 @@ function createDataPanel(type) {
      
       var dbinput = target.querySelector("[tagname='dbname']");
         var select = target.querySelector("[tagname='select']");
+
+      const dataDiv= target.querySelector("[objecttype='Data']");
+      // check if select is empty
+      if (select.value == "") {
+        let select = "";
+        // for each div in dataDiv.children
+        const dataDivChildren = dataDiv.querySelectorAll("div");
+        dataDivChildren.forEach((child) => {
+          // check if the child is selected
+          // get the <span> element
+          const span = child.querySelector("span");
+          const datafield=JSON.parse( span.getAttribute("data-field"));
+          // get the description
+          const description = child.querySelector("input[type='text']").value;
+          // check if the span is selected
+          const functionName = child.querySelector("select").value;
+          // genetate the select and store in element with datafield.fieldName,description and function name
+          if (select == "") {
+            switch (functionName) {
+              case "count":
+                select = "select count(*) \"" + description + "\" from PUB." + datafield.tableName;
+                break;
+              case "sum":
+                select = "select sum(" + datafield.fieldName + ") \"" + description + "\" from PUB." + datafield.tableName;
+                break;
+              case "avg":
+                select = "select avg(" + datafield.fieldName + ") \"" + description + "\" from PUB." + datafield.tableName;
+                break;
+              case "min":
+                select = "select min(" + datafield.fieldName + ") \"" + description + "\" from PUB." + datafield.tableName;
+                break;
+              case "max":
+                select = "select max(" + datafield.fieldName + ") \"" + description + "\" from PUB." + datafield.tableName;
+                break;
+              default:
+                select = "select * from PUB." + datafield.tableName;
+            }
+          }
+          element.setAttribute("data", JSON.stringify(datafield));
+          element.setAttribute("description", description);
+          element.setAttribute("function", functionName);
+       
+          var jsonData = {
+        DBName: datafield.DBName,
+        select: select   
+          }
+           // set the sql attribute
+        if (jsonData != null) {
+            element.setAttribute("sql", JSON.stringify(jsonData));
+            }
+
+          
+       });
+      }else {
       // generate the json data
       var jsonData = {
         DBName: dbinput.value,
@@ -49,7 +103,7 @@ function createDataPanel(type) {
             element.setAttribute("sql", JSON.stringify(jsonData));
             }
 
-
+          }
       renderDataPanel(element);
     };
     content.appendChild(button);
@@ -57,8 +111,20 @@ function createDataPanel(type) {
    
     content.appendChild(createSQLBox("SQL", "sql", "sql"));
   
-  
+    const data = createMultiSelectItem("Data", "data", "data", element.getAttribute('data'), "text", true);
+    content.appendChild(data);
     
+    if (element.getAttribute("data") != null) {
+      const field= addFieldToPropertiesBar(data, config,true);
+      // find input and put the description in it
+      const input = field.querySelector("input[type='text']");
+      input.value = element.getAttribute("description");
+      // find select and put the function in it
+      const select = field.querySelector("select");
+      select.value = element.getAttribute("function");
+      // find span and put the data-field in it
+      
+    }
       // sql
       if (element.getAttribute("sql") != null) {
         var target = content.querySelector("#SQL");
@@ -96,8 +162,21 @@ function createDataPanel(type) {
     }
 
     const dbName = sqljson.DBName;
-    const select = sqljson.select;
+    let select = sqljson.select;
+    // get the json filter 
+    const jsonFilter = JSON.parse(main.getAttribute("filter"));
+    // check if the json filter is not null
+    if (jsonFilter != null) {
 
+         // check if there is a where clause (upper case or lower case)
+       if (select.toLowerCase().includes("where")) {
+        // add the filter to the sql
+        select +=  " and " + Object.keys(jsonFilter)[0] + " = '" + Object.values(jsonFilter)[0] + "'";
+        } else {
+        // add the filter to the sql
+        select +=  " where " + Object.keys(jsonFilter)[0] + " = '" + Object.values(jsonFilter)[0] + "'";
+       }
+    }
         // execute the sql
        // get the data with query select "/table-data-sql/:database/:page/:pageSize"?sqlQuery=select * from table
     const url = "/table-data-sql/" + dbName + "/1/10?sqlQuery=" + select;
@@ -137,5 +216,4 @@ function createDataPanel(type) {
             console.error("Error:", error);
         });
   }
-  
   

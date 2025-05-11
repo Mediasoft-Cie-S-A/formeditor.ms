@@ -772,8 +772,16 @@ function dropInput(event, id) {
     if (tagName === "BarChart") {
       showType = true;
     }
-    // Otherwise, pass the fieldJson to addFieldToPropertiesBar to create a new field
-    addFieldToPropertiesBar(target, fieldJson,showType);
+    switch (tagName) {
+      case "DataPanel":
+      case "BarChart":
+        addFunctionsFieldToPropertiesBar(target, fieldJson,showType);
+      break;
+      default:
+      // Otherwise, pass the fieldJson to addFieldToPropertiesBar to create a new field
+      addFieldToPropertiesBar(target, fieldJson,showType);
+      break;
+    }
   }
 }
 
@@ -1363,6 +1371,82 @@ function addFieldToPropertiesBarWeb(target, fieldJson, isId) {
   // var height = dataObjet.clientHeight + div.clientHeight;
   // // set the height of the parent div
   // dataObjet.style.height = height + 30 + "px";
+}
+
+function addFunctionsFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false )
+ {
+  var dataObjet = target;
+
+  // Create the div container for the new field
+  var div = document.createElement("div");
+  div.classList.add("tables-list-item");
+  const elementId = fieldJson.fieldName + "-" + fieldJson.tableName;
+  div.id = elementId;
+  div.style.display = "block";
+  div.style.flexDirection = "column";
+  div.style.height = "60px";
+  // Set up the inner HTML for the div, including a span and a remove button
+  div.innerHTML += `<i class="fa fa-plus-square" onclick="expandReduceDiv(event,'${elementId}')" style="color:blue" title="Expand"></i>`;
+  div.innerHTML += `<i class="fa fa-trash" onclick="removeItem(event)" style="color:red" title="Remove"></i>`;
+  div.innerHTML += `<i class="fa fa-arrow-up" onclick="moveUp(event)" style="color:blue" title="Move Up"></i>`;
+  div.innerHTML += `<i class="fa fa-arrow-down" onclick="moveDown(event)" style="color:blue"  title="Move Up"></i>`;
+    // add expand the div size and reduce it button
+  div.innerHTML += `<hr style="margin: 0px;"></hr>`;
+  var tableName = fieldJson.tableName || "unk"; 
+  var fieldName = fieldJson.fieldName || "unknownField"; 
+  const prefix = tableName.slice(0, 3).toLowerCase() + '_';
+  fieldJson.displayName = prefix + fieldName; 
+  
+  
+  div.innerHTML += `<span name='dataContainer' data-field='${JSON.stringify(fieldJson)}' style="  font-weight: bold;">${fieldJson.displayName}</span>`;
+  // add the input for the name of the panel  
+  var input = document.createElement("input");
+  input.type = "text";
+  input.setAttribute("tagname", "description");
+  input.setAttribute("placeholder", "Description");
+  input.className = "input-element";
+  input.value = fieldJson.fieldLabel;
+  div.appendChild(input);
+ 
+
+  // Create a select dropdown
+  var select = document.createElement("select");
+  // add to the select the type of function
+  var options = ["sum", "avg", "min", "max", "count"];
+  // Clear any existing options in the select element
+  select.innerHTML = "";
+  // Populate the select dropdown with the options
+  options.forEach((option) => {
+    var opt = document.createElement("option");
+    opt.value = option;
+    opt.innerHTML = option;
+    select.appendChild(opt);
+    if (option === fieldJson.fieldType) {
+      opt.selected = true;
+    }
+  });
+  div.appendChild(select);
+
+ 
+  // Set the selected value as an attribute in the div
+  div.setAttribute("selectedValue", select.value);
+
+ dataObjet.appendChild(div);
+  // hide all the subDivs, input and select elements
+  var subDivs = div.querySelectorAll("div,input,select");
+  // loop through the subDivs
+  subDivs.forEach((subDiv) => {
+    subDiv.style.display = "none";
+  });
+  // set the height of the parent div
+    // ✅ NEW : Add scroll if too many fields
+    if (dataObjet.scrollHeight > 600) { // You can adjust 600px as needed
+      dataObjet.style.maxHeight = "600px";
+      dataObjet.style.overflowY = "auto";
+      dataObjet.style.paddingBottom = "80px"; // ✅ Add bottom padding for easier drop
+    }
+  
+  return div;
 }
 
 function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false )

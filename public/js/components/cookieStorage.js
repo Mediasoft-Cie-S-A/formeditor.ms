@@ -137,10 +137,11 @@ function renderCookieStorage(main) {
                 }
                 );
                 // excute the search when the select changes
-                updateGrid(name,select,DBName);
+                updateDataObjects(name,select,DBName);
                 // change the value of the variable when the select changes
                 select.onchange = () => {
-                    updateGrid(name,select,DBName);
+                    console.log("select onchange",name,select,DBName);
+                    updateDataObjects(name,select,DBName);
                 };
 
                 varContainer.appendChild(select);
@@ -180,10 +181,10 @@ function renderCookieStorage(main) {
                     });
                 });
                // excute the search when the select changes
-               updateGrid(name,select,DBName);
+               updateDataObjects(name,select,DBName);
                // change the value of the variable when the select changes
                select.onchange = () => {
-                   updateGrid(name,select,DBName);
+                   updateDataObjects(name,select,DBName);
                };
 
                varContainer.appendChild(select);
@@ -196,7 +197,8 @@ function renderCookieStorage(main) {
     });
 }
 
-function updateGrid(name,select,DBName){
+function updateDataObjects(name,select,DBName){
+    console.log("updateDataObjects",name,select,DBName);
     cookieValue = select.value;
                     setCookie(name, cookieValue, 1);
                     //let test = getDataGridObject();
@@ -210,8 +212,22 @@ function updateGrid(name,select,DBName){
                       const var_name = select.getAttribute("var_name");
                         searchGrid(DBName, var_name, "=", cookieValue, idObject.id);
                     
-                    }
-                });
+                        }
+                     });
+                     // get dataPanel div with attribute tagname=dataPanel
+                     let idObjects2 = document.querySelectorAll("div[tagname='DataPanel']");
+                        idObjects2.forEach((idObject) => {{
+                        console.log(idObject.id);
+                        // get data from 
+                    
+                        const var_name = select.getAttribute("var_name");
+                        // set filter in dataPanel
+                        idObject.setAttribute("filter", JSON.stringify({ [var_name]: cookieValue }));
+                        // search in dataPanel
+                        renderDataPanel(idObject);  
+                        
+                            }
+                        });
 }
 // Helper function to get a cookie by name
 function getCookie(name) {

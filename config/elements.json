@@ -131,6 +131,17 @@
     "icon": "fa fa-search",
     "renderFunction": ""
   },
+  "DataPanel": {
+    "type": "DataPanel",
+    "description": "Data Panel",
+    "category": "Business Logic",
+    "scriptName": "dataPanel.js",
+    "createFunction": "createDataPanel",
+    "editFunction": "editDataPanel",
+    "styles": "dataPanel.css",
+    "icon": "fa fa-th-large",
+    "renderFunction": "renderDataPanel"
+  },
 
   "workflow": {
     "type": "workflow",
