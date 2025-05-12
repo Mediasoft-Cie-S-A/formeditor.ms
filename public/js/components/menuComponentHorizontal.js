@@ -130,14 +130,22 @@ function saveMenuItemsHorizontal(element) {
         const items = [];
         const children = container.children;
         for (let i = 0; i < children.length; i++) {
-            const item = children[i].querySelector("input:nth-child(1)").value;
-            const url = children[i].querySelector("input:nth-child(2)").value;
-            const icon = children[i].querySelector("input:nth-child(3)").value;
-            const target = children[i].querySelector("input:nth-child(4)").value;
-            const checkpoint = children[i].querySelector("input:nth-child(5)").value;
+            const inputs = children[i].querySelectorAll("input");
+            if (inputs.length < 5) continue; // S'assurer qu'il y a suffisamment d'inputs
 
-            const subMenuDiv = children[i].querySelector("div");
-            const childrenItems = subMenuDiv ? parseMenuItems(subMenuDiv) : [];
+            const item = inputs[0].value;
+            const url = inputs[1].value;
+            const icon = inputs[2].value;
+            const target = inputs[3].value;
+            const checkpoint = inputs[4].value;
+
+            // Rechercher tous les divs enfants pour capturer les sous-menus
+            const subMenuDivs = children[i].querySelectorAll(":scope > div");
+            let childrenItems = [];
+            subMenuDivs.forEach(subDiv => {
+                childrenItems = childrenItems.concat(parseMenuItems(subDiv));
+            });
+
             items.push({
                 item: item,
                 url: url,
@@ -149,11 +157,13 @@ function saveMenuItemsHorizontal(element) {
         }
         return items;
     };
+
     const itemdiv = document.getElementById("menu-items");
     const items = parseMenuItems(itemdiv);
     element.setAttribute("items", JSON.stringify(items));
     renderMenuComponentHorizontal(element);
 }
+
 
 function renderMenuComponentHorizontal(content) {
     const items = JSON.parse(content.getAttribute("items"));
