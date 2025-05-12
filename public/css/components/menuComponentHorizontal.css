@@ -71,3 +71,38 @@
     gap: 10px;
     padding: 10px;
 }
+.menu-bar-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 20px;
+  background-color: #f9f9f9;
+  border-bottom: 2px solid #ccc;
+}
+
+.translate-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.translate-container div {
+  background-color: #007bff;
+  color: #fff;
+  padding: 5px;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.translate-container select {
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}

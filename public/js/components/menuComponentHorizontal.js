@@ -157,9 +157,43 @@ function saveMenuItemsHorizontal(element) {
 
 function renderMenuComponentHorizontal(content) {
     const items = JSON.parse(content.getAttribute("items"));
-    const menu = content.querySelector('ul');
-    menu.innerHTML = "";
 
+    // Clear the container
+    content.innerHTML = "";
+
+    // Create a wrapper to align menu and translate side by side
+    const wrapper = document.createElement("div");
+    wrapper.className = "menu-bar-wrapper"; // Flex container
+
+    const menu = document.createElement('ul');
+    menu.className = 'horizontal-menu';
+
+    // --- Translate button + selector ---
+    const translateWrapper = document.createElement("div");
+    translateWrapper.className = "translate-container";
+
+    const floatButton = document.createElement('div');
+    floatButton.textContent = '🌐';
+    floatButton.title = 'Select Language';
+    floatButton.onclick = () => {
+        selector.style.display = selector.style.display === 'none' ? 'block' : 'none';
+    };
+
+    const selector = document.createElement('select');
+    selector.style.display = 'none';
+    selector.style.marginLeft = '8px';
+    Object.keys(translationDictionary).forEach(lang => {
+        const option = document.createElement('option');
+        option.value = lang;
+        option.textContent = lang;
+        selector.appendChild(option);
+    });
+    selector.onchange = (e) => translatePage('', e.target.value);
+
+    translateWrapper.appendChild(floatButton);
+    translateWrapper.appendChild(selector);
+
+    // --- Menu items rendering ---
     const createMenuItem = (item) => {
         const li = document.createElement('li');
         const a = document.createElement('a');
@@ -185,11 +219,7 @@ function renderMenuComponentHorizontal(content) {
             li.setAttribute('onmouseleave', 'toggleSubMenuClose(event, this)');
 
         } else {
-            if (item.url.startsWith("http") || item.url.startsWith("/")) {
-                li.setAttribute('onclick', `window.location.href='${item.url}'; window.target='${item.target}'`);
-            } else {
-                li.setAttribute('onclick', `loadFormData('${item.url}',document.getElementById('${item.target}'))`);
-            }
+            li.setAttribute('onclick', `loadFormData('${item.url}', document.getElementById('${item.target}'))`);
         }
 
         return li;
@@ -198,6 +228,10 @@ function renderMenuComponentHorizontal(content) {
     items.forEach(item => {
         menu.appendChild(createMenuItem(item));
     });
+
+    wrapper.appendChild(menu);
+    wrapper.appendChild(translateWrapper);
+    content.appendChild(wrapper);
 }
 
 function toggleSubMenuOpen(event, element) {
