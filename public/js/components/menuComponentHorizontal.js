@@ -112,6 +112,14 @@ function addMenuItemsHorizontal(element, itemdiv, itemObj) {
         internalDiv.appendChild(subMenuDiv);
     };
     internalDiv.appendChild(subMenuButton);
+    // ✅ Add Delete Button
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.style.marginLeft = "10px";
+    deleteButton.onclick = () => {
+        itemdiv.removeChild(internalDiv); // Remove the current menu item from the editor
+    };
+    internalDiv.appendChild(deleteButton);
 
     itemdiv.appendChild(internalDiv);
 
@@ -123,6 +131,13 @@ function addMenuItemsHorizontal(element, itemdiv, itemObj) {
         });
         internalDiv.appendChild(subMenuDiv);
     }
+    deleteButton.textContent = "Delete";
+    deleteButton.onclick = () => {
+    if (confirm("Are you sure you want to delete this item?")) {
+        internalDiv.remove();
+    }
+};
+internalDiv.appendChild(deleteButton);
 }
 
 function saveMenuItemsHorizontal(element) {
