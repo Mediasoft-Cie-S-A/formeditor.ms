@@ -76,9 +76,9 @@ function loadForms(){
                 const showButton = document.createElement('button');
                 showButton.innerHTML='<i class="fa fa-eye" style="margin-left:-5px"></i>'
                 showButton.className = 'portal-show-button';
-                showButton.onclick = function() {
+                showButton.onclick = function(event) {
                     event.preventDefault();
-                    loadFormData(form.formId);
+                    loadFormData(form.formId,document.getElementById('renderContainer'));
                     const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
                     if (showTab) {
                         showTab.click(); // Simulate click
@@ -90,8 +90,9 @@ function loadForms(){
                 listItem.appendChild(deleteButton);
                 listItem.appendChild(showButton);                
                 listItem.appendChild(editButton);
-                listItem.addEventListener('dblclick', function() {
-                    loadFormData(form.formId);
+                listItem.addEventListener('dblclick', function(event) {
+                    event.preventDefault();
+                    loadFormData(form.formId,document.getElementById('renderContainer'));
                     const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
                     if (showTab) {
                         showTab.click(); // Simulate click
@@ -135,7 +136,7 @@ function deleteForm(formId, listItem) {
 
 
 
-function loadFormData(formId,renderContainer=document.getElementById('renderForm'))
+function loadFormData(formId,renderContainer)
  {
     fetch(`/get-form/${formId}`)
         .then(response => {
@@ -159,9 +160,9 @@ function loadFormData(formId,renderContainer=document.getElementById('renderForm
             formName.value=form.formName;
             formPath.value=form.formPath;
             userCreated.value=form.userCreated;
-            
-
+            console.log(renderContainer);
            
+            // Clear the render container
             renderContainer.innerHTML = '';
 
             // Convert JSON back to DOM and append

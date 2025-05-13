@@ -198,35 +198,29 @@ function onTabSwitch(event) {
   console.log(target);
   removeSelection();
   hideEditMenu();
-  if (target === "#formsList") {
-    console.log("formsList");
-    // Load forms
-    loadForms();
-  }
+  switch (target) {
+        case "#formsList":
+          console.log("formsList");
+          // Load forms
+          loadForms();
+          
 
-  if (target === "#editForm") {
-    console.log("editForm");
-    // Load forms
-    drageDroptableTableList(document.getElementById("drageDroptablesList"));
-    dragDropApiList(document.getElementById("dragDropApiList"));
-  }
+        
+        case "#editForm":
+          console.log("editForm");
+          // Load forms
+          drageDroptableTableList(document.getElementById("drageDroptablesList"));
+          dragDropApiList(document.getElementById("dragDropApiList"));
+        break;
+        case "#renderForm":
+          console.log("renderForm");
+          break;
 
-  if (target === "#renderForm") {
-    var formContainer = document.getElementById("formContainer");
-    var jsonData = domToJson(formContainer);
-    console.log(jsonData);
-    var renderContainer = document.getElementById("renderForm");
-
-    // Clear previous content
-    renderContainer.innerHTML = "";
-
-    // Convert JSON back to DOM and append
-    var domContent = jsonToDom(jsonData, renderContainer);
-  }
-  if (target === "#DatabaseForm") {
-    const list = document.getElementById("ContentTableListBar");
-    const detailsDiv = document.getElementById("mtableDetails");
-    createEditableTableList(list, detailsDiv);
+        case "#DatabaseForm":
+              const list = document.getElementById("ContentTableListBar");
+          const detailsDiv = document.getElementById("mtableDetails");
+          createEditableTableList(list, detailsDiv);
+          break;
   }
 }
 
