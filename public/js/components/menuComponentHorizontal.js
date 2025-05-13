@@ -43,6 +43,7 @@ function editMenuComponentHorizontal(type, element, content) {
     saveButton.style.width = "100%";                 // Full-width button
     div.appendChild(saveButton);
 
+    
     // Create the container that holds all menu items
     const itemdiv = document.createElement("div");
     itemdiv.id = "menu-items";
@@ -229,7 +230,14 @@ function renderMenuComponentHorizontal(content) {
 
         li.appendChild(i);
         li.appendChild(a);
-
+        // Add submenu indicator only if item has children
+        if (item.children && item.children.length > 0) {
+            const arrow = document.createElement("span");
+            arrow.textContent = " ▼"; // you can use ▾ or ▶ if preferred
+            arrow.style.fontSize = "0.75em";
+            arrow.style.marginLeft = "4px";
+            a.appendChild(arrow);
+        }
         if (item.children && item.children.length > 0) {
             const subMenu = document.createElement('ul');
             subMenu.className = "horizontal-submenu";
