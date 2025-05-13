@@ -374,6 +374,17 @@
     "icon": "fa fa-hand-pointer-o",
     "renderFunction": ""
   },
+  "buttonLink": {
+  "type": "buttonLink",                
+  "description": "Link Button",        
+  "category": "HTML",
+  "scriptName": "buttonLinkComponent.js", 
+  "createFunction": "createButtonLink",
+  "editFunction":  "editButtonLink",
+  "styles": "genericInput.css",         
+  "icon": "fa fa-link",                 
+  "renderFunction": ""                  
+  },
   "submit": {
     "type": "submit",
     "description": "Submit button",
