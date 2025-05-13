@@ -52,29 +52,28 @@ function editBooleanSearch(type,element,content)
         const propertiesBar = document.getElementById('propertiesBar');
         const gridID=propertiesBar.querySelector('label').textContent;                
         const main = document.getElementById(gridID);  
-        updateComboBoxData(main,content);
+        updateBooleanData(main,content);
    };
    content.appendChild(button);
      // create the input for the label
    content.appendChild(createInputItem("Label", "label", "label",element.getAttribute('label'),"text",true));
    // create the checkbox for set the default value
-    content.appendChild(createInputItem("Default", "default", "default",element.getAttribute('default'),"checkbox",true));
-
-   
+   content.appendChild(createInputItem("Default", "default", "default",element.getAttribute('default'),"checkbox",true));
    content.appendChild(createMultiSelectItem("Data", "data", "data"));
    content.appendChild(createMultiSelectItem("Link", "link", "link")); 
 
+   content.querySelector('input[type="checkbox"]').className = 'apple-switch';
    // assign the label to the checkbox
    if (element.getAttribute('label')!=null)
     {
-         var target=content.querySelector('#label input[type="text"]');
+         var target=content.querySelector('input[type="text"]');
          target.value=element.getAttribute('label');
     }
-    // assign the default value to the checkbox
-    if (element.getAttribute('default')!=null)
+    // assign the defaultValue value to the checkbox
+    if (element.getAttribute('defaultValue')!=null)
      {
-            var target=content.querySelector('#default input[type="checkbox"]');
-            target.checked=element.getAttribute('default');
+            var target=content.querySelector('input[type="checkbox"]');
+            target.checked=element.getAttribute('defaultValue');
      }
    
    // load the data
@@ -98,16 +97,19 @@ function editBooleanSearch(type,element,content)
    }
 }
 
-function updateComboBoxData(main,content)
+function updateBooleanData(main,content)
 {
+    
     // get the label
-    var label=content.querySelector('#label input[type="text"]').value;
+    var label=content.querySelector('input[type="text"]').value;
+    console.log(label);
     /// get the value of the default checkbox
-    var defaultValue=content.querySelector('#default input[type="checkbox"]').checked;
+    var defaultValue=content.querySelector('input[type="checkbox"]').checked;
+    console.log(defaultValue);
     // set the label
     main.setAttribute("label",label);
     // set the default value
-    main.setAttribute("default",defaultValue);
+    main.setAttribute("defaultValue",defaultValue);
    // get all the span elements from data 
     var data=content.querySelectorAll('#Data span[name="dataContainer"]');
     // generate the json of all the data
@@ -141,14 +143,19 @@ function refreshBooleanSearch(element) {
   
   // get datasearch
     var data=JSON.parse( element.getAttribute("datasearch"));
+    if (data==null)
+    {
+        console.log("no data");
+        return;
+    }
     // get the label
     var label=element.querySelector('label');
     // get the checkbox
     var checkbox=element.querySelector('input[type="checkbox"]');
     // set the label
-    label.textContent=data.fieldLabel;
+    label.textContent=element.getAttribute('label');
     // set the checkbox
-    checkbox.setAttribute('data-field',JSON.stringify(data));
+    checkbox.checked=element.getAttribute('defaultValue');
     // set the checkbox value
     checkbox.value=data.fieldValue;
     
