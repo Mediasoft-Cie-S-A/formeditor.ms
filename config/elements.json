@@ -107,7 +107,18 @@
     "editFunction": "editElementCombox",
     "styles": "combox.css",
     "icon": "fa fa-list",
-    "renderFunction": ""
+    "renderFunction": "refreshCombox"
+  },
+   "booleanSearch": {
+    "type": "booleanSearch",
+    "description": "Boolean Search",
+    "category": "Business Logic",
+    "scriptName": "booleanSearch.js",
+    "createFunction": "createBooleanSearch",
+    "editFunction": "editBooleanSearch",
+    "styles": "",
+    "icon": "fa fa-search-plus",
+    "renderFunction": "refreshBooleanSearch"
   },
   "cookieStorage": {
     "type": "cookieStorage",

@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-function createElementCombox(type) {
+function createBooleanSearch(type) {
     element = document.createElement("div");
-    element.textContent = type;
+    element.textContent = "";
     element.id=type+ Date.now(); // Unique ID for each new element
     element.tagName=type;
     element.className = 'container';
@@ -27,21 +27,23 @@ function createElementCombox(type) {
     
     label.tagName=type;
     // create select
-    var select = document.createElement('select');
-    select.textContent = 'select';
-    select.tagName=type;
-    select.setAttribute('onclik', 'filterData(this)');
+    var checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.tagName=type;
+    checkbox.setAttribute('onclik', 'filterDataBooleanSearch(this)');
+    checkbox.className = 'apple-switch';
     // create options
-    // insert options
     element.appendChild(label);
-    element.appendChild(select);
+    element.appendChild(checkbox);
+    // create the select
+
 
     return element;
 }
 
 
 
-function editElementCombox(type,element,content)
+function editBooleanSearch(type,element,content)
 {
    // adding tableName property to the element
    const button = document.createElement('button');
@@ -53,10 +55,28 @@ function editElementCombox(type,element,content)
         updateComboBoxData(main,content);
    };
    content.appendChild(button);
+     // create the input for the label
+   content.appendChild(createInputItem("Label", "label", "label",element.getAttribute('label'),"text",true));
+   // create the checkbox for set the default value
+    content.appendChild(createInputItem("Default", "default", "default",element.getAttribute('default'),"checkbox",true));
+
+   
    content.appendChild(createMultiSelectItem("Data", "data", "data"));
    content.appendChild(createMultiSelectItem("Link", "link", "link")); 
-   content.appendChild(createSelectItem("Filter", "filter", "filter",element.getAttribute('filter'),"text",true));  
 
+   // assign the label to the checkbox
+   if (element.getAttribute('label')!=null)
+    {
+         var target=content.querySelector('#label input[type="text"]');
+         target.value=element.getAttribute('label');
+    }
+    // assign the default value to the checkbox
+    if (element.getAttribute('default')!=null)
+     {
+            var target=content.querySelector('#default input[type="checkbox"]');
+            target.checked=element.getAttribute('default');
+     }
+   
    // load the data
    // check if jsonData is not empty
    if (element.getAttribute('datasearch')!=null)
@@ -80,6 +100,14 @@ function editElementCombox(type,element,content)
 
 function updateComboBoxData(main,content)
 {
+    // get the label
+    var label=content.querySelector('#label input[type="text"]').value;
+    /// get the value of the default checkbox
+    var defaultValue=content.querySelector('#default input[type="checkbox"]').checked;
+    // set the label
+    main.setAttribute("label",label);
+    // set the default value
+    main.setAttribute("default",defaultValue);
    // get all the span elements from data 
     var data=content.querySelectorAll('#Data span[name="dataContainer"]');
     // generate the json of all the data
@@ -106,36 +134,38 @@ function updateComboBoxData(main,content)
     });
     main.setAttribute("datalink",JSON.stringify(jsonData));
 
-    refreshCombox(main);
+    refreshBooleanSearch(main);
 }
 
-function refreshCombox(element) {
-  // get the data from the element
-  var data=element.getAttribute("dataSearch");
-  // parse the json
-  var jsonData=JSON.parse(data);
-  console.log(jsonData);
-  // get the main div
- 
-  const tableName = jsonData[0].tableName;
-  const fieldName = jsonData[0].fieldName;
-  const DBName = jsonData[0].DBName;
-  element.querySelector("label").innerText=fieldName;
-  var url = "/select-distinct/"+DBName+"/"+tableName+"/"+fieldName;
-  fetch(url)
-  .then(response => response.json())
-  .then(data => {
-      var select=element.querySelector("select");
-      data.forEach(row => {          
-        var option = document.createElement("option");
-        option.text = row[fieldName];
-        option.value = row[fieldName];
-        select.add(option);          
-      });
-  })
-  .catch(error => {
-      console.error(error);
-  });
+function refreshBooleanSearch(element) {
+  
+  // get datasearch
+    var data=JSON.parse( element.getAttribute("datasearch"));
+    // get the label
+    var label=element.querySelector('label');
+    // get the checkbox
+    var checkbox=element.querySelector('input[type="checkbox"]');
+    // set the label
+    label.textContent=data.fieldLabel;
+    // set the checkbox
+    checkbox.setAttribute('data-field',JSON.stringify(data));
+    // set the checkbox value
+    checkbox.value=data.fieldValue;
+    
 
+}
 
+function filterDataBooleanSearch(element) {
+    // get the main div
+    var data=element.getAttribute("dataSearch");
+    // parse the json
+    var jsonData=JSON.parse(data);
+    console.log(jsonData);
+    // get the main div
+    var main=element.parentNode;
+    // get the data from the element
+    var data=main.getAttribute("dataSearch");
+    // parse the json
+    var jsonData=JSON.parse(data);
+    console.log(jsonData);
 }
