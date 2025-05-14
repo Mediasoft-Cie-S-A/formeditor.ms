@@ -13,7 +13,8 @@ function createButtonLink(type) {
     const config = {
         url: "",
         target: "",
-        iconLock: true
+        iconLock: true,
+        label: "Open Screen"
     };
     btn.setAttribute("config", JSON.stringify(config));
 
@@ -32,10 +33,15 @@ function createButtonLink(type) {
         btn.onclick = () => {
             const config = JSON.parse(btn.getAttribute("config") || "{}");
             if (config.url && config.target) {
-                loadFormData(config.url, document.getElementById(config.target));
-            } else {
-                alert("Link is incomplete: missing URL or target.");
-            }
+                const targetEl = document.getElementById(config.target);
+                if (targetEl) {
+                    targetEl.innerHTML = ""; // Clear previous screen
+                    loadFormData(config.url, targetEl);
+                    // 👇 Automatically activate the "Edit" tab if present
+                    setTimeout(() => {
+                        activateEditTabIn(targetEl);
+                    }, 100);
+                }}
         };
     };
     btn._applyClick();
@@ -50,6 +56,13 @@ function editButtonLink(type, element, content) {
 
     const container = document.createElement("div");
     container.className = "button-link-editor";
+
+    // Label input
+    const labelLabel = document.createElement("label");
+    labelLabel.textContent = "Button Label:";
+    const inputLabel = document.createElement("input");
+    inputLabel.type = "text";
+    inputLabel.value = config.label || "Open Screen";
 
     // URL input
     const labelURL = document.createElement("label");
@@ -70,12 +83,14 @@ function editButtonLink(type, element, content) {
     updateBtn.textContent = "Update";
     updateBtn.style.width = "100%";
     updateBtn.onclick = () => {
-        saveButtonLink(element, inputURL.value, inputTarget.value);
+        saveButtonLink(element, inputURL.value, inputTarget.value, inputLabel.value);
     };
 
     // Add all inputs to the editor panel
     container.appendChild(labelURL);
     container.appendChild(inputURL);
+    container.appendChild(labelLabel);
+    container.appendChild(inputLabel);
     container.appendChild(labelTarget);
     container.appendChild(inputTarget);
     container.appendChild(updateBtn);
@@ -83,7 +98,6 @@ function editButtonLink(type, element, content) {
     content.appendChild(container);
 }
 
-  
 function setLockIcon(btn) {
     const show = btn.getAttribute("data-icon-lock") === "true";
     btn.querySelectorAll(".__lock").forEach(el => el.remove());
@@ -96,11 +110,12 @@ function setLockIcon(btn) {
     }
 }
 
-  function saveButtonLink(element, url, target) {
+function saveButtonLink(element, url, target, label) {
     const config = {
         url: url,
         target: target,
-        iconLock: element.getAttribute("data-icon-lock") === "true"
+        iconLock: element.getAttribute("data-icon-lock") === "true",
+        label: label
     };
 
     // Save configuration to element attribute
@@ -111,47 +126,47 @@ function setLockIcon(btn) {
 
     console.log("Button link saved:", config);
 }
-
 function renderButtonLink(element) {
     const config = JSON.parse(element.getAttribute("config") || "{}");
 
-    const newBtn = document.createElement("button");
-    newBtn.className = "btn-link";
-    newBtn.id = element.id; // Keep same ID
-    newBtn.textContent = "Open Screen";
-    newBtn.setAttribute("tagName", element.getAttribute("tagName"));
-    newBtn.setAttribute("config", JSON.stringify(config));
-    newBtn.setAttribute("data-url", config.url || "");
-    newBtn.setAttribute("data-target", config.target || "");
-    newBtn.setAttribute("data-icon-lock", config.iconLock ? "true" : "false");
+    // Update existing element (no replace!)
+    element.className = "btn-link";
+    element.textContent = config.label || "Open Screen";
+    element.setAttribute("tagName", element.getAttribute("tagName"));
+    element.setAttribute("config", JSON.stringify(config));
+    element.setAttribute("data-url", config.url || "");
+    element.setAttribute("data-target", config.target || "");
+    element.setAttribute("data-icon-lock", config.iconLock ? "true" : "false");
 
     // Drag & drop
-    newBtn.draggable = true;
-    newBtn.ondragstart = (e) => {
-        e.dataTransfer.setData("text/plain", newBtn.id);
-        setTimeout(() => newBtn.style.display = "none", 0);
+    element.draggable = true;
+    element.ondragstart = (e) => {
+        e.dataTransfer.setData("text/plain", element.id);
+        setTimeout(() => element.style.display = "none", 0);
     };
-    newBtn.ondragend = () => {
-        newBtn.style.display = "block";
+    element.ondragend = () => {
+        element.style.display = "block";
     };
 
     // Click logic
-    newBtn._applyClick = () => {
-        newBtn.onclick = () => {
-            const cfg = JSON.parse(newBtn.getAttribute("config") || "{}");
-            if (cfg.url && cfg.target) {
-                loadFormData(cfg.url, document.getElementById(cfg.target));
+    element._applyClick = () => {
+        element.onclick = () => {
+            const cfg = JSON.parse(element.getAttribute("config") || "{}");
+            const targetEl = document.getElementById(cfg.target);
+            if (cfg.url && targetEl) {
+                targetEl.innerHTML = "";
+                loadFormData(cfg.url, targetEl);
+                setTimeout(() => {
+                    activateEditTabIn(targetEl);
+                }, 100);
             } else {
                 alert("Link is incomplete.");
             }
         };
     };
-    newBtn._applyClick();
+    element._applyClick();
 
     // Icon
-    setLockIcon(newBtn);
-
-    // Replace old element in DOM
-    element.replaceWith(newBtn);
+    setLockIcon(element);
 }
 

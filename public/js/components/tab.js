@@ -143,3 +143,15 @@ function activateTab(event,tabHeader,tabContent){
     tabHeader.classList.add('active');       
     tabContent.style.display = 'block';
 }
+function activateEditTabIn(targetElement) {
+    const editHeader = Array.from(targetElement.querySelectorAll('.ctab_HeaderButton'))
+        .find(el => el.innerText.toLowerCase().includes('edit'));
+
+    if (editHeader) {
+        const tabId = editHeader.dataset.tab;
+        const editContent = targetElement.querySelector(`#${tabId}`);
+        if (editContent) {
+            activateTab(null, editHeader, editContent);
+        }
+    }
+}
