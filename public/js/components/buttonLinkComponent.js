@@ -185,3 +185,55 @@ document.addEventListener("click", (e) => {
         alert("Link is incomplete.");
     }
 });
+
+
+document.addEventListener("click", (e) => {
+    const btn = e.target.closest('button[tagName="buttonLink"]');
+    if (!btn) return; // click en dehors d'un ButtonLink
+
+    const { url } = JSON.parse(btn.getAttribute("config") || "{}");
+    if (!url) return alert("Link is incomplete.");
+
+    openScreenInModal(url);
+});
+
+/***********************
+ *  Modal infrastructure
+ ***********************/
+function ensureModal() {
+    let modal = document.getElementById("buttonLinkModal");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "buttonLinkModal";
+        modal.className = "modal"; // ex: display:none; position:fixed; inset:0; align-items:center; justify-content:center
+        modal.innerHTML = `
+            <div class="modal__backdrop"></div>
+            <div class="modal__dialog">
+                <button class="modal__close" aria-label="Fermer">&times;</button>
+                <div class="modal__body" id="buttonLinkModalBody"></div>
+            </div>`;
+        document.body.appendChild(modal);
+
+        // fermer sur clic croix ou backdrop
+        const close = () => {
+            modal.style.display = "none";
+            modal.querySelector("#buttonLinkModalBody").innerHTML = "";
+        };
+        modal.querySelector(".modal__close").onclick = close;
+        modal.querySelector(".modal__backdrop").onclick = close;
+    }
+    return modal;
+}
+
+function openScreenInModal(url) {
+    const modal = ensureModal();
+    const body = modal.querySelector("#buttonLinkModalBody");
+
+    body.innerHTML = "";
+    loadFormData(url, body);
+
+    modal.style.display = "flex"; // visible
+
+    // activer onglet Edit après injection
+    setTimeout(() => activateEditTabIn(body), 100);
+}
