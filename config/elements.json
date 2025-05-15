@@ -529,7 +529,18 @@
     "icon": "fa fa-paint-brush",
     "renderFunction": ""
   },
-
+  "greeting": {
+    "type": "greeting",
+    "description": "Greeting message",
+    "category": "UI",
+    "scriptName": "greetingComponent.js",
+    "createFunction": "createGreetingComponent",
+    "editFunction": "editGreetingComponent",
+    "styles": "greetingComponent.css",
+    "icon": "fa fa-smile-o",
+    "renderFunction": "renderGreetingComponent"
+  }
+  ,
   "tel": {
     "type": "tel",
     "description": "Telephone field",
