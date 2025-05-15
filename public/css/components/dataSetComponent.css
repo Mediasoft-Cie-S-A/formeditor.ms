@@ -1,24 +1,45 @@
+/* ========= Data-set container ===================================== */
 .dataSetContainer {
-  float: left;
-  display: flex;
-  flex-direction: row;
-  width: 90%;
-  height: 100%;
-  align-items: left;
-  flex-wrap: wrap;
-  padding: 10px;
+  /* supprime la bordure épaisse posée en inline */
+  border: none !important;
+
+  /* allège l’aspect général */
+  background: transparent !important;
+  padding: 8px;                 /* un peu moins que 10 px */
+  gap: 12px;                    /* espace homogène entre panneaux */
 }
 
-.navigation-bar-buttons {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-  align-items: center;
-  padding: 10px;
-  border: none;
+/* ========= Panneaux internes (champs) ============================= */
+.dataSetContainer .panel {
+  /* retire la bordure grise */
+  border: none !important;
 
-  vertical-align: top;
-  flex-wrap: wrap;
-  justify-content: flex-start;
+  /* angle plus doux */
+  border-radius: 4px !important;
+
+  /* ombre très légère plutôt qu’un trait */
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+
+/* Option : texte du label un peu plus lisible */
+.dataSetContainer .panel label {
+  font-weight: 600;
+}
+
+/* ========= Barre de navigation ==================================== */
+.navigation-bar-buttons {
+  padding: 4px;                 /* moitié moins d’espace */
+}
+
+/* Boutons plus plats : pas de bordure, fond clair au survol */
+.navigation-bar-buttons button {
+  border: none;
+  background: transparent;
+  padding: 6px 8px;
+  margin: 2px 0;
+  cursor: pointer;
+  transition: background .15s;
+}
+.navigation-bar-buttons button:hover {
+  background: rgba(0,0,0,.05);
 }

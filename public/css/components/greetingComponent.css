@@ -1,0 +1,30 @@
+/* greetingComponent.css */
+
+/* greetingComponent.css */
+.greeting-box {
+    /* style existant ------------------------------------------------ */
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #f9f9f9;
+    cursor: move;
+
+    /* NOUVEAU : centrage ------------------------------------------- */
+    /* centre le texte dans le composant */
+    text-align: center;
+
+    /* fait du composant une boîte « bloc » à largeur intrinsèque,
+       puis le centre horizontalement dans son parent */
+    display: block;          /* ou inline-block si vous préférez   */
+    margin: 0 auto;          /* ←→ centre dans le parent           */
+}
+
+
+.greeting-editor label {
+    display: block;
+    margin-top: 6px;
+}
+.greeting-editor input[type="checkbox"] {
+    width: 100%;
+    box-sizing: border-box;
+}
