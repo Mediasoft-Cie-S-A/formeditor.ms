@@ -5,7 +5,6 @@
 function createButtonLink(type) {
     const btn = document.createElement("button");
     btn.setAttribute("tagName", type);
-    btn.className = "btn-link";
     btn.id = `buttonLink-${Date.now()}`;
     btn.textContent = "Open Screen";
 
@@ -130,7 +129,6 @@ function renderButtonLink(element) {
     const config = JSON.parse(element.getAttribute("config") || "{}");
 
     // Update existing element (no replace!)
-    element.className = "btn-link";
     element.textContent = config.label || "Open Screen";
     element.setAttribute("tagName", element.getAttribute("tagName"));
     element.setAttribute("config", JSON.stringify(config));
@@ -170,3 +168,20 @@ function renderButtonLink(element) {
     setLockIcon(element);
 }
 
+
+document.addEventListener("click", (e) => {
+    const btn = e.target.closest('button[tagName="buttonLink"]');
+    if (!btn) return;          // clic hors d’un ButtonLink
+
+    const cfg = JSON.parse(btn.getAttribute("config") || "{}");
+    if (cfg.url && cfg.target) {
+        const targetEl = document.getElementById(cfg.target);
+        if (targetEl) {
+            targetEl.innerHTML = "";
+            loadFormData(cfg.url, targetEl);
+            setTimeout(() => activateEditTabIn(targetEl), 100);
+        }
+    } else {
+        alert("Link is incomplete.");
+    }
+});
