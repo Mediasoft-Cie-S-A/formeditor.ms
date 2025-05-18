@@ -96,10 +96,10 @@ class ChartManager {
         const dataConfig = JSON.parse(element.getAttribute("dataConfig"));
           const pivotConfig = JSON.parse(element.getAttribute("pivotConfig"));
         if (dataConfig){
-            dataConfig.forEach(config => addFieldToPropertiesBar(data, config,true));
+            dataConfig.forEach(config => addFunctionsFieldToPropertiesBar(data, config,true));
         }
         if (pivotConfig) {
-            pivotConfig.forEach(config => addFieldToPropertiesBar(pivot, config,true));
+            pivotConfig.forEach(config => addFunctionsFieldToPropertiesBar(pivot, config,true));
         }
         const legendInput = legend.querySelector('input');
         const legendJson = JSON.parse(element.getAttribute("labels-json"));
@@ -238,8 +238,10 @@ class ChartManager {
             }
         });
       
+        // generate the query to get the data
+        
         // Get the dataset data from the server, using the filter
-        var url = this.getFilterUrl(element)+"&agg="+labelName;
+        var url = this.getFilterUrl(element)+"groups="+labelName;
 
         const request = new XMLHttpRequest();
         request.open("POST", url, false); // `false` makes the request synchronous
@@ -309,7 +311,7 @@ class ChartManager {
     }
 
     getFilterUrl(element) {
-        return `/getDatasetDataByFilter?tableName=${element.getAttribute("tableName")}`;
+        return `/getDatasetDataByFilter?`;
     }
 
     updateJsonData() {
@@ -339,21 +341,18 @@ class ChartManager {
        
     
         var pivotInput = propertiesBar.querySelector('#Pivot');
-        const dataSelect = dataInput.querySelectorAll('div');
+        const dataSelect = dataInput.querySelectorAll('[name="dataContainer"]');
         const dataConfig = [];
         dataSelect.forEach(item => {
             //get the json form data-field
-            if (item.getAttribute('data-field')) {
-                const jsonDataset = JSON.parse(item.getAttribute('data-field'));
+                  const jsonDataset = JSON.parse(item.getAttribute('data-field'));
+            // get the function name close select
+            const selectFunction = item.parentElement.querySelector('[tagname="function"]');
+            console.log("selectFunction", selectFunction);
+            jsonDataset.functionName = selectFunction.value;
 
-                dataConfig.push({
-                    fieldName: jsonDataset.fieldName, 
-                    functionName: jsonDataset.dataType,
-                    dataType: jsonDataset.fieldDataType,
-                    DBName: jsonDataset.DBName,
-                    tableName: jsonDataset.tableName
-                 });
-            }
+                dataConfig.push(jsonDataset);
+            
         });
         currentChart.setAttribute("dataConfig", JSON.stringify(dataConfig));
 

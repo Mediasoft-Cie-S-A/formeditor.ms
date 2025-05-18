@@ -864,7 +864,7 @@ app.post('/getDatasetDataByFilter',dbs.checkAuthenticated, async (req, res) => {
   console.log("getDatasetDataByFilter");
 
   try {
-      const { groups, agg,  } = req.query;
+      const {  groups  } = req.query;
    
    
      
@@ -892,7 +892,7 @@ app.post('/getDatasetDataByFilter',dbs.checkAuthenticated, async (req, res) => {
       }
       console.log("filterDocuments"); 
       // get all the results by
-      var results = await filterDocuments( view, filters, columns, agg,sortfield,direction,limitValue);
+      var results = await filterDocuments( view, filters, columns, groups,sortfield,direction,limitValue);
     
 
       // get all the results by 
@@ -956,26 +956,47 @@ function flattenJSON(data,columns) {
 
 async function filterDocuments( view, filters, columns, groups, sort, direction, limitValue) {
    // generate the query string with columns columns fieldName and columns DBname colums dataset = table name
-    let query = `SELECT ${columns.map(column => column.fieldName).join(", ")} FROM PUB.${columns[0].tableName}`;
-    // add limit to the query
-    if (limitValue) {
-        query += ` FETCH FIRST ${limitValue} ROWS ONLY`;
-    }
-    else {
-        query += ` FETCH FIRST 100 ROWS ONLY`;
-    }
-    console.log(query);
+   // generate query with columns function, fieldname
+ 
+  console.log(groups);
+  let query = "SELECT ";
+  columns.forEach((column, index) => {
+        switch (column.functionName) {
+          case "count":
+            query += ` COUNT(*) AS "${column.fieldName}" ,`;
+            break;
+          case "value":         
+          query += ` ${column.fieldName} AS "${column.fieldName}" ,`;
+            break;
+            default:
+          query += ` ${column.functionName}(${column.fieldName}) AS "${column.fieldName}" ,`;
+          break;
+        }
+              
 
+      }) ;
+  // add the aggregate function
+  query += ` ${groups} `;
+  query += ` FROM PUB.${columns[0].tableName}`;
+  query += ` GROUP BY ${groups} `;
+  
+  // check limit value
+  if (!limitValue || limitValue === undefined) {
+      limitValue = 100;
+  }
+
+  query += ` FETCH FIRST ${limitValue} ROWS ONLY`;
+  console.log("query:"+query);
+  
     // Connect to the database
     const db= dbs.databases[columns[0].DBName];
    
     // Execute the query
     const data = await db.queryData(query);
-  //  console.log(data);
-    // Close the database connection
     
-    // Flatten the JSON data
-   
+
+
+
     // return the data
     return data;
 }

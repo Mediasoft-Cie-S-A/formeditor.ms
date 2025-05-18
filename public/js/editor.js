@@ -1411,6 +1411,7 @@ function addFunctionsFieldToPropertiesBar(target, fieldJson, dataTypeVisble = fa
 
   // Create a select dropdown
   var select = document.createElement("select");
+  select.setAttribute("tagname", "function");
   // add to the select the type of function
   var options = ["sum", "avg", "min", "max", "count"];
   // Clear any existing options in the select element
@@ -1432,6 +1433,11 @@ function addFunctionsFieldToPropertiesBar(target, fieldJson, dataTypeVisble = fa
   div.setAttribute("selectedValue", select.value);
 
  dataObjet.appendChild(div);
+   // force the change event to set the fieldJson
+  select.dispatchEvent(new Event("change"));
+  // Adjust the height of the parent element to accommodate the new field
+  var height = dataObjet.clientHeight + div.clientHeight;
+  dataObjet.style.height = height + 30 + "px";
   // hide all the subDivs, input and select elements
   var subDivs = div.querySelectorAll("div,input,select");
   // loop through the subDivs
@@ -1647,11 +1653,11 @@ function expandReduceDiv(event, elementId) {
   // Calculate the new height of the parent div
   var dataObjet = div.parentNode;
   // for each subDiv get the height
-  var height = 0;
+  var height = 60;
   var subDivs = dataObjet.querySelectorAll("div");
   // loop through the subDivs
   subDivs.forEach((subDiv) => {
-    height += subDiv.clientHeight+20;
+    height += subDiv.clientHeight+30;
   });
   // set the height of the parent div
   dataObjet.style.height = height + "px";
