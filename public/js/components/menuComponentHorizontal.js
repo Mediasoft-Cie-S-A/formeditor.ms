@@ -252,7 +252,9 @@ function renderMenuComponentHorizontal(content) {
             li.setAttribute('onmouseleave', 'toggleSubMenuClose(event, this)');
 
         } else {
-            li.setAttribute('onclick', `loadFormData('${item.url}', document.getElementById('${item.target}'))`);
+            li.onclick = () => {
+                openModalWithContent(item.url, item.target);
+            };
         }
 
         return li;
@@ -279,4 +281,52 @@ function toggleSubMenuClose(event, element) {
     if (subMenu) {
         subMenu.classList.remove("show");
     }
+}
+
+
+function openModalWithContent(url, targetId) {
+    // Crée ou récupère le modal
+    let modal = document.getElementById("custom-modal");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "custom-modal";
+        modal.style.position = "fixed";
+        modal.style.top = "0";
+        modal.style.left = "0";
+        modal.style.width = "100vw";
+        modal.style.height = "100vh";
+        modal.style.backgroundColor = "rgba(0,0,0,0.6)";
+        modal.style.display = "flex";
+        modal.style.justifyContent = "center";
+        modal.style.alignItems = "center";
+        modal.style.zIndex = "1000";
+
+        const content = document.createElement("div");
+        content.id = "modal-content";
+        content.style.backgroundColor = "#fff";
+        content.style.padding = "20px";
+        content.style.borderRadius = "8px";
+        content.style.width = "80%";
+        content.style.height = "80%";
+        content.style.overflow = "auto";
+        modal.appendChild(content);
+
+        const closeBtn = document.createElement("button");
+        closeBtn.textContent = "Close";
+        closeBtn.style.position = "absolute";
+        closeBtn.style.top = "10px";
+        closeBtn.style.right = "10px";
+        closeBtn.onclick = () => modal.remove();
+        modal.appendChild(closeBtn);
+
+        document.body.appendChild(modal);
+    }
+
+    // Charger le contenu dans le modal
+    const targetElement = modal.querySelector("#modal-content");
+    if (targetElement) {
+        loadFormData(url, targetElement);  // Réutilise ta fonction actuelle
+    }
+
+    modal.style.display = "flex";
 }
