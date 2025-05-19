@@ -214,7 +214,6 @@ function ensureModal() {
             modal.querySelector("#buttonLinkModalBody").innerHTML = "";
         };
         modal.querySelector(".modal__close").onclick = close;
-        modal.querySelector(".modal__backdrop").onclick = close;
     }
     return modal;
 }

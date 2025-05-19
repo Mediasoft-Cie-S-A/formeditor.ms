@@ -253,7 +253,8 @@ function renderMenuComponentHorizontal(content) {
 
         } else {
             li.onclick = () => {
-                openModalWithContent(item.url, item.target);
+                console.log("Open modal with title:", item.item);
+                openModalWithContent(item.url, item.target,item.item);
             };
         }
 
@@ -283,50 +284,76 @@ function toggleSubMenuClose(event, element) {
     }
 }
 
+function openModalWithContent(url, targetId, title = '') {
+    // Crée ou récupère le modal container principal
+    let modalContainer = document.getElementById("custom-modal-container");
+    if (!modalContainer) {
+        modalContainer = document.createElement("div");
+        modalContainer.id = "custom-modal-container";
+        modalContainer.style.position = "fixed";
+        modalContainer.style.top = "0";
+        modalContainer.style.left = "0";
+        modalContainer.style.width = "100vw";
+        modalContainer.style.height = "100vh";
+        modalContainer.style.backgroundColor = "rgba(0,0,0,0.6)";
+        modalContainer.style.display = "flex";
+        modalContainer.style.justifyContent = "center";
+        modalContainer.style.alignItems = "center";
+        modalContainer.style.zIndex = "1000";
 
-function openModalWithContent(url, targetId) {
-    // Crée ou récupère le modal
-    let modal = document.getElementById("custom-modal");
-    if (!modal) {
-        modal = document.createElement("div");
+        // Modal principal (blanc)
+        const modal = document.createElement("div");
         modal.id = "custom-modal";
-        modal.style.position = "fixed";
-        modal.style.top = "0";
-        modal.style.left = "0";
-        modal.style.width = "100vw";
-        modal.style.height = "100vh";
-        modal.style.backgroundColor = "rgba(0,0,0,0.6)";
+        modal.style.backgroundColor = "#fff";
+        modal.style.padding = "20px";
+        modal.style.borderRadius = "8px";
+        modal.style.width = "80%";
+        modal.style.height = "80%";
+        modal.style.overflow = "auto";
         modal.style.display = "flex";
-        modal.style.justifyContent = "center";
-        modal.style.alignItems = "center";
-        modal.style.zIndex = "1000";
+        modal.style.flexDirection = "column";
+        modal.style.position = "relative";
 
+        // Div titre séparée
+        const titleDiv = document.createElement("div");
+        titleDiv.id = "modal-title-container";
+        titleDiv.style.marginBottom = "20px";
+        titleDiv.style.textAlign = "center";
+        titleDiv.style.fontSize = "1.5em";
+        titleDiv.style.fontWeight = "bold";
+        modal.appendChild(titleDiv);
+
+        // Contenu principal dans une div à part
         const content = document.createElement("div");
         content.id = "modal-content";
-        content.style.backgroundColor = "#fff";
-        content.style.padding = "20px";
-        content.style.borderRadius = "8px";
-        content.style.width = "80%";
-        content.style.height = "80%";
+        content.style.flex = "1";   // pour prendre tout l'espace restant
         content.style.overflow = "auto";
         modal.appendChild(content);
 
+        // Bouton fermeture
         const closeBtn = document.createElement("button");
-        closeBtn.textContent = "Close";
+        closeBtn.textContent = "X";
         closeBtn.style.position = "absolute";
         closeBtn.style.top = "10px";
         closeBtn.style.right = "10px";
-        closeBtn.onclick = () => modal.remove();
+        closeBtn.onclick = () => modalContainer.remove();
         modal.appendChild(closeBtn);
 
-        document.body.appendChild(modal);
+        modalContainer.appendChild(modal);
+        document.body.appendChild(modalContainer);
     }
 
     // Charger le contenu dans le modal
-    const targetElement = modal.querySelector("#modal-content");
-    if (targetElement) {
-        loadFormData(url, targetElement);  // Réutilise ta fonction actuelle
+    const contentElement = modalContainer.querySelector("#modal-content");
+    if (contentElement) {
+        loadFormData(url, contentElement);  // ta fonction actuelle pour charger le contenu
     }
 
-    modal.style.display = "flex";
+    // Mettre à jour le titre dans la div titre
+    const titleDiv = modalContainer.querySelector("#modal-title-container");
+    if (titleDiv) {
+        titleDiv.textContent = title;
+    }
+
+    modalContainer.style.display = "flex";
 }
