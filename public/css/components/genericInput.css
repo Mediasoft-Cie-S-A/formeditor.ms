@@ -94,15 +94,15 @@
       0 8px 14px -4px rgba(0,0,0,.15);
   }
   
-  /* Close button : cercle semi-transparent, retour haptique --*/
-  .modal__close {
-    width: 2.25rem; height: 2.25rem;         /* bouton rond   */
-    display: grid; place-items: center;
-    border-radius: 50%;
-    background: rgba(0,0,0,.05);
-    font-size: 1.35rem;
-    transition: background .15s, transform .15s;
-  }
+  .modal__close{
+    position:absolute;
+    top:8px;
+    right:8px;
+    background:none;
+    border:0;
+    font-size:1.5rem;
+    cursor:pointer;
+}
   .modal__close:hover {
     background: rgba(0,0,0,.12);
     transform: rotate(90deg) scale(1.05);
@@ -140,4 +140,10 @@
   @media (prefers-reduced-motion: reduce) {
     .modal, .modal__close { animation: none; transition: none; }
   }
-  
+  .modal__title {
+    margin: 0 0 1em;
+    font-size: 2rem;        /* Plus grand */
+    font-weight: 700;       /* Plus gras */
+    text-align: center;
+    letter-spacing: 0.05em; /* Espacement entre lettres, optionnel */
+}

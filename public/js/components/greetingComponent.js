@@ -5,20 +5,52 @@
 
 /* Utilitaire — adapte cette partie à ton propre backend ------------- */
 function getCurrentUser() {
-    return (
-        JSON.parse(sessionStorage.getItem("currentUser") || "null") || {
-            name: "Anonymous"
+    if (window.currentUser) return normaliseUser(window.currentUser);
+
+    const stored =
+        sessionStorage.getItem("currentUser") ||
+        localStorage.getItem("currentUser");
+    if (stored) {
+        try {
+            return normaliseUser(JSON.parse(stored));
+        } catch (_) {
+            /* malformed JSON – ignore */
         }
-    );
+    }
+    return { name: "Anonymous" };
 }
 
-/* Détermine le message en fonction de l’heure ---------------------- */
+function normaliseUser(u = {}) {
+    const name = u.name || u.displayName || u.username || "Test";
+    return { ...u, name };
+}
+
+/* ------------------------------------------------------------------
+ * 2. Greeting message helper                                        */
 function getGreetingMessage(date = new Date()) {
     const h = date.getHours();
-    if (h < 12) return "Bonjour";              // matin
-    if (h < 18) return "Bon après-midi";       // après-midi
-    return "Bonsoir";                          // soir
+    return h < 12 ? "Bonjour"      // 00 h → 11 h 59
+     : h < 18 ? "Bonjour" // 12 h → 17 h 59
+              : "Bonsoir";       // 18 h → 23 h 59
+
 }
+
+/* ------------------------------------------------------------------
+ * 3. Factory – create component                                     */
+function createGreetingComponent(type) {
+    const box = document.createElement("div");
+    box.setAttribute("tagName", type);
+    box.id = `greeting-${Date.now()}`;
+    box.className = "greeting-box";
+
+    const config = { showName: true };
+    box.setAttribute("config", JSON.stringify(config));
+
+    enableDrag(box);
+    renderGreetingComponent(box);
+    return box;
+}
+
 
 /* 1. Création ------------------------------------------------------- */
 function createGreetingComponent(type) {

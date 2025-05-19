@@ -61,7 +61,14 @@ function editButtonLink(type, element, content) {
     labelLabel.textContent = "Button Label:";
     const inputLabel = document.createElement("input");
     inputLabel.type = "text";
-    inputLabel.value = config.label || "Open Screen";
+    inputLabel.value = config.label || "Name button";
+
+        // Label input
+    const nameScreen = document.createElement("label");
+    nameScreen.textContent = "Screen name:";
+    const inputNameScreen = document.createElement("input");
+    inputNameScreen.type = "text";
+    inputNameScreen.value = config.nameScreen || "Name Screen";
 
     // URL input
     const labelURL = document.createElement("label");
@@ -82,17 +89,19 @@ function editButtonLink(type, element, content) {
     updateBtn.textContent = "Update";
     updateBtn.style.width = "100%";
     updateBtn.onclick = () => {
-        saveButtonLink(element, inputURL.value, inputTarget.value, inputLabel.value);
+        saveButtonLink(element, inputURL.value, inputTarget.value, inputLabel.value, inputNameScreen.value);
     };
 
     // Add all inputs to the editor panel
+    container.appendChild(updateBtn);
     container.appendChild(labelURL);
     container.appendChild(inputURL);
     container.appendChild(labelLabel);
     container.appendChild(inputLabel);
     container.appendChild(labelTarget);
     container.appendChild(inputTarget);
-    container.appendChild(updateBtn);
+    container.appendChild(nameScreen);
+    container.appendChild(inputNameScreen);
 
     content.appendChild(container);
 }
@@ -109,13 +118,14 @@ function setLockIcon(btn) {
     }
 }
 
-function saveButtonLink(element, url, target, label) {
+function saveButtonLink(element, url, target, label,nameScreen) {
     const config = {
         url: url,
         target: target,
         iconLock: element.getAttribute("data-icon-lock") === "true",
-        label: label
-    };
+        label: label,
+        nameScreen : nameScreen
+        };
 
     // Save configuration to element attribute
     element.setAttribute("config", JSON.stringify(config));
@@ -157,8 +167,6 @@ function renderButtonLink(element) {
                 setTimeout(() => {
                     activateEditTabIn(targetEl);
                 }, 100);
-            } else {
-                alert("Link is incomplete.");
             }
         };
     };
@@ -169,32 +177,17 @@ function renderButtonLink(element) {
 }
 
 
-document.addEventListener("click", (e) => {
-    const btn = e.target.closest('button[tagName="buttonLink"]');
-    if (!btn) return;          // clic hors d’un ButtonLink
 
-    const cfg = JSON.parse(btn.getAttribute("config") || "{}");
-    if (cfg.url && cfg.target) {
-        const targetEl = document.getElementById(cfg.target);
-        if (targetEl) {
-            targetEl.innerHTML = "";
-            loadFormData(cfg.url, targetEl);
-            setTimeout(() => activateEditTabIn(targetEl), 100);
-        }
-    } else {
-        alert("Link is incomplete.");
-    }
-});
 
 
 document.addEventListener("click", (e) => {
     const btn = e.target.closest('button[tagName="buttonLink"]');
-    if (!btn) return; // click en dehors d'un ButtonLink
+    if (!btn) return;
 
-    const { url } = JSON.parse(btn.getAttribute("config") || "{}");
-    if (!url) return alert("Link is incomplete.");
+    const config = JSON.parse(btn.getAttribute("config") || "{}");
+    if (!config.url) return;
 
-    openScreenInModal(url);
+    openScreenInModal(config);
 });
 
 /***********************
@@ -210,6 +203,7 @@ function ensureModal() {
             <div class="modal__backdrop"></div>
             <div class="modal__dialog">
                 <button class="modal__close" aria-label="Fermer">&times;</button>
+                <h2 class="modal__title" id="buttonLinkModalTitle"></h2>
                 <div class="modal__body" id="buttonLinkModalBody"></div>
             </div>`;
         document.body.appendChild(modal);
@@ -225,12 +219,15 @@ function ensureModal() {
     return modal;
 }
 
-function openScreenInModal(url) {
+function openScreenInModal(config) {
     const modal = ensureModal();
     const body = modal.querySelector("#buttonLinkModalBody");
+    const title = modal.querySelector("#buttonLinkModalTitle");
+
+    title.textContent = config.nameScreen || "Écran";
 
     body.innerHTML = "";
-    loadFormData(url, body);
+    loadFormData(config.url, body);
 
     modal.style.display = "flex"; // visible
 
