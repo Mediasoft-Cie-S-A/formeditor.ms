@@ -183,53 +183,56 @@ function renderButtonLink(element) {
 document.addEventListener("click", (e) => {
     const btn = e.target.closest('button[tagName="buttonLink"]');
     if (!btn) return;
-
+  
     const config = JSON.parse(btn.getAttribute("config") || "{}");
     if (!config.url) return;
-
-    openScreenInModal(config);
-});
-
+  
+    openMenuInModal(config.nameScreen || "Écran", config.url);
+  });
+  
 /***********************
  *  Modal infrastructure
  ***********************/
-function ensureModal() {
-    let modal = document.getElementById("buttonLinkModal");
+function ensureMenuModal() {
+    let modal = document.getElementById("menuModal");
     if (!modal) {
-        modal = document.createElement("div");
-        modal.id = "buttonLinkModal";
-        modal.className = "modal"; // ex: display:none; position:fixed; inset:0; align-items:center; justify-content:center
-        modal.innerHTML = `
-            <div class="modal__backdrop"></div>
-            <div class="modal__dialog">
-                <button class="modal__close" aria-label="Fermer">&times;</button>
-                <h2 class="modal__title" id="buttonLinkModalTitle"></h2>
-                <div class="modal__body" id="buttonLinkModalBody"></div>
-            </div>`;
-        document.body.appendChild(modal);
-
-        // fermer sur clic croix ou backdrop
-        const close = () => {
-            modal.style.display = "none";
-            modal.querySelector("#buttonLinkModalBody").innerHTML = "";
-        };
-        modal.querySelector(".modal__close").onclick = close;
+      modal = document.createElement("div");
+      modal.id = "menuModal";
+      modal.className = "modal";
+  
+      modal.innerHTML = `
+        <div class="modal__dialog">
+          <button class="modal__close" aria-label="Fermer">&times;</button>
+          <div class="modal__title" id="menuModalTitle"></div>
+          <div class="modal__screen" id="menuModalScreen"></div>
+        </div>
+      `;
+  
+      // Fermeture uniquement via le bouton, pas au clic hors modal
+      const closeBtn = modal.querySelector(".modal__close");
+      closeBtn.onclick = () => {
+        modal.style.display = "none";
+        modal.querySelector("#menuModalScreen").innerHTML = "";
+      };
+  
+      document.body.appendChild(modal);
     }
     return modal;
-}
-
-function openScreenInModal(config) {
-    const modal = ensureModal();
-    const body = modal.querySelector("#buttonLinkModalBody");
-    const title = modal.querySelector("#buttonLinkModalTitle");
-
-    title.textContent = config.nameScreen || "Écran";
-
-    body.innerHTML = "";
-    loadFormData(config.url, body);
-
-    modal.style.display = "flex"; // visible
-
-    // activer onglet Edit après injection
-    setTimeout(() => activateEditTabIn(body), 100);
-}
+  }
+  
+  
+  function openMenuInModal(titleText, screenUrl) {
+    const modal = ensureMenuModal();
+    const title = modal.querySelector("#menuModalTitle");
+    const screen = modal.querySelector("#menuModalScreen");
+  
+    title.textContent = titleText || "Menu";
+    screen.innerHTML = "";
+    loadFormData(screenUrl, screen);
+  
+    modal.style.display = "flex"; // ou block selon ton CSS
+  
+    // Si tu veux activer un onglet "Edit" ou autre dans l'écran après chargement
+    setTimeout(() => activateEditTabIn(screen), 100);
+  }
+  
