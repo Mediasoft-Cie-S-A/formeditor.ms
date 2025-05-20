@@ -138,6 +138,8 @@ function deleteForm(formId, listItem) {
 
 function loadFormData(formId,renderContainer)
  {
+    console.log("🔍 loadFormData called for:", formId, "into:", renderContainer.id || renderContainer.className);
+
     fetch(`/get-form/${formId}`)
         .then(response => {
             if (!response.ok) {
@@ -163,7 +165,9 @@ function loadFormData(formId,renderContainer)
             console.log(renderContainer);
            
             // Clear the render container
-            renderContainer.innerHTML = '';
+
+                renderContainer.innerHTML = '';
+
 
             // Convert JSON back to DOM and append
             var domContent = jsonToDom(form.formData,renderContainer);
@@ -177,4 +181,21 @@ function loadFormData(formId,renderContainer)
         });
 }
 
+function loadFormDataInModal(formId, container) {
+    fetch(`/get-form/${formId}`)
+        .then(response => {
+            if (!response.ok) throw new Error('Network error');
+            return response.json();
+        })
+        .then(form => {
+            // ⚠️ Ne surtout pas toucher aux champs globaux ici
+            container.innerHTML = '';
+            const domContent = jsonToDom(form.formData, container);
+            renderElements(container);
+        })
+        .catch(error => {
+            showToast('Erreur modal : ' + error, 5000);
+            console.error('Modal load error:', error);
+        });
+}
 

@@ -11,9 +11,10 @@ function createButtonLink(type) {
     // Initial configuration
     const config = {
         url: "",
-        target: "",
+        // target: "", // ❌ plus utilisé
         iconLock: true,
-        label: "Open Screen"
+        label: "Open Screen",
+        nameScreen: "Écran"
     };
     btn.setAttribute("config", JSON.stringify(config));
 
@@ -27,7 +28,8 @@ function createButtonLink(type) {
         btn.style.display = "block";
     };
 
-    // Assign click behavior
+    // Assign click behavior (ancienne logique désactivée)
+    /*
     btn._applyClick = () => {
         btn.onclick = () => {
             const config = JSON.parse(btn.getAttribute("config") || "{}");
@@ -36,20 +38,23 @@ function createButtonLink(type) {
                 if (targetEl) {
                     targetEl.innerHTML = ""; // Clear previous screen
                     loadFormData(config.url, targetEl);
-                    // 👇 Automatically activate the "Edit" tab if present
                     setTimeout(() => {
                         activateEditTabIn(targetEl);
                     }, 100);
-                }}
+                }
+            }
         };
     };
+    */
+   btn._applyClick = () => {}; // noop
+
     btn._applyClick();
 
     setLockIcon(btn);
     return btn;
 }
 
-// Edit panel to update button's URL and target
+// Edit panel to update button's URL and label
 function editButtonLink(type, element, content) {
     const config = JSON.parse(element.getAttribute("config") || "{}");
 
@@ -63,7 +68,7 @@ function editButtonLink(type, element, content) {
     inputLabel.type = "text";
     inputLabel.value = config.label || "Name button";
 
-        // Label input
+    // Screen name input
     const nameScreen = document.createElement("label");
     nameScreen.textContent = "Screen name:";
     const inputNameScreen = document.createElement("input");
@@ -77,19 +82,22 @@ function editButtonLink(type, element, content) {
     inputURL.type = "text";
     inputURL.value = config.url || "";
 
-    // Target input
+    // Target input (désactivé mais conservé)
+    /*
     const labelTarget = document.createElement("label");
     labelTarget.textContent = "Target ID:";
     const inputTarget = document.createElement("input");
     inputTarget.type = "text";
     inputTarget.value = config.target || "";
+    */
 
     // Update button
     const updateBtn = document.createElement("button");
     updateBtn.textContent = "Update";
     updateBtn.style.width = "100%";
     updateBtn.onclick = () => {
-        saveButtonLink(element, inputURL.value, inputTarget.value, inputLabel.value, inputNameScreen.value);
+        // saveButtonLink(element, inputURL.value, inputTarget.value, inputLabel.value, inputNameScreen.value); // old
+        saveButtonLink(element, inputURL.value, inputLabel.value, inputNameScreen.value); // new
     };
 
     // Add all inputs to the editor panel
@@ -98,8 +106,8 @@ function editButtonLink(type, element, content) {
     container.appendChild(inputURL);
     container.appendChild(labelLabel);
     container.appendChild(inputLabel);
-    container.appendChild(labelTarget);
-    container.appendChild(inputTarget);
+    // container.appendChild(labelTarget);
+    // container.appendChild(inputTarget);
     container.appendChild(nameScreen);
     container.appendChild(inputNameScreen);
 
@@ -118,32 +126,31 @@ function setLockIcon(btn) {
     }
 }
 
-function saveButtonLink(element, url, target, label,nameScreen) {
+// Save button settings
+// ❗️ version simplifiée sans target
+function saveButtonLink(element, url, label, nameScreen) {
     const config = {
         url: url,
-        target: target,
+        // target: target, // ❌ plus utilisé
         iconLock: element.getAttribute("data-icon-lock") === "true",
         label: label,
-        nameScreen : nameScreen
-        };
+        nameScreen: nameScreen
+    };
 
-    // Save configuration to element attribute
     element.setAttribute("config", JSON.stringify(config));
-
-    // Update appearance and behavior
     renderButtonLink(element);
-
     console.log("Button link saved:", config);
 }
+
 function renderButtonLink(element) {
     const config = JSON.parse(element.getAttribute("config") || "{}");
 
-    // Update existing element (no replace!)
+    // Update appearance
     element.textContent = config.label || "Open Screen";
     element.setAttribute("tagName", element.getAttribute("tagName"));
     element.setAttribute("config", JSON.stringify(config));
     element.setAttribute("data-url", config.url || "");
-    element.setAttribute("data-target", config.target || "");
+    // element.setAttribute("data-target", config.target || ""); // ❌ plus utilisé
     element.setAttribute("data-icon-lock", config.iconLock ? "true" : "false");
 
     // Drag & drop
@@ -156,7 +163,8 @@ function renderButtonLink(element) {
         element.style.display = "block";
     };
 
-    // Click logic
+    // Click behavior (ancienne logique désactivée)
+    /*
     element._applyClick = () => {
         element.onclick = () => {
             const cfg = JSON.parse(element.getAttribute("config") || "{}");
@@ -170,69 +178,63 @@ function renderButtonLink(element) {
             }
         };
     };
+    */
     element._applyClick();
 
-    // Icon
     setLockIcon(element);
 }
 
-
-
-
-
+// Main click listener: modal opening
 document.addEventListener("click", (e) => {
     const btn = e.target.closest('button[tagName="buttonLink"]');
     if (!btn) return;
-  
+
     const config = JSON.parse(btn.getAttribute("config") || "{}");
     if (!config.url) return;
-  
+
     openMenuInModal(config.nameScreen || "Écran", config.url);
-  });
-  
+});
+
 /***********************
  *  Modal infrastructure
  ***********************/
 function ensureMenuModal() {
     let modal = document.getElementById("menuModal");
     if (!modal) {
-      modal = document.createElement("div");
-      modal.id = "menuModal";
-      modal.className = "modal";
-  
-      modal.innerHTML = `
-        <div class="modal__dialog">
-          <button class="modal__close" aria-label="Fermer">&times;</button>
-          <div class="modal__title" id="menuModalTitle"></div>
-          <div class="modal__screen" id="menuModalScreen"></div>
-        </div>
-      `;
-  
-      // Fermeture uniquement via le bouton, pas au clic hors modal
-      const closeBtn = modal.querySelector(".modal__close");
-      closeBtn.onclick = () => {
-        modal.style.display = "none";
-        modal.querySelector("#menuModalScreen").innerHTML = "";
-      };
-  
-      document.body.appendChild(modal);
+        modal = document.createElement("div");
+        modal.id = "menuModal";
+        modal.className = "modal";
+
+        modal.innerHTML = `
+            <div class="modal__dialog">
+                <button class="modal__close" aria-label="Fermer">&times;</button>
+                <div class="modal__title" id="menuModalTitle"></div>
+                <div class="modal__screen" id="menuModalScreen"></div>
+            </div>
+        `;
+
+        const closeBtn = modal.querySelector(".modal__close");
+        closeBtn.onclick = () => {
+            modal.style.display = "none";
+            modal.querySelector("#menuModalScreen").innerHTML = "";
+        };
+
+        document.body.appendChild(modal);
     }
     return modal;
-  }
-  
-  
-  function openMenuInModal(titleText, screenUrl) {
+}
+
+function openMenuInModal(titleText, screenUrl) {
     const modal = ensureMenuModal();
     const title = modal.querySelector("#menuModalTitle");
     const screen = modal.querySelector("#menuModalScreen");
-  
+
     title.textContent = titleText || "Menu";
-    screen.innerHTML = "";
-    loadFormData(screenUrl, screen);
-  
-    modal.style.display = "flex"; // ou block selon ton CSS
-  
-    // Si tu veux activer un onglet "Edit" ou autre dans l'écran après chargement
+    screen.innerHTML = "<h2>Chargement...</h2>";
+    //loadFormData(screenUrl, screen);
+    loadFormDataInModal(screenUrl, screen);
+
+    modal.style.display = "flex";
+
     setTimeout(() => activateEditTabIn(screen), 100);
-  }
-  
+}

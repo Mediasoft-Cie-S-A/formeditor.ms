@@ -346,7 +346,7 @@ function openModalWithContent(url, targetId, title = '') {
     // Charger le contenu dans le modal
     const contentElement = modalContainer.querySelector("#modal-content");
     if (contentElement) {
-        loadFormData(url, contentElement);  // ta fonction actuelle pour charger le contenu
+        loadFormDataInModal(url, contentElement);  // ta fonction actuelle pour charger le contenu
     }
 
     // Mettre à jour le titre dans la div titre
