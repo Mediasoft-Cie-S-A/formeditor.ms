@@ -95,21 +95,12 @@
   }
   
   .modal__close{
-    position:absolute;
-    top:8px;
-    right:8px;
-    background:none;
-    border:0;
-    font-size:1.5rem;
-    cursor:pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    content: "X"; /* ⚠️ Non nécessaire si "X" est dans le HTML */
 }
-  .modal__close:hover {
-    background: rgba(0,0,0,.12);
-    transform: rotate(90deg) scale(1.05);
-  }
-  .modal__close:active {
-    transform: scale(.95);
-  }
+
   
   /* Corps : petites scrollbars discrètes --------------------*/
   .modal__body {

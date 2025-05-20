@@ -236,5 +236,18 @@ function openMenuInModal(titleText, screenUrl) {
 
     modal.style.display = "flex";
 
-    setTimeout(() => activateEditTabIn(screen), 100);
+    setTimeout(() => {
+        activateEditTabIn(screen);
+
+        // Attendre encore un peu pour s'assurer que les éléments sont bien dans le DOM
+        setTimeout(() => {
+            const insertBtn = screen.querySelector('[name="InsertDSBtn"]');
+            if (insertBtn) {
+                console.log("InsertDSBtn trouvé, déclenchement du clic...");
+                insertBtn.click(); // 💥 Lancement du mode 'new record'
+            } else {
+                console.warn('Le bouton [name="InsertDSBtn"] est introuvable.');
+            }
+        }, 150); // ajustable si nécessaire selon le temps de chargement
+    }, 100);
 }
