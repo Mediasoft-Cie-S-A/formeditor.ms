@@ -248,6 +248,6 @@ function openMenuInModal(titleText, screenUrl) {
             } else {
                 console.warn('Le bouton [name="InsertDSBtn"] est introuvable.');
             }
-        }, 150); // ajustable si nécessaire selon le temps de chargement
+        }, 100); // ajustable si nécessaire selon le temps de chargement
     }, 100);
 }

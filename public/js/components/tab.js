@@ -132,17 +132,105 @@ function createTabContent (tabsHeader,tabsContent)
 
    
 };
+function createEditModal() {
+    // Vérifie si le modal existe déjà pour éviter de le recréer
+    if (document.getElementById("editModal")) return;
+
+    const modal = document.createElement("div");
+    modal.id = "editModal";
+    modal.className = "modal";
+    modal.style.display = "none";
+    modal.style.position = "fixed";
+    modal.style.top = "0";
+    modal.style.left = "0";
+    modal.style.width = "100%";
+    modal.style.height = "100%";
+    modal.style.backgroundColor = "rgba(0,0,0,0.5)";
+    modal.style.zIndex = "999";
+    modal.style.justifyContent = "center";
+    modal.style.alignItems = "center";
+
+    const modalContent = document.createElement("div");
+    modalContent.className = "modal-content";
+    modalContent.style.backgroundColor = "white";
+    modalContent.style.padding = "20px";
+    modalContent.style.borderRadius = "6px";
+    modalContent.style.minWidth = "300px";
+    modalContent.style.minHeight = "200px";
+    modalContent.style.position = "relative";
+
+    const closeButton = document.createElement("span");
+    closeButton.className = "close-button";
+    closeButton.innerHTML = "&times;";
+    closeButton.style.position = "absolute";
+    closeButton.style.top = "10px";
+    closeButton.style.right = "15px";
+    closeButton.style.cursor = "pointer";
+    closeButton.style.fontSize = "20px";
+
+    closeButton.addEventListener("click", function () {
+        modal.style.display = "none";
+
+        // remettre le contenu Edit à sa place d’origine dans .ctab_tabs
+        const editTabContent = document.getElementById("editModalContent").firstElementChild;
+        if (editTabContent) {
+            const tabsContainer = document.querySelector('.ctab_tabs');
+            if (tabsContainer) {
+                tabsContainer.appendChild(editTabContent);
+                editTabContent.style.display = "none"; // le re-cacher
+            }
+        }
+    });
+
+    const modalContentContainer = document.createElement("div");
+    modalContentContainer.id = "editModalContent";
+
+    modalContent.appendChild(closeButton);
+    modalContent.appendChild(modalContentContainer);
+    modal.appendChild(modalContent);
+
+    document.body.appendChild(modal);
+}
+
 
 function activateTab(event,tabHeader,tabContent){
+    createEditModal(); // S'assure que le modal est créé
     if (event)
         {
             event.preventDefault();
         }
+    // Cas spécial : si c'est le tab "Edit", on ouvre un modal
+    if (tabHeader.innerText.trim().toLowerCase() === "edit") {
+        // Ouvrir le modal
+        const modal = document.getElementById("editModal");
+        const modalContent = document.getElementById("editModalContent");
+
+        // Insérer le contenu du tab dans le modal
+        modalContent.innerHTML = ''; // Clear previous
+        modalContent.appendChild(tabContent);
+
+        modal.style.display = "block";
+        return;
+    }
     tabContent.parentElement.querySelectorAll('.ctab_ContentDiv').forEach((el) => el.style.display = 'none');
     tabHeader.parentElement.querySelectorAll('.ctab_HeaderButton').forEach((el) => el.classList.remove('active'));
     tabHeader.classList.add('active');       
     tabContent.style.display = 'block';
 }
+
+// Gérer la fermeture du modal
+document.querySelector('.close-button').addEventListener('click', function() {
+    const modal = document.getElementById("editModal");
+    modal.style.display = "none";
+
+    // remettre le contenu "Edit" dans son div original (hors du modal)
+    const editTabContent = document.getElementById("editModalContent").firstElementChild;
+    if (editTabContent) {
+        document.querySelector('.ctab_tabs').appendChild(editTabContent);
+    }
+});
+
+
 function activateEditTabIn(targetElement) {
     const editHeader = Array.from(targetElement.querySelectorAll('.ctab_HeaderButton'))
         .find(el => el.innerText.toLowerCase().includes('edit'));

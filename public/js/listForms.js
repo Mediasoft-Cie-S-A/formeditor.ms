@@ -180,22 +180,33 @@ function loadFormData(formId,renderContainer)
             console.error('There was a problem with the fetch operation:', error);
         });
 }
+const formCache = {};
 
 function loadFormDataInModal(formId, container) {
+    // ✅ Si le formulaire est déjà en cache, l'afficher
+    if (formCache[formId]) {
+        container.innerHTML = ''; // Vider le container actuel
+        container.appendChild(formCache[formId].cloneNode(true)); // Cloner pour éviter les effets de bord
+        return;
+    }
+
+    // ❌ Sinon, faire le fetch
     fetch(`/get-form/${formId}`)
         .then(response => {
             if (!response.ok) throw new Error('Network error');
             return response.json();
         })
         .then(form => {
-            // ⚠️ Ne surtout pas toucher aux champs globaux ici
             container.innerHTML = '';
+
             const domContent = jsonToDom(form.formData, container);
             renderElements(container);
+
+            // ✅ Stocker une copie *clonée* pour réutilisation plus tard
+            formCache[formId] = container.cloneNode(true);
         })
         .catch(error => {
             showToast('Erreur modal : ' + error, 5000);
             console.error('Modal load error:', error);
         });
 }
-

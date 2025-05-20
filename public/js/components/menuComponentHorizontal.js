@@ -43,7 +43,6 @@ function editMenuComponentHorizontal(type, element, content) {
     saveButton.style.width = "100%";                 // Full-width button
     div.appendChild(saveButton);
 
-    
     // Create the container that holds all menu items
     const itemdiv = document.createElement("div");
     itemdiv.id = "menu-items";
@@ -230,14 +229,7 @@ function renderMenuComponentHorizontal(content) {
 
         li.appendChild(i);
         li.appendChild(a);
-        // Add submenu indicator only if item has children
-        if (item.children && item.children.length > 0) {
-            const arrow = document.createElement("span");
-            arrow.textContent = " ▼"; // you can use ▾ or ▶ if preferred
-            arrow.style.fontSize = "0.75em";
-            arrow.style.marginLeft = "4px";
-            a.appendChild(arrow);
-        }
+
         if (item.children && item.children.length > 0) {
             const subMenu = document.createElement('ul');
             subMenu.className = "horizontal-submenu";
@@ -252,10 +244,7 @@ function renderMenuComponentHorizontal(content) {
             li.setAttribute('onmouseleave', 'toggleSubMenuClose(event, this)');
 
         } else {
-            li.onclick = () => {
-                console.log("Open modal with title:", item.item);
-                openModalWithContent(item.url, item.target,item.item);
-            };
+            li.setAttribute('onclick', `loadFormData('${item.url}', document.getElementById('${item.target}'))`);
         }
 
         return li;
@@ -282,78 +271,4 @@ function toggleSubMenuClose(event, element) {
     if (subMenu) {
         subMenu.classList.remove("show");
     }
-}
-
-function openModalWithContent(url, targetId, title = '') {
-    // Crée ou récupère le modal container principal
-    let modalContainer = document.getElementById("custom-modal-container");
-    if (!modalContainer) {
-        modalContainer = document.createElement("div");
-        modalContainer.id = "custom-modal-container";
-        modalContainer.style.position = "fixed";
-        modalContainer.style.top = "0";
-        modalContainer.style.left = "0";
-        modalContainer.style.width = "100vw";
-        modalContainer.style.height = "100vh";
-        modalContainer.style.backgroundColor = "rgba(0,0,0,0.6)";
-        modalContainer.style.display = "flex";
-        modalContainer.style.justifyContent = "center";
-        modalContainer.style.alignItems = "center";
-        modalContainer.style.zIndex = "1000";
-
-        // Modal principal (blanc)
-        const modal = document.createElement("div");
-        modal.id = "custom-modal";
-        modal.style.backgroundColor = "#fff";
-        modal.style.padding = "20px";
-        modal.style.borderRadius = "8px";
-        modal.style.width = "80%";
-        modal.style.height = "80%";
-        modal.style.overflow = "auto";
-        modal.style.display = "flex";
-        modal.style.flexDirection = "column";
-        modal.style.position = "relative";
-
-        // Div titre séparée
-        const titleDiv = document.createElement("div");
-        titleDiv.id = "modal-title-container";
-        titleDiv.style.marginBottom = "20px";
-        titleDiv.style.textAlign = "center";
-        titleDiv.style.fontSize = "1.5em";
-        titleDiv.style.fontWeight = "bold";
-        modal.appendChild(titleDiv);
-
-        // Contenu principal dans une div à part
-        const content = document.createElement("div");
-        content.id = "modal-content";
-        content.style.flex = "1";   // pour prendre tout l'espace restant
-        content.style.overflow = "auto";
-        modal.appendChild(content);
-
-        // Bouton fermeture
-        const closeBtn = document.createElement("button");
-        closeBtn.textContent = "X";
-        closeBtn.style.position = "absolute";
-        closeBtn.style.top = "10px";
-        closeBtn.style.right = "10px";
-        closeBtn.onclick = () => modalContainer.remove();
-        modal.appendChild(closeBtn);
-
-        modalContainer.appendChild(modal);
-        document.body.appendChild(modalContainer);
-    }
-
-    // Charger le contenu dans le modal
-    const contentElement = modalContainer.querySelector("#modal-content");
-    if (contentElement) {
-        loadFormDataInModal(url, contentElement);  // ta fonction actuelle pour charger le contenu
-    }
-
-    // Mettre à jour le titre dans la div titre
-    const titleDiv = modalContainer.querySelector("#modal-title-container");
-    if (titleDiv) {
-        titleDiv.textContent = title;
-    }
-
-    modalContainer.style.display = "flex";
 }
