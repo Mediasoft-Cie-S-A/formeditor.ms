@@ -8,10 +8,14 @@ function createButtonLink(type) {
     btn.id = `buttonLink-${Date.now()}`;
     btn.textContent = "Open Screen";
 
+    // Add spacing around the button for better layout
+    btn.style.margin = "8px"; // external space between buttons
+    btn.style.padding = "10px 15px"; // internal space inside the button
+
     // Initial configuration
     const config = {
         url: "",
-        // target: "", // ❌ plus utilisé
+        // target: "", // ❌ no longer used
         iconLock: true,
         label: "Open Screen",
         nameScreen: "Écran"
@@ -26,9 +30,13 @@ function createButtonLink(type) {
     };
     btn.ondragend = () => {
         btn.style.display = "block";
+
+        // 🧠 Re-apply layout spacing after drop (in case needed)
+        btn.style.margin = "8px";
+        btn.style.padding = "10px 15px";
     };
 
-    // Assign click behavior (ancienne logique désactivée)
+    // Assign click behavior (previous logic disabled)
     /*
     btn._applyClick = () => {
         btn.onclick = () => {
@@ -46,13 +54,14 @@ function createButtonLink(type) {
         };
     };
     */
-   btn._applyClick = () => {}; // noop
+    btn._applyClick = () => {}; // noop
 
     btn._applyClick();
 
     setLockIcon(btn);
     return btn;
 }
+
 
 // Edit panel to update button's URL and label
 function editButtonLink(type, element, content) {
@@ -238,6 +247,16 @@ function openMenuInModal(titleText, screenUrl) {
 
     setTimeout(() => {
         activateEditTabIn(screen);
+// Désactiver l'onglet "Table" s'il existe
+const tabHeaders = screen.querySelectorAll('.ctab_HeaderButton');
+tabHeaders.forEach(header => {
+    if (header.innerText.trim().toLowerCase() === "table") {
+        header.classList.add('disabled');
+        header.onclick = (e) => e.preventDefault(); // bloque le clic
+        header.style.pointerEvents = "none"; // optionnel : désactive les clics
+        header.style.opacity = "0.5"; // optionnel : grise le bouton
+    }
+});
 
         // Attendre encore un peu pour s'assurer que les éléments sont bien dans le DOM
         setTimeout(() => {

@@ -138,3 +138,8 @@
     text-align: center;
     letter-spacing: 0.05em; /* Espacement entre lettres, optionnel */
 }
+.ctab_HeaderButton.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
