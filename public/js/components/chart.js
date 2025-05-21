@@ -250,6 +250,36 @@ class ChartManager {
         const sort = JSON.parse(element.getAttribute("sort"));
         const limit = JSON.parse(element.getAttribute("limit"));
         console.log("filter:" + filter);
+        // add the tagname cookieStorage in the filter
+        const cookieStorage= document.querySelector('[tagname="cookieStorage"]');
+        if (cookieStorage) {
+            const cookieStorageJson = JSON.parse(cookieStorage.getAttribute("data-cookies"));
+            if (cookieStorageJson) {
+                // get the variables name from the cookieStorage
+                cookieStorageJson.forEach(item => {
+                    const fieldName = item.name;
+                    const selectValue = cookieStorage.querySelector(`select[var_name="${fieldName}"]`);
+                    // get the value of the select
+                    const value = selectValue.options[selectValue.selectedIndex].value;
+                    // check if the filter has the field name
+                    if (filter && filter.filters) {
+                        const index = filter.filters.findIndex(x => x.fieldName === fieldName);
+                        if (index !== -1) {
+                            // update the value
+                            filter.filters[index].value = value;
+                        } else {
+                            // add the field to the filter
+                            filter.filters.push({ fieldName: fieldName, value: value });
+                        }
+                    } else {
+                        // add the field to the filter
+                        filter.filters = [{ fieldName: fieldName, value: value }];
+                    }
+                });
+            }
+        }
+        // check if the filter is not null or undefined   
+
         if (filter !== null && filter !== undefined && filter !== "undefined") {
             const body = { 
                     columns: dataConfig, 

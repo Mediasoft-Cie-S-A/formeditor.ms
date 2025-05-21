@@ -978,6 +978,31 @@ async function filterDocuments( view, filters, columns, groups, sort, direction,
   // add the aggregate function
   query += ` ${groups} `;
   query += ` FROM PUB.${columns[0].tableName}`;
+
+    // check if filters is not empty
+    if (filters.length > 0) {
+      query += " WHERE ";
+      filters.forEach((filter, index) => {
+        // check if filter is not empty
+        // apply the fieldName = value
+        if (filter.fieldName && filter.value) {
+          // check if filter is not empty
+          if (filter.value !== "") {
+            // check if filter is not empty
+            switch (filter.operator) {
+              case "like":
+                query += ` ${filter.fieldName} LIKE '%${filter.value}%' `;
+                break;
+            default:
+                query += ` ${filter.fieldName} = '${filter.value}' `;
+                break;
+            } // switch
+          } // if (filter.value !== "")
+        } // if (filter.fieldName && filter.value)
+      }) // forEach
+    }
+        // check if filter is not empty 
+
   query += ` GROUP BY ${groups} `;
   
   // check limit value
