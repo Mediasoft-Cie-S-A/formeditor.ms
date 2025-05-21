@@ -284,7 +284,7 @@
     "editFunction": "editElementChart",
     "styles": "chart.css",
     "icon": "fa fa-bar-chart",
-    "renderFunction": ""
+    "renderFunction": "renderDataChart"
 },
   "textfield": {
     "type": "textfield",

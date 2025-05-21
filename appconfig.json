@@ -4,6 +4,9 @@
   "dblist": {
            "msdb" : {
             "ConnectionString" :"DSN=msdb;UID=sysprogress;PWD=sysprogress"
+           },
+           "msec" : {
+            "ConnectionString" :"DSN=msec;UID=sysprogress;PWD=sysprogress"
            }
         },
 

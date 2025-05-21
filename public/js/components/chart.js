@@ -395,7 +395,7 @@ class ChartManager {
         var controlPanel = element.querySelector(`#${id}`);
         var sortfield="";
         var funct="";
-        var limitValue=1000;
+        var limitValue=100;
         if (controlPanel) {
             // get sort field and direction
             sortfield = element.querySelector('#sortSelect').textContent;
@@ -458,7 +458,21 @@ class ChartManager {
         functSelect.id = 'functSelect';
         functSelect.style.marginRight = '10px';
         controlPanel.appendChild(functSelect);
-        setOptionsByType(functSelect, 'number');
+        const functions = [
+            { value: 'sum', text: 'Sum' },
+            { value: 'avg', text: 'Average' },
+            { value: 'count', text: 'Count' },
+            { value: 'min', text: 'Min' },
+            { value: 'max', text: 'Max' },
+          
+        ];
+        functions.forEach(func => {
+            const option = document.createElement('option');
+            option.value = func.value;
+            option.textContent = func.text;
+            functSelect.appendChild(option);
+        });
+
         for (var i = 0; i < functSelect.options.length; i++) {
             if (functSelect.options[i].value === funct) {
                 functSelect.options[i].selected = true;
@@ -506,4 +520,8 @@ function createElementChart(type) {
 
 function editElementChart(type, element, content) {
     chartManager.editElementChart(type, element, content);
+}
+
+function renderDataChart(element) {
+    chartManager.renderData(element);
 }
