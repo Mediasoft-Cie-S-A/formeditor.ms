@@ -229,7 +229,7 @@ button {
 .form-element {
     margin-bottom: 15px;
     padding: 10px;
-    border: 1px solid #ccc;
+    /* border: 1px solid #ccc; */
     background-color: white;
 }
 
