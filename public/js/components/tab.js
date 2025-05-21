@@ -111,7 +111,7 @@ function createTabContent (tabsHeader,tabsContent)
     const tabHeader = document.createElement('div');
     
     tabHeader.dataset.tab = tabId;
-    tabHeader.innerText = `Tab-${tabcount}`;;
+    tabHeader.innerText = (tabcount === 1) ? "Edit" : `Tab-${tabcount}`;
     tabHeader.className='ctab_HeaderButton';
     tabsHeader.appendChild(tabHeader);
 
@@ -133,7 +133,7 @@ function createTabContent (tabsHeader,tabsContent)
    
 };
 function createEditModal() {
-    // Vérifie si le modal existe déjà pour éviter de le recréer
+    // Prevent duplicate modals
     if (document.getElementById("editModal")) return;
 
     const modal = document.createElement("div");
@@ -168,18 +168,25 @@ function createEditModal() {
     closeButton.style.cursor = "pointer";
     closeButton.style.fontSize = "20px";
 
+    // 🧠 Move tab content back when modal is closed
     closeButton.addEventListener("click", function () {
         modal.style.display = "none";
 
-        // remettre le contenu Edit à sa place d’origine dans .ctab_tabs
         const editTabContent = document.getElementById("editModalContent").firstElementChild;
-        if (editTabContent) {
-            const tabsContainer = document.querySelector('.ctab_tabs');
-            if (tabsContainer) {
-                tabsContainer.appendChild(editTabContent);
-                editTabContent.style.display = "none"; // le re-cacher
+        if (editTabContent && editTabContent._originalParent) {
+            if (editTabContent._originalNextSibling) {
+                editTabContent._originalParent.insertBefore(editTabContent, editTabContent._originalNextSibling);
+            } else {
+                editTabContent._originalParent.appendChild(editTabContent);
             }
+            editTabContent.style.display = "none";
+        
+            // Nettoyer après usage
+            delete editTabContent._originalParent;
+            delete editTabContent._originalNextSibling;
         }
+        
+
     });
 
     const modalContentContainer = document.createElement("div");
@@ -193,42 +200,51 @@ function createEditModal() {
 }
 
 
-function activateTab(event,tabHeader,tabContent){
-    createEditModal(); // S'assure que le modal est créé
-    if (event)
-        {
-            event.preventDefault();
-        }
-    // Cas spécial : si c'est le tab "Edit", on ouvre un modal
-    if (tabHeader.innerText.trim().toLowerCase() === "edit") {
-        // Ouvrir le modal
+
+function activateTab(event, tabHeader, tabContent) {
+    if (event) {
+        event.preventDefault();
+    }
+
+    // Always ensure modal exists
+    createEditModal();
+
+    // Normalize tab label (trim + lowercase)
+    const tabLabel = tabHeader.innerText.trim().toLowerCase();
+    console.log("Clicked tab:", tabHeader.innerText.trim());
+
+    const insideMenuModal = tabContent.closest("#menuModal") !== null;
+
+    // Special behavior for "edit" tab (only if not inside #menuModal)
+    if (tabLabel === "edit" && !insideMenuModal) {
         const modal = document.getElementById("editModal");
         const modalContent = document.getElementById("editModalContent");
-
-        // Insérer le contenu du tab dans le modal
-        modalContent.innerHTML = ''; // Clear previous
+    
+        modalContent.innerHTML = '';
+    
+        tabContent._originalParent = tabContent.parentElement;
+        tabContent._originalNextSibling = tabContent.nextSibling;
+    
         modalContent.appendChild(tabContent);
-
-        modal.style.display = "block";
+        tabContent.style.display = 'block';
+    
+        modal.style.display = "flex";
         return;
     }
+    
+
+    // 🔁 Default behavior for regular tabs
+    // Hide all tab contents
     tabContent.parentElement.querySelectorAll('.ctab_ContentDiv').forEach((el) => el.style.display = 'none');
+
+    // Unset 'active' on all tab headers
     tabHeader.parentElement.querySelectorAll('.ctab_HeaderButton').forEach((el) => el.classList.remove('active'));
-    tabHeader.classList.add('active');       
+
+    // Activate current tab
+    tabHeader.classList.add('active');
     tabContent.style.display = 'block';
 }
 
-// Gérer la fermeture du modal
-document.querySelector('.close-button').addEventListener('click', function() {
-    const modal = document.getElementById("editModal");
-    modal.style.display = "none";
-
-    // remettre le contenu "Edit" dans son div original (hors du modal)
-    const editTabContent = document.getElementById("editModalContent").firstElementChild;
-    if (editTabContent) {
-        document.querySelector('.ctab_tabs').appendChild(editTabContent);
-    }
-});
 
 
 function activateEditTabIn(targetElement) {
