@@ -299,7 +299,7 @@ function addVariableInput(element, content, name = "") {
     const valueDB = document.createElement("input");
     valueDB.type = "text";
     valueDB.placeholder = "Database Name";
-    valueDB.value = currentVariables?.DBName!=undefined?currentVariables?.DBName:"";
+    valueDB.value = currentVariables?.DBName!=undefined?currentVariables?.DBName:"msdb";
     valueDB.setAttribute("tag", "db_name");
 
 
