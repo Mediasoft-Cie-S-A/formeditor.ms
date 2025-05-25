@@ -864,10 +864,8 @@ app.post('/getDatasetDataByFilter',dbs.checkAuthenticated, async (req, res) => {
   console.log("getDatasetDataByFilter");
 
   try {
-      const {  groups  } = req.query;
-   
-   
      
+        
       //if req.body is not defined, set it to an empty object
       const filters = req.body.filters.filters || [];
       // if req.body.view is not defined, set it to empty string
@@ -876,7 +874,8 @@ app.post('/getDatasetDataByFilter',dbs.checkAuthenticated, async (req, res) => {
       const columns = req.body.columns || [];
       // if req.body.pivot is not defined, set it to an empty array
       const pivot = req.body.pivot || [];
-
+      // get groups from req.body.groups
+      const groups = req.body.groups || '';
       
       // check if in the colums exits the limit field
       const limit = req.body.limit
@@ -957,27 +956,29 @@ function flattenJSON(data,columns) {
 async function filterDocuments( view, filters, columns, groups, sort, direction, limitValue) {
    // generate the query string with columns columns fieldName and columns DBname colums dataset = table name
    // generate query with columns function, fieldname
- 
-  console.log(groups);
+  // split the groups by |
+  
+
+
   let query = "SELECT ";
   columns.forEach((column, index) => {
         switch (column.functionName) {
           case "count":
-            query += ` COUNT(*) AS "${column.fieldName}" ,`;
+            query += ` COUNT(*) AS "${column.fieldLabel}" ,`;
             break;
           case "value":         
-          query += ` ${column.fieldName} AS "${column.fieldName}" ,`;
+          query += ` ${column.fieldName} AS "${column.fieldLabel}" ,`;
             break;
             default:
-          query += ` ${column.functionName}(${column.fieldName}) AS "${column.fieldName}" ,`;
+          query += ` ${column.functionName}(${column.fieldName}) AS "${column.fieldLabel}" ,`;
           break;
         }
               
 
       }) ;
   // add the aggregate function
-  query += ` ${groups} `;
-  query += ` FROM PUB.${columns[0].tableName}`;
+  query += ` ${groups.fieldName} AS "${groups.fieldLabel}" `;
+  query += ` FROM PUB.${groups.tableName}`;
 
     // check if filters is not empty
     if (filters.length > 0) {
@@ -1003,7 +1004,7 @@ async function filterDocuments( view, filters, columns, groups, sort, direction,
     }
         // check if filter is not empty 
 
-  query += ` GROUP BY ${groups} `;
+  query += ` GROUP BY ${groups.fieldName} `;
   
   // check limit value
   if (!limitValue || limitValue === undefined) {
@@ -1014,7 +1015,7 @@ async function filterDocuments( view, filters, columns, groups, sort, direction,
   console.log("query:"+query);
   
     // Connect to the database
-    const db= dbs.databases[columns[0].DBName];
+    const db= dbs.databases[groups.DBName];
    
     // Execute the query
     const data = await db.queryData(query);

@@ -275,8 +275,8 @@
     "icon": "fa fa-table",
     "renderFunction": ""
   },
-  "BarChart": {
-    "type": "BarChart",
+  "barChart": {
+    "type": "barChart",
     "description": "Bar Chart",
     "category": "Charts",
     "scriptName": "chart.js",
@@ -286,6 +286,95 @@
     "icon": "fa fa-bar-chart",
     "renderFunction": "renderDataChart"
 },
+"lineChart": {
+    "type": "lineChart",
+    "description": "Line Chart",
+    "category": "Charts",
+    "scriptName": "chart.js",
+    "createFunction": "createElementChart",
+    "editFunction": "editElementChart",
+    "styles": "chart.css",
+    "icon": "fa fa-line-chart",
+    "renderFunction": "renderDataChart"
+  },
+  "pieChart": {
+    "type": "pieChart",
+    "description": "Pie Chart",
+    "category": "Charts",
+    "scriptName": "chart.js",
+    "createFunction": "createElementChart",
+    "editFunction": "editElementChart",
+    "styles": "chart.css",
+    "icon": "fa fa-pie-chart",
+    "renderFunction": "renderDataChart"
+  },
+  "scatterChart": {
+    "type": "ScatterChart",
+    "description": "Scatter Chart",
+    "category": "Charts",
+    "scriptName": "chart.js",
+    "createFunction": "createElementChart",
+    "editFunction": "editElementChart",
+    "styles": "chart.css",
+    "icon": "fa fa-dot-circle-o",
+    "renderFunction": "renderDataChart"
+  },
+
+  "radarChart": {
+    "type": "padarChart",
+    "description": "Radar Chart",
+    "category": "Charts",
+    "scriptName": "chart.js",
+    "createFunction": "createElementChart",
+    "editFunction": "editElementChart",
+    "styles": "chart.css",
+    "icon": "fa fa-area-chart",
+    "renderFunction": "renderDataChart"
+  },
+  "doughnutChart": {
+    "type": "doughnutChart",
+    "description": "Doughnut Chart",
+    "category": "Charts",
+    "scriptName": "chart.js",
+    "createFunction": "createElementChart",
+    "editFunction": "editElementChart",
+    "styles": "chart.css",
+    "icon": "fa fa-circle-o-notch",
+    "renderFunction": "renderDataChart"
+  },
+  "polarAreaChart": {
+    "type": "polarAreaChart",
+    "description": "Polar Area Chart",
+    "category": "Charts",
+    "scriptName": "chart.js",
+    "createFunction": "createElementChart",
+    "editFunction": "editElementChart",
+    "styles": "chart.css",
+    "icon": "fa fa-compass",
+    "renderFunction": "renderDataChart"
+  },
+  "bubbleChart": {
+    "type": "bubbleChart",
+    "description": "Bubble Chart",
+    "category": "Charts",
+    "scriptName": "chart.js",
+    "createFunction": "createElementChart",
+    "editFunction": "editElementChart",
+    "styles": "chart.css",
+    "icon": "fa fa-dot-circle-o",
+    "renderFunction": "renderDataChart"
+  },
+  "treemapChart": {
+    "type": "treemapChart",
+    "description": "Tree Map",
+    "category": "Charts",
+    "scriptName": "treeMap.js",
+    "createFunction": "createElementChart",
+    "editFunction": "editElementChart",
+    "styles": "treeMap.css",
+    "icon": "fa fa-sitemap",
+    "renderFunction": "renderDataChart"
+  },
   "textfield": {
     "type": "textfield",
     "description": "Text field",

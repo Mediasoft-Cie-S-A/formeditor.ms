@@ -64,9 +64,9 @@ class ChartManager {
 
     getChartType(type) {
         switch (type) {
-            case 'LineChart': return 'line';
-            case 'BarChart': return 'bar';
-            case 'PieChart': return 'pie';
+            case 'lineChart': return 'line';
+            case 'barChart': return 'bar';
+            case 'pieChart': return 'pie';
             case 'scatterChart': return 'scatter';
             case 'radarChart': return 'radar';
             case 'doughnutChart': return 'doughnut';
@@ -175,7 +175,8 @@ class ChartManager {
         const fieldsElaborated = [];
        
         var functionName = legendJson.functionName;
-        var labelName = legendJson.fieldName;
+        var labelName = legendJson.fieldLabel;
+               
         // generate colors for each dataset
         var colorCount = -1;
         const fieldsChart=[];
@@ -185,8 +186,8 @@ class ChartManager {
             
             const keys = Object.keys(data[0]);
             keys.forEach(key => {
-                // if the key is not ind dataConfig.fieldname, add it to fieldsChart
-                if (!dataConfig.find(x => x.fieldName === key)) {
+                // if the key is not ind dataConfig.fieldLabel, add it to fieldsChart
+                if (!dataConfig.find(x => x.fieldLabel === key)) {
                     fieldsChart.push(key);
                 }
             });
@@ -194,7 +195,7 @@ class ChartManager {
         }else
         {
             dataConfig.forEach((config, index) => {
-                fieldsChart.push(config.fieldName);
+                fieldsChart.push(config.fieldLabel);
             });
         }
         console.log("fieldsChart",fieldsChart);
@@ -241,7 +242,7 @@ class ChartManager {
         // generate the query to get the data
         
         // Get the dataset data from the server, using the filter
-        var url = this.getFilterUrl(element)+"groups="+labelName;
+        var url = this.getFilterUrl(element);;
 
         const request = new XMLHttpRequest();
         request.open("POST", url, false); // `false` makes the request synchronous
@@ -288,6 +289,7 @@ class ChartManager {
                     filters: filter, 
                     sort: sort, 
                     limit: limit,
+                    groups: legendJson,
                    // links: metadata.links
                 };
             request.send(JSON.stringify(body));
@@ -300,6 +302,7 @@ class ChartManager {
                 filters: [], 
                 sort: sort, 
                 limit: limit,
+                groups: legendJson,
                // links: metadata.links
                };
             request.send(JSON.stringify(body));
