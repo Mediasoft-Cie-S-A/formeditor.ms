@@ -148,12 +148,23 @@ function loadFormData(formId,renderContainer)
             return response.json();
         })
         .then(form => {
+             // Clear the render container
+
+             renderContainer.innerHTML = '';
+
+
+            // Convert JSON back to DOM and append
+            var domContent = jsonToDom(form.formData,renderContainer);
+            renderElements(renderContainer);
+           
             // set the header
             var formId = document.getElementById('formId');
             var formName = document.getElementById('formName');
             var formPath = document.getElementById('formPath');
             var userCreated = document.getElementById('userCreated');
             var userModified = document.getElementById('userModified');
+
+            if (formId === null || formId === undefined)
             // Handle the form data here
             console.log('Form Data:', form);
             // For example, display the form data in an alert or populate a form for editing
@@ -162,17 +173,6 @@ function loadFormData(formId,renderContainer)
             formName.value=form.formName;
             formPath.value=form.formPath;
             userCreated.value=form.userCreated;
-            console.log(renderContainer);
-           
-            // Clear the render container
-
-                renderContainer.innerHTML = '';
-
-
-            // Convert JSON back to DOM and append
-            var domContent = jsonToDom(form.formData,renderContainer);
-            renderElements(renderContainer);
-            console.log(domContent);
            
         })
         .catch(error => {
@@ -210,3 +210,62 @@ function loadFormDataInModal(formId, container) {
             console.error('Modal load error:', error);
         });
 }
+
+function showToast(message, duration = 3000) {
+    let toastContainer = document.getElementById("toast-container");
+    if (toastContainer === null || toastContainer === undefined)
+    {
+       toastContainer = document.createElement("div") ;
+       toastContainer.id="toast-container";
+
+    }
+    const toast = document.createElement("div");
+    toast.classList.add("toast-message");
+    toast.textContent = message;
+  
+    // Add the toast to the container
+    toastContainer.appendChild(toast);
+  
+    // Make the toast visible
+    setTimeout(() => {
+      toast.style.opacity = 1;
+    }, 100);
+  
+    // Hide and remove the toast after 'duration'
+    setTimeout(() => {
+      toast.style.opacity = 0;
+      toast.addEventListener("transitionend", () => toast.remove());
+    }, duration);
+  }
+  
+  // show hint like a toastmessage wiht absolute position, based on the mouse position
+  function showHint(message, duration = 1000, event) {
+    let hintContainer = document.getElementById("hint-container");
+    if (hintContainer === null || hintContainer === undefined)
+        {
+            hintContainer = document.createElement("div") ;
+            hintContainer.id="toast-container";
+    
+        }
+    hintContainer.style.top = 10 + event.clientY + "px";
+    hintContainer.style.left = 10 + event.clientX + "px";
+    const hint = document.createElement("div");
+    hint.classList.add("hint-message");
+    hint.innerHTML = message;
+  
+    hintContainer.innerHTML = "";
+  
+    // Add the toast to the container
+    hintContainer.appendChild(hint);
+  
+    // Make the toast visible
+    setTimeout(() => {
+      hint.style.opacity = 1;
+    }, 100);
+  
+    // Hide and remove the toast after 'duration'
+    setTimeout(() => {
+      hint.style.opacity = 0;
+      hint.addEventListener("transitionend", () => hint.remove());
+    }, duration);
+  }

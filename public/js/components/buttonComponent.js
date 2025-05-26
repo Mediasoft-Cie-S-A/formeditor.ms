@@ -20,17 +20,106 @@ The double-click event listener calls the editElement function with the element 
  and the click event listener calls the selectElement function with the element as an argument.
 */
 function createElementButton(type) {
-    element = document.createElement(type);
-            element.textContent = type;
-    element.id=type+ Date.now(); // Unique ID for each new element
-    element.tagName=type;
+    const element = document.createElement("button"); // toujours un bouton HTML valide
+    element.textContent = type;
+    element.id = type + Date.now();
+    element.setAttribute("tagName", type); // stocke le type comme "métadonnée"
     element.className = 'button';
+
+    const config = {
+        label: type,
+        url: "",     // <-- ID de l'écran à afficher
+        target: ""   // <-- ID de la div dans laquelle on va afficher
+    };
+    
+    element.setAttribute("config", JSON.stringify(config));
+    renderElementButton(element);
+
     return element;
 }
 
 
+function editElementButton(type, element, content) {
+    const config = JSON.parse(element.getAttribute("config") || "{}");
 
-function editElementButton(type,element,content)
-{
-   
+    const container = document.createElement("div");
+    container.className = "button-editor";
+
+    // Label
+    const labelGroup = document.createElement("div");
+    labelGroup.style.marginBottom = "8px";
+    const label = document.createElement("label");
+    label.textContent = "Texte du bouton :";
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = config.label || "";
+    input.style.marginLeft = "10px";
+    labelGroup.appendChild(label);
+    labelGroup.appendChild(input);
+
+    // URL (ID de l'écran)
+    const urlGroup = document.createElement("div");
+    urlGroup.style.marginBottom = "8px";
+    const urlLabel = document.createElement("label");
+    urlLabel.textContent = "ID de l’écran à charger (URL) :";
+    const urlInput = document.createElement("input");
+    urlInput.type = "text";
+    urlInput.value = config.url || "";
+    urlInput.style.marginLeft = "10px";
+    urlGroup.appendChild(urlLabel);
+    urlGroup.appendChild(urlInput);
+
+    // Target (div cible)
+    const targetGroup = document.createElement("div");
+    targetGroup.style.marginBottom = "8px";
+    const targetLabel = document.createElement("label");
+    targetLabel.textContent = "ID de la div cible (Target) :";
+    const targetInput = document.createElement("input");
+    targetInput.type = "text";
+    targetInput.value = config.target || "";
+    targetInput.style.marginLeft = "10px";
+    targetGroup.appendChild(targetLabel);
+    targetGroup.appendChild(targetInput);
+
+    // Bouton Update
+    const updateBtn = document.createElement("button");
+    updateBtn.textContent = "Update";
+    updateBtn.onclick = () => {
+        config.label = input.value.trim();
+        config.url = urlInput.value.trim();
+        config.target = targetInput.value.trim();
+        console.log("💾 Nouvelle config sauvegardée :", config);
+
+        element.setAttribute("config", JSON.stringify(config));
+        renderElementButton(element);
+    };
+
+    container.appendChild(labelGroup);
+    container.appendChild(urlGroup);
+    container.appendChild(targetGroup);
+    container.appendChild(updateBtn);
+
+    content.innerHTML = "";
+    content.appendChild(container);
+}
+
+
+function renderElementButton(element) {
+    console.log("🔧 Appel de renderElementButton");
+    const config = JSON.parse(element.getAttribute("config") || "{}");
+    element.textContent = config.label || "Button";
+    element.style.color = config.color || "#000";
+    element.style.backgroundColor = config.background || "#fff";
+
+    element.onclick = () => {
+        if (config.url && config.target) {
+            const targetDiv = document.getElementById(config.target);
+            if (targetDiv) {
+                console.log(`🔁 Chargement de l’écran '${config.url}' dans '${config.target}'`);
+                loadFormData(config.url, targetDiv);
+            } else {
+                console.warn(`❌ Div cible '${config.target}' introuvable`);
+            }
+        }
+    };
 }

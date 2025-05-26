@@ -226,6 +226,15 @@ function renderMenuComponentHorizontal(content) {
 
         i.className = item.icon;
         a.textContent = item.item;
+        a.style.fontFamily = "'Segoe UI', 'Roboto', 'Open Sans', sans-serif";
+        // a.style.backgroundColor = "gray";
+        a.style.fontSize = "14px";
+        a.style.fontWeight = "500";
+        a.style.textDecoration = "none";
+        a.style.color = "#333";
+        a.style.padding = "8px 16px";
+        a.style.display = "inline-block";
+        
 
         li.appendChild(i);
         li.appendChild(a);
@@ -250,10 +259,16 @@ function renderMenuComponentHorizontal(content) {
         return li;
     };
 
+    if (items.length > 1) {
+        const lastItem = items[items.length - 1];     // copie du dernier
+        items.splice(items.length - 1, 1);            // supprime le dernier
+        items.unshift(lastItem);                      // insère au début
+    }
+    
     items.forEach(item => {
         menu.appendChild(createMenuItem(item));
     });
-
+    
     wrapper.appendChild(menu);
     wrapper.appendChild(translateWrapper);
     content.appendChild(wrapper);
