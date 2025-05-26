@@ -477,6 +477,7 @@ class OdbcDatabase {
       // Construct the full SQL statement
 
       const sql = `INSERT INTO PUB.${tableName} (${data.fields}) VALUES (${data.values})`;
+      // Note: The values should be properly escaped to prevent SQL injection
       console.log(sql);
       // Execute the query
       const connection =  await odbc.connect(this.connectionString);

@@ -1,3 +1,5 @@
+const { act } = require("react");
+
 function createDataSetComponentNavigate(type) {
   var main = document.createElement("div");
   main.className = "dataSetComponentNavigate";
@@ -447,10 +449,15 @@ async function navbar_SaveRecord() {
     }
     console.log("SaveRecord");
 
-    // validation
+    // get the dataset div
+    const datasetDiv = document.querySelector("[tagname='dataSet']");
+    if (!datasetDiv) {
+      showToast("No dataset found to save");
+      return;
+    }
     // Select all row ID elements (one per dataset record)
-    const nextRowIds = document.querySelectorAll("[dataset-field-type='rowid']");
-
+    const nextRowIds = datasetDiv.querySelectorAll("[dataset-field-type='rowid']");
+    console.log("nextRowIds: ", nextRowIds);
     for (const nextRowId of nextRowIds) {
       console.log("Row being processed:", nextRowId);
 
@@ -539,18 +546,18 @@ async function navbar_SaveRecord() {
         showToast("validation error, please fixes");
         return;
       }
-
+      const action = {};
       let result;
       console.log("before verifiying rowIsValue if new");
       if (rowIdValue === "new") {
         let data = await CreateInsert(dbName, tableName, divLine);
-        result = await insertRecordDB(dbName, tableName, data);
+        result = await insertRecordDB(dbName, tableName, data,action);
       } else {
         const data = {
           body: CreateUpdated(dbName, tableName, divLine),
         };
-
-        result = await updateRecordDB(dbName, tableName, rowIdValue, data);
+        
+        result = await updateRecordDB(dbName, tableName, rowIdValue, data,action);
       }
 
       document.querySelector("[name=SaveDSBtn]").disabled = true;
@@ -596,9 +603,9 @@ async function CreateInsert(DBName, tableName,divLine) {
             sequence
           );
           inputs[i].value = sequenceValue;
-          insertValues += `'${sequenceValue}'`;
+          insertValues += `'${sequenceValue}'`; // Add sequence value
         } else {
-          insertValues += `'${inputs[i].value}'`;
+          insertValues += `'${inputs[i].value}'`; // Add input value
         }
         if (i < inputs.length - 1) {
           insertFields += ",";
@@ -632,7 +639,7 @@ async function navigateSequence(DBName, tableName, sequenceName) {
   }
 }
 
-async function updateRecordDB(DBName, tableName, nextRowId, updateData) {
+async function updateRecordDB(DBName, tableName, nextRowId, data,action) {
   try {
     const response = await fetch(
       `/update-record/${DBName}/${tableName}/${nextRowId}`,
@@ -641,7 +648,12 @@ async function updateRecordDB(DBName, tableName, nextRowId, updateData) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(updateData),
+        // add to the body data and action if it exists
+        body: JSON.stringify({
+          data: data,
+          action: action ,
+        }),
+       
       }
     );
 
@@ -669,16 +681,19 @@ async function updateRecordDB(DBName, tableName, nextRowId, updateData) {
 }
 
 
-async function insertRecordDB(DBName, tableName, data) {
+async function insertRecordDB(DBName, tableName, data,action) {
   try {
-    const payload = JSON.stringify(data);
     const response = await fetch(`/insert-record/${DBName}/${tableName}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         // Include other headers as needed, like authentication tokens
       },
-      body: payload,
+      // Add the data and action to the body
+      body: JSON.stringify({
+        data: data,
+        action: action,
+      }),
     });
 
     if (!response.ok) {

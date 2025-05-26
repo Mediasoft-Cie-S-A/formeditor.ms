@@ -9,7 +9,14 @@
             "ConnectionString" :"DSN=msec;UID=sysprogress;PWD=sysprogress"
            }
         },
-
+  "SMTP": {
+    "host": "smtp.office365.com",
+    "port": 587,
+    "secure": true,
+    "user": "send@mediasoft-sa.ch",
+    "pass": "yox46420!",
+    "from": "send@mediasoft-sa.ch"
+  },
   "mongoDbUrl": "mongodb://192.168.201.24:27017",
   "mongoDbName": "formeditmsapp",
   "sessionSecret": "secJKDFUret",

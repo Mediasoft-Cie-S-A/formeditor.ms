@@ -39,6 +39,8 @@ class dblayer{
           this.checkAuthenticated = this.checkAuthenticated.bind(this);
         
           this.dbtype = app.config.dbtype;
+          this.SMTP = app.config.SMTP;
+          console.log(this.SMTP);
           // get key value from dblist           
       }
 
@@ -533,14 +535,15 @@ class dblayer{
               const db= dbs.databases[database];
              
 
-              const data = req.body; // Assuming the updated data is sent in the request body
+              const data = req.body.data; // Assuming the updated data is sent in the request body
+              const action = req.body.action; // Assuming the action is sent in the request body
               console.log(data);
               try {
                
                 const result = await db.updateRecord(tableName, data, rowID);
                 res.json({ message: "Record updated successfully", result });
                 
-                const action = "event_triggered";
+             
                 const details = { tableName, data,  event: "Update" };
                 // Track the action in MongoDB
                 await this.trackAction(action, details);
@@ -559,7 +562,8 @@ class dblayer{
               const {database, tableName } = req.params;
               const db= dbs.databases[database];
             
-              const data = req.body; // Assuming the updated data is sent in the request body
+              const data = req.body.data; // Assuming the updated data is sent in the request body
+              const action = req.body.action; // Assuming the action is sent in the request body
               console.log(data);
               try {
                   // repalce in data ' with `
@@ -571,7 +575,7 @@ class dblayer{
                 const result = await db.insertRecord(tableName, data);
                 res.json({ message: "Record inserted successfully", result });
                 
-                const action = "event_triggered";
+                
                 const details = { tableName, data, event: "Insert" };
                 // Track the action in MongoDB
                 await this.trackAction(action, details);
