@@ -1,4 +1,6 @@
-const { act } = require("react");
+const e = require("express");
+const { copySync } = require("fs-extra");
+
 
 function createDataSetComponentNavigate(type) {
   var main = document.createElement("div");
@@ -24,7 +26,7 @@ function editDataSetComponentNavigate(type, element, content) {
   // Button to save all variables as cookies
   const saveButton = document.createElement("button");
   saveButton.textContent = "Update";
-  saveButton.onclick = () => saveActions(element);
+  saveButton.onclick = () => saveActions(element,content);
   saveButton.style.width = "100%";
   div.appendChild(saveButton);
   // Create a container div for the variables
@@ -50,21 +52,24 @@ function editDataSetComponentNavigate(type, element, content) {
 
 function addAction(element, itemdiv, action) {
   const actionDiv = document.createElement("div");
+  actionDiv.id = "action_" + Date.now();
+  actionDiv.tagName = "actionContainer";
   actionDiv.className = "action";
   actionDiv.draggable = true;
   actionDiv.style.border = "1px solid #ccc";
   actionDiv.style.borderRadius = "5px";
   actionDiv.style.padding = "5px";
   const actionEvent = document.createElement("select");
-  actionEvent.options.add(new Option("Read", "read"));
+  actionEvent.tagName = "actionEvent";
+  actionEvent.style.width = "100%";
   actionEvent.options.add(new Option("Write", "write"));
-  actionEvent.options.add(new Option("Update", "update"));
-  actionEvent.options.add(new Option("Copy", "copy"));
   if (action.actionEvent) {
     actionEvent.value = action.actionEvent;
   }
   actionDiv.appendChild(actionEvent);
   const actionType = document.createElement("select");
+  actionType.tagName = "actionType";
+  actionType.style.width = "100%";
   actionType.options.add(new Option("Send Email", "email"));
   actionType.options.add(new Option("Call API", "api"));
   actionType.options.add(new Option("Navigate", "navigate"));
@@ -81,6 +86,7 @@ function addAction(element, itemdiv, action) {
   }
   actionDiv.appendChild(actionType);
   const actionContent = document.createElement("textarea");
+  actionContent.tagName = "actionContent";
   actionContent.placeholder = "Action content";
   actionContent.style.width = "100%";
   actionContent.style.height = "100px";
@@ -96,17 +102,27 @@ function addAction(element, itemdiv, action) {
 }
   
 
-function saveActions(element) {
+function saveActions(element,content) {
+  console.log("Saving actions for element:", element);
+  console.log("Content:", content);
   const actions = [];
-  const actionDivs = element.querySelectorAll(".action");
+  const actionDivs = content.querySelectorAll("[tagName='actionContainer']");
   actionDivs.forEach((actionDiv) => {
+    console.log(actionDiv);
     const action = {};
-    const actionEvent = actionDiv.querySelector("select");
+    const actionEvent = actionDiv.querySelector("select[tagName='actionEvent']");
+    if (!actionEvent) {
     action.actionEvent = actionEvent.value;
-    const actionType = actionDiv.querySelector("select");
+    } 
+    const actionType = actionDiv.querySelector("select[tagName='actionType']");
+    if (!actionType) {
     action.actionType = actionType.value;
-    const actionContent = actionDiv.querySelector("textarea");
+    }
+    // Get the action content textarea
+    const actionContent = actionDiv.querySelector("textarea[tagName='actionContent']");
+    if (!actionContent) {
     action.actionContent = actionContent.value;
+    }
     actions.push(action);
   });
   element.setAttribute("actions", JSON.stringify(actions));
@@ -164,7 +180,13 @@ function renderNavigationBar(main) {
       title: "Save Record",
       text: '<p>Save</p><i class="fa fa-floppy-o" style="color:red;margin-left:-6px"></i>',
       event: "navbar_SaveRecord()",
-    }
+    },
+    {
+      name: "CancelDSBtn",
+      title: "Cancel",
+      text: '<p>Cancel</p><i class="fa fa-ban" style="color:#4d61fc;margin-left:-6px"></i>',
+      event: "navbar_CancelEdit()",
+    },
   ];
   var htm = "";
   //for the dom2json is mandatory to create a html for the events
@@ -291,6 +313,43 @@ function navbar_moveNext() {
 }
 
 function navbar_EditRecord(action) {
+  console.log(action);
+  if (!action )
+  {
+    // Always ensure modal exists
+    createEditModal();
+
+            const modal = document.getElementById("editModal");
+        console.log("Modal: ", modal);
+            const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
+            const parentDiv = dataSetNavigator.parentElement;
+          console.log("Parent Div: ", parentDiv);
+            const modalContent = modal.querySelector(".modal-content");
+            modalContent.innerHTML = '';
+            // set in parentDiv the id of original parent and next sibling
+        
+            parentDiv._originalParent = parentDiv.parentElement;
+            parentDiv._originalNextSibling = parentDiv.nextSibling;
+        
+            modalContent.appendChild(parentDiv);
+           
+            modal.style.display = "flex";
+            console.log(modal);
+  }else {
+ const modal = document.getElementById("editModal");
+    modal.style.display = "none";
+    // set the parentDiv back to its original place
+    const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
+    const parentDiv = dataSetNavigator.parentElement;
+    if (parentDiv._originalParent) {
+        org= parentDiv._originalParent;
+        org.appendChild(parentDiv);
+      }
+    }
+
+
+
+
   const inputs = document.querySelectorAll(
     `[data-table-name] input[dataset-field-name]`
   );
@@ -304,6 +363,12 @@ function navbar_EditRecord(action) {
 
   document.querySelector("[name=SaveDSBtn]").disabled = action;
   deactivateLoaders();
+}
+
+  function navbar_CancelEdit() {
+    console.log("Cancel Edit");
+ 
+ navbar_EditRecord(true);
 }
 
 function navbar_InsertRecord() {
@@ -561,6 +626,7 @@ async function navbar_SaveRecord() {
       }
 
       document.querySelector("[name=SaveDSBtn]").disabled = true;
+      navbar_CancelEdit();
       return result;
     }
   } catch (error) {
@@ -624,7 +690,7 @@ async function CreateInsert(DBName, tableName,divLine) {
     insertValues = insertValues.slice(0, -1); // Remove last comma
   }
 
-  return { fields: insertFields, values: insertValues };
+  return { fields: JSON.parse(insertFields), values: JSON.parse(insertValues) };
 }
 
 async function navigateSequence(DBName, tableName, sequenceName) {

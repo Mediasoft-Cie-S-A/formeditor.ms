@@ -205,10 +205,6 @@ function activateTab(event, tabHeader, tabContent) {
     if (event) {
         event.preventDefault();
     }
-    // get the edittab 
-    const editTab = document.getElementById('editForm');
-    // check if active exists in classList array
-    if (editTab && editTab.classList.contains('active')) {
            // 🔁 Default behavior for regular tabs
     // Hide all tab contents
     tabContent.parentElement.querySelectorAll('.ctab_ContentDiv').forEach((el) => el.style.display = 'none');
@@ -219,34 +215,6 @@ function activateTab(event, tabHeader, tabContent) {
     // Activate current tab
     tabHeader.classList.add('active');
     tabContent.style.display = 'block';
-    }else {
-    // Always ensure modal exists
-    createEditModal();
-
-    // Normalize tab label (trim + lowercase)
-    const tabLabel = tabHeader.innerText.trim().toLowerCase();
-    console.log("Clicked tab:", tabHeader.innerText.trim());
-
-    const insideMenuModal = tabContent.closest("#menuModal") !== null;
-
-        // Special behavior for "edit" tab (only if not inside #menuModal)
-        if (tabLabel === "edit" && !insideMenuModal) {
-            const modal = document.getElementById("editModal");
-            const modalContent = document.getElementById("editModalContent");
-        
-            modalContent.innerHTML = '';
-        
-            tabContent._originalParent = tabContent.parentElement;
-            tabContent._originalNextSibling = tabContent.nextSibling;
-        
-            modalContent.appendChild(tabContent);
-            tabContent.style.display = 'block';
-        
-            modal.style.display = "flex";
-            return;
-        }
-    }
-
  
 }
 
