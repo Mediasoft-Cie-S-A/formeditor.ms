@@ -20,23 +20,27 @@ The double-click event listener calls the editElement function with the element 
  and the click event listener calls the selectElement function with the element as an argument.
 */
 function createElementButton(type) {
-    const element = document.createElement("button"); // toujours un bouton HTML valide
+    const element = document.createElement("button");
     element.textContent = type;
-    element.id = type + Date.now();
-    element.setAttribute("tagName", type); // stocke le type comme "métadonnée"
+    element.id = `elementButton-${Date.now()}`;
+    element.setAttribute("tagName", "elementButton");
     element.className = 'button';
+
+    element.style.margin = "8px";
+    element.style.padding = "10px 15px";
 
     const config = {
         label: type,
-        url: "",     // <-- ID de l'écran à afficher
-        target: ""   // <-- ID de la div dans laquelle on va afficher
+        url: "",
+        target: ""
     };
-    
+
     element.setAttribute("config", JSON.stringify(config));
     renderElementButton(element);
-
     return element;
 }
+
+
 
 
 function editElementButton(type, element, content) {
@@ -103,23 +107,56 @@ function editElementButton(type, element, content) {
     content.appendChild(container);
 }
 
-
 function renderElementButton(element) {
     console.log("🔧 Appel de renderElementButton");
+
     const config = JSON.parse(element.getAttribute("config") || "{}");
     element.textContent = config.label || "Button";
     element.style.color = config.color || "#000";
     element.style.backgroundColor = config.background || "#fff";
 
+    element.onclick = null;
+    element.ondblclick = null;
+
     element.onclick = () => {
-        if (config.url && config.target) {
-            const targetDiv = document.getElementById(config.target);
+        console.log("🖱️ Bouton cliqué :", element.id);
+    
+        const freshConfig = JSON.parse(element.getAttribute("config") || "{}");
+        console.log("📦 Config actuelle :", freshConfig);
+    
+        if (freshConfig.url && freshConfig.target) {
+            const targetDiv = document.getElementById(freshConfig.target);
             if (targetDiv) {
-                console.log(`🔁 Chargement de l’écran '${config.url}' dans '${config.target}'`);
-                loadFormData(config.url, targetDiv);
+                console.log(`🔁 Chargement de l’écran '${freshConfig.url}' dans '${freshConfig.target}'`);
+                loadFormData(freshConfig.url, targetDiv);
             } else {
-                console.warn(`❌ Div cible '${config.target}' introuvable`);
+                console.warn(`❌ Div cible '${freshConfig.target}' introuvable`);
             }
+        } else {
+            console.warn("⚠️ Clic ignoré : URL ou Target manquant.");
         }
     };
+    
 }
+
+
+
+document.addEventListener("click", (e) => {
+    const btn = e.target.closest('button[tagName="button"]');
+    if (!btn) return;
+
+    const config = JSON.parse(btn.getAttribute("config") || "{}");
+    if (!config.url || !config.target) {
+        console.warn("⚠️ Bouton ignoré (URL ou Target manquant)");
+        return;
+    }
+
+    const targetDiv = document.getElementById(config.target);
+    if (!targetDiv) {
+        console.warn(`❌ Div cible '${config.target}' introuvable`);
+        return;
+    }
+
+    console.log(`🔁 Chargement de l’écran '${config.url}' dans '${config.target}'`);
+    loadFormData(config.url, targetDiv);
+});
