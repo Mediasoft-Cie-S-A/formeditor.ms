@@ -30,7 +30,7 @@
 	margin: 0;
 	padding: 0;	
     font-family: 'Inter', sans-serif;
-    font-weight: 400;
+    /* font-weight: 400; */
 }
 
 body {
@@ -42,11 +42,11 @@ body {
     font-size: 17px;
 }	
 
-.nav-tabs > li > a {
+/* .nav-tabs > li > a {
     color: #000;
 
 
-}
+} */
 
 .wrapper {
     display: flex;
@@ -94,7 +94,7 @@ body {
 
 .main-content  {
     border: 1px solid rgba(0,0,0,.05);
-    border-radius: 0.375rem;
+    /* border-radius: 0.375rem; */
 }
 
 
@@ -135,7 +135,7 @@ body {
 }
 
 #formContainer {
-    border: 2px dashed #ccc;
+    /* border: 2px dashed #ccc; */
     width: 100%;
     padding: 10px;
     box-sizing: border-box;
@@ -180,11 +180,12 @@ button {
 
 .form-container {
     padding: 0 15px;
+    margin-top: 20px;
 }
 
 .grid-element {
     min-height: 60px;
-    border: 2px dashed #66666669;
+    /* border: 2px dashed #66666669; */
     margin: 0 1px 10px 1px;
 }
 
@@ -230,7 +231,8 @@ button {
     margin-bottom: 15px;
     padding: 10px;
     /* border: 1px solid #ccc; */
-    background-color: white;
+    border-radius: 10px; /* arrondit tous les coins */
+
 }
 
 
@@ -558,7 +560,13 @@ body {
     background: #f7fafc;
     margin: 0;
     padding: 0;
+    height: 100%;
+
 }
+html, body {
+    margin: 0;
+    padding: 0;
+  }
 
 form,
 fieldset {
@@ -1389,3 +1397,224 @@ input.apple-switch:checked:after {
       .modal-actions button:hover {
         background-color: #0056b3;
       }
+/* ================================================================================================= */
+
+      /* menuComponentHorizontal.css */
+
+/* Container for the whole horizontal menu */
+.horizontal-menu {
+    display: flex;
+    align-items: center;
+    background-color: #f9f9f9;
+    padding: 10px 20px;
+    gap: 30px;
+    flex-wrap: wrap; /* Allows items to wrap onto multiple lines */
+    gap: 5px; /* Optional: adds spacing between items */
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    color: black;
+  }
+  
+  /* Each top-level item */
+  .horizontal-menu > li {
+    padding: 6px 10px; /* Réduit le padding interne */
+    list-style: none;
+    position: relative;
+    padding: 8px 12px;
+    cursor: pointer;
+    color: black;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+  
+  .horizontal-menu > li:hover {
+    background-color: #eaeaea;
+    border-radius: 8px;
+    color: black;
+  }
+  
+  /* Submenu (hidden by default) */
+  .horizontal-submenu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    /* box-shadow: 0 4px 8px rgba(0,0,0,0.1); */
+    border-radius: 8px;
+    min-width: 180px;
+    padding: 10px 0;
+    z-index: 1000;
+  }
+  
+  /* Submenu items */
+  .horizontal-submenu li {
+    list-style: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    list-style: none;
+  }
+  
+  .horizontal-submenu li:hover {
+    background-color: #fff9f9;
+  }
+  
+  /* Animation for submenu */
+  .horizontal-submenu.show {
+    display: block;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .menu-editor-container {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+}
+.menu-bar-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 20px;
+  background-color: #e4e2e2;
+  border-bottom: 2px solid #bababa;
+  border-radius: 15px;
+  font-size: rem ;
+}
+
+.translate-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.translate-container div {
+  background-color: #007bff;
+  color: #fff;
+  padding: 5px;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.translate-container select {
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+
+.horizontal-menu li {
+  flex: 0 1 auto; /* Items will not grow but can shrink and have a base size */
+  margin: 5px; /* Optional: adds spacing around each menu item */
+}
+
+.horizontal-menu li {
+  border-radius: 6px;
+  padding: 8px 8px;
+  margin: 4px;
+  background-color: #f9f9f9;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.horizontal-menu li:hover {
+  background-color: #e6f0ff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+/* .horizontal-menu > li > a span {
+  color: #666;
+  font-weight: normal;
+} */
+#grid1747036473873GridElement-0 {
+  width: 100%;
+  max-width: 1100px; /* Limite la largeur sur grands écrans */
+  margin: 50px auto; /* Centrage horizontal + espace vertical */
+  /* padding: 20px; */
+  height: 100%;
+  background-color: rgb(239, 239, 239);
+  border-radius: 10px;
+  box-sizing: border-box;
+}
+
+/* Optionnel : centrage vertical sur grands écrans */
+/* @media (min-height: 600px) {
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    min-height: 100vh;
+    margin: 0;
+  }
+} */
+
+/*   
+.fixed-bottom{
+    display: flex;
+} */
+ .variable-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+ }
+ .table-container{
+    width: 100%;
+ }
+ #mainApplication{
+    height: 100%;
+ }
+footer{
+    display: flex;
+    justify-content: space-evenly;
+}
+ /* Exemple de style pour un pied de page copyright */
+.copyright {
+    text-align: center;
+    padding: 12px 20px;
+    font-size: 14px;
+    color: #555;
+  }
+  .container{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 0;
+    margin-right: 0;
+    width: 10%;
+  }
+  .text-center{
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+
+  .modal-content-responsive {
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: auto;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #fff;
+    box-sizing: border-box;
+  }
+  
+  /* Optionnel : responsive pour petits écrans */
+  @media (max-width: 600px) {
+    .modal-content-responsive {
+      padding: 10px;
+      font-size: 14px;
+    }
+  }
+  

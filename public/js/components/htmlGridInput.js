@@ -39,7 +39,7 @@ const gridDataStruct = {
 function createGridElement(type, id) {
     console.log("creategrid:" + type);
     var main = document.createElement('div');
-    main.className = 'form-container row display-flex';
+    main.className = 'form-container row display-flex centered-container';
     main.id = type + Date.now(); // Unique ID for each new element
     main.tagName = type;
 

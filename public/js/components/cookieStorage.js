@@ -26,6 +26,12 @@ function createCookieStorage(type) {
     main.setAttribute("tagName", type);
     main.draggable = true;
     main.dataset.type = type;
+    main.style.display = "flex";
+    main.style.justifyContent = "center";
+    main.style.alignItems = "center";
+    main.style.height = "100%"; // Facultatif, selon ton besoin
+    main.style.width = "100%";  // Facultatif aussi
+
 
     // Display message when no variables are set
     main.textContent = "No variables set yet.";

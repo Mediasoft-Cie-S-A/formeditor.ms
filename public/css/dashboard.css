@@ -1,0 +1,151 @@
+.account-element {
+    /* TODO: define styles for account-element */
+}
+
+.col-md-12 {
+    /* TODO: define styles for col-md-12 */
+}
+
+.container {
+    /* TODO: define styles for container */
+}
+
+.d-flex {
+    /* TODO: define styles for d-flex */
+}
+
+.logo-element {
+    /* TODO: define styles for logo-element */
+}
+
+.main-header {
+    /* TODO: define styles for main-header */
+}
+
+.main-header-nav {
+    /* TODO: define styles for main-header-nav */
+}
+
+.navbar {
+    /* TODO: define styles for navbar */
+}
+
+.row {
+    /* TODO: define styles for row */
+}
+
+.title {
+    /* TODO: define styles for title */
+}
+.form-container {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    /* background-color: #f9f9f9; */
+    position: relative;
+    height: 100vh; /* ou fixe si tu veux */
+  }
+  
+  .form-element {
+    margin-bottom: 10px;
+    padding: 10px;
+    /* border: 1px dashed #aaa; */
+    border-radius: 15px;
+    color: black;
+  }
+  
+  .menu-bar-wrapper {
+    /* background-color: #3f51b5; */
+    padding: 10px;
+    /* color: white; */
+    border-radius: 20px;
+  }
+  
+  .horizontal-menu {
+    font-weight: bold;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 20px;
+  }
+  
+  .horizontal-menu > li {
+    position: relative;
+  }
+  
+  .horizontal-menu a {
+    color: white;
+    text-decoration: none;
+    padding: 8px 12px;
+    display: inline-block;
+  }
+  
+  .horizontal-submenu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    color: black;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    z-index: 999;
+  }
+  
+  .horizontal-submenu li a {
+    color: black;
+    padding: 8px 12px;
+    display: block;
+    white-space: nowrap;
+  }
+  
+  li:hover > .horizontal-submenu {
+    display: block !important;
+  }
+  
+  .grid-element {
+    /* border: 1px solid #ddd; */
+    padding: 15px;
+    background-color: #fff;
+  }
+  
+  .horizontal-menu li a {
+    font-family: 'Segoe UI', 'Roboto', 'Open Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    color: black;
+    padding: 8px 16px;
+    display: inline-block;
+  }
+  
+  .horizontal-menu li a:hover {
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    color: black;
+  }
+  .horizontal-menu li a {
+    font-family: 'Segoe UI', 'Roboto', 'Open Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    color: black;
+    padding: 8px 16px;
+    display: inline-block;
+  }
+  
+  .horizontal-menu li a:hover {
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    color: black;
+  }
+  .centered-container {
+    width: 70%;
+    margin: 0 auto;         /* centre horizontalement */
+    display: flex;
+    flex-direction: column;
+  }
+  

@@ -64,11 +64,15 @@ function elementToJson(element) {
 function jsonToDom(json, parent) {
   if (Array.isArray(json)) {
     json.forEach((childJson) => createDomElement(childJson, parent));
-  } else {
+  } else if (typeof json === 'object' && json !== null) {
     createDomElement(json, parent);
+  } else {
+    // 👇 fallback : on crée un TextNode dans tous les autres cas
+    const textNode = document.createTextNode(String(json));
+    parent.appendChild(textNode);
   }
-  
 }
+
   // planning
 
 function renderElements(parent){
@@ -155,11 +159,16 @@ function createDomElement(json, parent) {
       }
     }
 
+    // 🔥 Stocker dans un tableau global
+    if (!window._allFormComponents) window._allFormComponents = [];
+    window._allFormComponents.push(element);
+
     element.classList.remove("gjs-selection");
-    // onlyEditor is used to hide the element in the render view
+
     if (element.getAttribute("onlyEditor") === "true") {
       element.style.display = "none";
     }
+
     // Append to parent
     parent.appendChild(element);
 
@@ -170,11 +179,11 @@ function createDomElement(json, parent) {
       });
     }
   } else if (json.text) {
-    // Create text node
     var textNode = document.createTextNode(json.text);
     parent.appendChild(textNode);
   }
 }
+
 
 // Function to export the json to file
 function exportJson() {

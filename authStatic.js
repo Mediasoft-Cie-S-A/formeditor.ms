@@ -59,6 +59,11 @@ module.exports = function(app,session, passport) {
         res.render("login.ejs")
     
     })
+
+    app.get("/index", (req, res) => {
+        res.render("index.ejs")
+    
+    })
     
     app.delete("/logout", (req,res) => {
         req.logOut()
@@ -67,7 +72,7 @@ module.exports = function(app,session, passport) {
      })
     
     app.post ("/login", passport.authenticate('local', {
-        successRedirect: "/dashboard",
+        successRedirect: "/index",
         failureRedirect: "/login",
     }))
     

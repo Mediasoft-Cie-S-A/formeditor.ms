@@ -20,11 +20,41 @@ const fs = require('fs');
 const path = require('path');
 const { deletedComponents } = require('./utils/deletedStore');
 
+// ✅ DEFINE upload BEFORE it's used
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      let uploadDir;
+      if (file.mimetype.startsWith("image")) {
+        uploadDir = path.join(__dirname, 'public/media/img');
+      } else if (file.mimetype.startsWith("video")) {
+        uploadDir = path.join(__dirname, 'public/media/video');
+      } else {
+        return cb(new Error("Unsupported media type"));
+      }
 
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+
+      cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+      cb(null, `${Date.now()}-${Buffer.from(file.originalname, 'latin1').toString('utf8')}`);
+    }
+  }),
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/bmp', 'video/mp4'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only images and .mp4 videos are allowed.'));
+    }
+  }
+});
 
 module.exports = function (app, mongoDbUrl, dbName) {
   const checkAuthenticated = (req, res, next) => {
-  //  console.log(app.passport);
     if (req.isAuthenticated()) {
       return next();
     }
@@ -33,61 +63,49 @@ module.exports = function (app, mongoDbUrl, dbName) {
 
   const requireCheckpoint = (requiredCheckPoint) => {
     return (req, res, next) => {
-        if (!req.isAuthenticated()) {
-          res.redirect("/login");
-        }
-        console.log(req.user.checkPoints);
-        const userCheckpoints = req.user.checkPoints || [];
-
-        if (userCheckpoints.includes('*') || userCheckpoints.includes(requiredCheckPoint)) {
-            return next(); // User has access
-        } else {
-            return res.status(403).json({ message: 'Access Denied. Insufficient privileges.' });
-        }
-    };
-};
-
-  // Configure multer for file uploads
-  const upload = multer({
-    storage: multer.diskStorage({
-      destination: (req, file, cb) => {
-        if (file.mimetype.startsWith("image"))
-          uploadDir = path.join(__dirname, 'public/media/img'); // Replace with your target directory
-        else if (file.mimetype.startsWith("video"))
-          uploadDir = path.join(__dirname, 'public/media/video');
-        if (!fs.existsSync(uploadDir)) {
-          fs.mkdirSync(uploadDir, { recursive: true });
-        }
-        cb(null, uploadDir);
-      },
-      filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${Buffer.from(file.originalname, 'latin1').toString('utf8')}`);
+      if (!req.isAuthenticated()) {
+        res.redirect("/login");
       }
-    }),
-    fileFilter: (req, file, cb) => {
-      const allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/bmp','video/mp4'];
-      if (allowedTypes.includes(file.mimetype)) {
-        cb(null, true);
+      console.log(req.user.checkPoints);
+      const userCheckpoints = req.user.checkPoints || [];
+      if (userCheckpoints.includes('*') || userCheckpoints.includes(requiredCheckPoint)) {
+        return next();
       } else {
-        cb(new Error('Invalid file type. Only images are allowed.'));
+        return res.status(403).json({ message: 'Access Denied. Insufficient privileges.' });
       }
-    }
-  });
+    };
+  };
 
-  app.get("/dashboard", checkAuthenticated, (req, res) => {
-    res.render("dashboard.ejs", { name: req.user.name });
-  });
-
-  app.post("/store-json", checkAuthenticated, async (req, res) => {
-     // create a new MongoClient
-     const client = new mongoClient(mongoDbUrl, {});
+  // ✅ MODIFIED ROUTE: Dashboard should load the 'homepage' form from MongoDB and pass to EJS
+  app.get("/dashboard", checkAuthenticated, async (req, res) => {
+    const client = new mongoClient(mongoDbUrl, {});
     try {
-   
       await client.connect();
       const db = client.db(dbName);
       const col = db.collection("forms");
 
-      // Construct form data with metadata
+      const result = await col.findOne({ formId: "homepage" });
+      if (!result) {
+        console.error("⚠️ Homepage form not found");
+        return res.render("dashboard.ejs", { name: req.user.name, homePageData: "[]" });
+      }
+
+      const json = JSON.stringify(result.formData);
+      res.render("dashboard.ejs", { name: req.user.name, homePageData: json });
+    } catch (err) {
+      console.error("Erreur dans /dashboard :", err);
+      res.status(500).send("Erreur serveur lors du chargement de la page d'accueil");
+    } finally {
+      await client.close();
+    }
+  });
+
+  app.post("/store-json", checkAuthenticated, async (req, res) => {
+    const client = new mongoClient(mongoDbUrl, {});
+    try {
+      await client.connect();
+      const db = client.db(dbName);
+      const col = db.collection("forms");
       const formData = {
         formId: req.body.formId,
         formName: req.body.formName,
@@ -98,10 +116,7 @@ module.exports = function (app, mongoDbUrl, dbName) {
         creationDate: new Date(),
         formData: req.body.formData,
       };
-
-      // Insert the form data
       const result = await col.insertOne(formData);
-
       res.send({ message: "Form stored successfully", _id: result.insertedId });
     } catch (err) {
       console.log(err.stack);
@@ -111,19 +126,13 @@ module.exports = function (app, mongoDbUrl, dbName) {
     }
   });
 
-  app.get("/list-forms", 
-    requireCheckpoint("0001100001"), // Require specific checkpoint
-    async (req, res) => {
-      const client = new mongoClient(mongoDbUrl, {});
+  app.get("/list-forms", requireCheckpoint("0001100001"), async (req, res) => {
+    const client = new mongoClient(mongoDbUrl, {});
     try {
-       // create a new MongoClient
-    
       await client.connect();
-     
       const db = client.db(dbName);
       const col = db.collection("forms");
       const forms = await col.find({}).toArray();
-
       res.send(forms);
     } catch (err) {
       console.log(err.stack);
@@ -133,19 +142,13 @@ module.exports = function (app, mongoDbUrl, dbName) {
     }
   });
 
-  app.get("/get-form/:formId", 
-    requireCheckpoint("0001100002"), // Require specific checkpoint 
-    async (req, res) => {
-       // create a new MongoClient
-       const client = new mongoClient(mongoDbUrl, {});
-      try {
-
+  app.get("/get-form/:formId", requireCheckpoint("0001100002"), async (req, res) => {
+    const client = new mongoClient(mongoDbUrl, {});
+    try {
       await client.connect();
       const db = client.db(dbName);
       const col = db.collection("forms");
-
       const form = await col.findOne({ formId: req.params.formId });
-
       if (form) {
         res.send(form);
       } else {
@@ -171,14 +174,11 @@ module.exports = function (app, mongoDbUrl, dbName) {
   });
 
   app.put("/update-form/:formId", checkAuthenticated, async (req, res) => {
-           // create a new MongoClient
-           const client = new mongoClient(mongoDbUrl, {});
+    const client = new mongoClient(mongoDbUrl, {});
     try {
-
       await client.connect();
       const db = client.db(dbName);
       const col = db.collection("forms");
-
       const updateData = {
         formName: req.body.formName,
         formPath: req.body.formPath,
@@ -186,12 +186,7 @@ module.exports = function (app, mongoDbUrl, dbName) {
         modificationDate: new Date(),
         formData: req.body.formData,
       };
-
-      const result = await col.updateOne(
-        { formId: req.params.formId },
-        { $set: updateData }
-      );
-
+      const result = await col.updateOne({ formId: req.params.formId }, { $set: updateData });
       if (result.matchedCount === 0) {
         res.status(404).send("Form not found");
       } else {
@@ -206,16 +201,12 @@ module.exports = function (app, mongoDbUrl, dbName) {
   });
 
   app.delete("/delete-form/:formId", checkAuthenticated, async (req, res) => {
-       // create a new MongoClient
-       const client = new MongoClient(mongoDbUrl, {});
+    const client = new mongoClient(mongoDbUrl, {});
     try {
-
       await client.connect();
       const db = client.db(dbName);
       const col = db.collection("forms");
-
       const result = await col.deleteOne({ formId: req.params.formId });
-
       if (result.deletedCount === 0) {
         res.status(404).send("Form not found");
       } else {
@@ -229,58 +220,38 @@ module.exports = function (app, mongoDbUrl, dbName) {
     }
   });
 
-  // Web service to return all images
   app.get('/media', checkAuthenticated, (req, res) => {
-    const imgDir = path.join(__dirname, 'public/media/img'); // Replace with your target directory
+    const imgDir = path.join(__dirname, 'public/media/img');
     const videoDir = path.join(__dirname, 'public/media/video');
-    
     const getAllImages = (dir, baseDir = dir) => {
       const images = [];
-      const supportedExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp']; // Add supported image extensions here
-
-      // Read directory contents
+      const supportedExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'];
       const entries = fs.readdirSync(dir, { withFileTypes: true });
-
       entries.forEach(entry => {
         const fullPath = path.join(dir, entry.name);
-
         if (entry.isDirectory()) {
-          // Recursively process subdirectories
           images.push(...getAllImages(fullPath, baseDir));
         } else if (entry.isFile() && supportedExtensions.includes(path.extname(entry.name).toLowerCase())) {
-          // Add relative path to images array
           images.push(path.relative(baseDir, fullPath));
         }
       });
-
       return images;
     };
-
     const getAllVideos = (dir, baseDir = dir) => {
       const videos = [];
-      const supportedExtensions = ['.mp4']; // Add supported video extensions here
-
-      // Read directory contents
+      const supportedExtensions = ['.mp4'];
       const entries = fs.readdirSync(dir, { withFileTypes: true });
-
       entries.forEach(entry => {
         const fullPath = path.join(dir, entry.name);
-
         if (entry.isDirectory()) {
-          // Recursively process subdirectories
           videos.push(...getAllVideos(fullPath, baseDir));
         } else if (entry.isFile() && supportedExtensions.includes(path.extname(entry.name).toLowerCase())) {
-          // Add relative path to images array
           videos.push(path.relative(baseDir, fullPath));
         }
       });
-
       return videos;
     };
-    
-
     try {
-     
       const imagePaths = getAllImages(imgDir);
       const videoPaths = getAllVideos(videoDir);
       res.json({ images: imagePaths, videos: videoPaths });
@@ -290,22 +261,15 @@ module.exports = function (app, mongoDbUrl, dbName) {
     }
   });
 
-  // Web service to upload images
   app.post('/upload-media', checkAuthenticated, upload.single('media'), (req, res) => {
-    console.log(req.file.mimetype)
     try {
-      // save the image in public/media/img and video in public/media/video
-      console.log(req.file.filename)
       res.json({ imagePath: `${req.file.filename}` });
-
-      
     } catch (error) {
       console.error('Error uploading image/video:', error);
       res.status(500).json({ error: 'Unable to upload mediaformData' });
     }
   });
 
-  // Frontend functions for media library
   app.get('/media-library', checkAuthenticated, (req, res) => {
     res.render('media-library.ejs');
   });
