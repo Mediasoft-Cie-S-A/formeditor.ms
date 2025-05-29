@@ -77,30 +77,85 @@ class dblayer{
     return dbCache[dbName].map(table => table.NAME.toLowerCase());
     }
 
-    async trackAction(action, details) {
-     /* try {
-          this.mongoClient.connect();
-          const db = this.mongoClient.db(this.mongoDbName); // Database name          
-          const collection = db.collection("actions"); // Collection name
+    async executeActions(actions, details)
+  {
+    console.log("executeActions");
+    console.log(actions);
+    console.log(actions.actionType);
+    actions.forEach(action => {
+        switch (action.actionType) {
+          case "email":
+            console.log("send email notification");
+            this.sendEmailNotification(action, details);
+            break;
+        } // switch (actions.actionType) {
+    }); // actions.forEach(action => {
+  } // async executeActions(actions, details)
 
-          // Check if the action already exists
-          const existingAction = await collection.findOne({ action: action, details: details });
 
-          if (existingAction) {
-              console.log(`Action already tracked: ${action}`);
-          } else {
-              // Insert the new action
-              await collection.insertOne({ action: action, details: details, timestamp: new Date() });
-              console.log(`Action tracked successfully: ${action}`);
-          }
-      } catch (err) {
-          console.error("Error tracking action in MongoDB:", err);
-      }
-      finally{
-        await this.mongoClient.close();
-      }
-        */
+  sendEmailNotification(action, details) 
+  {
+    console.log("sendEmailNotification");
+    // get the SMTP configuration from the app config
+          const smtpConfig = this.SMTP;
+          console.log("smtpConfig:"+smtpConfig);
+          if (smtpConfig) {
+            // from actions get the email address
+            // send email notification
+            var nodemailer = require('nodemailer');
+            
+          // Create reusable transporter object
+          const transporter = nodemailer.createTransport({
+            host: smtpConfig.host,
+            port: smtpConfig.port,
+            secure: smtpConfig.secure, // false for TLS
+            auth: {
+              user: smtpConfig.user,
+              pass: smtpConfig.pass,
+            },                        
+              tls: {
+                rejectUnauthorized: false // Optional: useful for debugging TLS issues
+              }
+          }); // transporter.createTransport({
+
+          // Send mail
+          
+            try {
+              const email= this.parseEmailText(action.actionContent);
+              console.log(email);
+              const info =  transporter.sendMail({
+                from: `"Mediasoft" <${smtpConfig.from}>`,
+                to: email.to ,
+                subject: email.subject,
+                html: email.body,
+              }); // transporter.sendMail({
+
+              console.log('Email sent:', info.messageId);
+            } catch (error) {
+              console.error('Error sending email:', error);
+            } // transporter.sendMail({
+          
+          
+          }// if (!smtpConfig) {
+       
   }
+
+  parseEmailText(text) {
+    console.log("parseEmailText");
+  console.log(text);
+  const toMatch = text.match(/\[to:(.*?)\]/i);
+  const subjectMatch = text.match(/\[subjet:(.*?)\]/i); // intentionally matching "subjet"
+  const body = text
+    .replace(/\[to:.*?\]/i, '')
+    .replace(/\[subjet:.*?\]/i, '')
+    .trim();
+
+  return {
+    to: toMatch ? toMatch[1].trim() : null,
+    subject: subjectMatch ? subjectMatch[1].trim() : null,
+    body: body || null,
+  };
+}
 
     // Function to generate a mapping of tables to their databases
     createTableDatabaseMapping(dbCache) {
@@ -533,11 +588,10 @@ class dblayer{
             async (req, res) => {
               const {database, tableName, rowID } = req.params;
               const db= dbs.databases[database];
-             
-
-              const data = req.body.data; // Assuming the updated data is sent in the request body
-              const action = req.body.action; // Assuming the action is sent in the request body
-              console.log(data);
+      
+              const data = JSON.parse( req.body.data); ; // Assuming the updated data is sent in the request body
+              const actions = JSON.parse(req.body.actions); // Assuming the action is sent in the request body
+        
               try {
                
                 const result = await db.updateRecord(tableName, data, rowID);
@@ -546,7 +600,7 @@ class dblayer{
              
                 const details = { tableName, data,  event: "Update" };
                 // Track the action in MongoDB
-                await this.trackAction(action, details);
+                await this.executeActions(actions, details);
               } catch (err) {
                 console.error(err);
                 res.status(500).send({"Error updating record":err});
@@ -562,23 +616,17 @@ class dblayer{
               const {database, tableName } = req.params;
               const db= dbs.databases[database];
             
-              const data = req.body.data; // Assuming the updated data is sent in the request body
-              const action = req.body.action; // Assuming the action is sent in the request body
-              console.log(data);
+              const data = JSON.parse( req.body.data); // Assuming the updated data is sent in the request body
+              const actions =JSON.parse(  req.body.actions); // Assuming the action is sent in the request body
               try {
-                  // repalce in data ' with `
-                  for (const key in data) {
-                    if (data.hasOwnProperty(key)) {
-                      data[key] = data[key].replace(/'/g, "`");
-                    }
-                  }
+                  
                 const result = await db.insertRecord(tableName, data);
                 res.json({ message: "Record inserted successfully", result });
                 
                 
                 const details = { tableName, data, event: "Insert" };
                 // Track the action in MongoDB
-                await this.trackAction(action, details);
+                await this.executeActions(actions, details);
               } catch (err) {
                 console.error(err);
                 res.status(500).send({"Error inserting record":err});

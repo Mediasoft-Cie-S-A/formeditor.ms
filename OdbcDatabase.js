@@ -454,8 +454,24 @@ class OdbcDatabase {
 
   async updateRecord(tableName, data, rowID) {
     try {
+      let setdata = "";
+      // convert array data.fields and data.values to string
+      if (!data || !data.fields || !data.values) {
+        throw new Error("Invalid data format. 'fields' and 'values' are required.");
+      }
+      if (typeof data.fields !== "object" && typeof data.values !== "object") {
+        throw new Error("Invalid data format. 'fields' and 'values' should be arrays.");
+      }
+      if (data.fields.length !== data.values.length) {
+        throw new Error("Fields and values length mismatch.");
+      }
+      for( let i = 0; i < data.fields.length; i++) {
+        setdata += `"${data.fields[i]}" = '${data.values[i]}',`;
+      }
+      // remove the last comma
+      setdata = setdata.slice(0, -1); // remove the last comma
       // Construct the full SQL statement
-      const sql = `UPDATE PUB.${tableName} SET ${data.body} WHERE ROWID = '${rowID}'`;
+      const sql = `UPDATE PUB.${tableName} SET ${setdata} WHERE ROWID = '${rowID}'`;
 
       console.log(sql);
       // Execute the query
@@ -474,9 +490,23 @@ class OdbcDatabase {
   // insert new record
   async insertRecord(tableName, data) {
     try {
+      let fields = "";
+      let values = "";
+      // convert array data.fields and data.values to string
+      if (!data || !data.fields || !data.values) {
+        throw new Error("Invalid data format. 'fields' and 'values' are required.");
+      }
+      if (typeof data.fields === "object") {
+        fields = "\""+ data.fields.join("\",\"") + "\""; // add quotes around each field
+      }
+      if (typeof data.values === "object") {
+        values =  "'"+ data.values.join("','") + "'"; // add quotes around each value  
+      }
+      // remove the last comma and quote
+   
+      
       // Construct the full SQL statement
-
-      const sql = `INSERT INTO PUB.${tableName} (${data.fields}) VALUES (${data.values})`;
+      const sql = `INSERT INTO PUB.${tableName} (${fields}) VALUES (${values})`;
       // Note: The values should be properly escaped to prevent SQL injection
       console.log(sql);
       // Execute the query
