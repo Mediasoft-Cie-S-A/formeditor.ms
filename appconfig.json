@@ -17,7 +17,7 @@
     "pass": "yox46420!",
     "from": "send@mediasoft-sa.ch"
   },
-  "mongoDbUrl": "mongodb://0.0.0.0:27017",
+  "mongoDbUrl": "mongodb://192.168.201.24:27017",
   "mongoDbName": "formeditmsapp",
   "sessionSecret": "secJKDFUret",
   "authentication": {
