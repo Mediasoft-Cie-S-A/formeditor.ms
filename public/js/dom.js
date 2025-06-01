@@ -179,14 +179,14 @@ function createDomElement(json, parent) {
 // Function to export the json to file
 function exportJson() {
   var formContainer = document.getElementById("formContainer");
-  var formId = document.getElementById("formId").value;
+  var objectId = document.getElementById("objectId").value;
   var jsonData = domToJson(formContainer);
   var dataStr =
     "data:text/json;charset=utf-8," +
     encodeURIComponent(JSON.stringify(jsonData));
   var downloadAnchorNode = document.createElement("a");
   downloadAnchorNode.setAttribute("href", dataStr);
-  downloadAnchorNode.setAttribute("download", formId + ".json");
+  downloadAnchorNode.setAttribute("download", objectId + ".json");
   document.body.appendChild(downloadAnchorNode); // required for firefox
   downloadAnchorNode.click();
   downloadAnchorNode.remove();
@@ -199,6 +199,12 @@ function onTabSwitch(event) {
   removeSelection();
   hideEditMenu();
   switch (target) {
+    case "#pageList":
+      console.log("PageList");
+      // Load pages
+      loadPages();
+      break;
+
         case "#formsList":
           console.log("formsList");
           // Load forms

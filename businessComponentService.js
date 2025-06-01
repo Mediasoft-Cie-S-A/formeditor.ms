@@ -22,9 +22,7 @@ module.exports = function (app, mongoDbUrl, dbName) {
     }
     res.redirect("/login");
   };
-  app.get("/dashboard", checkAuthenticated, (req, res) => {
-    res.render("dashboard.ejs", { name: req.user.name });
-  });
+  
   app.post("/store-business-json", checkAuthenticated, async (req, res) => {
     const client = new MongoClient(mongoDbUrl, {});
     try {
@@ -34,9 +32,9 @@ module.exports = function (app, mongoDbUrl, dbName) {
 
       // Construct form data with metadata
       const formData = {
-        formId: req.body.formId, // Assuming formId is provided in the request
-        formName: req.body.formName,
-        formPath: req.body.formPath,
+        objectId: req.body.objectId, // Assuming objectId is provided in the request
+        objectName: req.body.objectName,
+        objectSlug: req.body.objectSlug,
         userCreated: req.body.userCreated,
         userModified: req.body.userModified,
         modificationDate: new Date(),
@@ -85,7 +83,7 @@ module.exports = function (app, mongoDbUrl, dbName) {
         await client.connect();
         const db = client.db(dbName);
         const col = db.collection("businessComponent");
-        const form = await col.findOne({ formId: req.params.formId });
+        const form = await col.findOne({ objectId: req.params.objectId });
         if (form) {
           res.send(form);
         } else {
@@ -112,14 +110,14 @@ module.exports = function (app, mongoDbUrl, dbName) {
         const db = client.db(dbName);
         const col = db.collection("businessComponent");
         const updateData = {
-          formName: req.body.formName,
-          formPath: req.body.formPath,
+          objectName: req.body.objectName,
+          objectSlug: req.body.objectSlug,
           userModified: req.body.userModified,
           modificationDate: new Date(),
           formData: req.body.formData,
         };
         const result = await col.updateOne(
-          { formId: req.params.formId },
+          { objectId: req.params.objectId },
           { $set: updateData }
         );
         if (result.matchedCount === 0) {
@@ -148,7 +146,7 @@ module.exports = function (app, mongoDbUrl, dbName) {
         const db = client.db(dbName);
         const col = db.collection("businessComponent");
 
-        const result = await col.deleteOne({ formId: req.params.formId });
+        const result = await col.deleteOne({ objectId: req.params.objectId });
 
         if (result.deletedCount === 0) {
           res.status(404).send("Form not found");

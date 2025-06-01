@@ -375,6 +375,94 @@
     "icon": "fa fa-sitemap",
     "renderFunction": "renderDataChart"
   },
+  "heading1": {
+    "type": "heading1",
+    "description": "Heading 1",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-header",
+    "renderFunction": ""
+  },
+  "heading2": {
+    "type": "heading2",
+    "description": "Heading 2",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-header",
+    "renderFunction": ""
+  },
+  "heading3": {
+    "type": "heading3",
+    "description": "Heading 3",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-header",
+    "renderFunction": ""
+  },
+  "heading4": {
+    "type": "heading4",
+    "description": "Heading 4",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-header",
+    "renderFunction": ""
+  },
+  "heading5": {
+    "type": "heading5",
+    "description": "Heading 5",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-header",
+    "renderFunction": ""
+  },
+  "heading6": {
+    "type": "heading6",
+    "description": "Heading 6",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-header",
+    "renderFunction": ""
+  },
+  "paragraph": {
+    "type": "paragraph",
+    "description": "Paragraph",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-paragraph",
+    "renderFunction": ""
+  },
+  "container": {
+    "type": "container",
+    "description": "Container",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-cube",
+    "renderFunction": ""
+  },
   "textfield": {
     "type": "textfield",
     "description": "Text field",

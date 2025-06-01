@@ -28,8 +28,8 @@ async function loadBusinessComponent() {
   }
 }
 
-// function deleteForm(formId, listItem) {
-//   fetch(`/delete-form/${formId}`, { method: "DELETE" })
+// function deleteForm(objectId, listItem) {
+//   fetch(`/delete-form/${objectId}`, { method: "DELETE" })
 //     .then((response) => {
 //       if (!response.ok) {
 //         throw new Error("Network response was not ok");
@@ -46,10 +46,10 @@ async function loadBusinessComponent() {
 // }
 
 // function loadFormData(
-//   formId,
+//   objectId,
 //   renderContainer = document.getElementById("renderForm")
 // ) {
-//   fetch(`/get-form/${formId}`)
+//   fetch(`/get-form/${objectId}`)
 //     .then((response) => {
 //       if (!response.ok) {
 //         throw new Error("Network response was not ok");
@@ -58,18 +58,18 @@ async function loadBusinessComponent() {
 //     })
 //     .then((form) => {
 //       // set the header
-//       var formId = document.getElementById("formId");
-//       var formName = document.getElementById("formName");
-//       var formPath = document.getElementById("formPath");
+//       var objectId = document.getElementById("objectId");
+//       var objectName = document.getElementById("objectName");
+//       var objectSlug = document.getElementById("objectSlug");
 //       var userCreated = document.getElementById("userCreated");
 //       var userModified = document.getElementById("userModified");
 //       // Handle the form data here
 //       console.log("Form Data:", form);
 //       // For example, display the form data in an alert or populate a form for editing
-//       formId.value = form.formId;
-//       console.log(formId);
-//       formName.value = form.formName;
-//       formPath.value = form.formPath;
+//       objectId.value = form.objectId;
+//       console.log(objectId);
+//       objectName.value = form.objectName;
+//       objectSlug.value = form.objectSlug;
 //       userCreated.value = form.userCreated;
 
 //       renderContainer.innerHTML = "";

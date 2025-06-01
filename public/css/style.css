@@ -1052,44 +1052,19 @@ a.brand-logo {
     box-sizing: border-box;    
 }
 .portal-container{
-    display: inline-block;;   
     vertical-align: top;        
-    flex-direction: row;
-    flex-wrap: wrap;
-    padding: 20px;
+   
+    padding: 5px;
     background-color: white;
     width: 100%;
-}
-
-.portal-path-container {
-    display: flex;
-    padding: 20px;
-    background-color: white;
-    border-bottom: #4d61fc 1px dashed;
-    width: 100%;
-    padding: 20px;
-}
-
-
-.portal-list-item{
     margin: 10px;
-    margin-bottom: 20px;
-    border: 1px solid #ccc;
-    border-left: #4d61fc 7px solid;
-    padding: 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: 0.5s;
-    width: 300px;
-    height: 60px;
-    text-align: center;      
-    align-items: center;
-    justify-content: center;
-    vertical-align: middle !important;
-    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
 }
 
-.portal-container div:hover{
+
+
+
+
+.portal-container tr:hover{
     background-color: #f0f0f0;
 }   
 
@@ -1103,7 +1078,6 @@ a.brand-logo {
     border-radius: 5px;   
     width: 30px;
     height: 30px;
-    float: right;
     align-items: center;
     margin-left: 5px;
 }   
@@ -1121,7 +1095,7 @@ a.brand-logo {
     box-shadow: inset gray 0px 0px 60px -12px;
     width: 30px;
     height: 30px;
-    float: right;
+
     align-items: center;
     border-radius: 5px;
     margin-left: 5px;
@@ -1135,7 +1109,7 @@ a.brand-logo {
     cursor: hand;   
     width: 30px;
     height: 30px;
-    float: right;
+ 
     align-items: center;
     border-radius: 5px;
     margin-left: 5px;
