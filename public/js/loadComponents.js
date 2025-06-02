@@ -21,10 +21,10 @@ var elementsData = [];
 
 function replaceNameWithDescription(data) {
   return data?.map((item) => {
-    const { formName, ...rest } = item;
+    const { objectName, ...rest } = item;
     return {
       ...rest,
-      description: formName,
+      description: objectName,
       icon: "fa fa-briefcase",
       dataComponent: JSON.stringify(item.formData),
     };

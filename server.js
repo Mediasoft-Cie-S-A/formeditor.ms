@@ -122,6 +122,10 @@ catch(err)
 require('./formService')(app, mongoDbUrl,  dbName);
 require('./businessComponentService')(app, mongoDbUrl,  dbName);
 require('./GED')(app,session, passport);
+const { registerDynamicRoutes } =  require("./dynamic")(app, mongoDbUrl,  dbName);
+// Register the dynamic routes
+registerDynamicRoutes();
+require("./pageService")(app, mongoDbUrl,  dbName, registerDynamicRoutes);
 
 // Swagger definition
 const swaggerDefinition = {

@@ -74,10 +74,11 @@ module.exports = function (app, mongoDbUrl, dbName) {
     }
   });
 
+ 
   app.get("/dashboard", checkAuthenticated, (req, res) => {
-    res.render("dashboard.ejs", { name: req.user.name });
+    console.log(req.user.username);
+    res.render("dashboard.ejs", { userName: req.user.username, checkPoints: req.user.checkPoints });
   });
-
   app.post("/store-json", checkAuthenticated, async (req, res) => {
      // create a new MongoClient
      const client = new mongoClient(mongoDbUrl, {});
@@ -89,9 +90,9 @@ module.exports = function (app, mongoDbUrl, dbName) {
 
       // Construct form data with metadata
       const formData = {
-        formId: req.body.formId,
-        formName: req.body.formName,
-        formPath: req.body.formPath,
+        objectId: req.body.objectId,
+        objectName: req.body.objectName,
+        objectSlug: req.body.objectSlug,
         userCreated: req.body.userCreated,
         userModified: req.body.userModified,
         modificationDate: new Date(),
@@ -133,7 +134,7 @@ module.exports = function (app, mongoDbUrl, dbName) {
     }
   });
 
-  app.get("/get-form/:formId", 
+  app.get("/get-form/:objectId", 
     requireCheckpoint("0001100002"), // Require specific checkpoint 
     async (req, res) => {
        // create a new MongoClient
@@ -144,7 +145,7 @@ module.exports = function (app, mongoDbUrl, dbName) {
       const db = client.db(dbName);
       const col = db.collection("forms");
 
-      const form = await col.findOne({ formId: req.params.formId });
+      const form = await col.findOne({ objectId: req.params.objectId });
 
       if (form) {
         res.send(form);
@@ -170,7 +171,7 @@ module.exports = function (app, mongoDbUrl, dbName) {
     }
   });
 
-  app.put("/update-form/:formId", checkAuthenticated, async (req, res) => {
+  app.put("/update-form/:objectId", checkAuthenticated, async (req, res) => {
            // create a new MongoClient
            const client = new mongoClient(mongoDbUrl, {});
     try {
@@ -180,15 +181,15 @@ module.exports = function (app, mongoDbUrl, dbName) {
       const col = db.collection("forms");
 
       const updateData = {
-        formName: req.body.formName,
-        formPath: req.body.formPath,
+        objectName: req.body.objectName,
+        objectSlug: req.body.objectSlug,
         userModified: req.body.userModified,
         modificationDate: new Date(),
         formData: req.body.formData,
       };
 
       const result = await col.updateOne(
-        { formId: req.params.formId },
+        { objectId: req.params.objectId },
         { $set: updateData }
       );
 
@@ -205,7 +206,7 @@ module.exports = function (app, mongoDbUrl, dbName) {
     }
   });
 
-  app.delete("/delete-form/:formId", checkAuthenticated, async (req, res) => {
+  app.delete("/delete-form/:objectId", checkAuthenticated, async (req, res) => {
        // create a new MongoClient
        const client = new MongoClient(mongoDbUrl, {});
     try {
@@ -214,7 +215,7 @@ module.exports = function (app, mongoDbUrl, dbName) {
       const db = client.db(dbName);
       const col = db.collection("forms");
 
-      const result = await col.deleteOne({ formId: req.params.formId });
+      const result = await col.deleteOne({ objectId: req.params.objectId });
 
       if (result.deletedCount === 0) {
         res.status(404).send("Form not found");

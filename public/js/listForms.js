@@ -25,100 +25,115 @@ function loadForms(){
             return response.json();
         })
         .then(forms => {
-            const list = document.getElementById('formsList');
+            const list = document.getElementById('componentsListBody');
+            
             list.innerHTML = ''; // Clear the list
-            const container = document.createElement('div');
-            list.appendChild(container);
-            container.className = 'portal-container';
-// generate the list of path
-   var pathList = forms.map(form => form.formPath);
-// remove duplicates
-    pathList = pathList.filter((value, index, self) => self.indexOf(value) === index);
-    // create the div container for each path with the id
-    pathList.forEach(path => {
-        const pathContainer = document.createElement('div');
-        pathContainer.className = 'portal-path-container';
-        pathContainer.innerHTML = `<span style="float:left;position:absolute;margin-top:-10px"><b>${path}</b></span>`;
-        pathContainer.setAttribute('data-path', path); // Set the path as a data attribute
-        pathContainer.id = path;
-        container.appendChild(pathContainer);
-        // create the div container for each form with the id
-    });
-
+           
             forms.forEach(form => {
-                const listItem = document.createElement('div');                
-                listItem.innerHTML = `<b>${form.formName}</b>`; // Adjust according to your form object structure
-                listItem.className = 'portal-list-item';                
-                listItem.setAttribute('data-form-id', form.formId); // Set the form ID as a data attribute
-                listItem.setAttribute('title', `double click to view form`);
+                 const container = document.createElement('tr'); // Create a new container for the forms
+             
+                container.className = 'portal-container';
+                container.setAttribute('data-form-id', form.objectId); // Set the form ID as a data attribute
+                container.setAttribute('title', `double click to view form`);
+                const ItemID = document.createElement('td'); // Create a new list item for each form
+                ItemID.innerHTML = `<b>${form.objectId}</b>`; // Adjust according to your form object structure
+                container.appendChild(ItemID); // Append the list item to the container
+                const ItemName = document.createElement('td');                
+                ItemName.innerHTML = `<b>${form.objectName}</b>`; // Adjust according to your form object structure
+                      
+                
+                container.appendChild(ItemName); // Append the list item to the container
+                const ItemSlug = document.createElement('td');
+                ItemSlug.innerHTML = `<i>${form.objectSlug}</i>`; // Adjust according to your form object structure
+                container.appendChild(ItemSlug); // Append the list item to the container
+                const ItemUser = document.createElement('td');
+                ItemUser.innerHTML = `<i>${form.userCreated}</i>`; // Adjust according to your form object structure
+                container.appendChild(ItemUser); // Append the list item to the container
+                const ItemModified = document.createElement('td');
+                ItemModified.innerHTML = `<i>${form.userModified}</i>`; // Adjust according to your form object structure
+                container.appendChild(ItemModified); // Append the list item to the container
+                const ItemDate = document.createElement('td');
+                ItemDate.innerHTML = `<i>${form.modificationDate}</i>`; // Adjust according to your form object structure
+                container.appendChild(ItemDate); // Append the list item to the container
+                
                 // Create delete button
                 const deleteButton = document.createElement('button');
                 deleteButton.innerHTML='<i class="fa fa-trash" style="margin-left:-5px"></i>'
                 deleteButton.className = 'portal-delete-button';        
-                deleteButton.onclick = function() {
-                    deleteForm(form.formId, listItem);
-                };
+                deleteButton.onclick = function(event) {
+                    event.preventDefault();
+                    deleteForm(form.objectId, listItem);
+                }; // delete button functionality
 
                 // create edit button
                 const editButton = document.createElement('button');
                 editButton.innerHTML='<i class="fa fa-edit" style="margin-left:-5px"></i>'
                 editButton.className = 'portal-edit-button';
-                editButton.onclick = function() {
+                editButton.onclick = function(event) {
                     event.preventDefault();
-                    loadFormData(form.formId,document.getElementById('formContainer'));
+                    loadFormData(form.objectId,document.getElementById('formContainer'));
                     const editTab = document.querySelector('.nav-tabs a[href="#editForm"]');
                     if (editTab) {
                         editTab.click(); // Simulate click
-                    }
+                    }  // Simulate click on the edit tab
                    
-                };
+                }; // edit button functionality
                 // create show button
                 const showButton = document.createElement('button');
                 showButton.innerHTML='<i class="fa fa-eye" style="margin-left:-5px"></i>'
                 showButton.className = 'portal-show-button';
                 showButton.onclick = function(event) {
                     event.preventDefault();
-                    loadFormData(form.formId,document.getElementById('renderContainer'));
+                    loadFormData(form.objectId,document.getElementById('renderContainer'));
                     const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
                     if (showTab) {
                         showTab.click(); // Simulate click
-                    }
+                    }// if (showTab) {
                    
-                };
-
+                }; // show button functionality
+                const itemActions = document.createElement('td');
+                container.appendChild(itemActions); // Append the actions cell to the container
                 //append the delete button to the list item
-                listItem.appendChild(deleteButton);
-                listItem.appendChild(showButton);                
-                listItem.appendChild(editButton);
-                listItem.addEventListener('dblclick', function(event) {
+                itemActions.appendChild(deleteButton);
+                itemActions.appendChild(showButton);                
+                itemActions.appendChild(editButton);
+                container.addEventListener('dblclick', function(event) {
                     event.preventDefault();
-                    loadFormData(form.formId,document.getElementById('renderContainer'));
+                    loadFormData(form.objectId,document.getElementById('renderContainer'));
                     const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
                     if (showTab) {
                         showTab.click(); // Simulate click
                     }
-                });
-                listItem.addEventListener('click', function(e) {
+                }); // Add a double-click event listener to the list item
+                container.addEventListener('click', function(e) {
                     e.preventDefault();
                     // check if the event is a click on the delete,show or edit button
                     if (e.target.className === 'portal-list-item'){
                         
-                    showHint(`ID:${form.formId}<br>User:${form.userCreated}<br>Last mod:${form.modificationDate}`, 5000, event);
+                    showHint(`ID:${form.objectId}<br>User:${form.userCreated}<br>Last mod:${form.modificationDate}`, 5000, event);
                     }
-                });
-
-                // get the path container
-                const pathContainer = document.getElementById(form.formPath);
-                pathContainer.appendChild(listItem);
-            });
-        })
+                }
+                ); // ListItem.addEventListener 
+        
+             
+                 list.appendChild(container); // Append the container to the list
+                // Add the container to the list
+        }); // forEach
+            // Check if there are no forms
+            if (forms.length === 0) {
+                const noFormsMessage = document.createElement('div');
+                noFormsMessage.className = 'portal-no-forms';
+                noFormsMessage.textContent = 'No forms available.';
+                container.appendChild(noFormsMessage);
+            }
+        })// Handle the response
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
 
-function deleteForm(formId, listItem) {
-    fetch(`/delete-form/${formId}`, { method: 'DELETE' })
+function deleteForm(objectId, listItem) {
+    fetch(`/delete-form/${objectId}`, { method: 'DELETE' })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -134,13 +149,83 @@ function deleteForm(formId, listItem) {
         });
 }
 
+function searchFormbyID(event) {
+    event.preventDefault(); // Prevent the default form submission
+    const searchInput = event.target;
+    const list = document.getElementById('componentsListBody');
+    const searchTerm = searchInput.value.trim().toLowerCase(); // Get the search term and convert to lowercase
+    console.log('Searching for form with ID:', searchTerm);
+    // get the all the rows in the list
+    const rows = list.querySelectorAll('tr'); // Select all rows with the class 'portal-container'
+    let found = false; // Flag to check if any form is found
+    rows.forEach(row => {
+        const formId = row.getAttribute('data-form-id'); // Get the form ID from the data attribute
+        if (formId && formId.toLowerCase().includes(searchTerm)) { // Check if the form ID includes the search term
+            row.style.display = ''; // Show the row if it matches
+            found = true; // Set the flag to true if a match is found
+        } else {
+            row.style.display = 'none'; // Hide the row if it doesn't match
+        }
+    });
+    if (!found) {
+        showToast('No forms found with ID: ' + searchTerm, 5000); // Show a toast message if no forms are found
+    }
+    console.log('Search completed.');
+}
 
+function searchFormbyName(event) {
+    event.preventDefault(); // Prevent the default form submission  
+    const searchInput = event.target;
+    const list = document.getElementById('componentsListBody');
+    const searchTerm = searchInput.value.trim().toLowerCase(); // Get the search term and convert to lowercase
+    console.log('Searching for form with Name:', searchTerm);
+    // get the all the rows in the list
+    const rows = list.querySelectorAll('tr'); // Select all rows with the class 'portal-container'
+    let found = false; // Flag to check if any form is found
+    rows.forEach(row => {
+        const formName = row.querySelector('td:nth-child(2)').textContent; // Get the form name from the second cell
+        if (formName && formName.toLowerCase().includes(searchTerm)) { // Check if the form name includes the search term
+            row.style.display = ''; // Show the row if it matches
+            found = true; // Set the flag to true if a match is found
+        } else {
+            row.style.display = 'none'; // Hide the row if it doesn't match
+        }
+    }); 
+    if (!found) {
+        showToast('No forms found with Name: ' + searchTerm, 5000); // Show a toast message if no forms are found
+    }
+    console.log('Search completed.');
+}
 
-function loadFormData(formId,renderContainer)
+function searchFormbySlug(event) {
+    event.preventDefault(); // Prevent the default form submission
+    const searchInput = event.target;
+    const list = document.getElementById('componentsListBody');
+    const searchTerm = searchInput.value.trim().toLowerCase(); // Get the search term and convert to lowercase
+    console.log('Searching for form with Slug:', searchTerm);
+    // get the all the rows in the list
+    const rows = list.querySelectorAll('tr'); // Select all rows with the class 'portal-container'
+    let found = false; // Flag to check if any form is found
+    rows.forEach(row => {
+        const formSlug = row.querySelector('td:nth-child(3)').textContent; // Get the form slug from the third cell
+        if (formSlug && formSlug.toLowerCase().includes(searchTerm)) { // Check if the form slug includes the search term
+            row.style.display = ''; // Show the row if it matches
+            found = true; // Set the flag to true if a match is found
+        } else {
+            row.style.display = 'none'; // Hide the row if it doesn't match
+        }
+    });
+    if (!found) {
+        showToast('No forms found with Slug: ' + searchTerm, 5000); // Show a toast message if no forms are found
+    }
+    console.log('Search completed.');
+}
+
+function loadFormData(objectId,renderContainer)
  {
-    console.log("🔍 loadFormData called for:", formId, "into:", renderContainer.id || renderContainer.className);
+    console.log("🔍 loadFormData called for:", objectId, "into:", renderContainer.id || renderContainer.className);
 
-    fetch(`/get-form/${formId}`)
+    fetch(`/get-form/${objectId}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -158,20 +243,20 @@ function loadFormData(formId,renderContainer)
             renderElements(renderContainer);
            
             // set the header
-            var formId = document.getElementById('formId');
-            var formName = document.getElementById('formName');
-            var formPath = document.getElementById('formPath');
+            var objectId = document.getElementById('objectId');
+            var objectName = document.getElementById('objectName');
+            var objectSlug = document.getElementById('objectSlug');
             var userCreated = document.getElementById('userCreated');
             var userModified = document.getElementById('userModified');
 
-            if (formId === null || formId === undefined)
+            if (objectId === null || objectId === undefined)
             // Handle the form data here
             console.log('Form Data:', form);
             // For example, display the form data in an alert or populate a form for editing
-            formId.value=form.formId;
-            console.log(formId);
-            formName.value=form.formName;
-            formPath.value=form.formPath;
+            objectId.value=form.objectId;
+            console.log(objectId);
+            objectName.value=form.objectName;
+            objectSlug.value=form.objectSlug;
             userCreated.value=form.userCreated;
            
         })
@@ -182,16 +267,16 @@ function loadFormData(formId,renderContainer)
 }
 const formCache = {};
 
-function loadFormDataInModal(formId, container) {
+function loadFormDataInModal(objectId, container) {
     // ✅ Si le formulaire est déjà en cache, l'afficher
-    if (formCache[formId]) {
+    if (formCache[objectId]) {
         container.innerHTML = ''; // Vider le container actuel
-        container.appendChild(formCache[formId].cloneNode(true)); // Cloner pour éviter les effets de bord
+        container.appendChild(formCache[objectId].cloneNode(true)); // Cloner pour éviter les effets de bord
         return;
     }
 
     // ❌ Sinon, faire le fetch
-    fetch(`/get-form/${formId}`)
+    fetch(`/get-form/${objectId}`)
         .then(response => {
             if (!response.ok) throw new Error('Network error');
             return response.json();
@@ -203,7 +288,7 @@ function loadFormDataInModal(formId, container) {
             renderElements(container);
 
             // ✅ Stocker une copie *clonée* pour réutilisation plus tard
-            formCache[formId] = container.cloneNode(true);
+            formCache[objectId] = container.cloneNode(true);
         })
         .catch(error => {
             showToast('Erreur modal : ' + error, 5000);

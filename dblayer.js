@@ -174,11 +174,17 @@ class dblayer{
     // Function to generate a mapping of tables to their databases
     createTableDatabaseMapping(dbCache) {
     const mapping = {};
-    for (const [dbName, tables] of Object.entries(dbCache)) {
-      for (const table of tables) {
-          mapping[table.NAME.toLowerCase()] = dbName;
-      }
-    }
+    
+      try
+      {
+        for (const [dbName, tables] of Object.entries(dbCache)) {
+          for (const table of tables) {
+              mapping[table.NAME.toLowerCase()] = dbName;
+          }
+        }
+      }catch (error) {
+      console.error("Error creating table to database mapping:", error);
+     }
 
     return mapping;
     }

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestion des pages</title>
+  <link rel="stylesheet" href="https://unpkg.com/grapesjs/dist/css/grapes.min.css">
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 8px 12px; border-bottom: 1px solid #ccc; }
+    button { padding: 6px 10px; margin-right: 4px; }
+  </style>
+</head>
+<body>
+
+  <h1>🛠️ Gestion des pages HTML</h1>
+  <button onclick="window.location.href='editor.html'">➕ Nouvelle page</button>
+
+  <table id="pages-table">
+    <thead>
+      <tr>
+        <th>Titre</th>
+        <th>Slug</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Contenu dynamique -->
+    </tbody>
+  </table>
+
+  <script>
+    async function fetchPages() {
+      const res = await fetch("/api/pages");
+      const pages = await res.json();
+      const tbody = document.querySelector("#pages-table tbody");
+      tbody.innerHTML = "";
+
+      pages.forEach(page => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td>${page.title}</td>
+          <td>${page.slug}</td>
+          <td>
+            <button onclick="editPage('${page._id}')">✏️ Modifier</button>
+            <button onclick="deletePage('${page._id}')">🗑️ Supprimer</button>
+            <a href="/html${page.slug}" target="_blank">🔍 Voir</a>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function editPage(id) {
+      window.location.href = `editor.html?id=${id}`;
+    }
+
+    async function deletePage(id) {
+      if (!confirm("Confirmer la suppression ?")) return;
+      const res = await fetch(`/api/pages/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        alert("Page supprimée");
+        fetchPages();
+      } else {
+        alert("Erreur lors de la suppression");
+      }
+    }
+
+    fetchPages();
+  </script>
+</body>
+</html>
