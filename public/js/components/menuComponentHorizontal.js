@@ -4,24 +4,212 @@
  */
 
 function createMenuComponentHorizontal(type) {
-    const mainDiv = document.createElement('div');
-    mainDiv.setAttribute("tagName", type);
-    mainDiv.className = "form-element menu-horizontal-wrapper";
-    mainDiv.id = `menuComponentHorizontal-${Date.now()}`;
+    const wrapper = document.createElement('div');
+    wrapper.id = 'menuGlobale';
+    wrapper.style.display = 'flex';
+    wrapper.style.justifyContent = 'space-between';
+    wrapper.style.alignItems = 'flex-start';
+    wrapper.style.gap = '20px';
+    wrapper.style.padding = '10px 20px';
+    wrapper.style.backgroundColor = '#fafafa';
+    wrapper.style.borderBottom = '1px solid #ccc';
 
-    const internalDiv = document.createElement('div');
+    const menuZone = document.createElement('div');
+    menuZone.id = 'menuZone';
+    menuZone.style.flex = '1';
+
+    const menuComponent = document.createElement('div');
+    menuComponent.setAttribute("tagName", type);
+    menuComponent.className = "form-element menu-horizontal-wrapper";
+    menuComponent.id = `menuComponentHorizontal-${Date.now()}`;
+    menuComponent.setAttribute("items", JSON.stringify(menuItems));
+
+    menuZone.appendChild(menuComponent);
+
+    const rightSideMenu = document.createElement('div');
+    rightSideMenu.id = 'rightSideMenu';
+    rightSideMenu.style.minWidth = '80px';
+
+    wrapper.appendChild(menuZone);
+    wrapper.appendChild(rightSideMenu);
+
+    setTimeout(() => {
+        const items = menuComponent.getAttribute("items");
+        if (items) {
+            renderMenuComponentHorizontal(menuComponent);
+        } else {
+            console.warn("⚠️ Tentative de render, mais 'items' est toujours null.");
+        }
+    }, 0);
+    
+
+    return wrapper;
+}
+
+function renderMenuComponentHorizontal(content) {
+    const itemsAttr = content.getAttribute("items");
+    console.log("🖁 Rendering menuComponent with items :", itemsAttr);
+
+    if (!itemsAttr) {
+        console.warn("⛔ Aucun attribut 'items' trouvé ou vide sur le composant menu. Annulation du rendu.");
+        return;
+    }
+
+    let items;
+    try {
+        items = JSON.parse(itemsAttr);
+        if (!Array.isArray(items)) throw new Error("items n'est pas un tableau");
+    } catch (err) {
+        console.error("❌ Erreur lors du parsing de 'items' :", err);
+        return;
+    }
+
+    content.innerHTML = "";
+
     const menu = document.createElement('ul');
     menu.className = 'horizontal-menu';
 
-    internalDiv.appendChild(menu);
-    mainDiv.appendChild(internalDiv);
-    mainDiv.setAttribute("items", JSON.stringify(menuItems));
+    const createMenuItem = (item) => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        const i = document.createElement('i');
 
-    renderMenuComponentHorizontal(mainDiv);
+        i.className = item.icon;
+        a.textContent = item.item;
+        a.style.fontFamily = "'Segoe UI', 'Roboto', 'Open Sans', sans-serif";
+        a.style.fontSize = "14px";
+        a.style.fontWeight = "500";
+        a.style.textDecoration = "none";
+        a.style.color = "#333";
+        a.style.padding = "8px 16px";
+        a.style.display = "inline-block";
 
-    return mainDiv;
+        li.appendChild(i);
+        li.appendChild(a);
+
+        if (item.children && item.children.length > 0) {
+            const subMenu = document.createElement('ul');
+            subMenu.className = "horizontal-submenu";
+            subMenu.style.display = "none";
+
+            item.children.forEach(subItem => {
+                subMenu.appendChild(createMenuItem(subItem));
+            });
+
+            li.appendChild(subMenu);
+            li.setAttribute('onmouseenter', 'toggleSubMenuOpen(event, this)');
+            li.setAttribute('onmouseleave', 'toggleSubMenuClose(event, this)');
+        } else {
+            li.setAttribute('onclick', `loadFormData('${item.url}', document.getElementById('${item.target}'))`);
+        }
+
+        return li;
+    };
+
+    if (items.length > 1) {
+        const lastItem = items.pop();
+        items.unshift(lastItem);
+    }
+
+    items.forEach(item => {
+        menu.appendChild(createMenuItem(item));
+    });
+
+    content.appendChild(menu);
+
+    const rightSide = document.getElementById("rightSideMenu");
+    if (rightSide) {
+        rightSide.innerHTML = "";
+
+        const savedState = localStorage.getItem("menuState");
+        if (savedState) {
+            try {
+                const state = JSON.parse(savedState);
+                if (state.rightSide) {
+                    state.rightSide.forEach(component => {
+                        const el = document.createElement(component.tag || "div");
+                        if (component.id) el.id = component.id;
+                        if (component.class) el.className = component.class;
+                        if (component.text && !['input', 'textarea'].includes(component.tag)) {
+                            el.textContent = component.text;
+                        }
+                        if (component.type) el.setAttribute("type", component.type);
+                        if (component.value) el.value = component.value;
+                        if (component.innerHTML && component.tag === "div") {
+                            el.innerHTML = component.innerHTML;
+                        }
+                        
+                        el.draggable = !!component.draggable;
+                        if (component.onclick) {
+                            try {
+                                el.onclick = () => {
+                                    console.log("➡️ Bouton cliqué, exécution onclick :", component.onclick);
+                                    eval(component.onclick);
+                                };
+                            } catch (e) {
+                                console.error("❌ Erreur lors de l’exécution du onclick avec eval :", e);
+                            }
+                        }
+                        
+
+                        rightSide.appendChild(el);
+                        if (state.rightSide) {
+                            console.log("📦 Nombre d’éléments posés dans le rightSide :", state.rightSide.length);
+                        }
+                        
+                    });
+                }
+            } catch (e) {
+                console.error("❌ Erreur restauration rightSide :", e);
+            }
+        }
+
+        const translateWrapper = document.createElement("div");
+        translateWrapper.className = "translate-container";
+
+        const floatButton = document.createElement('div');
+        floatButton.textContent = '🌐';
+        floatButton.title = 'Select Language';
+        floatButton.onclick = () => {
+            selector.style.display = selector.style.display === 'none' ? 'block' : 'none';
+        };
+
+        const selector = document.createElement('select');
+        selector.style.display = 'none';
+        selector.style.marginLeft = '8px';
+
+        Object.keys(translationDictionary).forEach(lang => {
+            const option = document.createElement('option');
+            option.value = lang;
+            option.textContent = lang;
+            selector.appendChild(option);
+        });
+
+        selector.onchange = (e) => translatePage('', e.target.value);
+
+        translateWrapper.appendChild(floatButton);
+        translateWrapper.appendChild(selector);
+
+        rightSide.appendChild(document.createElement("hr"));
+        rightSide.appendChild(translateWrapper);
+    }
+
+    console.log("✅ Menu horizontal rendu avec", items.length, "éléments.");
 }
 
+function toggleSubMenuOpen(event, element) {
+    const subMenu = element.querySelector('.horizontal-submenu');
+    if (subMenu) {
+        subMenu.classList.add("show");
+    }
+}
+
+function toggleSubMenuClose(event, element) {
+    const subMenu = element.querySelector('.horizontal-submenu');
+    if (subMenu) {
+        subMenu.classList.remove("show");
+    }
+}
 function editMenuComponentHorizontal(type, element, content) {
     // Parse the menu items from the element's "items" attribute
     const items = JSON.parse(element.getAttribute("items"));
@@ -68,6 +256,8 @@ function editMenuComponentHorizontal(type, element, content) {
 
 
 function addMenuItemsHorizontal(element, itemdiv, itemObj) {
+    console.log("🔍 Searching for #rightSideMenu...", document.getElementById("rightSideMenu"));
+
     const internalDiv = document.createElement('div');
     internalDiv.style.marginBottom = "5px";
     internalDiv.style.border = "1px solid #ccc";
@@ -140,150 +330,28 @@ function addMenuItemsHorizontal(element, itemdiv, itemObj) {
 internalDiv.appendChild(deleteButton);
 }
 
-function saveMenuItemsHorizontal(element) {
-    const parseMenuItems = (container) => {
-        const items = [];
-        const children = container.children;
-        for (let i = 0; i < children.length; i++) {
-            const inputs = children[i].querySelectorAll("input");
-            if (inputs.length < 5) continue; // S'assurer qu'il y a suffisamment d'inputs
 
-            const item = inputs[0].value;
-            const url = inputs[1].value;
-            const icon = inputs[2].value;
-            const target = inputs[3].value;
-            const checkpoint = inputs[4].value;
+window.addEventListener("DOMContentLoaded", () => {
+    console.log("📦 DOMContentLoaded triggered");
 
-            // Rechercher tous les divs enfants pour capturer les sous-menus
-            const subMenuDivs = children[i].querySelectorAll(":scope > div");
-            let childrenItems = [];
-            subMenuDivs.forEach(subDiv => {
-                childrenItems = childrenItems.concat(parseMenuItems(subDiv));
-            });
+    const container = document.getElementById("menuGlobale");
+    const savedState = localStorage.getItem("menuState");
 
-            items.push({
-                item: item,
-                url: url,
-                icon: icon,
-                target: target,
-                checkpoint: checkpoint,
-                children: childrenItems.length > 0 ? childrenItems : null
-            });
-        }
-        return items;
-    };
-
-    const itemdiv = document.getElementById("menu-items");
-    const items = parseMenuItems(itemdiv);
-    element.setAttribute("items", JSON.stringify(items));
-    renderMenuComponentHorizontal(element);
-}
-
-
-function renderMenuComponentHorizontal(content) {
-    const items = JSON.parse(content.getAttribute("items"));
-
-    // Clear the container
-    content.innerHTML = "";
-
-    // Create a wrapper to align menu and translate side by side
-    const wrapper = document.createElement("div");
-    wrapper.className = "menu-bar-wrapper"; // Flex container
-
-    const menu = document.createElement('ul');
-    menu.className = 'horizontal-menu';
-
-    // --- Translate button + selector ---
-    const translateWrapper = document.createElement("div");
-    translateWrapper.className = "translate-container";
-
-    const floatButton = document.createElement('div');
-    floatButton.textContent = '🌐';
-    floatButton.title = 'Select Language';
-    floatButton.onclick = () => {
-        selector.style.display = selector.style.display === 'none' ? 'block' : 'none';
-    };
-
-    const selector = document.createElement('select');
-    selector.style.display = 'none';
-    selector.style.marginLeft = '8px';
-    Object.keys(translationDictionary).forEach(lang => {
-        const option = document.createElement('option');
-        option.value = lang;
-        option.textContent = lang;
-        selector.appendChild(option);
-    });
-    selector.onchange = (e) => translatePage('', e.target.value);
-
-    translateWrapper.appendChild(floatButton);
-    translateWrapper.appendChild(selector);
-
-    // --- Menu items rendering ---
-    const createMenuItem = (item) => {
-        const li = document.createElement('li');
-        const a = document.createElement('a');
-        const i = document.createElement('i');
-
-        i.className = item.icon;
-        a.textContent = item.item;
-        a.style.fontFamily = "'Segoe UI', 'Roboto', 'Open Sans', sans-serif";
-        // a.style.backgroundColor = "gray";
-        a.style.fontSize = "14px";
-        a.style.fontWeight = "500";
-        a.style.textDecoration = "none";
-        a.style.color = "#333";
-        a.style.padding = "8px 16px";
-        a.style.display = "inline-block";
-        
-
-        li.appendChild(i);
-        li.appendChild(a);
-
-        if (item.children && item.children.length > 0) {
-            const subMenu = document.createElement('ul');
-            subMenu.className = "horizontal-submenu";
-            subMenu.style.display = "none";
-
-            item.children.forEach(subItem => {
-                subMenu.appendChild(createMenuItem(subItem));
-            });
-
-            li.appendChild(subMenu);
-            li.setAttribute('onmouseenter', 'toggleSubMenuOpen(event, this)');
-            li.setAttribute('onmouseleave', 'toggleSubMenuClose(event, this)');
-
-        } else {
-            li.setAttribute('onclick', `loadFormData('${item.url}', document.getElementById('${item.target}'))`);
-        }
-
-        return li;
-    };
-
-    if (items.length > 1) {
-        const lastItem = items[items.length - 1];     // copie du dernier
-        items.splice(items.length - 1, 1);            // supprime le dernier
-        items.unshift(lastItem);                      // insère au début
+    if (!container) {
+        console.error("❌ Conteneur #menuGlobale non trouvé !");
+        return;
     }
-    
-    items.forEach(item => {
-        menu.appendChild(createMenuItem(item));
-    });
-    
-    wrapper.appendChild(menu);
-    wrapper.appendChild(translateWrapper);
-    content.appendChild(wrapper);
-}
 
-function toggleSubMenuOpen(event, element) {
-    const subMenu = element.querySelector('.horizontal-submenu');
-    if (subMenu) {
-        subMenu.classList.add("show");
-    }
-}
+    if (savedState) {
+        console.log("✅ État retrouvé :", savedState);
+        const state = JSON.parse(savedState);
+        window.menuItems = state.menuItems;
 
-function toggleSubMenuClose(event, element) {
-    const subMenu = element.querySelector('.horizontal-submenu');
-    if (subMenu) {
-        subMenu.classList.remove("show");
+        const restoredMenu = createMenuComponentHorizontal("menuComponentHorizontal");
+
+        container.innerHTML = '';
+        container.appendChild(restoredMenu);
+    } else {
+        console.warn("⚠️ Aucun état sauvegardé");
     }
-}
+});

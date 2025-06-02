@@ -96,6 +96,9 @@ function editElementButton(type, element, content) {
 
         element.setAttribute("config", JSON.stringify(config));
         renderElementButton(element);
+
+        saveGlobalState(); // 👈 Important !
+
     };
 
     container.appendChild(labelGroup);
@@ -106,6 +109,74 @@ function editElementButton(type, element, content) {
     content.innerHTML = "";
     content.appendChild(container);
 }
+
+function saveMenuItemsHorizontal(element) {
+    const parseMenuItems = (container) => {
+        const items = [];
+        const children = container.children;
+        for (let i = 0; i < children.length; i++) {
+            const inputs = children[i].querySelectorAll("input");
+            if (inputs.length < 5) continue;
+
+            const item = inputs[0].value;
+            const url = inputs[1].value;
+            const icon = inputs[2].value;
+            const target = inputs[3].value;
+            const checkpoint = inputs[4].value;
+
+            const subMenuDivs = children[i].querySelectorAll(":scope > div");
+            let childrenItems = [];
+            subMenuDivs.forEach(subDiv => {
+                childrenItems = childrenItems.concat(parseMenuItems(subDiv));
+            });
+
+            items.push({
+                item: item,
+                url: url,
+                icon: icon,
+                target: target,
+                checkpoint: checkpoint,
+                children: childrenItems.length > 0 ? childrenItems : null
+            });
+        }
+        return items;
+    };
+
+    const itemdiv = document.getElementById("menu-items");
+    const items = parseMenuItems(itemdiv);
+
+    // Mise à jour des items dans menuComponentHorizontal
+    element.setAttribute("items", JSON.stringify(items));
+
+    // Recherche du menuGlobale pour stocker l'état complet
+    const menuGlobale = document.getElementById("menuGlobale");
+    if (menuGlobale) {
+        const rightSide = document.getElementById("rightSideMenu");
+        const rightSideData = [];
+
+        if (rightSide) {
+            const tagged = rightSide.querySelectorAll("[tagName]");
+            tagged.forEach(el => {
+                rightSideData.push({
+                    tagName: el.getAttribute("tagName"),
+                    config: JSON.parse(el.getAttribute("config") || "{}")
+                });
+            });
+        }
+
+        const state = {
+            menuItems: items,
+            rightSide: rightSideData
+        };
+
+        menuGlobale.setAttribute("data-fullstate", JSON.stringify(state));
+    }
+
+    renderMenuComponentHorizontal(element);
+    saveGlobalState(); // 👈 AJOUT ICI
+
+}
+
 
 function renderElementButton(element) {
     console.log("🔧 Appel de renderElementButton");
@@ -142,7 +213,7 @@ function renderElementButton(element) {
 
 
 document.addEventListener("click", (e) => {
-    const btn = e.target.closest('button[tagName="button"]');
+    const btn = e.target.closest('button[tagName="button"], button[tagName="elementButton"]');
     if (!btn) return;
 
     const config = JSON.parse(btn.getAttribute("config") || "{}");
@@ -158,5 +229,112 @@ document.addEventListener("click", (e) => {
     }
 
     console.log(`🔁 Chargement de l’écran '${config.url}' dans '${config.target}'`);
+    console.log("targetDiv: ",targetDiv);
     loadFormData(config.url, targetDiv);
+});
+
+function saveGlobalState() {
+    const menuComponent = document.querySelector('.menu-horizontal-wrapper');
+    const rightSide = document.getElementById("rightSideMenu");
+    const menuGlobale = document.getElementById("menuGlobale");
+    if (!menuComponent || !rightSide || !menuGlobale) {
+        console.warn("⛔ Structure HTML incomplète !");
+        return;
+    }
+
+    // --- Récupérer menuItems ---
+    const parseMenuItems = (container) => {
+        const items = [];
+        const children = container.children;
+        for (let i = 0; i < children.length; i++) {
+            const inputs = children[i].querySelectorAll("input");
+            if (inputs.length < 5) continue;
+
+            const item = inputs[0].value;
+            const url = inputs[1].value;
+            const icon = inputs[2].value;
+            const target = inputs[3].value;
+            const checkpoint = inputs[4].value;
+
+            const subMenuDivs = children[i].querySelectorAll(":scope > div");
+            let childrenItems = [];
+            subMenuDivs.forEach(subDiv => {
+                childrenItems = childrenItems.concat(parseMenuItems(subDiv));
+            });
+
+            items.push({
+                item,
+                url,
+                icon,
+                target,
+                checkpoint,
+                children: childrenItems.length > 0 ? childrenItems : null
+            });
+        }
+        return items;
+    };
+
+    const itemDiv = document.getElementById("menu-items");
+    const items = itemDiv ? parseMenuItems(itemDiv) : [];
+
+    // --- Récupérer rightSide ---
+    const rightSideData = [];
+    const tagged = rightSide.querySelectorAll("[tagName]");
+    tagged.forEach(el => {
+        rightSideData.push({
+            tagName: el.getAttribute("tagName"),
+            config: JSON.parse(el.getAttribute("config") || "{}")
+        });
+    });
+
+    const state = {
+        menuItems: items,
+        rightSide: rightSideData
+    };
+
+    menuGlobale.setAttribute("data-fullstate", JSON.stringify(state));
+    console.log("💾 État global sauvegardé :", state);
+}
+
+
+function loadGlobalState() {
+    const menuGlobale = document.getElementById("menuGlobale");
+    const saved = menuGlobale?.getAttribute("data-fullstate");
+    if (!saved) {
+        console.warn("🔍 Aucun état sauvegardé trouvé dans #menuGlobale.");
+        return;
+    }
+
+    const state = JSON.parse(saved);
+    console.log("🔁 Chargement de l’état sauvegardé :", state);
+
+    // --- Recharger le menu horizontal ---
+    const menuComponent = document.querySelector(".menu-horizontal-wrapper");
+    if (menuComponent && state.menuItems) {
+        menuComponent.setAttribute("items", JSON.stringify(state.menuItems));
+        renderMenuComponentHorizontal(menuComponent);
+    }
+
+    // --- Recharger les composants du panneau droit ---
+    const rightSide = document.getElementById("rightSideMenu");
+    if (rightSide && Array.isArray(state.rightSide)) {
+        rightSide.innerHTML = ""; // vide l'existant avant restauration
+        state.rightSide.forEach(component => {
+            if (!component.tagName || !component.config) return;
+    
+            if (component.tagName === "elementButton") {
+                const btn = createElementButton(component.config.label || "Button");
+                btn.setAttribute("config", JSON.stringify(component.config));
+                renderElementButton(btn);
+                rightSide.appendChild(btn);
+            }
+    
+            // Tu peux ajouter d'autres composants ici s'il y en a d'autres à gérer
+        });
+    }
+    
+    
+}
+window.addEventListener("DOMContentLoaded", () => {
+    loadGlobalState();
 });

@@ -126,10 +126,19 @@ function renderElements(parent){
                     // get the render function from the config
                       var renderFunction = element.renderFunction;
                       if (renderFunction) {
-                        console.log("renderFunction:" + renderFunction);
-                        // Call the render function with the element as a parameter
+                        console.log("renderFunction:", renderFunction);
+                      
+                        // ⚠️ Sécurité spécifique pour renderMenuComponentHorizontal
+                        if (
+                          renderFunction === "renderMenuComponentHorizontal" &&
+                          (!el.getAttribute("items") || el.getAttribute("items") === "null")
+                        ) {
+                          console.warn("⛔ Menu ignoré temporairement car 'items' est vide.");
+                          continue; // Skip this element
+                        }
+                      
                         window[renderFunction](el);
-                        } else {
+                      } else {
                         console.log("No render function found for tagname: " + element.type);
                       } // end if renderFunction
                   } // end for (var j = 0; j < elements.length; j++)

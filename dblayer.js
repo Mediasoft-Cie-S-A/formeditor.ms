@@ -16,7 +16,7 @@
 
  const OdbcDatabase = require("./OdbcDatabase.js");
  const MySqlDatabase = require("./MySqlDatabase.js");
-
+ const VALID_API_KEY = "e7f4b0f3-5c6b-4a29-b821-93f0d99d1cb6"; 
 class dblayer{
 
     
@@ -24,10 +24,24 @@ class dblayer{
       databases = [];
       dbCache = [];
      
-    checkAuthenticated = (req, res, next) => {
-              if (req.isAuthenticated()) { return next(); }
-              res.redirect("/login");
-          };
+      checkAuthenticated = (req, res, next) => {
+        const apiKey = req.headers["api_key"]; // ou req.get("api_key")
+      
+        // ✅ Si une clé API valide est fournie → autoriser l'accès
+        if (apiKey && apiKey === VALID_API_KEY) {
+          console.log("🔐 Accès autorisé via API key");
+          return next();
+        }
+      
+        // 🔐 Sinon, vérifie l'authentification standard
+        if (req.isAuthenticated && req.isAuthenticated()) {
+          return next();
+        }
+      
+        // ❌ Refusé
+        console.warn("⛔ Accès refusé : ni authentifié ni clé API valide");
+        res.redirect("/login");
+      };
 
 
       // for each dns entre create a db object
