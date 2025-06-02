@@ -223,9 +223,7 @@ function searchFormbySlug(event) {
 
 function loadFormData(objectId,renderContainer)
  {
-    console.log("🔍 loadFormData called for:", objectId, "into:", renderContainer.id || renderContainer.className);
-
-    fetch(`/get-form/${objectId}`)
+     fetch(`/get-form/${objectId}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -241,6 +239,7 @@ function loadFormData(objectId,renderContainer)
             // Convert JSON back to DOM and append
             var domContent = jsonToDom(form.formData,renderContainer);
             renderElements(renderContainer);
+            rebuildComponents(renderContainer);
            
             // set the header
             var objectId = document.getElementById('objectId');
@@ -265,6 +264,24 @@ function loadFormData(objectId,renderContainer)
             console.error('There was a problem with the fetch operation:', error);
         });
 }
+function rebuildComponents(container) {
+    const elements = container.querySelectorAll("[tagName]");
+    elements.forEach(el => {
+        const type = el.getAttribute("tagName");
+        switch (type) {
+            case "menuComponentHorizontal":
+                renderMenuComponentHorizontal(el);
+                break;
+            case "button":
+                renderElementButton(el);
+                break;
+            // ajoute ici les autres composants si besoin
+            default:
+                console.warn("⚠️ Composant inconnu :", type);
+        }
+    });
+}
+
 const formCache = {};
 
 function loadFormDataInModal(objectId, container) {

@@ -21,9 +21,12 @@ let undoStack = [];
 let redoStack = [];
 let isRestoring = false;
 
-// Save initial state
-undoStack.push(htmlEditor.innerHTML);
 
+// Save initial state
+if (htmlEditor)
+{
+  undoStack.push(htmlEditor.innerHTML);
+}
 
 // Undo
 function EditorUndo() {

@@ -1363,3 +1363,344 @@ input.apple-switch:checked:after {
       .modal-actions button:hover {
         background-color: #0056b3;
       }
+
+
+/* ============= Light AboutUs Style ============= */
+/* Reset */
+/* ============= Light AboutUs Style ============= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  html, body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f9f9f9;
+    color: #2c3e50;
+    scroll-behavior: smooth;
+  }
+  
+  /* Container principale */
+  #formContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    min-height: 100vh;
+    background-color: #f9f9f9;
+  }
+  
+  /* Structure de la page */
+  .container {
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  
+  /* Header */
+  .main-header {
+    width: 100%;
+    border-bottom: 1px solid #ddd;
+    background: #fff;
+    padding: 10px 0;
+  }
+  
+  .announcement {
+    font-size: 14px;
+    background: #333;
+    color: #fff;
+    padding: 8px;
+    text-align: center;
+  }
+  
+  /* Navbar */
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  
+  .navbar-nav {
+    display: flex;
+    gap: 16px;
+    list-style: none;
+  }
+  
+  .navbar-nav .nav-link {
+    text-decoration: none;
+    color: #333;
+    font-size: 15px;
+  }
+  
+  .auth-buttons .btn {
+    margin-left: 8px;
+  }
+  
+  .btn {
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .btn:hover {
+    background-color: #eee;
+  }
+  
+  /* Logo */
+  .landing_logo {
+    max-height: 50px;
+    height: auto;
+  }
+  
+  /* Bannière */
+  .common-banner {
+    width: 100%;
+    background: #e0e0e0;
+    padding: 40px 20px;
+    text-align: center;
+  }
+  
+  .common-banner h1 {
+    font-size: 28px;
+    font-weight: 600;
+    color: #2c3e50;
+  }
+  
+  /* Bloc contenu principal */
+  .static-content {
+    width: 100%;
+    max-width: 800px;
+    background: #fff;
+    padding: 32px;
+    border-radius: 10px;
+    border: 1px solid #e1e1e1;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04);
+    height: 800px;
+  }
+  
+  .static-content h2 {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  
+  .static-content h3 {
+    font-size: 18px;
+    font-weight: 500;
+    margin-top: 24px;
+    margin-bottom: 10px;
+  }
+  
+  .static-content ul {
+    padding-left: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .static-content ul li {
+    margin-bottom: 8px;
+  }
+  
+  /* Témoignage */
+  .testimonial {
+    background: #f0f0f0;
+    padding: 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-top: 30px;
+  }
+  
+  .testimonial h4 {
+    margin-bottom: 6px;
+    font-size: 16px;
+  }
+  
+  .testimonial img {
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+  }
+  
+  /* Footer */
+  .site-footer {
+    width: 100%;
+    background: #f4f4f4;
+    padding: 30px 0;
+    font-size: 14px;
+  }
+  
+  .footer-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  
+  .footer-row ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .footer-row a {
+    text-decoration: none;
+    color: #2c3e50;
+  }
+  
+  .footer-row a:hover {
+    text-decoration: underline;
+  }
+  
+  .input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .input-wrapper input {
+    flex: 1;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .input-wrapper button {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 50px;
+    background: #444;
+    color: #fff;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  
+  .input-wrapper button:hover {
+    background: #2c3e50;
+  }
+  
+
+/* ===== page accueil ========================================================== */
+
+.login-wrapper {
+    background: #ffffff;
+    padding: 32px;
+    border: 1px solid #e1e1e1;
+    border-radius: 6px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    max-width: 400px;
+    width: 100%;
+  }
+  
+  /* Formulaire de connexion */
+  .login-form .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .login-form label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  
+  .login-form input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .form-options {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+  }
+  
+  .small-link {
+    font-size: 13px;
+    color: #2c3e50;
+    text-decoration: none;
+  }
+  
+  .small-link:hover {
+    text-decoration: underline;
+  }
+  
+  /* Utilitaires */
+  .w-100 {
+    width: 100%;
+  }
+  
+  .mt-3 {
+    margin-top: 1rem;
+  }
+  
+  .mb-4 {
+    margin-bottom: 1.5rem;
+  }
+  
+  /* ========================= LOGO ========================= */
+  
+  .landing_logo {
+    max-height: 40px; /* Assure que le logo s'aligne avec le menu */
+    display: block;
+  }
+  
+  /* ========================= NAVBAR ========================= */
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 10px 0;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  .navbar-nav {
+    display: flex;
+    justify-content: center;
+    flex: 2;
+    gap: 16px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .navbar-nav .nav-link {
+    text-decoration: none;
+    color: #2c3e50;
+    font-weight: 500;
+  }
+  
+  /* Boutons d’authentification */
+  .auth-buttons {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    min-width: 160px;
+  }
+  
+  /* ========================= PAGE DE CONNEXION ========================= */
+  
+  .section-gap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 120px); /* Pour centrer verticalement en dessous du header */
+    padding: 20px;
+  }
+  
