@@ -26,8 +26,8 @@ module.exports = async function (app,mongoDbUrl, dbName, dynamic) {
        await client.connect();
        const db = client.db(dbName);
        const pageCol = db.collection("pages");
-
-      const existing = await pageCol.findOne({ objectId, slug });
+       const id = objectId;
+      const existing = await pageCol.findOne({ objectId: id });
       //if existi update 
       if (existing) {
         // update the existing page
@@ -39,6 +39,13 @@ module.exports = async function (app,mongoDbUrl, dbName, dynamic) {
           meta,
           updatedAt: new Date()
         };
+        // update
+        const result = await pageCol.updateOne(
+          { objectId: id },         // critère de sélection
+          { $set: update }          // données à mettre à jour
+        );
+        res.json({ msg: "update"});
+        return result;
       }
 
       const now = new Date();
@@ -52,7 +59,7 @@ module.exports = async function (app,mongoDbUrl, dbName, dynamic) {
       res.status(400).json({ error: err.message });
     }finally {
       await client.close();
-      dynamic.registerDynamicRoutes(); // Re-register dynamic routes after creating a page
+      dynamic(); // Re-register dynamic routes after creating a page
     }
   });
 
@@ -63,11 +70,12 @@ module.exports = async function (app,mongoDbUrl, dbName, dynamic) {
     const id = req.params.id;
     const client = new mongoClient(mongoDbUrl, {});
     try {
-      if (!ObjectId.isValid(id)) throw new Error("ID invalide");
+    
       await client.connect();
       const db = client.db(dbName);
       const pageCol = db.collection("pages");
       const result = await pageCol.deleteOne({objectId: id });
+      
       if (result.deletedCount === 0) throw new Error("Page non trouvée ou déjà supprimée");
 
       res.json({ success: true });
@@ -85,11 +93,12 @@ module.exports = async function (app,mongoDbUrl, dbName, dynamic) {
     const id = req.params.id;
     const client = new mongoClient(mongoDbUrl, {});
     try {
-      if (!ObjectId.isValid(id)) throw new Error("ID invalide");
+     
       await client.connect();
       const db = client.db(dbName);
       const pageCol = db.collection("pages");
       const page = await pageCol.findOne({ objectId: id });
+      console.log(page);
       if (!page) return res.status(404).json({ error: "Page non trouvée" });
       res.json(page);
     } catch (err) {
