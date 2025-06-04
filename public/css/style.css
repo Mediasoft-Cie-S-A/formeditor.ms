@@ -56,9 +56,9 @@ body {
 
 .main-header {
     height: 70px;
-    margin-bottom: 40px;
     background-color: #fff;
     box-shadow: 2px 9px 49px -17px rgba(0, 0, 0, 0.1);
+    height: 100%;
 }
 
 .main-header-nav img {
@@ -1365,9 +1365,9 @@ input.apple-switch:checked:after {
       }
 
 
-/* ============= Light AboutUs Style ============= */
 /* Reset */
 /* ============= Light AboutUs Style ============= */
+
 * {
     margin: 0;
     padding: 0;
@@ -1394,9 +1394,11 @@ input.apple-switch:checked:after {
   /* Structure de la page */
   .container {
     width: 100%;
-    max-width: 960px;
+    max-width: 70%;
     margin: 0 auto;
     padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
   }
   
   /* Header */
@@ -1702,5 +1704,51 @@ input.apple-switch:checked:after {
     align-items: center;
     min-height: calc(100vh - 120px); /* Pour centrer verticalement en dessous du header */
     padding: 20px;
+  }
+  
+  /* section{
+    width: 70%;
+    margin: auto;
+    margin-top: 1%;
+    margin-bottom: 1%;
+  } */
+
+
+  #home{
+    display: flex;
+    justify-content: space-between;
+  }
+  .img-fluid {
+    width: 100%;
+    height: auto;
+    display: block;
+    padding: 0;
+  }
+  .features-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+  .col-md-4{
+    padding: 0;
+  }
+  
+  .containerWtImages{
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* ========================================== */
+  .reveal {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+    will-change: opacity, transform;
+  }
+  
+  .reveal.active {
+    opacity: 1;
+    transform: translateY(0);
   }
   
