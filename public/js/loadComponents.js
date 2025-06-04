@@ -109,6 +109,41 @@ function loadScriptIfNotLoaded(scriptUrl, scriptslist) {
 function createSidebar(elementsData, components) {
   const sidebar = document.getElementById("componentsSidebar");
   if (sidebar===null || sidebar === undefined) return;
+  sidebar.innerHTML = ""; // Clear existing content
+  sidebar.style.display = "flex";
+  sidebar.style.flexDirection = "column";
+  sidebar.style.width = "200px"; 
+  // genereate the searcher
+  const searcher = document.createElement("input");
+  searcher.type = "text";
+  searcher.placeholder = "Search components...";
+  searcher.style.width = "100%";
+  searcher.addEventListener("input", function () {
+    const searchTerm = this.value.toLowerCase();
+    // searchTerm = title of div  
+    const categoryDivs = sidebar.querySelectorAll(".category");
+    categoryDivs.forEach((categoryDiv) => {
+      const button = categoryDiv.querySelector(".category-button");
+      const items = categoryDiv.querySelectorAll(".draggable");
+      items.forEach((item) => {
+        const itemText = item.getAttribute("title") || item.textContent;
+        if (itemText.toLowerCase().includes(searchTerm)) {
+          item.style.display = "block"; // Show the item if it matches the search term
+        } else {
+          item.style.display = "none"; // Hide the item if it doesn't match
+        }
+        // Show the category button if at least one item matches
+        if (Array.from(items).some((el) => el.style.display !== "none")) {
+          button.style.display = "block"; // Show the category button
+        } else {
+          button.style.display = "none"; // Hide the category button if no items match
+        }
+      }
+      );
+    });
+  });
+  sidebar.appendChild(searcher);
+  // Create a container for the sidebar items
   const categories = {};
   var scriptslist = [];
   var csslist = [];

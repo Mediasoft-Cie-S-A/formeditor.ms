@@ -61,7 +61,10 @@ function  loadPages () {
                 showButton.innerHTML='<i class="fa fa-eye" style="margin-left:-5px"></i>'
                 showButton.className = 'portal-show-button';
                 showButton.onclick = function(event) {
-                
+                  event.preventDefault();
+                  // call window.open with the page slug
+                    const pageUrl = `/${page.slug}`;
+                    window.open(pageUrl, '_blank'); // Open the page in a new tab
                 }; // show button functionality
                 const itemActions = document.createElement('td');
                 itemActions.appendChild(showButton); // Append the show button

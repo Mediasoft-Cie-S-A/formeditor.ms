@@ -38,6 +38,34 @@ function createElementStatic(type) {
             tagType = 'div';
             html = "Container";
             break;
+        case 'line':
+            tagType = 'hr';
+            html = ""; // Horizontal line, no inner HTML
+            break;
+        case 'link':
+            tagType = 'a';
+            html = "Link";
+            break;
+        case 'quote':
+            tagType = 'blockquote';
+            html = "Quote";
+            break;
+        case 'iframe':
+            tagType = 'iframe';
+            html = '<iframe src="https://example.com" width="100%" height="300px"></iframe>';
+            break;
+        case 'code':
+            tagType = 'pre';
+            html = '<code>Code block</code>';
+            break;
+        case 'list':
+            tagType = 'ul';
+            html = '<li>List item 1</li><li>List item 2</li>';
+            break;
+        case 'table':
+            tagType = 'table';
+            html = '<tr><td>Cell 1</td><td>Cell 2</td></tr>';
+            break;
         default:
             console.error("Unknown static element type: " + type);
             return null; // Return null for unsupported types
