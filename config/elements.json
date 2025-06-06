@@ -463,10 +463,87 @@
     "icon": "fa fa-cube",
     "renderFunction": ""
   },
+  "line": {
+    "type": "line",
+    "description": "Line",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-minus",
+    "renderFunction": ""
+  },
+  "Link": {
+    "type": "link",
+    "description": "Link",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-link",
+    "renderFunction": ""
+  },
+  "quote": {
+    "type": "quote",
+    "description": "Quote",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-quote-left",
+    "renderFunction": ""
+  },
+  "code": {
+    "type": "code",
+    "description": "Code",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-code",
+    "renderFunction": ""
+  },
+  "iframe": {
+    "type": "iframe",
+    "description": "Iframe",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-window-restore",
+    "renderFunction": ""
+  },
+  "list": {
+    "type": "list",
+    "description": "List",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-list-ul",
+    "renderFunction": ""
+  },
+  "table": {
+    "type": "table",
+    "description": "Table",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-table",
+    "renderFunction": ""
+  },
   "textfield": {
     "type": "textfield",
     "description": "Text field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -477,7 +554,7 @@
   "number": {
     "type": "number",
     "description": "Number field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -488,7 +565,7 @@
   "password": {
     "type": "password",
     "description": "Password field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -499,7 +576,7 @@
   "email": {
     "type": "email",
     "description": "Email field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -510,7 +587,7 @@
   "textarea": {
     "type": "textarea",
     "description": "Textarea",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -521,7 +598,7 @@
   "checkbox": {
     "type": "checkbox",
     "description": "Checkbox",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -532,7 +609,7 @@
   "radio": {
     "type": "radio",
     "description": "Radio button",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -543,7 +620,7 @@
   "select": {
     "type": "select",
     "description": "Select",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "selectComponent.js",
     "createFunction": "createElementSelect",
     "editFunction": "editElementSelect",
@@ -554,7 +631,7 @@
   "button": {
     "type": "button",
     "description": "Button",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "buttonComponent.js",
     "createFunction": "createElementButton",
     "editFunction": "editElementButton",
@@ -565,7 +642,7 @@
   "buttonLink": {
   "type": "buttonLink",                
   "description": "Link Button",        
-  "category": "HTML",
+  "category": "Form",
   "scriptName": "buttonLinkComponent.js", 
   "createFunction": "createButtonLink",
   "editFunction":  "editButtonLink",
@@ -576,7 +653,7 @@
   "submit": {
     "type": "submit",
     "description": "Submit button",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "buttonComponent.js",
     "createFunction": "createElementButton",
     "editFunction": "editElementButton",
@@ -587,7 +664,7 @@
   "reset": {
     "type": "reset",
     "description": "Reset button",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "buttonComponent.js",
     "createFunction": "createElementButton",
     "editFunction": "editElementButton",
@@ -598,7 +675,7 @@
   "image": {
     "type": "image",
     "description": "Image",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "imageComponent.js",
     "createFunction": "createElementImage",
     "editFunction": "editElementImage",
@@ -609,7 +686,7 @@
   "file": {
     "type": "file",
     "description": "File upload",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -620,7 +697,7 @@
   "hidden": {
     "type": "hidden",
     "description": "Hidden field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -631,7 +708,7 @@
   "date": {
     "type": "date",
     "description": "Date field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -642,7 +719,7 @@
   "datetime": {
     "type": "datetime",
     "description": "Datetime field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -654,7 +731,7 @@
   "month": {
     "type": "month",
     "description": "Month field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -665,7 +742,7 @@
   "week": {
     "type": "week",
     "description": "Week field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -676,7 +753,7 @@
   "time": {
     "type": "time",
     "description": "Time field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -687,7 +764,7 @@
   "range": {
     "type": "range",
     "description": "Range field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -698,7 +775,7 @@
   "color": {
     "type": "color",
     "description": "Color field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -721,7 +798,7 @@
   "tel": {
     "type": "tel",
     "description": "Telephone field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -732,12 +809,23 @@
   "url": {
     "type": "url",
     "description": "Url field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
     "styles": "genericInput.css",
     "icon": "fa fa-link",
     "renderFunction": ""
+  },
+  "prompt": {
+    "type": "prompt",
+    "description": "Prompt",
+    "category": "AI",
+    "scriptName": "promptComponent.js",
+    "createFunction": "createPromptComponent",
+    "editFunction": "editPromptComponent",
+    "styles": "promptComponent.css",
+    "icon": "fa fa-commenting-o",
+    "renderFunction": "renderPromptComponent"
   }
 }

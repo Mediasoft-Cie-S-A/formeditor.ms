@@ -144,9 +144,6 @@ body {
 
 
 .category {
-    margin-left: -4px;
-    margin-right: -4px;
-    border: 1px solid #ccc;	    
     cursor: pointer;	    
     padding: 5px;
     align-items: center;	  
