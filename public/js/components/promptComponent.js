@@ -24,33 +24,8 @@ function createPromptComponent(type) {
     main.setAttribute("promptPlaceholder", "Type your question here...");
     main.setAttribute("promptButtonText", "Submit");
     main.setAttribute("promptResponse", "");
-    const  Label = document.createElement('label');
-    Label.innerHTML = "Prompt";
-    Label.id = "PromptLabel";
-    Label.tagName = "label";
-    main.appendChild(Label);    
-    const promptText = document.createElement('textarea');
-    promptText.id = "PromptText";
-    promptText.value = main.getAttribute("promptText");
-    promptText.placeholder = main.getAttribute("promptPlaceholder");
-    promptText.className = "input-element textarea-element";
-    promptText.setAttribute("promptType","auto");
-    main.appendChild(promptText);
-    const promptType = document.createElement('select');
-    promptType.id = "PromptType";
-    promptType.innerHTML = `
-        <option value="auto">Auto Fill</option>
-        <option value="generate">Generate</option>
-        <option value="question">Question</option>
-        `;
-    promptType.value = main.getAttribute("promptType") || "auto";
-    main.appendChild(promptType);
-    const promptButtonText = document.createElement('input');
-    promptButtonText.id = "PromptButtonText";
-    promptButtonText.value = main.getAttribute("promptButtonText");
-    promptButtonText.placeholder = "Button text for the prompt";
-    promptButtonText.setAttribute("onclick", "callAIService(event)");
-    main.appendChild(promptButtonText);
+    renderPromptComponent(main);
+
     return main;
 }
 
@@ -75,54 +50,128 @@ function editPromptComponent(type, element, content) {
 }
 
 function renderPromptComponent(element) {
-    
+     element.innerHTML = `<div id="chat-container">
+                    <textarea id="PromptText" placeholder="Type your message..."></textarea>
+
+                    <div class="actions">
+                      <div style="display: none; gap: 10px;">
+                        <label for="file-upload">📎 Upload
+                        <input type="file" id="file-upload" />
+                        </label>
+                    </div>
+                        <button onclick="handleshowFileUpload()" title="Upload File">📎</button>
+                        <button onclick="handleFill(event)" title="Fill">✨</button>
+                        <button onclick="handleOCR(event)" title="OCR">📄</button>
+                        <button onclick="handleVoice(event)" title="Voice">🎤</button>
+                        <button  onclick="callAIService(event)" title="Send to AI">🤖</button>
+                        <img src="img/loader.gif" id="loader" style="display: none; width: 80px; height: 40px;" alt="Loading...">
+                    </div>
+                    </div> `;
+   
 }
 
 function callAIService(event) {
     event.preventDefault();
     // get the prompt text and button text
-    const promptText = event.target.parentElement.querySelector('#PromptText').value;
-    const promptType = event.target.parentElement.querySelector('#PromptType').value;
-    switch (promptType) {
-        case 'auto':
-             // get all the inputs in the form
-            const inputs = event.target.parentElement.querySelectorAll('input, textarea');
-        
-            break;
-        case 'generate':
-            // Generate logic can be implemented here
-            break;
-        case 'question':
-            // Question logic can be implemented here
-            break;
-        default:
-            console.error('Unknown prompt type:', promptType);
-            return;
-    }
+    const promptText = document.getElementById('PromptText');
+   
+    // call the AI service with the prompt text
+    fetchAIResponse(promptText.value).then(responseText => {
+        // handle the response from the AI service
+        const responseElement = document.createElement('div');
+        responseElement.innerHTML = `<strong>AI Response:</strong> ${responseText}`;
+        event.target.parentElement.appendChild(responseElement);
+    }).catch(error => {
+        console.error('Error:', error);
+        const errorElement = document.createElement('div');
+        errorElement.innerHTML = `<strong>Error:</strong> ${error.message}`;
+        event.target.parentElement.appendChild(errorElement);
+    });
   
 }
 
-function fetchAIResponse(promptText) {
-      
+function handleshowFileUpload() {
+    const fileUpload = document.getElementById('file-upload');
+    fileUpload.style.display = fileUpload.style.display === 'none' ? 'block' : 'none';
+}
+
+function handleFill(event) {
+    event.preventDefault();
+    // Implement the fill functionality here
+    const promptText = document.getElementById('PromptText');
+    // search all the fileds in the form and fill the prompt text with their values
+    const formFields = document.querySelectorAll('[dataset-field-name]');
+    // get all the nams of the fields
+    const fieldNames = Array.from(formFields).map(field => field.getAttribute('dataset-field-name')).join(', ');
+    // get the prompt text and set it to the promptText
+    let prompt = `From the following text: "${promptText.value}"\n tExtract the following fields and generate a JSON object with their names and values:\n Fields:${fieldNames} Only include values that can be inferred from the text. For missing fields, return null.
+
+Respond **only** with a JSON object with the following format: {
+  "response": { ...`;
+    console.log(prompt);  
+    fetchAIResponse(prompt).then(responseText => {
+        // handle the response from the AI service
+        const jsonResponse =  extractJsonAfterResponse(responseText);
+        const responseElement = document.createElement('div');
+        responseElement.innerHTML = `<strong>AI Response:</strong> ${jsonResponse}`;
+        event.target.parentElement.appendChild(responseElement);
+        
+        console.log('JSON Response:', jsonResponse);
+        if (jsonResponse) {
+            // Update the form fields with the values from the JSON response
+            for (const [key, value] of Object.entries(jsonResponse)) {
+                const field = document.querySelector(`[dataset-field-name="${key}"]`);
+                if (field) {
+                    field.value = value !== null ? value : '';
+                }
+            }
+        } else {
+            console.error('No valid JSON response found.');
+        }
+
+    }).catch(error => {
+        console.error('Error:', error);
+        const errorElement = document.createElement('div');
+        errorElement.innerHTML = `<strong>Error:</strong> ${error.message}`;
+        event.target.parentElement.appendChild(errorElement);
+    }
+    );
+}
+
+async function fetchAIResponse(promptText) {
+       const loader = document.getElementById('loader');
+    // show the loader
+    loader.style.display = 'block';
     // call ollama API or any AI service with the prompt text with full URL
-    fetch('https://api.ollama.com/v1/chat/completions', {
+   return  fetch('http://demo01:5001/api/v1/generate', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-            model: 'llama2',
-            messages: [{ role: 'user', content: promptText }],
+        body: JSON.stringify({            
+            "max_context_length": 2048,
+            "max_length": 100,
+            "prompt": promptText,
+            "quiet": false,
+            "rep_pen": 1.1,
+            "rep_pen_range": 256,
+            "rep_pen_slope": 1,
+            "temperature": 0.5,
+            "tfs": 1,
+            "top_a": 0,
+            "top_k": 100,
+            "top_p": 0.9,
+            "typical": 1,
+
         }),
     })  
     .then(response => response.json())
     .then(data => {
         // handle the response from the AI service
-        const responseText = data.choices[0].message.content;
-        // display the response in the element
-        const responseElement = document.createElement('div');
-        responseElement.innerHTML = `<strong>Response:</strong> ${responseText}`;
-        event.target.parentElement.appendChild(responseElement);
+        const responseText = data.results[0].text || "No response from AI service";
+        // hide the loader
+        loader.style.display = 'none';
+        return responseText;
     })  
     .catch(error => {
         console.error('Error:', error);
@@ -132,3 +181,42 @@ function fetchAIResponse(promptText) {
     });
 }
     
+function extractJsonAfterResponse(text) {
+    const keyword = '"response": {';
+    const startIndex = text.indexOf(keyword);
+
+    if (startIndex === -1) {
+        console.error('No "response": {' + ' found in text.');
+        return null;
+    }
+
+    let braceCount = 0;
+    let inside = false;
+    let json = '';
+
+    // Start iterating from the position of the opening brace of "response"
+    for (let i = text.indexOf('{', startIndex); i < text.length; i++) {
+        const char = text[i];
+        json += char;
+
+        if (char === '{') {
+            braceCount++;
+            inside = true;
+        } else if (char === '}') {
+            braceCount--;
+        }
+
+        // If we've closed all opened braces, we're done
+        if (inside && braceCount === 0) {
+            break;
+        }
+    }
+
+    try {
+        const parsed = JSON.parse(json);
+        return parsed; // Return the full parsed object that was inside "response"
+    } catch (err) {
+        console.error('Invalid JSON structure:', err.message);
+        return null;
+    }
+}

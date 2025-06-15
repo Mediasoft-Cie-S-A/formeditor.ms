@@ -207,6 +207,7 @@ function onTabSwitch(event) {
   console.log(target);
   removeSelection();
   hideEditMenu();
+
   switch (target) {
     case "#pageList":
       console.log("PageList");
@@ -237,13 +238,11 @@ function onTabSwitch(event) {
           createEditableTableList(list, detailsDiv);
           break;
   }
+
+
 }
 
-// Add event listeners to tab links
-var tabLinks = document.querySelectorAll(".nav-tabs a");
-tabLinks.forEach(function (link) {
-  link.addEventListener("click", onTabSwitch);
-});
+
 
 function jsonToDomBusinessComponent(json, parent) {
   // Helper function to create an element from JSON structure
@@ -307,3 +306,9 @@ function jsonToDomBusinessComponent(json, parent) {
     renderCookieStorage(cookieStorageElements[i]); // Custom function to render cookieStorage elements
   }
 }
+
+// Add event listeners to tab links
+var tabLinks = document.querySelectorAll(".nav-tabs a");
+tabLinks.forEach(function (link) {
+  link.addEventListener("click", onTabSwitch);
+});

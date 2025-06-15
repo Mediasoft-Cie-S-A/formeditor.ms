@@ -40,7 +40,7 @@ function  loadPages () {
                 deleteButton.className = 'portal-delete-button';        
                 deleteButton.onclick = function(event) {
                     event.preventDefault();
-                    deleteForm(page.objectId, listItem);
+                    deletePage(page.objectId);
                 }; // delete button functionality
 
                 // create edit button
@@ -98,6 +98,9 @@ function loadPage(pageId) {
             document.getElementById("objectSlug").value = page.slug;
             document.getElementById("userCreated").value = page.userCreated;
             document.getElementById("userModified").value = page.userModified;
+             var objectType = document.getElementById('objectType');
+            // select in the objecttype the value form
+            objectType.value = 'form';
             // Assuming formContainer is where the page content is displayed
             const formContainer = document.getElementById("formContainer");
             formContainer.innerHTML = ""; // Clear existing content
@@ -188,6 +191,25 @@ function registerPage(e) {
         }).catch(error => {
             console.error("Error registering page:", error);
             showToast("Error registering page: " + error.message);
+        });
+    }
+}
+
+function deletePage(pageID) {
+    if (confirm("Are you sure you want to delete this page?")) {
+        fetch(`/pages/${pageID}`, {
+            method: "DELETE"
+        })
+        .then(response => {
+            if (!response.ok) {
+                showToast("Error deleting page: " + response.statusText);
+            } else {
+                showToast("Page deleted successfully");
+                loadPages(); // Reload the pages list
+            }
+        }).catch(error => {
+            console.error("Error deleting page:", error);
+            showToast("Error deleting page: " + error.message);
         });
     }
 }

@@ -94,9 +94,10 @@ function loadForms(){
                 const itemActions = document.createElement('td');
                 container.appendChild(itemActions); // Append the actions cell to the container
                 //append the delete button to the list item
-                itemActions.appendChild(deleteButton);
+                
                 itemActions.appendChild(showButton);                
                 itemActions.appendChild(editButton);
+                itemActions.appendChild(deleteButton);
                 container.addEventListener('dblclick', function(event) {
                     event.preventDefault();
                     loadFormData(form.objectId,document.getElementById('renderContainer'));
@@ -247,8 +248,11 @@ function loadFormData(objectId,renderContainer)
             var objectSlug = document.getElementById('objectSlug');
             var userCreated = document.getElementById('userCreated');
             var userModified = document.getElementById('userModified');
-
-            if (objectId === null || objectId === undefined)
+            var objectType = document.getElementById('objectType');
+            // select in the objecttype the value form
+            objectType.value = 'form';
+            // set the values in the header
+            
             // Handle the form data here
             console.log('Form Data:', form);
             // For example, display the form data in an alert or populate a form for editing
