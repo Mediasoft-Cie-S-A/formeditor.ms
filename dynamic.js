@@ -52,11 +52,25 @@ module.exports = function (app, mongoDbUrl, dbName) {
           if (!slug.startsWith("/")) {
            slug = `/${slug}`;
           }
+          // check if meta is an object
+          if (typeof meta !== 'object' || meta === null) {
+            meta = {};
+          }
+          // assign meta.description if not defined
+          if (!meta.description) {
+            meta.description = `Page ${title}`;
+          }
+          // assign meta.keywords if not defined
+          if (!meta.keywords) {
+            meta.keywords = title.split(" ").join(", ");
+          }
           app.get(slug, (req, res) => {
             res.render(`layouts/${layout}.ejs`, {
               title,
               meta,
-              body: content   // verrà iniettato nella view
+              body: content ,  // verrà iniettato nella view
+              description: meta.description,
+              keywords: meta.keywords
             });
           });
         });

@@ -21,7 +21,7 @@ function createElementTab(type) {
     element.id = 'Tab'+ Date.now(); // Unique ID for each new element
     element.tagName = type;
     element.classList.add('ctab_tabs-container');
-   
+    element.style.width = '100%';
     // generate tab html code with 3 tabs
     const tabsHeader = document.createElement('div');
     tabsHeader.classList.add('ctab_tabs-header');

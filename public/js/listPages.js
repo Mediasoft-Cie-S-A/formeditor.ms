@@ -100,14 +100,14 @@ function loadPage(pageId) {
             document.getElementById("userModified").value = page.userModified;
              var objectType = document.getElementById('objectType');
             // select in the objecttype the value form
-            objectType.value = 'form';
+            objectType.value = 'page';
             // Assuming formContainer is where the page content is displayed
             const formContainer = document.getElementById("formContainer");
             formContainer.innerHTML = ""; // Clear existing content
             // Assuming page.content is a JSON object that needs to be rendered
             switch (page.layout) {
                 case "raw":
-                    formContainer.innerHTML = JSON.stringify(page.content, null, 2);
+                    formContainer.innerHTML = page.content; // Directly set the HTML content
                     break;
                 case "default":
                      jsonToDom(page.content,formContainer);

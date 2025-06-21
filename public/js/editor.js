@@ -407,6 +407,12 @@ formContainer.addEventListener("click", function (event) {
   var editorElementSelected = event.target;
   editorElementSelected.classList.add("gjs-selection");
   const inputElementSelected = document.getElementById("editorElementSelected");
+  // set the id of the inputElementSelected to the id of the editorElementSelected
+  if (!editorElementSelected.id) {
+    // generate a uniqe id for the element
+    editorElementSelected.id = "element_" + Date.now();
+    console.log("No ID found, generating a new one: " + editorElementSelected.id);
+  }
   inputElementSelected.value = editorElementSelected.id;
   var editorFloatMenu = document.getElementById("editorFloatMenu");
   editorFloatMenu.style.display = "block";
@@ -481,13 +487,32 @@ function showHTMLCodeEditor() {
   console.log(codeEditor);
   CodeDialog.style.display = "block";
   // get the textare element
-  const codeEditorArea = document.getElementById("HTMLCodeEditorArea");
-  
+  //const codeEditorArea = document.getElementById("HTMLCodeEditorArea");
+  // beautify the html code
+  const htmlCode = beautifyHTML( editorElementSelected.outerHTML);
 
-  codeEditorHTML.setValue(editorElementSelected.outerHTML);
+  codeEditorHTML.setValue(htmlCode);
    
 
 }
+
+ function decodeHtml(html) {
+      return html.replace(/&amp;/g, '&').replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '\"')
+        .replace(/&#39;/g, '\'')
+        .replace(/&#x27;/g, '\'')
+        .replace(/&#x2F;/g, '/')
+        .replace(/\\&quot;/g, '\"')
+        .replace(/\\"/g, '\"')
+        .replace(/\\'/g, '\'');
+    }
+  function beautifyHTML(input) {
+      const decoded = decodeHtml(input);
+      const pretty = decoded;
+      
+      return pretty;
+    }
 
 function saveHTMLCode() {
   undoStack.push(htmlEditor.innerHTML);
@@ -696,6 +721,7 @@ const codeEditor = CodeMirror.fromTextArea(
 const codeEditorHTML = CodeMirror.fromTextArea(
   document.getElementById("HTMLCodeEditorArea"),
   {
+    
     lineNumbers: true,
     mode: "htmlmixed",
     lint: true, // Enable JavaScript linting
@@ -708,6 +734,16 @@ const codeEditorHTML = CodeMirror.fromTextArea(
     // enable cut
     autoCloseTags: true,
     // autocomple
+    hintOptions: {
+      schemaInfo: {
+        // Define your HTML schema here if needed
+        tags: {
+          "div": { attributes: ["id", "class", "style"] },
+          "span": { attributes: ["id", "class", "style"] },
+          // Add more tags and attributes as needed
+        }
+      }
+    }
    
   }
 );
@@ -2023,3 +2059,5 @@ function showDiv(divId,btn) {
   
   btn.style.boxShadow = 'inset 0 0 10px #000000';
 }
+
+  
