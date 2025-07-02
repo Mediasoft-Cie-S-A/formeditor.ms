@@ -48,7 +48,7 @@ function editElementCombox(type,element,content)
    button.textContent = 'update';
    button.onclick = function() {
         const propertiesBar = document.getElementById('propertiesBar');
-        const gridID=propertiesBar.querySelector('label').textContent;                
+        const gridID=propertiesBar.getAttribute("data-element-id");                
         const main = document.getElementById(gridID);  
         updateComboBoxData(main,content);
    };

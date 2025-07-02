@@ -179,6 +179,7 @@ function editElement(element) {
  
 
   const label = document.createElement("label");
+  label.style.fontSize = "7px";
   label.textContent = element.id;
   dialog.setAttribute("data-element-id", element.id);
   dialog.setAttribute("data-element-type", element.getAttribute("tagName"));
@@ -199,7 +200,143 @@ function editElement(element) {
         window[functionName](type, element, content);
       }
     }
+    // check if in the formDataForm the value of objectType = page
+  const formDataForm = document.getElementById("formDataForm");
+  if (formDataForm && formDataForm.objectType && formDataForm.objectType.value === "page") {
+    // create a box to show and edit the header of the page and store the it in hidden input pageHeader
+    const headerBox = document.createElement("div");
+    headerBox.className = "editor-box";
+    headerBox.style.border = "1px solid #ccc";
+    headerBox.style.marginBottom = "10px";
+    headerBox.style.padding = "5px";
+    headerBox.style.fontSize = "9px";
+    headerBox.style.borderRadius = "5px";
+    headerBox.innerHTML = "<div style='font-weight: bold; width:100%'>Page Header</div>";
+    // create an input to edit the header
+    const headerInput = document.createElement("textarea");
+    headerInput.type = "textarea";
+    // set the textarea to be 100% width
+    headerInput.style.width = "100%";
+    // set the textarea to 3 rows
+    headerInput.rows = 3;
+    headerInput.id = "pageHeader";
+    headerInput.value = formDataForm.pageHeader ? formDataForm.pageHeader.value : "";
+    headerInput.style.fontSize = "9px";
+    headerInput.style.marginBottom = "5px";
+    headerInput.onchange = () => {
+        const newHeader = headerInput.value.trim();
+        if (newHeader) {
+            formDataForm.pageHeader.value = newHeader; // Update the form's hidden input
+            element.setAttribute("data-page-header", newHeader); // Set the attribute on the element
+        }
+    };
+    // Append the input to the headerBox
+    headerBox.appendChild(headerInput);
+    // Append the headerBox to the content
+    content.appendChild(headerBox);
 
+  }
+
+  // get the name of the class
+  const className = element.className || "";
+  // get the list of classes
+  const classList = className.split(" ").filter((cls) => cls.trim() !== "");
+  // create a div for the class list to show the class or classes and edit them
+  const classDiv = document.createElement("div");
+  classDiv.id = "classDiv";
+  classDiv.style.display = "flex";
+  classDiv.style.flexDirection = "column";
+  classDiv.style.marginBottom = "10px";
+  classDiv.style.fontSize = "9px";
+  classDiv.style.border = "1px solid #ccc";
+  classDiv.style.padding = "5px";
+  classDiv.style.borderRadius = "5px";
+  classDiv.innerHTML = "<strong>Classes:</strong>";
+  // create a select element to show the classes
+  const classSelect = document.createElement("select");
+  classSelect.id = "classSelect";
+  classSelect.style.width = "100%";
+  classSelect.style.fontSize = "9px";
+  classSelect.style.marginBottom = "5px";
+  classSelect.setAttribute("data-style-property", "class");
+  // create an option for each class
+  classList.forEach((cls) => {
+      const option = document.createElement("option");
+      option.value = cls;
+      option.textContent = cls;
+      classSelect.appendChild(option);
+  });
+  // create an input to add a new class
+  const newClassInput = document.createElement("input");
+  newClassInput.type = "text";
+  newClassInput.placeholder = "Add new class";
+  newClassInput.style.fontSize = "9px";
+  newClassInput.style.marginBottom = "5px";
+  newClassInput.onchange = () => {
+      const newClass = newClassInput.value.trim();
+      if (newClass && !classList.includes(newClass)) {
+          classList.push(newClass);
+          const option = document.createElement("option");
+          option.value = newClass;
+          option.textContent = newClass;
+          classSelect.appendChild(option);
+          classSelect.value = newClass; // Select the newly added class
+          element.classList.add(newClass); // Add the class to the element
+      }
+      newClassInput.value = ""; // Clear the input field
+  };
+  // create a button to remove the selected class
+  const removeClassButton = document.createElement("button");
+  removeClassButton.textContent = "Remove Class";
+  removeClassButton.style.fontSize = "9px";
+  removeClassButton.onclick = () => {
+      const selectedClass = classSelect.value;
+      if (selectedClass && classList.includes(selectedClass)) {
+          classList.splice(classList.indexOf(selectedClass), 1);
+          classSelect.removeChild(classSelect.querySelector(`option[value="${selectedClass}"]`));
+          element.classList.remove(selectedClass); // Remove the class from the element
+      }
+  };
+  // Append the select, input, and button to the classDiv
+  classDiv.appendChild(classSelect);
+  classDiv.appendChild(newClassInput);
+  classDiv.appendChild(removeClassButton);
+  // Append the classDiv to the content
+  content.appendChild(classDiv);
+  // create a div for the id
+  const idDiv = document.createElement("div");
+  idDiv.id = "idDiv";
+  idDiv.style.display = "flex";
+  idDiv.style.flexDirection = "column";
+  idDiv.style.marginBottom = "10px";
+  idDiv.style.fontSize = "9px";
+  idDiv.style.border = "1px solid #ccc";
+  idDiv.style.padding = "5px";
+  idDiv.style.borderRadius = "5px";
+  idDiv.innerHTML = "<strong>ID:</strong>";
+  // create an input to edit the id
+  const idInput = document.createElement("input");
+  idInput.type = "text";
+  idInput.id = "idInput";
+  idInput.value = element.id || "";
+  idInput.style.fontSize = "9px";
+  idInput.style.marginBottom = "5px";
+  idInput.onchange = () => {
+      const newId = idInput.value.trim();
+      if (newId) {
+          element.id = newId; // Update the element's ID
+          dialog.setAttribute("data-element-id", newId); // Update the dialog's data attribute
+          label.textContent = newId; // Update the label text
+      }
+  };
+  // Append the input to the idDiv
+  idDiv.appendChild(idInput);
+  // Append the idDiv to the content
+  content.appendChild(idDiv);
+  
+   
+  
+ 
   for (const [category, properties] of Object.entries(categories)) {
       const box = document.createElement("div");
       box.className = "editor-box";
@@ -209,6 +346,29 @@ function editElement(element) {
       box.style.fontSize = "9px";
       box.style.borderRadius = "5px";
       box.innerHTML = `<div style='font-weight: bold; width:100%'>${category}</div>`;
+      // add to box a expandable icon and reduce icon of the box, on click of the icon
+      const expandIcon = document.createElement("i");
+      expandIcon.className = "fa fa-chevron-right";
+      expandIcon.style.cursor = "pointer";
+      expandIcon.style.float = "right";
+      expandIcon.style.marginTop = "-5px";
+      // generate the inner div for the box
+      const innerDiv = document.createElement("div");
+      expandIcon.onclick = () => {
+          if (innerDiv.style.display === "none") {
+              innerDiv.style.display = "block";
+              expandIcon.className = "fa fa-chevron-down";
+          }
+          else {
+              innerDiv.style.display = "none";
+              expandIcon.className = "fa fa-chevron-right";
+          }
+      };
+      box.appendChild(expandIcon);
+      box.appendChild(innerDiv);
+      // hide the box by default
+      innerDiv.style.display = "none"; // Set to "none" if you want it hidden by default
+      
 
       const inputsContainer = document.createElement("div");
       inputsContainer.style.display = "grid";
@@ -288,7 +448,7 @@ function editElement(element) {
           return input;
       });
 
-      box.appendChild(inputsContainer);
+      innerDiv.appendChild(inputsContainer);
 
       const updateButton = document.createElement("button");
       updateButton.textContent = "Update";
@@ -1992,7 +2152,7 @@ function generateJson(event) {
    //  console.log(JSON.stringify(filterInfo));
     const propertiesBar = document.getElementById("propertiesBar");
     // get id of the element
-    const element = document.getElementById( propertiesBar.querySelector("label").innerText);
+    const element = document.getElementById( propertiesBar.getAttribute("data-element-id"));
     // console.log(element);
     element.setAttribute("filter", JSON.stringify(filterInfo));
 
@@ -2057,7 +2217,6 @@ function showDiv(divId,btn) {
   div.style.display = 'block';
   // inset shadow
   
-  btn.style.boxShadow = 'inset 0 0 10px #000000';
 }
 
   

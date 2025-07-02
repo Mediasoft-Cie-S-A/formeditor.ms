@@ -43,7 +43,7 @@ module.exports = function (app, mongoDbUrl, dbName) {
             console.warn("No pages found in the database.");
             return;
           }
-          pages.forEach(({ slug, layout, content, title, meta }) => {
+          pages.forEach(({ slug, layout, content, title, meta, header }) => {
             console.log(`Defining route for slug: ${slug}, layout: ${layout}, title: ${title}`);
           // Evita collisioni con rotte già definite
           if (app._router.stack.some(r => r.route?.path === slug)) return;
@@ -70,7 +70,8 @@ module.exports = function (app, mongoDbUrl, dbName) {
               meta,
               body: content ,  // verrà iniettato nella view
               description: meta.description,
-              keywords: meta.keywords
+              keywords: meta.keywords,
+              header: header || "" // Aggiungi header se esiste
             });
           });
         });

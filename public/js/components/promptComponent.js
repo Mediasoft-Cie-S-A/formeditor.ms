@@ -34,7 +34,7 @@ function editPromptComponent(type, element, content) {
     button.textContent = 'Update';
     button.onclick = function(event) {
         const propertiesBar = document.getElementById('propertiesBar');
-        const panelID = propertiesBar.querySelector('label').textContent;
+        const panelID = propertiesBar.getAttribute("data-element-id");
         const main = document.getElementById(panelID);
         updatePanelJsonData(element);
     };

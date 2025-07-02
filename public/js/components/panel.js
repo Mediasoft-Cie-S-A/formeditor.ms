@@ -39,7 +39,7 @@ function editElementPanel(type, element, content) {
     button.textContent = 'Update';
     button.onclick = function(event) {
         const propertiesBar = document.getElementById('propertiesBar');
-        const panelID = propertiesBar.querySelector('label').textContent;
+        const panelID = propertiesBar.getAttribute("data-element-id");
         const main = document.getElementById(panelID);
         updatePanelJsonData(element);
     };
@@ -73,7 +73,7 @@ function editElementPanel(type, element, content) {
 // Function to update panel JSON data
 function updatePanelJsonData(element) {
     const propertiesBar = document.getElementById('propertiesBar');
-    const chartID = propertiesBar.querySelector('label').textContent;
+    const chartID = propertiesBar.getAttribute("data-element-id");
     var dataInput = propertiesBar.querySelector('#Data');
     var dataSelect = dataInput.querySelectorAll('div');
     var pivotInput = propertiesBar.querySelector('#Pivot');
@@ -115,7 +115,7 @@ function updatePanelJsonData(element) {
 // Function to get panel
 function getPanel() {
     const propertiesBar = document.getElementById('propertiesBar');
-    const panelID = propertiesBar.querySelector('label').textContent;
+    const panelID = propertiesBar.getAttribute("data-element-id");
     const element = document.getElementById(panelID);
     const panelNumber = element.getAttribute('panelNumber');
     var chart = chartList[panelNumber];

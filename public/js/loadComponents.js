@@ -112,7 +112,6 @@ function createSidebar(elementsData, components) {
   sidebar.innerHTML = ""; // Clear existing content
   sidebar.style.display = "flex";
   sidebar.style.flexDirection = "column";
-  sidebar.style.width = "200px"; 
   // genereate the searcher
   const searcher = document.createElement("input");
   searcher.type = "text";

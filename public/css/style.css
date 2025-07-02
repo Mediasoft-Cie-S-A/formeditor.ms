@@ -39,18 +39,38 @@ body {
 }
 
 .nav-tabs {
-    font-size: 17px;
+
+    align-items: center;
+    height: 40px;
 }	
+
+
+.nav-tabs > li {
+    display: inline-block;
+    
+    cursor: pointer;
+  
+}
+.nav-tabs > li > a {
+   
+    padding: 10px 15px;
+    height: 45px;  
+}
+.nav-tabs > li > a.active {
+    background-color: white;
+    color: #4d61fc;
+    border-top: 2px solid silver;
+    border-left: 2px solid silver;
+    border-right: 2px solid silver;
+  border-bottom: 2px solid white;
+}
 
 .nav-tabs > li > a {
     color: #000;
-
-
 }
 
 .wrapper {
-    display: flex;
-  
+    display: flex;  
     align-items: stretch;
 }
 
@@ -139,9 +159,9 @@ body {
     border: 2px dashed #ccc;
     width: 100%;
     padding: 10px;
-    box-sizing: border-box;
     min-height: 1200px;
-}
+    align-items: left;
+  }
 
 
 .category {
@@ -177,7 +197,7 @@ button {
 }
 
 .form-container {
-    padding: 0 15px;
+    padding: 10px;
 }
 
 .grid-element {
@@ -227,9 +247,12 @@ button {
 .form-element {
     margin-bottom: 15px;
     padding: 10px;
-    /* border: 1px solid #ccc; */
+    width: 100% !important;
+    background-color: white !important;
+    border: 1px dotted #ccc;
     /* background-color: white; */
 }
+
 
 
 input,

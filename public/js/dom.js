@@ -215,24 +215,24 @@ function onTabSwitch(event) {
       loadPages();
       break;
 
-        case "#formsList":
+    case "#formsList":
           console.log("formsList");
           // Load forms
           loadForms();
           
-
+        break;
         
-        case "#editForm":
+    case "#editForm":
           console.log("editForm");
           // Load forms
           drageDroptableTableList(document.getElementById("drageDroptablesList"));
           dragDropApiList(document.getElementById("dragDropApiList"));
         break;
-        case "#renderForm":
+    case "#renderForm":
           console.log("renderForm");
           break;
 
-        case "#DatabaseForm":
+    case "#DatabaseForm":
               const list = document.getElementById("ContentTableListBar");
           const detailsDiv = document.getElementById("mtableDetails");
           createEditableTableList(list, detailsDiv);
@@ -307,8 +307,19 @@ function jsonToDomBusinessComponent(json, parent) {
   }
 }
 
+ 
+
 // Add event listeners to tab links
 var tabLinks = document.querySelectorAll(".nav-tabs a");
 tabLinks.forEach(function (link) {
   link.addEventListener("click", onTabSwitch);
+  // set the first tab as active
+
+
 });
+
+// Set the first tab as active
+if (tabLinks.length > 0) {
+ // simulate a click on the first tab
+  tabLinks[0].click();
+}

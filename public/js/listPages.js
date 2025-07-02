@@ -98,6 +98,7 @@ function loadPage(pageId) {
             document.getElementById("objectSlug").value = page.slug;
             document.getElementById("userCreated").value = page.userCreated;
             document.getElementById("userModified").value = page.userModified;
+            document.getElementById("objectTypeHidden").value = page.header || ""; // Use header if available
              var objectType = document.getElementById('objectType');
             // select in the objecttype the value form
             objectType.value = 'page';
@@ -155,11 +156,19 @@ function registerPage(e) {
     var userCreated = document.getElementById("userCreated").value;
     var userModified = document.getElementById("userModified").value;
     var type = document.getElementById("objectType").value;
+    var header = document.getElementById("objectTypeHidden").value;
 
     var formContainer = document.getElementById("formContainer");
    // var jsonData = domToJson(formContainer);
+   // removet gjs-selection class from all elements in formContainer
+    var elements = formContainer.querySelectorAll('.gjs-selection');
+    elements.forEach(function(element) {
+        element.classList.remove('gjs-selection');
+    });
+    // get the innerHTML of the formContainer
    var htmlContent = formContainer.innerHTML;
     if (type == "page") {
+
       // genere form data based on slug, title, layout = "default", content = "", meta = {}
         const formData = {
             objectId: objectId,
@@ -173,6 +182,7 @@ function registerPage(e) {
             },
             userCreated: userCreated,
             userModified: userModified,
+            header: header,
         };
       // post the form data to the server to store it /page
         fetch("/pages", {

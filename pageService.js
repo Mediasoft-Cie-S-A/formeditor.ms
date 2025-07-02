@@ -19,7 +19,15 @@ module.exports = async function (app,mongoDbUrl, dbName, dynamic) {
 
   // Crée une nouvelle page
   app.post("/pages", checkAuthenticated, async (req, res) => {
-    const { objectId, slug, title, layout = "default", content = "", meta = {} } = req.body;
+    const { objectId, 
+            slug, 
+            title, 
+            layout = "raw", 
+            content = "", 
+            meta = {},  
+            userCreated ="",
+            userModified ="",
+            header ="" } = req.body;
    const client = new mongoClient(mongoDbUrl, {});
     try {
       if (!title) throw new Error("Le titre est requis");
@@ -37,7 +45,10 @@ module.exports = async function (app,mongoDbUrl, dbName, dynamic) {
           layout,
           content,
           meta,
-          updatedAt: new Date()
+          updatedAt: new Date(),
+          userCreated,
+          userModified, 
+          header,
         };
         // update
         const result = await pageCol.updateOne(

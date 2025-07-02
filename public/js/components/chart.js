@@ -121,7 +121,7 @@ class ChartManager {
 
     getChart() {
         const propertiesBar = document.getElementById('propertiesBar');
-        const chartID = propertiesBar.querySelector('label').textContent;
+        const chartID = propertiesBar.getAttribute("data-element-id");
         const element = document.getElementById(chartID);
         const chartNumber = element.getAttribute('chartNumber');
         return this.chartList[chartNumber];
@@ -349,7 +349,7 @@ class ChartManager {
 
     updateJsonData() {
         const propertiesBar = document.getElementById('propertiesBar');
-        const chartID = propertiesBar.querySelector('label').textContent;
+        const chartID = propertiesBar.getAttribute("data-element-id");
         console.log("chartID", chartID);
         const currentChart = document.getElementById(chartID);
 
