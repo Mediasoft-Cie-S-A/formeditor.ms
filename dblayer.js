@@ -16,7 +16,7 @@
 
  const OdbcDatabase = require("./OdbcDatabase.js");
  const MySqlDatabase = require("./MySqlDatabase.js");
-
+ const VALID_API_KEY = "e7f4b0f3-5c6b-4a29-b821-93f0d99d1cb6"; 
 class dblayer{
 
     
@@ -24,10 +24,24 @@ class dblayer{
       databases = [];
       dbCache = [];
      
-    checkAuthenticated = (req, res, next) => {
-              if (req.isAuthenticated()) { return next(); }
-              res.redirect("/login");
-          };
+      checkAuthenticated = (req, res, next) => {
+        const apiKey = req.headers["api_key"]; // ou req.get("api_key")
+      
+        // ✅ Si une clé API valide est fournie → autoriser l'accès
+        if (apiKey && apiKey === VALID_API_KEY) {
+          console.log("🔐 Accès autorisé via API key");
+          return next();
+        }
+      
+        // 🔐 Sinon, vérifie l'authentification standard
+        if (req.isAuthenticated && req.isAuthenticated()) {
+          return next();
+        }
+      
+        // ❌ Refusé
+        console.warn("⛔ Accès refusé : ni authentifié ni clé API valide");
+        res.redirect("/login");
+      };
 
 
       // for each dns entre create a db object
@@ -39,6 +53,8 @@ class dblayer{
           this.checkAuthenticated = this.checkAuthenticated.bind(this);
         
           this.dbtype = app.config.dbtype;
+          this.SMTP = app.config.SMTP;
+          console.log(this.SMTP);
           // get key value from dblist           
       }
 
@@ -75,39 +91,115 @@ class dblayer{
     return dbCache[dbName].map(table => table.NAME.toLowerCase());
     }
 
-    async trackAction(action, details) {
-     /* try {
-          this.mongoClient.connect();
-          const db = this.mongoClient.db(this.mongoDbName); // Database name          
-          const collection = db.collection("actions"); // Collection name
+    async executeActions(actions, details)
+  {
+    console.log("executeActions");
+    // check if actions is an array
+    if (!Array.isArray(actions)) {
+      console.log("Actions should be an array");
+      return;
+    }
+    // check if details is an object
+    if (typeof details !== 'object' || details === null) {
+      console.log("Details should be an object");
+      return;
+    } 
+    // check if actions has actionType property
+    if (!actions.every(action => action.hasOwnProperty('actionType'))) {
+      console.log("Each action should have an actionType property");
+      return;
+    }
+    console.log(actions);
+    console.log(actions.actionType);
+    actions.forEach(action => {
+        switch (action.actionType) {
+          case "email":
+            console.log("send email notification");
+            this.sendEmailNotification(action, details);
+            break;
+        } // switch (actions.actionType) {
+    }); // actions.forEach(action => {
+  } // async executeActions(actions, details)
 
-          // Check if the action already exists
-          const existingAction = await collection.findOne({ action: action, details: details });
 
-          if (existingAction) {
-              console.log(`Action already tracked: ${action}`);
-          } else {
-              // Insert the new action
-              await collection.insertOne({ action: action, details: details, timestamp: new Date() });
-              console.log(`Action tracked successfully: ${action}`);
-          }
-      } catch (err) {
-          console.error("Error tracking action in MongoDB:", err);
-      }
-      finally{
-        await this.mongoClient.close();
-      }
-        */
+  sendEmailNotification(action, details) 
+  {
+    console.log("sendEmailNotification");
+    // get the SMTP configuration from the app config
+          const smtpConfig = this.SMTP;
+          console.log("smtpConfig:"+smtpConfig);
+          if (smtpConfig) {
+            // from actions get the email address
+            // send email notification
+            var nodemailer = require('nodemailer');
+            
+          // Create reusable transporter object
+          const transporter = nodemailer.createTransport({
+            host: smtpConfig.host,
+            port: smtpConfig.port,
+            secure: smtpConfig.secure, // false for TLS
+            auth: {
+              user: smtpConfig.user,
+              pass: smtpConfig.pass,
+            },                        
+              tls: {
+                rejectUnauthorized: false // Optional: useful for debugging TLS issues
+              }
+          }); // transporter.createTransport({
+
+          // Send mail
+          
+            try {
+              const email= this.parseEmailText(action.actionContent);
+              console.log(email);
+              const info =  transporter.sendMail({
+                from: `"Mediasoft" <${smtpConfig.from}>`,
+                to: email.to ,
+                subject: email.subject,
+                html: email.body,
+              }); // transporter.sendMail({
+
+              console.log('Email sent:', info.messageId);
+            } catch (error) {
+              console.error('Error sending email:', error);
+            } // transporter.sendMail({
+          
+          
+          }// if (!smtpConfig) {
+       
   }
+
+  parseEmailText(text) {
+    console.log("parseEmailText");
+  console.log(text);
+  const toMatch = text.match(/\[to:(.*?)\]/i);
+  const subjectMatch = text.match(/\[subjet:(.*?)\]/i); // intentionally matching "subjet"
+  const body = text
+    .replace(/\[to:.*?\]/i, '')
+    .replace(/\[subjet:.*?\]/i, '')
+    .trim();
+
+  return {
+    to: toMatch ? toMatch[1].trim() : null,
+    subject: subjectMatch ? subjectMatch[1].trim() : null,
+    body: body || null,
+  };
+}
 
     // Function to generate a mapping of tables to their databases
     createTableDatabaseMapping(dbCache) {
     const mapping = {};
-    for (const [dbName, tables] of Object.entries(dbCache)) {
-      for (const table of tables) {
-          mapping[table.NAME.toLowerCase()] = dbName;
-      }
-    }
+    
+      try
+      {
+        for (const [dbName, tables] of Object.entries(dbCache)) {
+          for (const table of tables) {
+              mapping[table.NAME.toLowerCase()] = dbName;
+          }
+        }
+      }catch (error) {
+      console.error("Error creating table to database mapping:", error);
+     }
 
     return mapping;
     }
@@ -531,19 +623,19 @@ class dblayer{
             async (req, res) => {
               const {database, tableName, rowID } = req.params;
               const db= dbs.databases[database];
-             
-
-              const data = req.body; // Assuming the updated data is sent in the request body
-              console.log(data);
+      
+              const data = JSON.parse( req.body.data); ; // Assuming the updated data is sent in the request body
+              const actions = JSON.parse(req.body.actions); // Assuming the action is sent in the request body
+        
               try {
                
                 const result = await db.updateRecord(tableName, data, rowID);
                 res.json({ message: "Record updated successfully", result });
                 
-                const action = "event_triggered";
+             
                 const details = { tableName, data,  event: "Update" };
                 // Track the action in MongoDB
-                await this.trackAction(action, details);
+                await this.executeActions(actions, details);
               } catch (err) {
                 console.error(err);
                 res.status(500).send({"Error updating record":err});
@@ -559,22 +651,17 @@ class dblayer{
               const {database, tableName } = req.params;
               const db= dbs.databases[database];
             
-              const data = req.body; // Assuming the updated data is sent in the request body
-              console.log(data);
+              const data = JSON.parse( req.body.data); // Assuming the updated data is sent in the request body
+              const actions =JSON.parse(  req.body.actions); // Assuming the action is sent in the request body
               try {
-                  // repalce in data ' with `
-                  for (const key in data) {
-                    if (data.hasOwnProperty(key)) {
-                      data[key] = data[key].replace(/'/g, "`");
-                    }
-                  }
+                  
                 const result = await db.insertRecord(tableName, data);
                 res.json({ message: "Record inserted successfully", result });
                 
-                const action = "event_triggered";
+                
                 const details = { tableName, data, event: "Insert" };
                 // Track the action in MongoDB
-                await this.trackAction(action, details);
+                await this.executeActions(actions, details);
               } catch (err) {
                 console.error(err);
                 res.status(500).send({"Error inserting record":err});
@@ -864,10 +951,8 @@ app.post('/getDatasetDataByFilter',dbs.checkAuthenticated, async (req, res) => {
   console.log("getDatasetDataByFilter");
 
   try {
-      const { groups, agg,  } = req.query;
-   
-   
      
+        
       //if req.body is not defined, set it to an empty object
       const filters = req.body.filters.filters || [];
       // if req.body.view is not defined, set it to empty string
@@ -876,7 +961,8 @@ app.post('/getDatasetDataByFilter',dbs.checkAuthenticated, async (req, res) => {
       const columns = req.body.columns || [];
       // if req.body.pivot is not defined, set it to an empty array
       const pivot = req.body.pivot || [];
-
+      // get groups from req.body.groups
+      const groups = req.body.groups || '';
       
       // check if in the colums exits the limit field
       const limit = req.body.limit
@@ -892,7 +978,7 @@ app.post('/getDatasetDataByFilter',dbs.checkAuthenticated, async (req, res) => {
       }
       console.log("filterDocuments"); 
       // get all the results by
-      var results = await filterDocuments( view, filters, columns, agg,sortfield,direction,limitValue);
+      var results = await filterDocuments( view, filters, columns, groups,sortfield,direction,limitValue);
     
 
       // get all the results by 
@@ -956,26 +1042,74 @@ function flattenJSON(data,columns) {
 
 async function filterDocuments( view, filters, columns, groups, sort, direction, limitValue) {
    // generate the query string with columns columns fieldName and columns DBname colums dataset = table name
-    let query = `SELECT ${columns.map(column => column.fieldName).join(", ")} FROM PUB.${columns[0].tableName}`;
-    // add limit to the query
-    if (limitValue) {
-        query += ` FETCH FIRST ${limitValue} ROWS ONLY`;
-    }
-    else {
-        query += ` FETCH FIRST 100 ROWS ONLY`;
-    }
-    console.log(query);
+   // generate query with columns function, fieldname
+  // split the groups by |
+  
 
+
+  let query = "SELECT ";
+  columns.forEach((column, index) => {
+        switch (column.functionName) {
+          case "count":
+            query += ` COUNT(*) AS "${column.fieldLabel}" ,`;
+            break;
+          case "value":         
+          query += ` ${column.fieldName} AS "${column.fieldLabel}" ,`;
+            break;
+            default:
+          query += ` ${column.functionName}(${column.fieldName}) AS "${column.fieldLabel}" ,`;
+          break;
+        }
+              
+
+      }) ;
+  // add the aggregate function
+  query += ` ${groups.fieldName} AS "${groups.fieldLabel}" `;
+  query += ` FROM PUB.${groups.tableName}`;
+
+    // check if filters is not empty
+    if (filters.length > 0) {
+      query += " WHERE ";
+      filters.forEach((filter, index) => {
+        // check if filter is not empty
+        // apply the fieldName = value
+        if (filter.fieldName && filter.value) {
+          // check if filter is not empty
+          if (filter.value !== "") {
+            // check if filter is not empty
+            switch (filter.operator) {
+              case "like":
+                query += ` ${filter.fieldName} LIKE '%${filter.value}%' `;
+                break;
+            default:
+                query += ` ${filter.fieldName} = '${filter.value}' `;
+                break;
+            } // switch
+          } // if (filter.value !== "")
+        } // if (filter.fieldName && filter.value)
+      }) // forEach
+    }
+        // check if filter is not empty 
+
+  query += ` GROUP BY ${groups.fieldName} `;
+  
+  // check limit value
+  if (!limitValue || limitValue === undefined) {
+      limitValue = 100;
+  }
+
+  query += ` FETCH FIRST ${limitValue} ROWS ONLY`;
+  console.log("query:"+query);
+  
     // Connect to the database
-    const db= dbs.databases[columns[0].DBName];
+    const db= dbs.databases[groups.DBName];
    
     // Execute the query
     const data = await db.queryData(query);
-  //  console.log(data);
-    // Close the database connection
     
-    // Flatten the JSON data
-   
+
+
+
     // return the data
     return data;
 }

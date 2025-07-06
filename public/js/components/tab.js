@@ -21,7 +21,7 @@ function createElementTab(type) {
     element.id = 'Tab'+ Date.now(); // Unique ID for each new element
     element.tagName = type;
     element.classList.add('ctab_tabs-container');
-   
+    element.style.width = '100%';
     // generate tab html code with 3 tabs
     const tabsHeader = document.createElement('div');
     tabsHeader.classList.add('ctab_tabs-header');
@@ -111,7 +111,7 @@ function createTabContent (tabsHeader,tabsContent)
     const tabHeader = document.createElement('div');
     
     tabHeader.dataset.tab = tabId;
-    tabHeader.innerText = `Tab-${tabcount}`;;
+    tabHeader.innerText = (tabcount === 1) ? "Edit" : `Tab-${tabcount}`;
     tabHeader.className='ctab_HeaderButton';
     tabsHeader.appendChild(tabHeader);
 
@@ -132,14 +132,103 @@ function createTabContent (tabsHeader,tabsContent)
 
    
 };
+function createEditModal() {
+    // Prevent duplicate modals
+    if (document.getElementById("editModal")) return;
 
-function activateTab(event,tabHeader,tabContent){
-    if (event)
-        {
-            event.preventDefault();
+    const modal = document.createElement("div");
+    modal.id = "editModal";
+    modal.className = "modal";
+    modal.style.display = "none";
+    modal.style.position = "fixed";
+    modal.style.top = "0";
+    modal.style.left = "0";
+    modal.style.width = "100%";
+    modal.style.height = "100%";
+    modal.style.backgroundColor = "rgba(0,0,0,0.5)";
+    modal.style.zIndex = "999";
+    modal.style.justifyContent = "center";
+    modal.style.alignItems = "center";
+
+    const modalContent = document.createElement("div");
+    modalContent.className = "modal-content";
+    modalContent.style.backgroundColor = "white";
+    modalContent.style.padding = "20px";
+    modalContent.style.borderRadius = "6px";
+    modalContent.style.minWidth = "300px";
+    modalContent.style.minHeight = "200px";
+    modalContent.style.position = "relative";
+
+    const closeButton = document.createElement("span");
+    closeButton.className = "close-button";
+    closeButton.innerHTML = "&times;";
+    closeButton.style.position = "absolute";
+    closeButton.style.top = "10px";
+    closeButton.style.right = "15px";
+    closeButton.style.cursor = "pointer";
+    closeButton.style.fontSize = "20px";
+
+    // 🧠 Move tab content back when modal is closed
+    closeButton.addEventListener("click", function () {
+        modal.style.display = "none";
+
+        const editTabContent = document.getElementById("editModalContent").firstElementChild;
+        if (editTabContent && editTabContent._originalParent) {
+            if (editTabContent._originalNextSibling) {
+                editTabContent._originalParent.insertBefore(editTabContent, editTabContent._originalNextSibling);
+            } else {
+                editTabContent._originalParent.appendChild(editTabContent);
+            }
+            editTabContent.style.display = "none";
+        
+            // Nettoyer après usage
+            delete editTabContent._originalParent;
+            delete editTabContent._originalNextSibling;
         }
+        
+
+    });
+
+    const modalContentContainer = document.createElement("div");
+    modalContentContainer.id = "editModalContent";
+
+    modalContent.appendChild(closeButton);
+    modalContent.appendChild(modalContentContainer);
+    modal.appendChild(modalContent);
+
+    document.body.appendChild(modal);
+}
+
+
+
+function activateTab(event, tabHeader, tabContent) {
+    if (event) {
+        event.preventDefault();
+    }
+           // 🔁 Default behavior for regular tabs
+    // Hide all tab contents
     tabContent.parentElement.querySelectorAll('.ctab_ContentDiv').forEach((el) => el.style.display = 'none');
+
+    // Unset 'active' on all tab headers
     tabHeader.parentElement.querySelectorAll('.ctab_HeaderButton').forEach((el) => el.classList.remove('active'));
-    tabHeader.classList.add('active');       
+
+    // Activate current tab
+    tabHeader.classList.add('active');
     tabContent.style.display = 'block';
+ 
+}
+
+
+
+function activateEditTabIn(targetElement) {
+    const editHeader = Array.from(targetElement.querySelectorAll('.ctab_HeaderButton'))
+        .find(el => el.innerText.toLowerCase().includes('edit'));
+
+    if (editHeader) {
+        const tabId = editHeader.dataset.tab;
+        const editContent = targetElement.querySelector(`#${tabId}`);
+        if (editContent) {
+            activateTab(null, editHeader, editContent);
+        }
+    }
 }

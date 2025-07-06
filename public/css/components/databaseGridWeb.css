@@ -63,17 +63,7 @@
     
 }
 
-.grid-row {
-    height: 35px;
-    border-bottom: 1px solid #ccc;
-    display: table-row;
-    vertical-align: top;
-}
-.grid-row:hover {
-    
-    color:  #6d7fcc;
-    
-}
+
 
 
 .grid-cell {

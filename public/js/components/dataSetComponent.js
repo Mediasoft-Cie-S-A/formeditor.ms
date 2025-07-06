@@ -277,17 +277,19 @@ function renderDataSet(main) {
     });
   }
 
-  // Filter fields to avoid displaying the rowid
-  const visibleFields = jsonData.filter(field => field.fieldName !== "rowid");
 
   // Fill the dataset or display "dataset empty" if no data
   if (jsonData.length > 0) {
-    visibleFields.forEach((fieldJson) => {
+    jsonData.forEach((fieldJson) => {
       var createField = createFieldFromJson(fieldJson);
 
       // Style each field to be flexible inside the grid
       createField.style.minHeight = "100px";
+      if (fieldJson.fieldType === "hidden" || fieldJson.fieldType === "rowid") {
+        createField.style.display = "none"; // Hide hidden and rowid fields
+      } else {
       createField.style.display = "flex";
+      }
       createField.style.flexDirection = "column";
       createField.style.justifyContent = "center";
       createField.style.boxSizing = "border-box";
@@ -300,7 +302,11 @@ function renderDataSet(main) {
       panel.style.padding = "8px";
       panel.style.backgroundColor = "#fff";
       panel.style.boxSizing = "border-box";
-      panel.style.display = "flex";
+      if (fieldJson.fieldType === "hidden" || fieldJson.fieldType === "rowid") {
+      panel.style.display = "none"; // Hide the panel for hidden and rowid fields
+      }else {
+      panel.style.display = "flex"; // Show the panel for visible fields
+      }
       panel.style.flexDirection = "column";
       panel.style.justifyContent = "center";
 

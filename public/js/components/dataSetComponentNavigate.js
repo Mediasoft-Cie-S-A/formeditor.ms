@@ -1,3 +1,20 @@
+
+/*
+ * Copyright (c) 2023 Mediasoft & Cie S.A.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 function createDataSetComponentNavigate(type) {
   var main = document.createElement("div");
   main.className = "dataSetComponentNavigate";
@@ -22,7 +39,7 @@ function editDataSetComponentNavigate(type, element, content) {
   // Button to save all variables as cookies
   const saveButton = document.createElement("button");
   saveButton.textContent = "Update";
-  saveButton.onclick = () => saveActions(element);
+  saveButton.onclick = () => saveActions(element,content);
   saveButton.style.width = "100%";
   div.appendChild(saveButton);
   // Create a container div for the variables
@@ -48,21 +65,25 @@ function editDataSetComponentNavigate(type, element, content) {
 
 function addAction(element, itemdiv, action) {
   const actionDiv = document.createElement("div");
+  actionDiv.id = "action_" + Date.now();
+  actionDiv.setAttribute("tagname", "actionContainer");
   actionDiv.className = "action";
   actionDiv.draggable = true;
   actionDiv.style.border = "1px solid #ccc";
   actionDiv.style.borderRadius = "5px";
   actionDiv.style.padding = "5px";
   const actionEvent = document.createElement("select");
-  actionEvent.options.add(new Option("Read", "read"));
+  actionEvent.setAttribute("tagname", "actionEvent");
+
+  actionEvent.style.width = "100%";
   actionEvent.options.add(new Option("Write", "write"));
-  actionEvent.options.add(new Option("Update", "update"));
-  actionEvent.options.add(new Option("Copy", "copy"));
   if (action.actionEvent) {
     actionEvent.value = action.actionEvent;
   }
   actionDiv.appendChild(actionEvent);
   const actionType = document.createElement("select");
+  actionType.setAttribute("tagname", "actionType");
+  actionType.style.width = "100%";
   actionType.options.add(new Option("Send Email", "email"));
   actionType.options.add(new Option("Call API", "api"));
   actionType.options.add(new Option("Navigate", "navigate"));
@@ -79,6 +100,8 @@ function addAction(element, itemdiv, action) {
   }
   actionDiv.appendChild(actionType);
   const actionContent = document.createElement("textarea");
+  actionContent.setAttribute("tagname", "actionContent");
+  actionContent.setAttribute("placeholder", "Action content [variable:value]");
   actionContent.placeholder = "Action content";
   actionContent.style.width = "100%";
   actionContent.style.height = "100px";
@@ -94,19 +117,30 @@ function addAction(element, itemdiv, action) {
 }
   
 
-function saveActions(element) {
+function saveActions(element,content) {
   const actions = [];
-  const actionDivs = element.querySelectorAll(".action");
+  const actionDivs = content.querySelectorAll("[tagname='actionContainer']");
   actionDivs.forEach((actionDiv) => {
     const action = {};
-    const actionEvent = actionDiv.querySelector("select");
-    action.actionEvent = actionEvent.value;
-    const actionType = actionDiv.querySelector("select");
+    const actionEvent = actionDiv.querySelector("[tagname='actionEvent']");
+   
+    if (actionEvent) {
+       console.log("actionEvent: ", actionEvent.value);
+      action.actionEvent = actionEvent.value;
+    } 
+    const actionType = actionDiv.querySelector("[tagname='actionType']");
+    
+    if (actionType) {
     action.actionType = actionType.value;
-    const actionContent = actionDiv.querySelector("textarea");
+    }
+    // Get the action content textarea
+    const actionContent = actionDiv.querySelector("[tagname='actionContent']");
+    if (actionContent) {
     action.actionContent = actionContent.value;
+    }
     actions.push(action);
   });
+  console.log("Actions to save:", actions);
   element.setAttribute("actions", JSON.stringify(actions));
 }
 
@@ -162,7 +196,13 @@ function renderNavigationBar(main) {
       title: "Save Record",
       text: '<p>Save</p><i class="fa fa-floppy-o" style="color:red;margin-left:-6px"></i>',
       event: "navbar_SaveRecord()",
-    }
+    },
+    {
+      name: "CancelDSBtn",
+      title: "Cancel",
+      text: '<p>Cancel</p><i class="fa fa-ban" style="color:#4d61fc;margin-left:-6px"></i>',
+      event: "navbar_CancelEdit()",
+    },
   ];
   var htm = "";
   //for the dom2json is mandatory to create a html for the events
@@ -289,6 +329,41 @@ function navbar_moveNext() {
 }
 
 function navbar_EditRecord(action) {
+  console.log(action);
+  if (!action )
+  {
+    // Always ensure modal exists
+    createEditModal();
+
+            const modal = document.getElementById("editModal");
+        console.log("Modal: ", modal);
+            const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
+            const parentDiv = dataSetNavigator.parentElement;
+          console.log("Parent Div: ", parentDiv);
+            const modalContent = modal.querySelector(".modal-content");
+            modalContent.innerHTML = '';
+            // set in parentDiv the id of original parent and next sibling
+        
+            parentDiv._originalParent = parentDiv.parentElement;
+            parentDiv._originalNextSibling = parentDiv.nextSibling;
+        
+            modalContent.appendChild(parentDiv);
+           
+            modal.style.display = "flex";
+            console.log(modal);
+  }else {
+ const modal = document.getElementById("editModal");
+ if (modal) {
+    modal.style.display = "none";
+    // set the parentDiv back to its original place
+    const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
+    const parentDiv = dataSetNavigator.parentElement;
+    if (parentDiv._originalParent) {
+        org= parentDiv._originalParent;
+        org.appendChild(parentDiv);
+      }
+    }
+  }
   const inputs = document.querySelectorAll(
     `[data-table-name] input[dataset-field-name]`
   );
@@ -304,12 +379,17 @@ function navbar_EditRecord(action) {
   deactivateLoaders();
 }
 
+  function navbar_CancelEdit() {
+    console.log("Cancel Edit");
+ 
+ navbar_EditRecord(true);
+}
+
 function navbar_InsertRecord() {
+  navbar_EditRecord(false);
+
   const inputs = document.querySelectorAll(`[data-table-name] input,select`);
-  console.log(inputs);
   inputs.forEach((input) => {
-    input.readOnly = false;
-    input.disabled = false;
     const field = input.getAttribute("dataset-field-name");
     switch (input.type) {
       case "hidden":
@@ -322,7 +402,6 @@ function navbar_InsertRecord() {
     break;
     }
   });
-  document.querySelector("[name=SaveDSBtn]").disabled = false;
 }
 
 function navbar_CopyRecord() {
@@ -367,7 +446,8 @@ function CreateUpdated(DBName, tableName, divLine) {
   );
 
 
-  let updateFields = "";
+  let fields = [];
+  let values = [];
   let fieldGroups = {};
 
   inputs.forEach((input) => {
@@ -394,7 +474,9 @@ function CreateUpdated(DBName, tableName, divLine) {
       // Handle fields without a detectable prefix
       if (value) {
         // Only add fields with non-empty values
-        updateFields+=`"${field}" = '${value}',`;
+        fields.push(field);
+        values.push(value);
+       
       }
     }
 
@@ -410,16 +492,14 @@ function CreateUpdated(DBName, tableName, divLine) {
 
     // Add to updateFields only if valuesString is not empty
     if (valuesString) {
-      updateFields+=`"${prefix}" = '${valuesString}',`;
+      fields.push(prefix); // Add the prefix as a field
+      values.push(valuesString); // Add the concatenated values
+     
     }
-  }
-  // Remove the last comma if it exists
-  if (updateFields.endsWith(",")) {
-    updateFields = updateFields.slice(0, -1); // Remove last comma  
   }
 
   // Return the final formatted string
-  return updateFields;
+  return  { fields: fields, values: values };
 }
 
 function addIdToData(data, id, value) {
@@ -446,11 +526,17 @@ async function navbar_SaveRecord() {
       return;
     }
     console.log("SaveRecord");
-
-    // validation
+    // get the dataset navigator
+     const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
+    // get the dataset div
+    const datasetDiv = document.querySelector("[tagname='dataSet']");
+    if (!datasetDiv) {
+      showToast("No dataset found to save");
+      return;
+    }
     // Select all row ID elements (one per dataset record)
-    const nextRowIds = document.querySelectorAll("[dataset-field-type='rowid']");
-
+    const nextRowIds = datasetDiv.querySelectorAll("[dataset-field-type='rowid']");
+    console.log("nextRowIds: ", nextRowIds);
     for (const nextRowId of nextRowIds) {
       console.log("Row being processed:", nextRowId);
 
@@ -473,30 +559,7 @@ async function navbar_SaveRecord() {
         const dataFieldContainer = fieldElement.getAttribute('validation');
         const datasetTableName = fieldElement.getAttribute("dataset-table-name");
         const datasetChampName = fieldElement.getAttribute("dataset-field-name");
-
-     
-
-        /*const fieldInfo = {
-          validation: dataFieldContainer,
-          tableName: datasetTableName,
-          fieldName: datasetChampName
-        };*/
-     
-        //console.log("DataFied: ",dataFieldContainer);
-        //let fieldJson = {};
-       /* if (dataFieldContainer != null && dataFieldContainer != "") {
-          try {
-            fieldJson = JSON.stringify(fieldInfo);
-            console.log("In FieldJson :",fieldJson);
-          } catch (error) {
-            console.warn("Invalid JSON in data-field:", error);
-            validationFailed = true;
-            fieldElement.style.border = "2px solid red";
-            continue; // skip to next field
-          }
-        }*/
-
-          if (fieldElement.value == null || fieldElement.value == "") continue;
+        if (fieldElement.value == null || fieldElement.value == "") continue;
           console.log(dataFieldContainer);
           if (dataFieldContainer == undefined || dataFieldContainer == "undefined" || dataFieldContainer == null || dataFieldContainer == "") continue;
           const regexValidation = new RegExp(dataFieldContainer);
@@ -512,24 +575,6 @@ async function navbar_SaveRecord() {
           } else {
             fieldElement.style.border = ""; // champ valide, on enlève la bordure rouge
           }
-        
-
-          
-
-
-        
-
-        // Vérification que le champ appartient à la bonne table
-       /* if (fieldJson.tableName && fieldJson.tableName !== dataFieldContainer) {
-          console.warn(`Mismatch tableName: expected "${datasetTableName}", got "${fieldJson.tableName}"`);
-          validationFailed = true;
-          fieldElement.style.border = "2px solid red";
-          showToast(`Champ "${fieldJson.fieldName}" mal associé à la table "${datasetTableName}".`);
-        } else {
-          fieldElement.style.border = "";
-        }*/
-      
-        // Tu peux ici rajouter d'autres règles de validation par type ou attribut
 
 
       }
@@ -539,21 +584,21 @@ async function navbar_SaveRecord() {
         showToast("validation error, please fixes");
         return;
       }
-
+     
       let result;
       console.log("before verifiying rowIsValue if new");
+       const actions = dataSetNavigator.getAttribute("actions");
       if (rowIdValue === "new") {
         let data = await CreateInsert(dbName, tableName, divLine);
-        result = await insertRecordDB(dbName, tableName, data);
+        result = await insertRecordDB(dbName, tableName, JSON.stringify(data),actions);
       } else {
-        const data = {
-          body: CreateUpdated(dbName, tableName, divLine),
-        };
-
-        result = await updateRecordDB(dbName, tableName, rowIdValue, data);
+        const data = CreateUpdated(dbName, tableName, divLine);
+       
+        result = await updateRecordDB(dbName, tableName, rowIdValue, JSON.stringify(data),actions);
       }
 
       document.querySelector("[name=SaveDSBtn]").disabled = true;
+      navbar_CancelEdit();
       return result;
     }
   } catch (error) {
@@ -567,8 +612,8 @@ async function CreateInsert(DBName, tableName,divLine) {
   // create data for insert following this structure  `INSERT INTO ${tableName} (${data.fields}) VALUES (${data.values})`;
   // return data with data.fields and data.values
   const inputs = divLine.querySelectorAll(`#DataSet_${tableName} input`);
-  var insertFields = "";
-  var insertValues = "";
+  var insertFields = [];
+  var insertValues = [];
   for (i = 0; i < inputs.length; i++) {
 
     if (inputs[i].id && inputs[i].id.includes("__")) {
@@ -583,7 +628,7 @@ async function CreateInsert(DBName, tableName,divLine) {
         var subtype = inputs[i].getAttribute("dataset-field-type");
         if (field === "rowid")  continue; // Skip rowid field
         
-        insertFields += `"${field}"`;
+        insertFields.push(field); // Add field name to insertFields;
         // get sequence value from the the attribute dataset-field-values
         if (subtype === "sequence") {
           let sequence = inputs[i].getAttribute("dataset-field-values");
@@ -596,26 +641,17 @@ async function CreateInsert(DBName, tableName,divLine) {
             sequence
           );
           inputs[i].value = sequenceValue;
-          insertValues += `'${sequenceValue}'`;
+          insertValues.push(sequenceValue); // Add sequence value
         } else {
-          insertValues += `'${inputs[i].value}'`;
+          insertValues.push(inputs[i].value); // Add input value
         }
-        if (i < inputs.length - 1) {
-          insertFields += ",";
-          insertValues += ",";
-        } // end if i
+      
         break;
     } // end switch
 
     inputs[i].readOnly = true;
   } // end for
 
-  if (insertFields.endsWith(",")) {
-    insertFields = insertFields.slice(0, -1); // Remove last comma
-  }
-  if (insertValues.endsWith(",")) {
-    insertValues = insertValues.slice(0, -1); // Remove last comma
-  }
 
   return { fields: insertFields, values: insertValues };
 }
@@ -632,7 +668,7 @@ async function navigateSequence(DBName, tableName, sequenceName) {
   }
 }
 
-async function updateRecordDB(DBName, tableName, nextRowId, updateData) {
+async function updateRecordDB(DBName, tableName, nextRowId, data,actions) {
   try {
     const response = await fetch(
       `/update-record/${DBName}/${tableName}/${nextRowId}`,
@@ -641,7 +677,12 @@ async function updateRecordDB(DBName, tableName, nextRowId, updateData) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(updateData),
+        // add to the body data and action if it exists
+        body: JSON.stringify({
+          data: data,
+          actions: actions ,
+        }),
+       
       }
     );
 
@@ -669,16 +710,19 @@ async function updateRecordDB(DBName, tableName, nextRowId, updateData) {
 }
 
 
-async function insertRecordDB(DBName, tableName, data) {
+async function insertRecordDB(DBName, tableName, data,actions) {
   try {
-    const payload = JSON.stringify(data);
     const response = await fetch(`/insert-record/${DBName}/${tableName}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         // Include other headers as needed, like authentication tokens
       },
-      body: payload,
+      // Add the data and action to the body
+      body: JSON.stringify({
+        data: data,
+        actions: actions,
+      }),
     });
 
     if (!response.ok) {

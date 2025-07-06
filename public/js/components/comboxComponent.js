@@ -48,7 +48,7 @@ function editElementCombox(type,element,content)
    button.textContent = 'update';
    button.onclick = function() {
         const propertiesBar = document.getElementById('propertiesBar');
-        const gridID=propertiesBar.querySelector('label').textContent;                
+        const gridID=propertiesBar.getAttribute("data-element-id");                
         const main = document.getElementById(gridID);  
         updateComboBoxData(main,content);
    };
@@ -59,10 +59,10 @@ function editElementCombox(type,element,content)
 
    // load the data
    // check if jsonData is not empty
-   if (element.getAttribute('datasetgrid')!=null)
+   if (element.getAttribute('datasearch')!=null)
    {
        var target=content.querySelector('#Data');
-       var jsonData=JSON.parse(element.getAttribute('datasetgrid'));
+       var jsonData=JSON.parse(element.getAttribute('datasearch'));
        jsonData.forEach(fieldJson => {
            addFieldToPropertiesBar(target,fieldJson);
        });
@@ -119,9 +119,9 @@ function refreshCombox(element) {
  
   const tableName = jsonData[0].tableName;
   const fieldName = jsonData[0].fieldName;
-  const fieldType = jsonData[0].fieldType;
+  const DBName = jsonData[0].DBName;
   element.querySelector("label").innerText=fieldName;
-  var url = "/select-distinct-idvalue/"+tableName+"/"+fieldName+"?id="+fieldName;
+  var url = "/select-distinct/"+DBName+"/"+tableName+"/"+fieldName;
   fetch(url)
   .then(response => response.json())
   .then(data => {

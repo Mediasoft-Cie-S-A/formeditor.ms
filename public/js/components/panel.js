@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2023 Mediasoft & Cie S.A.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 var dataset = [];
 var labels = [];
 var sortDirection = {};  // Object to keep track of sorting directions
@@ -24,7 +39,7 @@ function editElementPanel(type, element, content) {
     button.textContent = 'Update';
     button.onclick = function(event) {
         const propertiesBar = document.getElementById('propertiesBar');
-        const panelID = propertiesBar.querySelector('label').textContent;
+        const panelID = propertiesBar.getAttribute("data-element-id");
         const main = document.getElementById(panelID);
         updatePanelJsonData(element);
     };
@@ -58,7 +73,7 @@ function editElementPanel(type, element, content) {
 // Function to update panel JSON data
 function updatePanelJsonData(element) {
     const propertiesBar = document.getElementById('propertiesBar');
-    const chartID = propertiesBar.querySelector('label').textContent;
+    const chartID = propertiesBar.getAttribute("data-element-id");
     var dataInput = propertiesBar.querySelector('#Data');
     var dataSelect = dataInput.querySelectorAll('div');
     var pivotInput = propertiesBar.querySelector('#Pivot');
@@ -100,7 +115,7 @@ function updatePanelJsonData(element) {
 // Function to get panel
 function getPanel() {
     const propertiesBar = document.getElementById('propertiesBar');
-    const panelID = propertiesBar.querySelector('label').textContent;
+    const panelID = propertiesBar.getAttribute("data-element-id");
     const element = document.getElementById(panelID);
     const panelNumber = element.getAttribute('panelNumber');
     var chart = chartList[panelNumber];

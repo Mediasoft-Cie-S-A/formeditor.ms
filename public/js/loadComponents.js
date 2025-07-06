@@ -21,10 +21,10 @@ var elementsData = [];
 
 function replaceNameWithDescription(data) {
   return data?.map((item) => {
-    const { formName, ...rest } = item;
+    const { objectName, ...rest } = item;
     return {
       ...rest,
-      description: formName,
+      description: objectName,
       icon: "fa fa-briefcase",
       dataComponent: JSON.stringify(item.formData),
     };
@@ -46,7 +46,18 @@ async function createSidebarSection(elementsData) {
 loadJson("/elementsConfig")
   .then((data) => {
     elementsData = data;
-    createSidebarSection(elementsData);
+    const sidebar = document.getElementById("componentsSidebar");
+    console.log(sidebar);
+    if (sidebar) {
+         createSidebarSection(elementsData);
+    }
+    else
+    {
+      let components = [];
+      const data = replaceNameWithDescription(components);
+      console.log(data);
+      loadComponentsFromConfig(elementsData, data);
+    }
   })
   .catch((err) => {
     console.error(err);
@@ -97,6 +108,41 @@ function loadScriptIfNotLoaded(scriptUrl, scriptslist) {
 // Create the sidebar
 function createSidebar(elementsData, components) {
   const sidebar = document.getElementById("componentsSidebar");
+  if (sidebar===null || sidebar === undefined) return;
+  sidebar.innerHTML = ""; // Clear existing content
+  sidebar.style.display = "flex";
+  sidebar.style.flexDirection = "column";
+  // genereate the searcher
+  const searcher = document.createElement("input");
+  searcher.type = "text";
+  searcher.placeholder = "Search components...";
+  searcher.style.width = "100%";
+  searcher.addEventListener("input", function () {
+    const searchTerm = this.value.toLowerCase();
+    // searchTerm = title of div  
+    const categoryDivs = sidebar.querySelectorAll(".category");
+    categoryDivs.forEach((categoryDiv) => {
+      const button = categoryDiv.querySelector(".category-button");
+      const items = categoryDiv.querySelectorAll(".draggable");
+      items.forEach((item) => {
+        const itemText = item.getAttribute("title") || item.textContent;
+        if (itemText.toLowerCase().includes(searchTerm)) {
+          item.style.display = "block"; // Show the item if it matches the search term
+        } else {
+          item.style.display = "none"; // Hide the item if it doesn't match
+        }
+        // Show the category button if at least one item matches
+        if (Array.from(items).some((el) => el.style.display !== "none")) {
+          button.style.display = "block"; // Show the category button
+        } else {
+          button.style.display = "none"; // Hide the category button if no items match
+        }
+      }
+      );
+    });
+  });
+  sidebar.appendChild(searcher);
+  // Create a container for the sidebar items
   const categories = {};
   var scriptslist = [];
   var csslist = [];
@@ -221,6 +267,65 @@ function createSidebar(elementsData, components) {
       }
     }
     sidebar.appendChild(categoryDiv);
+  }
+}
+
+
+function loadComponentsFromConfig(elementsData, components) {
+  const categories = {};
+  var scriptslist = [];
+  var csslist = [];
+
+  // Group elements by category
+  for (const elementId in elementsData) {
+    const elementData = elementsData[elementId];
+    if (!categories[elementData.category]) {
+      categories[elementData.category] = [];
+    }
+    categories[elementData.category].push(elementData);
+  }
+
+  if (components && components?.length > 0) {
+    for (const component of components) {
+      const category = component.category || "Business Components";
+      if (!categories[category]) {
+        categories[category] = [];
+      }
+      categories[category].push(component);
+    }
+  }
+
+  // Create sidebar items
+  for (const category in categories) {
+    
+
+    const elements = categories[category];
+
+    for (const elementData of elements) {
+      // Check if the css exists
+      var cssUrl = "/css/components/" + elementData.styles;
+      console.log("cssUrl:" + cssUrl);
+      var existingCss = csslist.find((css) => css === cssUrl);
+      if (!existingCss) {
+        console.log("cssUrl in:" + cssUrl);
+        loadCssIfNotLoaded(cssUrl, csslist);
+        csslist.push(cssUrl);
+      }
+
+      // Check if the script exists
+      // Use the function
+      var scriptUrl = "/js/components/" + elementData.scriptName;
+      //  scriptslist.forEach(script => console.log(script));
+      var existingScript = scriptslist.find((script) => script === scriptUrl);
+
+      if (!existingScript) {
+        console.log("scriptUrl:" + scriptUrl);
+        loadScriptIfNotLoaded(scriptUrl).catch((error) => {
+          console.log("Error loading script:", error);
+        });
+        scriptslist.push(scriptUrl);
+      }
+    }    
   }
 }
 

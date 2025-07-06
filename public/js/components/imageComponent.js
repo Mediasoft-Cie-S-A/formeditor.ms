@@ -26,8 +26,7 @@ function createElementImage(type) {
     return element;
 }
 
-function editElementImage(type,element,content)
-{
+function editElementImage(type, element, content) {
     const updateButton = document.createElement("button");
     updateButton.textContent = "Update";
     updateButton.onclick = () => {
@@ -42,18 +41,63 @@ function editElementImage(type,element,content)
         element.setAttribute('alt', altInput.value);
     };
     content.appendChild(updateButton);
-    // addinput for image src
-    content.appendChild(createInputItem("imageSrcInput", "Source", "Source",element.getAttribute('src'),"text"));
-    // button to open media library to select image
+
+    // Image source input
+    content.appendChild(createInputItem("imageSrcInput", "Source", "Source", element.getAttribute('src'), "text"));
+
+    // Button to open media library
     const button = document.createElement("button");
     button.textContent = "Select Image";
     button.onclick = () => openMediaLibrary(element);
     content.appendChild(button);
-    // add input for image size
-    content.appendChild(createInputItem("imageHeightInput", "height", "height",element.getAttribute('height'),"text"));
-    content.appendChild(createInputItem("imageWidthInput", "width", "width",element.getAttribute('width'),"text"));
-    content.appendChild(createInputItem("imageAltInput", "alt", "alt",element.getAttribute('alt'),"text"));
+
+    // Size and alt inputs
+    content.appendChild(createInputItem("imageHeightInput", "height", "height", element.getAttribute('height'), "text"));
+    content.appendChild(createInputItem("imageWidthInput", "width", "width", element.getAttribute('width'), "text"));
+    content.appendChild(createInputItem("imageAltInput", "alt", "alt", element.getAttribute('alt'), "text"));
+
+    // Positioning radio buttons
+    const positionLabel = document.createElement("label");
+    positionLabel.textContent = "Position in container:";
+    positionLabel.style.marginTop = "10px";
+    positionLabel.style.display = "block";
+    content.appendChild(positionLabel);
+
+    const positions = [
+        { label: "Top Left", value: "top-left" },
+        { label: "Top Center", value: "top-center" },
+        { label: "Top Right", value: "top-right" },
+        { label: "Bottom Left", value: "bottom-left" },
+        { label: "Bottom Center", value: "bottom-center" },
+        { label: "Bottom Right", value: "bottom-right" }
+    ];
+
+    const radioGroup = document.createElement("div");
+    radioGroup.style.display = "grid";
+    radioGroup.style.gridTemplateColumns = "repeat(3, auto)";
+    radioGroup.style.gap = "6px";
+
+    positions.forEach(pos => {
+        const wrapper = document.createElement("label");
+        wrapper.style.display = "flex";
+        wrapper.style.alignItems = "center";
+        wrapper.style.gap = "4px";
+
+        const radio = document.createElement("input");
+        radio.type = "radio";
+        radio.name = "imagePosition";
+        radio.value = pos.value;
+
+        radio.onclick = () => applyImagePosition(element, pos.value);
+
+        wrapper.appendChild(radio);
+        wrapper.appendChild(document.createTextNode(pos.label));
+        radioGroup.appendChild(wrapper);
+    });
+
+    content.appendChild(radioGroup);
 }
+
 
 function openMediaLibrary(targetElement) {
     const mediaLibraryWindow = window.open('/media-library', 'Media Library', 'width=800,height=600');
@@ -67,4 +111,52 @@ function openMediaLibrary(targetElement) {
             targetElement.setAttribute('src', selectedImage);
         }
     }, { once: true });
+}
+
+function applyImagePosition(element, position) {
+    const parent = element.parentElement;
+    if (!parent) return;
+
+    // Ensure parent is relatively positioned
+    if (window.getComputedStyle(parent).position === "static") {
+        parent.style.position = "relative";
+    }
+
+    element.style.position = "absolute";
+
+    // Reset all directions
+    element.style.top = "";
+    element.style.bottom = "";
+    element.style.left = "";
+    element.style.right = "";
+    element.style.transform = "";
+
+    switch (position) {
+        case "top-left":
+            element.style.top = "0";
+            element.style.left = "0";
+            break;
+        case "top-center":
+            element.style.top = "0";
+            element.style.left = "50%";
+            element.style.transform = "translateX(-50%)";
+            break;
+        case "top-right":
+            element.style.top = "0";
+            element.style.right = "0";
+            break;
+        case "bottom-left":
+            element.style.bottom = "0";
+            element.style.left = "0";
+            break;
+        case "bottom-center":
+            element.style.bottom = "0";
+            element.style.left = "50%";
+            element.style.transform = "translateX(-50%)";
+            break;
+        case "bottom-right":
+            element.style.bottom = "0";
+            element.style.right = "0";
+            break;
+    }
 }

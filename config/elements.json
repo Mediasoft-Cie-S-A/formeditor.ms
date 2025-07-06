@@ -107,7 +107,18 @@
     "editFunction": "editElementCombox",
     "styles": "combox.css",
     "icon": "fa fa-list",
-    "renderFunction": ""
+    "renderFunction": "refreshCombox"
+  },
+   "booleanSearch": {
+    "type": "booleanSearch",
+    "description": "Boolean Search",
+    "category": "Business Logic",
+    "scriptName": "booleanSearch.js",
+    "createFunction": "createBooleanSearch",
+    "editFunction": "editBooleanSearch",
+    "styles": "",
+    "icon": "fa fa-search-plus",
+    "renderFunction": "refreshBooleanSearch"
   },
   "cookieStorage": {
     "type": "cookieStorage",
@@ -131,7 +142,7 @@
     "icon": "fa fa-search",
     "renderFunction": ""
   },
- "DataPanel": {
+  "DataPanel": {
     "type": "DataPanel",
     "description": "Data Panel",
     "category": "Business Logic",
@@ -142,17 +153,7 @@
     "icon": "fa fa-th-large",
     "renderFunction": "renderDataPanel"
   },
-  "dataPanelWeb": {
-    "type": "DataPanelWeb",
-    "description": "Data Panel Web",
-    "category": "Web Server",
-    "scriptName": "dataPanelWeb.js",
-    "createFunction": "createDataPanelWeb",
-    "editFunction": "editDataPanelWeb",
-    "styles": "dataPanelWeb.css",
-    "icon": "fa fa-th-large",
-    "renderFunction": ""
-  },
+
   "workflow": {
     "type": "workflow",
     "description": "Workflow",
@@ -274,8 +275,8 @@
     "icon": "fa fa-table",
     "renderFunction": ""
   },
-  "BarChart": {
-    "type": "BarChart",
+  "barChart": {
+    "type": "barChart",
     "description": "Bar Chart",
     "category": "Charts",
     "scriptName": "chart.js",
@@ -283,12 +284,266 @@
     "editFunction": "editElementChart",
     "styles": "chart.css",
     "icon": "fa fa-bar-chart",
-    "renderFunction": ""
+    "renderFunction": "renderDataChart"
 },
+"lineChart": {
+    "type": "lineChart",
+    "description": "Line Chart",
+    "category": "Charts",
+    "scriptName": "chart.js",
+    "createFunction": "createElementChart",
+    "editFunction": "editElementChart",
+    "styles": "chart.css",
+    "icon": "fa fa-line-chart",
+    "renderFunction": "renderDataChart"
+  },
+  "pieChart": {
+    "type": "pieChart",
+    "description": "Pie Chart",
+    "category": "Charts",
+    "scriptName": "chart.js",
+    "createFunction": "createElementChart",
+    "editFunction": "editElementChart",
+    "styles": "chart.css",
+    "icon": "fa fa-pie-chart",
+    "renderFunction": "renderDataChart"
+  },
+  "scatterChart": {
+    "type": "ScatterChart",
+    "description": "Scatter Chart",
+    "category": "Charts",
+    "scriptName": "chart.js",
+    "createFunction": "createElementChart",
+    "editFunction": "editElementChart",
+    "styles": "chart.css",
+    "icon": "fa fa-dot-circle-o",
+    "renderFunction": "renderDataChart"
+  },
+
+  "radarChart": {
+    "type": "padarChart",
+    "description": "Radar Chart",
+    "category": "Charts",
+    "scriptName": "chart.js",
+    "createFunction": "createElementChart",
+    "editFunction": "editElementChart",
+    "styles": "chart.css",
+    "icon": "fa fa-area-chart",
+    "renderFunction": "renderDataChart"
+  },
+  "doughnutChart": {
+    "type": "doughnutChart",
+    "description": "Doughnut Chart",
+    "category": "Charts",
+    "scriptName": "chart.js",
+    "createFunction": "createElementChart",
+    "editFunction": "editElementChart",
+    "styles": "chart.css",
+    "icon": "fa fa-circle-o-notch",
+    "renderFunction": "renderDataChart"
+  },
+  "polarAreaChart": {
+    "type": "polarAreaChart",
+    "description": "Polar Area Chart",
+    "category": "Charts",
+    "scriptName": "chart.js",
+    "createFunction": "createElementChart",
+    "editFunction": "editElementChart",
+    "styles": "chart.css",
+    "icon": "fa fa-compass",
+    "renderFunction": "renderDataChart"
+  },
+  "bubbleChart": {
+    "type": "bubbleChart",
+    "description": "Bubble Chart",
+    "category": "Charts",
+    "scriptName": "chart.js",
+    "createFunction": "createElementChart",
+    "editFunction": "editElementChart",
+    "styles": "chart.css",
+    "icon": "fa fa-dot-circle-o",
+    "renderFunction": "renderDataChart"
+  },
+  "treemapChart": {
+    "type": "treemapChart",
+    "description": "Tree Map",
+    "category": "Charts",
+    "scriptName": "treeMap.js",
+    "createFunction": "createElementChart",
+    "editFunction": "editElementChart",
+    "styles": "treeMap.css",
+    "icon": "fa fa-sitemap",
+    "renderFunction": "renderDataChart"
+  },
+  "heading1": {
+    "type": "heading1",
+    "description": "Heading 1",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-header",
+    "renderFunction": ""
+  },
+  "heading2": {
+    "type": "heading2",
+    "description": "Heading 2",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-header",
+    "renderFunction": ""
+  },
+  "heading3": {
+    "type": "heading3",
+    "description": "Heading 3",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-header",
+    "renderFunction": ""
+  },
+  "heading4": {
+    "type": "heading4",
+    "description": "Heading 4",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-header",
+    "renderFunction": ""
+  },
+  "heading5": {
+    "type": "heading5",
+    "description": "Heading 5",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-header",
+    "renderFunction": ""
+  },
+  "heading6": {
+    "type": "heading6",
+    "description": "Heading 6",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-header",
+    "renderFunction": ""
+  },
+  "paragraph": {
+    "type": "paragraph",
+    "description": "Paragraph",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-paragraph",
+    "renderFunction": ""
+  },
+  "container": {
+    "type": "container",
+    "description": "Container",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-cube",
+    "renderFunction": ""
+  },
+  "line": {
+    "type": "line",
+    "description": "Line",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-minus",
+    "renderFunction": ""
+  },
+  "Link": {
+    "type": "link",
+    "description": "Link",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-link",
+    "renderFunction": ""
+  },
+  "quote": {
+    "type": "quote",
+    "description": "Quote",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-quote-left",
+    "renderFunction": ""
+  },
+  "code": {
+    "type": "code",
+    "description": "Code",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-code",
+    "renderFunction": ""
+  },
+  "iframe": {
+    "type": "iframe",
+    "description": "Iframe",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-window-restore",
+    "renderFunction": ""
+  },
+  "list": {
+    "type": "list",
+    "description": "List",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-list-ul",
+    "renderFunction": ""
+  },
+  "table": {
+    "type": "table",
+    "description": "Table",
+    "category": "HTML",
+    "scriptName": "genericStatic.js",
+    "createFunction": "createElementStatic",
+    "editFunction": "editElementStatic",
+    "styles": "genericStatic.css",
+    "icon": "fa fa-table",
+    "renderFunction": ""
+  },
   "textfield": {
     "type": "textfield",
     "description": "Text field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -299,7 +554,7 @@
   "number": {
     "type": "number",
     "description": "Number field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -310,7 +565,7 @@
   "password": {
     "type": "password",
     "description": "Password field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -321,7 +576,7 @@
   "email": {
     "type": "email",
     "description": "Email field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -332,7 +587,7 @@
   "textarea": {
     "type": "textarea",
     "description": "Textarea",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -343,7 +598,7 @@
   "checkbox": {
     "type": "checkbox",
     "description": "Checkbox",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -354,7 +609,7 @@
   "radio": {
     "type": "radio",
     "description": "Radio button",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -365,7 +620,7 @@
   "select": {
     "type": "select",
     "description": "Select",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "selectComponent.js",
     "createFunction": "createElementSelect",
     "editFunction": "editElementSelect",
@@ -376,7 +631,7 @@
   "button": {
     "type": "button",
     "description": "Button",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "buttonComponent.js",
     "createFunction": "createElementButton",
     "editFunction": "editElementButton",
@@ -384,10 +639,21 @@
     "icon": "fa fa-hand-pointer-o",
     "renderFunction": ""
   },
+  "buttonLink": {
+  "type": "buttonLink",                
+  "description": "Link Button",        
+  "category": "Form",
+  "scriptName": "buttonLinkComponent.js", 
+  "createFunction": "createButtonLink",
+  "editFunction":  "editButtonLink",
+  "styles": "genericInput.css",         
+  "icon": "fa fa-link",                 
+  "renderFunction": ""                  
+  },
   "submit": {
     "type": "submit",
     "description": "Submit button",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "buttonComponent.js",
     "createFunction": "createElementButton",
     "editFunction": "editElementButton",
@@ -398,7 +664,7 @@
   "reset": {
     "type": "reset",
     "description": "Reset button",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "buttonComponent.js",
     "createFunction": "createElementButton",
     "editFunction": "editElementButton",
@@ -409,7 +675,7 @@
   "image": {
     "type": "image",
     "description": "Image",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "imageComponent.js",
     "createFunction": "createElementImage",
     "editFunction": "editElementImage",
@@ -420,7 +686,7 @@
   "file": {
     "type": "file",
     "description": "File upload",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -431,7 +697,7 @@
   "hidden": {
     "type": "hidden",
     "description": "Hidden field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -442,7 +708,7 @@
   "date": {
     "type": "date",
     "description": "Date field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -453,7 +719,7 @@
   "datetime": {
     "type": "datetime",
     "description": "Datetime field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -465,7 +731,7 @@
   "month": {
     "type": "month",
     "description": "Month field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -476,7 +742,7 @@
   "week": {
     "type": "week",
     "description": "Week field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -487,7 +753,7 @@
   "time": {
     "type": "time",
     "description": "Time field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -498,7 +764,7 @@
   "range": {
     "type": "range",
     "description": "Range field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -509,7 +775,7 @@
   "color": {
     "type": "color",
     "description": "Color field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -517,11 +783,22 @@
     "icon": "fa fa-paint-brush",
     "renderFunction": ""
   },
-
+  "greeting": {
+    "type": "greeting",
+    "description": "Greeting message",
+    "category": "UI",
+    "scriptName": "greetingComponent.js",
+    "createFunction": "createGreetingComponent",
+    "editFunction": "editGreetingComponent",
+    "styles": "greetingComponent.css",
+    "icon": "fa fa-smile-o",
+    "renderFunction": "renderGreetingComponent"
+  }
+  ,
   "tel": {
     "type": "tel",
     "description": "Telephone field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
@@ -532,12 +809,23 @@
   "url": {
     "type": "url",
     "description": "Url field",
-    "category": "HTML",
+    "category": "Form",
     "scriptName": "genericInput.js",
     "createFunction": "createElementInput",
     "editFunction": "editElementInput",
     "styles": "genericInput.css",
     "icon": "fa fa-link",
     "renderFunction": ""
+  },
+  "prompt": {
+    "type": "prompt",
+    "description": "Prompt",
+    "category": "AI",
+    "scriptName": "promptComponent.js",
+    "createFunction": "createPromptComponent",
+    "editFunction": "editPromptComponent",
+    "styles": "promptComponent.css",
+    "icon": "fa fa-commenting-o",
+    "renderFunction": "renderPromptComponent"
   }
 }

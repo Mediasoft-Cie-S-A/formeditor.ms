@@ -1,27 +1,225 @@
 /*
- * Horizontal Menu Component
- * Corrected to match CSS class names
+ * Copyright (c) 2023 Mediasoft & Cie S.A.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 function createMenuComponentHorizontal(type) {
-    const mainDiv = document.createElement('div');
-    mainDiv.setAttribute("tagName", type);
-    mainDiv.className = "form-element menu-horizontal-wrapper";
-    mainDiv.id = `menuComponentHorizontal-${Date.now()}`;
+    const wrapper = document.createElement('div');
+    wrapper.id = 'menuGlobale';
+    wrapper.style.display = 'flex';
+    wrapper.style.justifyContent = 'space-between';
+    wrapper.style.alignItems = 'flex-start';
+    wrapper.style.gap = '20px';
+    wrapper.style.padding = '10px 20px';
+    wrapper.style.backgroundColor = '#fafafa';
+    wrapper.style.borderBottom = '1px solid #ccc';
 
-    const internalDiv = document.createElement('div');
+    const menuZone = document.createElement('div');
+    menuZone.id = 'menuZone';
+    menuZone.style.flex = '1';
+
+    const menuComponent = document.createElement('div');
+    menuComponent.setAttribute("tagName", type);
+    menuComponent.className = "form-element menu-horizontal-wrapper";
+    menuComponent.id = `menuComponentHorizontal-${Date.now()}`;
+    menuComponent.setAttribute("items", JSON.stringify(menuItems));
+
+    menuZone.appendChild(menuComponent);
+
+    const rightSideMenu = document.createElement('div');
+    rightSideMenu.id = 'rightSideMenu';
+    rightSideMenu.style.minWidth = '80px';
+
+    wrapper.appendChild(menuZone);
+    wrapper.appendChild(rightSideMenu);
+
+    setTimeout(() => {
+        const items = menuComponent.getAttribute("items");
+        if (items) {
+            renderMenuComponentHorizontal(menuComponent);
+        } else {
+            console.warn("⚠️ Tentative de render, mais 'items' est toujours null.");
+        }
+    }, 0);
+    
+
+    return wrapper;
+}
+
+function renderMenuComponentHorizontal(content) {
+    const itemsAttr = content.getAttribute("items");
+    console.log("🖁 Rendering menuComponent with items :", itemsAttr);
+
+    if (!itemsAttr) {
+        console.warn("⛔ Aucun attribut 'items' trouvé ou vide sur le composant menu. Annulation du rendu.");
+        return;
+    }
+
+    let items;
+    try {
+        items = JSON.parse(itemsAttr);
+        if (!Array.isArray(items)) throw new Error("items n'est pas un tableau");
+    } catch (err) {
+        console.error("❌ Erreur lors du parsing de 'items' :", err);
+        return;
+    }
+
+    content.innerHTML = "";
+
     const menu = document.createElement('ul');
     menu.className = 'horizontal-menu';
 
-    internalDiv.appendChild(menu);
-    mainDiv.appendChild(internalDiv);
-    mainDiv.setAttribute("items", JSON.stringify(menuItems));
+    const createMenuItem = (item) => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        const i = document.createElement('i');
 
-    renderMenuComponentHorizontal(mainDiv);
+        i.className = item.icon;
+        a.textContent = item.item;
+        a.style.fontFamily = "'Segoe UI', 'Roboto', 'Open Sans', sans-serif";
+        a.style.fontSize = "14px";
+        a.style.fontWeight = "500";
+        a.style.textDecoration = "none";
+        a.style.color = "#333";
+        a.style.padding = "8px 16px";
+        a.style.display = "inline-block";
 
-    return mainDiv;
+        li.appendChild(i);
+        li.appendChild(a);
+
+        if (item.children && item.children.length > 0) {
+            const subMenu = document.createElement('ul');
+            subMenu.className = "horizontal-submenu";
+            subMenu.style.display = "none";
+
+            item.children.forEach(subItem => {
+                subMenu.appendChild(createMenuItem(subItem));
+            });
+
+            li.appendChild(subMenu);
+            li.setAttribute('onmouseenter', 'toggleSubMenuOpen(event, this)');
+            li.setAttribute('onmouseleave', 'toggleSubMenuClose(event, this)');
+        } else {
+            li.setAttribute('onclick', `loadFormData('${item.url}', document.getElementById('${item.target}'))`);
+        }
+
+        return li;
+    };
+
+    if (items.length > 1) {
+        const lastItem = items.pop();
+        items.unshift(lastItem);
+    }
+
+    items.forEach(item => {
+        menu.appendChild(createMenuItem(item));
+    });
+
+    content.appendChild(menu);
+
+    const rightSide = document.getElementById("rightSideMenu");
+    if (rightSide) {
+        rightSide.innerHTML = "";
+
+        const savedState = localStorage.getItem("menuState");
+        if (savedState) {
+            try {
+                const state = JSON.parse(savedState);
+                if (state.rightSide) {
+                    state.rightSide.forEach(component => {
+                        const el = document.createElement(component.tag || "div");
+                        if (component.id) el.id = component.id;
+                        if (component.class) el.className = component.class;
+                        if (component.text && !['input', 'textarea'].includes(component.tag)) {
+                            el.textContent = component.text;
+                        }
+                        if (component.type) el.setAttribute("type", component.type);
+                        if (component.value) el.value = component.value;
+                        if (component.innerHTML && component.tag === "div") {
+                            el.innerHTML = component.innerHTML;
+                        }
+                        
+                        el.draggable = !!component.draggable;
+                        if (component.onclick) {
+                            try {
+                                el.onclick = () => {
+                                    console.log("➡️ Bouton cliqué, exécution onclick :", component.onclick);
+                                    eval(component.onclick);
+                                };
+                            } catch (e) {
+                                console.error("❌ Erreur lors de l’exécution du onclick avec eval :", e);
+                            }
+                        }
+                        
+
+                        rightSide.appendChild(el);
+                        if (state.rightSide) {
+                            console.log("📦 Nombre d’éléments posés dans le rightSide :", state.rightSide.length);
+                        }
+                        
+                    });
+                }
+            } catch (e) {
+                console.error("❌ Erreur restauration rightSide :", e);
+            }
+        }
+
+        const translateWrapper = document.createElement("div");
+        translateWrapper.className = "translate-container";
+
+        const floatButton = document.createElement('div');
+        floatButton.textContent = '🌐';
+        floatButton.title = 'Select Language';
+        floatButton.onclick = () => {
+            selector.style.display = selector.style.display === 'none' ? 'block' : 'none';
+        };
+
+        const selector = document.createElement('select');
+        selector.style.display = 'none';
+        selector.style.marginLeft = '8px';
+
+        Object.keys(translationDictionary).forEach(lang => {
+            const option = document.createElement('option');
+            option.value = lang;
+            option.textContent = lang;
+            selector.appendChild(option);
+        });
+
+        selector.onchange = (e) => translatePage('', e.target.value);
+
+        translateWrapper.appendChild(floatButton);
+        translateWrapper.appendChild(selector);
+
+        rightSide.appendChild(document.createElement("hr"));
+        rightSide.appendChild(translateWrapper);
+    }
+
+    console.log("✅ Menu horizontal rendu avec", items.length, "éléments.");
 }
 
+function toggleSubMenuOpen(event, element) {
+    const subMenu = element.querySelector('.horizontal-submenu');
+    if (subMenu) {
+        subMenu.classList.add("show");
+    }
+}
+
+function toggleSubMenuClose(event, element) {
+    const subMenu = element.querySelector('.horizontal-submenu');
+    if (subMenu) {
+        subMenu.classList.remove("show");
+    }
+}
 function editMenuComponentHorizontal(type, element, content) {
     // Parse the menu items from the element's "items" attribute
     const items = JSON.parse(element.getAttribute("items"));
@@ -68,6 +266,8 @@ function editMenuComponentHorizontal(type, element, content) {
 
 
 function addMenuItemsHorizontal(element, itemdiv, itemObj) {
+    console.log("🔍 Searching for #rightSideMenu...", document.getElementById("rightSideMenu"));
+
     const internalDiv = document.createElement('div');
     internalDiv.style.marginBottom = "5px";
     internalDiv.style.border = "1px solid #ccc";
@@ -112,6 +312,14 @@ function addMenuItemsHorizontal(element, itemdiv, itemObj) {
         internalDiv.appendChild(subMenuDiv);
     };
     internalDiv.appendChild(subMenuButton);
+    // ✅ Add Delete Button
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.style.marginLeft = "10px";
+    deleteButton.onclick = () => {
+        itemdiv.removeChild(internalDiv); // Remove the current menu item from the editor
+    };
+    internalDiv.appendChild(deleteButton);
 
     itemdiv.appendChild(internalDiv);
 
@@ -123,93 +331,37 @@ function addMenuItemsHorizontal(element, itemdiv, itemObj) {
         });
         internalDiv.appendChild(subMenuDiv);
     }
-}
-
-function saveMenuItemsHorizontal(element) {
-    const parseMenuItems = (container) => {
-        const items = [];
-        const children = container.children;
-        for (let i = 0; i < children.length; i++) {
-            const item = children[i].querySelector("input:nth-child(1)").value;
-            const url = children[i].querySelector("input:nth-child(2)").value;
-            const icon = children[i].querySelector("input:nth-child(3)").value;
-            const target = children[i].querySelector("input:nth-child(4)").value;
-            const checkpoint = children[i].querySelector("input:nth-child(5)").value;
-
-            const subMenuDiv = children[i].querySelector("div");
-            const childrenItems = subMenuDiv ? parseMenuItems(subMenuDiv) : [];
-            items.push({
-                item: item,
-                url: url,
-                icon: icon,
-                target: target,
-                checkpoint: checkpoint,
-                children: childrenItems.length > 0 ? childrenItems : null
-            });
-        }
-        return items;
-    };
-    const itemdiv = document.getElementById("menu-items");
-    const items = parseMenuItems(itemdiv);
-    element.setAttribute("items", JSON.stringify(items));
-    renderMenuComponentHorizontal(element);
-}
-
-function renderMenuComponentHorizontal(content) {
-    const items = JSON.parse(content.getAttribute("items"));
-    const menu = content.querySelector('ul');
-    menu.innerHTML = "";
-
-    const createMenuItem = (item) => {
-        const li = document.createElement('li');
-        const a = document.createElement('a');
-        const i = document.createElement('i');
-
-        i.className = item.icon;
-        a.textContent = item.item;
-
-        li.appendChild(i);
-        li.appendChild(a);
-
-        if (item.children && item.children.length > 0) {
-            const subMenu = document.createElement('ul');
-            subMenu.className = "horizontal-submenu";
-            subMenu.style.display = "none";
-
-            item.children.forEach(subItem => {
-                subMenu.appendChild(createMenuItem(subItem));
-            });
-
-            li.appendChild(subMenu);
-            li.setAttribute('onmouseenter', 'toggleSubMenuOpen(event, this)');
-            li.setAttribute('onmouseleave', 'toggleSubMenuClose(event, this)');
-
-        } else {
-            if (item.url.startsWith("http") || item.url.startsWith("/")) {
-                li.setAttribute('onclick', `window.location.href='${item.url}'; window.target='${item.target}'`);
-            } else {
-                li.setAttribute('onclick', `loadFormData('${item.url}',document.getElementById('${item.target}'))`);
-            }
-        }
-
-        return li;
-    };
-
-    items.forEach(item => {
-        menu.appendChild(createMenuItem(item));
-    });
-}
-
-function toggleSubMenuOpen(event, element) {
-    const subMenu = element.querySelector('.horizontal-submenu');
-    if (subMenu) {
-        subMenu.classList.add("show");
+    deleteButton.textContent = "Delete";
+    deleteButton.onclick = () => {
+    if (confirm("Are you sure you want to delete this item?")) {
+        internalDiv.remove();
     }
+};
+internalDiv.appendChild(deleteButton);
 }
 
-function toggleSubMenuClose(event, element) {
-    const subMenu = element.querySelector('.horizontal-submenu');
-    if (subMenu) {
-        subMenu.classList.remove("show");
+
+window.addEventListener("DOMContentLoaded", () => {
+    console.log("📦 DOMContentLoaded triggered");
+
+    const container = document.getElementById("menuGlobale");
+    const savedState = localStorage.getItem("menuState");
+
+    if (!container) {
+        console.error("❌ Conteneur #menuGlobale non trouvé !");
+        return;
     }
-}
+
+    if (savedState) {
+        console.log("✅ État retrouvé :", savedState);
+        const state = JSON.parse(savedState);
+        window.menuItems = state.menuItems;
+
+        const restoredMenu = createMenuComponentHorizontal("menuComponentHorizontal");
+
+        container.innerHTML = '';
+        container.appendChild(restoredMenu);
+    } else {
+        console.warn("⚠️ Aucun état sauvegardé");
+    }
+});

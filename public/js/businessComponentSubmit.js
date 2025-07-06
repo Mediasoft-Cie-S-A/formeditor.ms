@@ -16,18 +16,16 @@
 
 // store form data in mongoDB
 
-document
-  .getElementById("formDataForm")
-  .addEventListener("submit", function (e) {
+function registerBusinessComponent(e) {
     e.preventDefault();
     console.log("submit");
 
-    var formId = document.getElementById("formId").value;
-    var formName = document.getElementById("formName").value;
-    var formPath = document.getElementById("formPath").value;
+    var objectId = document.getElementById("objectId").value;
+    var objectName = document.getElementById("objectName").value;
+    var objectSlug = document.getElementById("objectSlug").value;
     var userCreated = document.getElementById("userCreated").value;
     var userModified = document.getElementById("userModified").value;
-    var type = document.getElementById("type").value;
+    var type = document.getElementById("objectType").value;
 
     var formContainer = document.getElementById("formContainer");
     var jsonData = domToJson(formContainer);
@@ -35,9 +33,9 @@ document
 
     if (type == "business_component") {
       const formData = {
-        formId: formId,
-        formName: formName,
-        formPath: formPath,
+        objectId: objectId,
+        objectName: objectName,
+        objectSlug: objectSlug,
         userCreated: userCreated,
         userModified: userModified,
         modificationDate: new Date(),
@@ -46,7 +44,7 @@ document
       };
 
       // Check if form exists
-      fetch(`/store-business-json/${formId}`)
+      fetch(`/store-business-json/${objectId}`)
         .then((response) => {
           console.log("response");
           console.log(response);
@@ -60,7 +58,7 @@ document
           console.log("existingForm");
           console.log(existingForm);
           // If form exists, update it
-          return fetch(`/update-business-component/${formId}`, {
+          return fetch(`/update-business-component/${objectId}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -90,53 +88,7 @@ document
           console.error("Error:", error);
         });
     }
-  });
+  }
 
-function showToast(message, duration = 3000) {
-  const toastContainer = document.getElementById("toast-container");
-  const toast = document.createElement("div");
-  toast.classList.add("toast-message");
-  toast.textContent = message;
 
-  // Add the toast to the container
-  toastContainer.appendChild(toast);
 
-  // Make the toast visible
-  setTimeout(() => {
-    toast.style.opacity = 1;
-  }, 100);
-
-  // Hide and remove the toast after 'duration'
-  setTimeout(() => {
-    toast.style.opacity = 0;
-    toast.addEventListener("transitionend", () => toast.remove());
-  }, duration);
-}
-
-// show hint like a toastmessage wiht absolute position, based on the mouse position
-function showHint(message, duration = 1000, event) {
-  const hintContainer = document.getElementById("hint-container");
-  hintContainer.style.top = 10 + event.clientY + "px";
-  hintContainer.style.left = 10 + event.clientX + "px";
-  const hint = document.createElement("div");
-  hint.classList.add("hint-message");
-  hint.innerHTML = message;
-
-  hintContainer.innerHTML = "";
-
-  // Add the toast to the container
-  hintContainer.appendChild(hint);
-
-  // Make the toast visible
-  setTimeout(() => {
-    hint.style.opacity = 1;
-  }, 100);
-
-  // Hide and remove the toast after 'duration'
-  setTimeout(() => {
-    hint.style.opacity = 0;
-    hint.addEventListener("transitionend", () => hint.remove());
-  }, duration);
-}
-
-loadForms();

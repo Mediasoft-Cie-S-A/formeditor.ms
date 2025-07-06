@@ -6,12 +6,17 @@
     align-items: center;
     background-color: #f9f9f9;
     padding: 10px 20px;
-    border-bottom: 2px solid #ccc;
     gap: 30px;
+    flex-wrap: wrap; /* Allows items to wrap onto multiple lines */
+    gap: 5px; /* Optional: adds spacing between items */
+    padding: 0;
+    margin: 0;
+    list-style: none;
   }
   
   /* Each top-level item */
   .horizontal-menu > li {
+    padding: 6px 10px; /* Réduit le padding interne */
     list-style: none;
     position: relative;
     padding: 8px 12px;
@@ -31,8 +36,6 @@
     position: absolute;
     top: 100%;
     left: 0;
-    background-color: white;
-    border: 1px solid #ddd;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     border-radius: 8px;
     min-width: 180px;
@@ -49,7 +52,7 @@
   }
   
   .horizontal-submenu li:hover {
-    background-color: #f0f0f0;
+    background-color: #fff9f9;
   }
   
   /* Animation for submenu */
@@ -71,3 +74,80 @@
     gap: 10px;
     padding: 10px;
 }
+.menu-bar-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 20px;
+  background-color: #f9f9f9;
+  border-bottom: 2px solid #ccc;
+}
+
+.translate-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #f9f9f9; /* ✅ AJOUTÉ pour égalité avec menu */
+  padding: 5px 10px;          /* ✅ AJOUTÉ */
+  border: 1px solid #ccc;     /* ✅ AJOUTÉ */
+  border-radius: 6px;         /* ✅ cohérence */
+}
+
+.translate-container div {
+  background-color: #007bff;
+  color: #fff;
+  padding: 5px;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #e6f0ff;
+color: #333;
+}
+
+.translate-container select {
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  padding: 6px 10px;
+  border-radius: 4px;
+  /* border: 1px solid #ccc; */
+  background-color: #fff;
+  font-size: 14px;
+}
+
+
+.horizontal-menu li {
+  flex: 0 1 auto; /* Items will not grow but can shrink and have a base size */
+  margin: 5px; /* Optional: adds spacing around each menu item */
+}
+
+.horizontal-menu li {
+  border-radius: 6px;
+  padding: 8px 8px;
+  margin: 4px;
+  background-color: #f9f9f9;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.horizontal-menu li:hover {
+  background-color: #e6f0ff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+.horizontal-menu > li > a span {
+  color: #666;
+  font-weight: normal;
+}
+#rightSideMenu {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+

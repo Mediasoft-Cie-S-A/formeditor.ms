@@ -64,9 +64,9 @@ class ChartManager {
 
     getChartType(type) {
         switch (type) {
-            case 'LineChart': return 'line';
-            case 'BarChart': return 'bar';
-            case 'PieChart': return 'pie';
+            case 'lineChart': return 'line';
+            case 'barChart': return 'bar';
+            case 'pieChart': return 'pie';
             case 'scatterChart': return 'scatter';
             case 'radarChart': return 'radar';
             case 'doughnutChart': return 'doughnut';
@@ -96,10 +96,10 @@ class ChartManager {
         const dataConfig = JSON.parse(element.getAttribute("dataConfig"));
           const pivotConfig = JSON.parse(element.getAttribute("pivotConfig"));
         if (dataConfig){
-            dataConfig.forEach(config => addFieldToPropertiesBar(data, config,true));
+            dataConfig.forEach(config => addFunctionsFieldToPropertiesBar(data, config,true));
         }
         if (pivotConfig) {
-            pivotConfig.forEach(config => addFieldToPropertiesBar(pivot, config,true));
+            pivotConfig.forEach(config => addFunctionsFieldToPropertiesBar(pivot, config,true));
         }
         const legendInput = legend.querySelector('input');
         const legendJson = JSON.parse(element.getAttribute("labels-json"));
@@ -121,7 +121,7 @@ class ChartManager {
 
     getChart() {
         const propertiesBar = document.getElementById('propertiesBar');
-        const chartID = propertiesBar.querySelector('label').textContent;
+        const chartID = propertiesBar.getAttribute("data-element-id");
         const element = document.getElementById(chartID);
         const chartNumber = element.getAttribute('chartNumber');
         return this.chartList[chartNumber];
@@ -175,7 +175,8 @@ class ChartManager {
         const fieldsElaborated = [];
        
         var functionName = legendJson.functionName;
-        var labelName = legendJson.fieldName;
+        var labelName = legendJson.fieldLabel;
+               
         // generate colors for each dataset
         var colorCount = -1;
         const fieldsChart=[];
@@ -185,8 +186,8 @@ class ChartManager {
             
             const keys = Object.keys(data[0]);
             keys.forEach(key => {
-                // if the key is not ind dataConfig.fieldname, add it to fieldsChart
-                if (!dataConfig.find(x => x.fieldName === key)) {
+                // if the key is not ind dataConfig.fieldLabel, add it to fieldsChart
+                if (!dataConfig.find(x => x.fieldLabel === key)) {
                     fieldsChart.push(key);
                 }
             });
@@ -194,7 +195,7 @@ class ChartManager {
         }else
         {
             dataConfig.forEach((config, index) => {
-                fieldsChart.push(config.fieldName);
+                fieldsChart.push(config.fieldLabel);
             });
         }
         console.log("fieldsChart",fieldsChart);
@@ -238,8 +239,10 @@ class ChartManager {
             }
         });
       
+        // generate the query to get the data
+        
         // Get the dataset data from the server, using the filter
-        var url = this.getFilterUrl(element)+"&agg="+labelName;
+        var url = this.getFilterUrl(element);;
 
         const request = new XMLHttpRequest();
         request.open("POST", url, false); // `false` makes the request synchronous
@@ -248,6 +251,36 @@ class ChartManager {
         const sort = JSON.parse(element.getAttribute("sort"));
         const limit = JSON.parse(element.getAttribute("limit"));
         console.log("filter:" + filter);
+        // add the tagname cookieStorage in the filter
+        const cookieStorage= document.querySelector('[tagname="cookieStorage"]');
+        if (cookieStorage) {
+            const cookieStorageJson = JSON.parse(cookieStorage.getAttribute("data-cookies"));
+            if (cookieStorageJson) {
+                // get the variables name from the cookieStorage
+                cookieStorageJson.forEach(item => {
+                    const fieldName = item.name;
+                    const selectValue = cookieStorage.querySelector(`select[var_name="${fieldName}"]`);
+                    // get the value of the select
+                    const value = selectValue.options[selectValue.selectedIndex].value;
+                    // check if the filter has the field name
+                    if (filter && filter.filters) {
+                        const index = filter.filters.findIndex(x => x.fieldName === fieldName);
+                        if (index !== -1) {
+                            // update the value
+                            filter.filters[index].value = value;
+                        } else {
+                            // add the field to the filter
+                            filter.filters.push({ fieldName: fieldName, value: value });
+                        }
+                    } else {
+                        // add the field to the filter
+                        filter.filters = [{ fieldName: fieldName, value: value }];
+                    }
+                });
+            }
+        }
+        // check if the filter is not null or undefined   
+
         if (filter !== null && filter !== undefined && filter !== "undefined") {
             const body = { 
                     columns: dataConfig, 
@@ -256,6 +289,7 @@ class ChartManager {
                     filters: filter, 
                     sort: sort, 
                     limit: limit,
+                    groups: legendJson,
                    // links: metadata.links
                 };
             request.send(JSON.stringify(body));
@@ -268,6 +302,7 @@ class ChartManager {
                 filters: [], 
                 sort: sort, 
                 limit: limit,
+                groups: legendJson,
                // links: metadata.links
                };
             request.send(JSON.stringify(body));
@@ -309,12 +344,12 @@ class ChartManager {
     }
 
     getFilterUrl(element) {
-        return `/getDatasetDataByFilter?tableName=${element.getAttribute("tableName")}`;
+        return `/getDatasetDataByFilter?`;
     }
 
     updateJsonData() {
         const propertiesBar = document.getElementById('propertiesBar');
-        const chartID = propertiesBar.querySelector('label').textContent;
+        const chartID = propertiesBar.getAttribute("data-element-id");
         console.log("chartID", chartID);
         const currentChart = document.getElementById(chartID);
 
@@ -339,21 +374,18 @@ class ChartManager {
        
     
         var pivotInput = propertiesBar.querySelector('#Pivot');
-        const dataSelect = dataInput.querySelectorAll('div');
+        const dataSelect = dataInput.querySelectorAll('[name="dataContainer"]');
         const dataConfig = [];
         dataSelect.forEach(item => {
             //get the json form data-field
-            if (item.getAttribute('data-field')) {
-                const jsonDataset = JSON.parse(item.getAttribute('data-field'));
+                  const jsonDataset = JSON.parse(item.getAttribute('data-field'));
+            // get the function name close select
+            const selectFunction = item.parentElement.querySelector('[tagname="function"]');
+            console.log("selectFunction", selectFunction);
+            jsonDataset.functionName = selectFunction.value;
 
-                dataConfig.push({
-                    fieldName: jsonDataset.fieldName, 
-                    functionName: jsonDataset.dataType,
-                    dataType: jsonDataset.fieldDataType,
-                    DBName: jsonDataset.DBName,
-                    tableName: jsonDataset.tableName
-                 });
-            }
+                dataConfig.push(jsonDataset);
+            
         });
         currentChart.setAttribute("dataConfig", JSON.stringify(dataConfig));
 
@@ -396,7 +428,7 @@ class ChartManager {
         var controlPanel = element.querySelector(`#${id}`);
         var sortfield="";
         var funct="";
-        var limitValue=1000;
+        var limitValue=100;
         if (controlPanel) {
             // get sort field and direction
             sortfield = element.querySelector('#sortSelect').textContent;
@@ -459,7 +491,21 @@ class ChartManager {
         functSelect.id = 'functSelect';
         functSelect.style.marginRight = '10px';
         controlPanel.appendChild(functSelect);
-        setOptionsByType(functSelect, 'number');
+        const functions = [
+            { value: 'sum', text: 'Sum' },
+            { value: 'avg', text: 'Average' },
+            { value: 'count', text: 'Count' },
+            { value: 'min', text: 'Min' },
+            { value: 'max', text: 'Max' },
+          
+        ];
+        functions.forEach(func => {
+            const option = document.createElement('option');
+            option.value = func.value;
+            option.textContent = func.text;
+            functSelect.appendChild(option);
+        });
+
         for (var i = 0; i < functSelect.options.length; i++) {
             if (functSelect.options[i].value === funct) {
                 functSelect.options[i].selected = true;
@@ -507,4 +553,8 @@ function createElementChart(type) {
 
 function editElementChart(type, element, content) {
     chartManager.editElementChart(type, element, content);
+}
+
+function renderDataChart(element) {
+    chartManager.renderData(element);
 }

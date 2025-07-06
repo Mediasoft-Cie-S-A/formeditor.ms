@@ -126,10 +126,19 @@ function renderElements(parent){
                     // get the render function from the config
                       var renderFunction = element.renderFunction;
                       if (renderFunction) {
-                        console.log("renderFunction:" + renderFunction);
-                        // Call the render function with the element as a parameter
+                        console.log("renderFunction:", renderFunction);
+                      
+                        // ⚠️ Sécurité spécifique pour renderMenuComponentHorizontal
+                        if (
+                          renderFunction === "renderMenuComponentHorizontal" &&
+                          (!el.getAttribute("items") || el.getAttribute("items") === "null")
+                        ) {
+                          console.warn("⛔ Menu ignoré temporairement car 'items' est vide.");
+                          continue; // Skip this element
+                        }
+                      
                         window[renderFunction](el);
-                        } else {
+                      } else {
                         console.log("No render function found for tagname: " + element.type);
                       } // end if renderFunction
                   } // end for (var j = 0; j < elements.length; j++)
@@ -179,14 +188,14 @@ function createDomElement(json, parent) {
 // Function to export the json to file
 function exportJson() {
   var formContainer = document.getElementById("formContainer");
-  var formId = document.getElementById("formId").value;
+  var objectId = document.getElementById("objectId").value;
   var jsonData = domToJson(formContainer);
   var dataStr =
     "data:text/json;charset=utf-8," +
     encodeURIComponent(JSON.stringify(jsonData));
   var downloadAnchorNode = document.createElement("a");
   downloadAnchorNode.setAttribute("href", dataStr);
-  downloadAnchorNode.setAttribute("download", formId + ".json");
+  downloadAnchorNode.setAttribute("download", objectId + ".json");
   document.body.appendChild(downloadAnchorNode); // required for firefox
   downloadAnchorNode.click();
   downloadAnchorNode.remove();
@@ -198,43 +207,42 @@ function onTabSwitch(event) {
   console.log(target);
   removeSelection();
   hideEditMenu();
-  if (target === "#formsList") {
-    console.log("formsList");
-    // Load forms
-    loadForms();
+
+  switch (target) {
+    case "#pageList":
+      console.log("PageList");
+      // Load pages
+      loadPages();
+      break;
+
+    case "#formsList":
+          console.log("formsList");
+          // Load forms
+          loadForms();
+          
+        break;
+        
+    case "#editForm":
+          console.log("editForm");
+          // Load forms
+          drageDroptableTableList(document.getElementById("drageDroptablesList"));
+          dragDropApiList(document.getElementById("dragDropApiList"));
+        break;
+    case "#renderForm":
+          console.log("renderForm");
+          break;
+
+    case "#DatabaseForm":
+              const list = document.getElementById("ContentTableListBar");
+          const detailsDiv = document.getElementById("mtableDetails");
+          createEditableTableList(list, detailsDiv);
+          break;
   }
 
-  if (target === "#editForm") {
-    console.log("editForm");
-    // Load forms
-    drageDroptableTableList(document.getElementById("drageDroptablesList"));
-    dragDropApiList(document.getElementById("dragDropApiList"));
-  }
 
-  if (target === "#renderForm") {
-    var formContainer = document.getElementById("formContainer");
-    var jsonData = domToJson(formContainer);
-    console.log(jsonData);
-    var renderContainer = document.getElementById("renderForm");
-
-    // Clear previous content
-    renderContainer.innerHTML = "";
-
-    // Convert JSON back to DOM and append
-    var domContent = jsonToDom(jsonData, renderContainer);
-  }
-  if (target === "#DatabaseForm") {
-    const list = document.getElementById("ContentTableListBar");
-    const detailsDiv = document.getElementById("mtableDetails");
-    createEditableTableList(list, detailsDiv);
-  }
 }
 
-// Add event listeners to tab links
-var tabLinks = document.querySelectorAll(".nav-tabs a");
-tabLinks.forEach(function (link) {
-  link.addEventListener("click", onTabSwitch);
-});
+
 
 function jsonToDomBusinessComponent(json, parent) {
   // Helper function to create an element from JSON structure
@@ -297,4 +305,21 @@ function jsonToDomBusinessComponent(json, parent) {
     console.log("cookieStorage:" + cookieStorageElements[i]);
     renderCookieStorage(cookieStorageElements[i]); // Custom function to render cookieStorage elements
   }
+}
+
+ 
+
+// Add event listeners to tab links
+var tabLinks = document.querySelectorAll(".nav-tabs a");
+tabLinks.forEach(function (link) {
+  link.addEventListener("click", onTabSwitch);
+  // set the first tab as active
+
+
+});
+
+// Set the first tab as active
+if (tabLinks.length > 0) {
+ // simulate a click on the first tab
+  tabLinks[0].click();
 }

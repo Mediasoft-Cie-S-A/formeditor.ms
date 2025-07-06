@@ -16,18 +16,16 @@
 
 // store form data in mongoDB
 
-document
-  .getElementById("formDataForm")
-  .addEventListener("submit", function (e) {
+ function registerForm(e) {
     e.preventDefault();
     console.log("submit");
 
-    var formId = document.getElementById("formId").value;
-    var formName = document.getElementById("formName").value;
-    var formPath = document.getElementById("formPath").value;
+    var objectId = document.getElementById("objectId").value;
+    var objectName = document.getElementById("objectName").value;
+    var objectSlug = document.getElementById("objectSlug").value;
     var userCreated = document.getElementById("userCreated").value;
     var userModified = document.getElementById("userModified").value;
-    var type = document.getElementById("type").value;
+    var type = document.getElementById("objectType").value;
 
     var formContainer = document.getElementById("formContainer");
     var jsonData = domToJson(formContainer);
@@ -35,9 +33,9 @@ document
 
     if (type == "form") {
       const formData = {
-        formId: formId,
-        formName: formName,
-        formPath: formPath,
+        objectId: objectId,
+        objectName: objectName,
+        objectSlug: objectSlug,
         userCreated: userCreated,
         userModified: userModified,
         modificationDate: new Date(),
@@ -46,7 +44,7 @@ document
       };
 
       // Check if form exists
-      fetch(`/get-form/${formId}`)
+      fetch(`/get-form/${objectId}`)
         .then((response) => {
           console.log("response");
           console.log(response);
@@ -60,7 +58,7 @@ document
           console.log("existingForm");
           console.log(existingForm);
           // If form exists, update it
-          return fetch(`/update-form/${formId}`, {
+          return fetch(`/update-form/${objectId}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -90,11 +88,11 @@ document
           console.error("Error:", error);
         });
     }
-  });
+  }
 
 
 
 
 
 
-loadForms();
+

@@ -54,7 +54,7 @@ function fetchTablesList(list,tableDetailsDiv) {
                             const listItem = document.createElement('div');
                             if (i%2==0) 
                             {
-                                listItem.style.backgroundColor='#e6e6e6';
+                                listItem.style.backgroundColor='#eeeeff';
                             }
                             listItem.classList.add('grid-row');
                             listItem.classList.add('table-item');
@@ -239,7 +239,7 @@ function fetchTableDetails(DBName,tableName,tableLabel,detailsDiv) {
         const tr = document.createElement('tr');
         tr.classList.add('table-header');
         tr.style.padding='10px';
-        tr.style.backgroundColor='#0056b3';
+        tr.style.backgroundColor='#4d61fc';
         tr.style.color='white';
         tr.id='TableFieldsList';
         tr.style.borderbottom='1px solid #ddd';
@@ -432,7 +432,7 @@ async function editTableDetails(DBName,tableName, tableLabel, detailsDiv) {
         // Add header to table
         const thead = document.createElement('thead');
         thead.style.padding='10px';
-        thead.style.backgroundColor='#0056b3';
+        thead.style.backgroundColor='#4d61fc';
         thead.style.color='white';
         thead.style.alignContent='center';
         table.appendChild(thead);

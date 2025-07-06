@@ -266,6 +266,7 @@ function renderGrid(main) {
     
   );
 
+  // create the table
   createGrid(
     table,
     dataset[0].DBName,
@@ -274,6 +275,8 @@ function renderGrid(main) {
     main
   );
   main.appendChild(table);
+  searchGrid(dataset[0].DBName, "", "", "", main.id);
+
 }
 
 function insertNavBar(
@@ -369,14 +372,7 @@ function createGrid(
   body.className = "grid-body";
   grid.appendChild(body);
   //set search inputs
-  // check if in the page exists tagname="cookieStorage"
-  var cookieStorage = document.querySelector('[tagname="cookieStorage"]');
-  console.log(cookieStorage);
-  if (!cookieStorage) {
-
-    console.log("cookieStorage not found");
-    gridFetchData(grid);
-  }
+  
 }
 
 function switchView(e, DBName, gridID, view) {
@@ -397,7 +393,7 @@ function generateHeaderRow(grid, dataset) {
   } else {
     header = grid.querySelector(".grid-header");
     header.innerHTML = ""; // clear the header
-  }
+  } 
 
   // header
   var row = document.createElement("div");
@@ -615,7 +611,12 @@ function searchGrid(DBName, filterName, FilterOp, filterValue, gridID) {
       gridGetData(tableGrid, DBName, tableName, page, pageSize,  filter,0);
       break;
     case "panel":
-     
+      // get the header
+      main = document.getElementById(gridID);
+      const header = main.querySelector(".grid-header");
+      if (header) {
+        header.remove();
+      }
       gridGetData(tableGrid, DBName, tableName, page, pageSize,  filter,1);
       break;
     default:
@@ -780,14 +781,10 @@ async function gridGetData(
   const body = grid.querySelector(".grid-body");
   const header = grid.querySelector(".grid-header");
   // if gridType is 1, clear the header, body
-  if (gridType == 1) {
-    header.innerHTML = "";
-   
-  }
+ 
   body.innerHTML = "";
   // Prepare the URL
   var url = `/table-data/${DBName}/${tableName}/${page}/${pageSize}?fields=${datasetFields}&filter=${encodeURIComponent(JSON.stringify(filterJSON))}&orderBy=${JSON.stringify(orderBy)}`;
-  console.log("urillllll:",url);
   // get the sqljson from the main
   var sqlJson = JSON.parse(main.getAttribute("sql"));
   if (sqlJson.DBName != "") {

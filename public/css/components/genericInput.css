@@ -51,3 +51,95 @@
 .textarea-element {
     min-height: 115px;
 }
+
+.modal {position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:1000;}
+.modal.show {display:flex;}
+.modal__backdrop {position:absolute; inset:0; background:#0004;}
+.modal__dialog {position:relative; background:#fff; max-width:90%; max-height:90%; overflow:auto; padding:1rem; border-radius:8px;}
+.modal__close {position:absolute; top:.5rem; right:.5rem; background:none; border:none; font-size:1.5rem;}
+/* -------------------------------------------------------
+   MODAL – embellissements
+   ------------------------------------------------------- */
+
+/* Animation d’apparition (fade + zoom léger) --------------*/
+@keyframes modal-fade-in {
+    from {opacity: 0; transform: scale(.96);}
+    to   {opacity: 1; transform: scale(1);}
+  }
+  .modal {                     /* conteneur flex déjà défini */
+    animation: modal-fade-in .25s ease-out;
+    backdrop-filter: blur(2px);        /* léger flou du fond */
+  }
+  
+  /* Backdrop : dégradé radial pour un centre plus clair -----*/
+  .modal__backdrop {
+    background:
+      radial-gradient(circle at center,
+        rgba(0,0,0,.35) 0%,
+        rgba(0,0,0,.55) 100%);
+  }
+  
+  /* Dialog : ombre, bordure douce, coin supérieur accentué ---*/
+  .modal__dialog {
+    border-radius: 1.2rem;
+    border: 1px solid rgba(0,0,0,.08);
+    box-shadow:
+      0 20px 32px -6px rgba(0,0,0,.25),
+      0 6px 10px -4px rgba(0,0,0,.12);
+    transition: box-shadow .2s ease-in-out;
+  }
+  .modal__dialog:hover {
+    box-shadow:
+      0 24px 40px -4px rgba(0,0,0,.28),
+      0 8px 14px -4px rgba(0,0,0,.15);
+  }
+  
+  .modal__close{
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    content: "X"; /* ⚠️ Non nécessaire si "X" est dans le HTML */
+}
+
+  
+  /* Corps : petites scrollbars discrètes --------------------*/
+  .modal__body {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,0,0,.25) transparent;
+  }
+  .modal__body::-webkit-scrollbar {
+    width: 6px;
+  }
+  .modal__body::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .modal__body::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,.25);
+    border-radius: 3px;
+  }
+  
+  /* Responsive : plein écran en dessous de 480 px -----------*/
+  @media (max-width: 480px) {
+    .modal__dialog {
+      width: 100%; height: 100%;
+      border-radius: 0;
+      max-width: 100%; max-height: 100%;
+    }
+  }
+  
+  /* Préférence utilisateur : réduire les animations ---------*/
+  @media (prefers-reduced-motion: reduce) {
+    .modal, .modal__close { animation: none; transition: none; }
+  }
+  .modal__title {
+    margin: 0 0 1em;
+    font-size: 2rem;        /* Plus grand */
+    font-weight: 700;       /* Plus gras */
+    text-align: center;
+    letter-spacing: 0.05em; /* Espacement entre lettres, optionnel */
+}
+.ctab_HeaderButton.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
