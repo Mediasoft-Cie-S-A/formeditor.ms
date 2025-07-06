@@ -94,6 +94,21 @@ class dblayer{
     async executeActions(actions, details)
   {
     console.log("executeActions");
+    // check if actions is an array
+    if (!Array.isArray(actions)) {
+      console.log("Actions should be an array");
+      return;
+    }
+    // check if details is an object
+    if (typeof details !== 'object' || details === null) {
+      console.log("Details should be an object");
+      return;
+    } 
+    // check if actions has actionType property
+    if (!actions.every(action => action.hasOwnProperty('actionType'))) {
+      console.log("Each action should have an actionType property");
+      return;
+    }
     console.log(actions);
     console.log(actions.actionType);
     actions.forEach(action => {
