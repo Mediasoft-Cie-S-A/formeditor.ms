@@ -159,8 +159,17 @@ function createDomElement(json, parent) {
 
     // Set attributes
     if (json.attributes) {
+
       for (var attr in json.attributes) {
-        element.setAttribute(attr, json.attributes[attr]);
+        
+        
+        try{
+          element.setAttribute(attr, json.attributes[attr]);
+        }
+        catch
+        {
+            console.log("error: "+ attr);
+        }
       }
     }
 
