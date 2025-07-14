@@ -157,7 +157,7 @@ function renderNavigationBar(main) {
   var buttons = [
 
     {
-      name: "PreviusDSBtn",
+      name: "PreviousDSBtn",
       title: "Previus",
       text: '<p>Previus</p> <i class="fa fa-chevron-left" style="color:#4d61fc;margin-left:-6px"></i>',
       event:
