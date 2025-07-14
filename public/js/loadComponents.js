@@ -260,7 +260,7 @@ function createSidebar(elementsData, components) {
 
       if (!existingScript) {
         console.log("scriptUrl:" + scriptUrl);
-        loadScriptIfNotLoaded(scriptUrl).catch((error) => {
+        loadScriptIfNotLoaded(scriptUrl, scriptslist).catch((error) => {
           console.log("Error loading script:", error);
         });
         scriptslist.push(scriptUrl);
