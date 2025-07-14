@@ -165,7 +165,9 @@ function renderNavigationBar(main) {
       title: "Previous",
       text: '<p>Previous</p> <i class="fa fa-chevron-left" style="color:#4d61fc;margin-left:-6px"></i>',
       event:
-        "navbar_movePrev()"
+        "navbar_movePrev()",
+      id: "btnPrevious",
+
     },
     {
       name: "NextDSBtn",
@@ -211,7 +213,7 @@ function renderNavigationBar(main) {
   var htm = "";
   //for the dom2json is mandatory to create a html for the events
   buttons.forEach((buttonInfo) => {
-    htm += `<button name='${buttonInfo.name}' title="${buttonInfo.title
+    htm += `<button id="${buttonInfo.id || ''}" name='${buttonInfo.name}' title="${buttonInfo.title
       }" onclick="${buttonInfo.event.trim()}" style="width:150px;">${buttonInfo.text
       }</button>`;
   });
