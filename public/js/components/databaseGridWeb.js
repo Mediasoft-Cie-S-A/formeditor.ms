@@ -191,7 +191,7 @@ function insertNavBarWeb(
   // <span style='font-size:8px'>Page Size:</span>
   html += search.outerHTML;
   html += `<div style='display: flex; align-items: center; gap: 10px;'>`;
-  html += `<button name='revGRIDBtn'  title='Previus Page'  grid-id='${gridContainer.parentElement.id}' onclick='gridPrevWeb(event,"${apiName}",searchfields.options[searchfields.options.selectedIndex].value,searchOperator.value)'><i class='bi bi-arrow-left-circle-fill' grid-id='${gridContainer.parentElement.id}'  style='color:blue;'></i></button>`;
+  html += `<button name='revGRIDBtn'  title='Previous Page'  grid-id='${gridContainer.parentElement.id}' onclick='gridPrevWeb(event,"${apiName}",searchfields.options[searchfields.options.selectedIndex].value,searchOperator.value)'><i class='bi bi-arrow-left-circle-fill' grid-id='${gridContainer.parentElement.id}'  style='color:blue;'></i></button>`;
   html += `<button name='NextGRIDBtn' title='Next Page'  grid-id='${gridContainer.parentElement.id}' onclick='gridNextWeb(event,"${apiName}",searchfields.options[searchfields.options.selectedIndex].value,searchOperator.value)'><i class='bi bi-arrow-right-circle-fill' grid-id='${gridContainer.parentElement.id}' style='color:blue;'></i></button>`;
   html += `<button name='RefreshGRIDBtn' title='Refresh'  grid-id='${gridContainer.parentElement.id}' onclick='refreshWeb(event,"${apiName}")'><i class='bi bi-arrow-repeat' grid-id='${gridContainer.parentElement.id}'  style='color:green;'></i></button>`;
   html += `<button name='PostitGRIDBtn' title='Postit'  grid-id='${gridContainer.parentElement.id}' onclick='postitWeb(event,"${apiName}")'><i class='bi bi-card-text' grid-id='${gridContainer.parentElement.id}' style='color:#aa0;'></i></button>`;

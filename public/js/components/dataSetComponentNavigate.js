@@ -146,6 +146,8 @@ function saveActions(element,content) {
 
 function renderNavigationBar(main) {
 
+  console.log("Rendering navigation Bar");
+
   // Create the navigation bar div
   var navigationBar = document.createElement("div");
   navigationBar.id = "navigationBar_" + Date.now();
@@ -153,15 +155,17 @@ function renderNavigationBar(main) {
   //   navigationBar.className = "navigation-bar";
   navigationBar.style.display = "block";
 
+  console.log(navigationBar.id)
+
   // Create buttons and append them to the navigation bar
   var buttons = [
 
     {
       name: "PreviousDSBtn",
-      title: "Previus",
-      text: '<p>Previus</p> <i class="fa fa-chevron-left" style="color:#4d61fc;margin-left:-6px"></i>',
+      title: "Previous",
+      text: '<p>Previous</p> <i class="fa fa-chevron-left" style="color:#4d61fc;margin-left:-6px"></i>',
       event:
-        "navbar_movePrev()",
+        "navbar_movePrev()"
     },
     {
       name: "NextDSBtn",
@@ -207,7 +211,7 @@ function renderNavigationBar(main) {
   var htm = "";
   //for the dom2json is mandatory to create a html for the events
   buttons.forEach((buttonInfo) => {
-    htm += `<button name='${buttonInfo.name}'  title="${buttonInfo.title
+    htm += `<button name='${buttonInfo.name}' title="${buttonInfo.title
       }" onclick="${buttonInfo.event.trim()}" style="width:150px;">${buttonInfo.text
       }</button>`;
   });
@@ -216,7 +220,17 @@ function renderNavigationBar(main) {
   main.appendChild(navigationBar);
 }
 
+function updatePreviousButtonState(hasPrevious) {
+  const btn = document.getElementById("btnPrevious");
+  if (btn) {
+    btn.disabled = !hasPrevious;
+    btn.style.opacity = hasPrevious ? "1" : "0.5";
+    btn.style.pointerEvents = hasPrevious ? "auto" : "none";
+  }
+}
+
 function navbar_movePrev() {
+  console.log("Moving prev");
   let allPanels = document.querySelectorAll("[tagname='dataTable'] div.grid-row");
   let selectedPanel = document.querySelector(".selected-panel");
 
@@ -236,6 +250,7 @@ function navbar_movePrev() {
     if (currentIndex > 0) {
       panels[currentIndex - 1].classList.add("selected-panel");
       panels[currentIndex - 1].click();
+      updatePreviousButtonState(currentIndex-1 > 0); // or whatever your logic is
       return; // Exit after handling panels
     } else {
       console.log("No previous panel to select.");
@@ -293,6 +308,7 @@ function navbar_moveNext() {
     if (currentIndex + 1 < panels.length) {
       panels[currentIndex + 1].classList.add("selected-panel");
       panels[currentIndex + 1].click();
+      updatePreviousButtonState(currentIndex+1 > 0);
       return; // Exit after handling panels
     } else {
       console.log("No next panel to select.");
