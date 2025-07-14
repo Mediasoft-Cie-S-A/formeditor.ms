@@ -41,7 +41,9 @@ This will walk you through the installation process. When it is done, you will h
 http://localhost:3000/dashboard
 http://localhost:3000/api-docs/
 ````
-user admin password 123
+user admin password admin
+The configuration can be found in appconfig.json
+
 
 The installation process will also ask if you would like to download an application. If selected, the application can be found at the following URL.
 
