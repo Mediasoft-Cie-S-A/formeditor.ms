@@ -127,10 +127,32 @@ function loadForms(){
                 noFormsMessage.textContent = 'No forms available.';
                 container.appendChild(noFormsMessage);
             }
+
+            // Manually trigger the search functions
+            const searchIdInput = document.getElementById('searchFormInput');
+            if (searchIdInput && searchIdInput.value) {
+                searchFormbyID({ target: searchIdInput, preventDefault: () => {} });
+            }
+
+            // Manually trigger the search functions
+            const searchNameInput = document.getElementById('searchNameInput');
+            if (searchNameInput && searchNameInput.value) {
+                searchFormbyName({ target: searchNameInput, preventDefault: () => {} });
+            }
+            
+            // Manually trigger the search functions
+            const searchSlugInput = document.getElementById('searchSlugInput');
+            if (searchSlugInput && searchSlugInput.value) {
+                searchFormbySlug({ target: searchSlugInput, preventDefault: () => {} });
+            }
+            
+
         })// Handle the response
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
+
+    
 }
 
 function deleteForm(objectId, listItem) {
