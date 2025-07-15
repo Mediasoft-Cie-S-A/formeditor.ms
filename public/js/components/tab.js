@@ -202,6 +202,7 @@ function createEditModal() {
 
 
 function activateTab(event, tabHeader, tabContent) {
+    console.log("Activate tab")
     if (event) {
         event.preventDefault();
     }

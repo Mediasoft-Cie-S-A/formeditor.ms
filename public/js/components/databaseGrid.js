@@ -937,6 +937,7 @@ function drawGridRow(
 
   // Add click event listener to select the row
   rowDiv.addEventListener("click", function (event) {
+      console.log("Click on table element")
       event.preventDefault();
 
       // Find the closest parent with class 'grid-row'
@@ -952,16 +953,28 @@ function drawGridRow(
       // Remove the 'grid-row-selected' class from all rows
       var gridRows = document.querySelectorAll('.grid-row');
       gridRows.forEach(row => {
-          row.classList.remove("grid-row-selected");
+          //row.classList.remove("grid-row-selected");
+          row.classList.remove("selected-panel");
+          
       });
 
       // Add the 'grid-row-selected' class to the clicked row
-      closestRow.classList.add("grid-row-selected");
+      //closestRow.classList.add("grid-row-selected");
+      closestRow.classList.add("selected-panel");
+
+      let selectedPanel = document.querySelector(".selected-panel");
+      if (selectedPanel) {
+        let allPanels = document.querySelectorAll("[tagname='dataTable'] div.grid-row");
+        let panels = Array.from(allPanels);
+        let currentIndex = panels.indexOf(selectedPanel);
+        //updatePreviousButtonState(currentIndex > 0);
+      }
 
       // Deactivate loading indicators
       deactivateLoaders();
 
       // Link the clicked record to the grid
+      
       linkRecordToGrid(
           DBName,
           tableName,
@@ -971,6 +984,7 @@ function drawGridRow(
           datalink,
           rowData
       );
+      
 
       // Try switching to the second tab if it exists
       const tab = document.querySelector('[tagname="Tab"]');

@@ -555,131 +555,128 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum,dataset,link,ro
     activateLoaders();
     // get all the datasets
     var datasetsDiv = document.querySelectorAll("[tagname='dataSet']");
-      // check if the datasetDiv exists
-      if (datasetsDiv.length === 0) {
-        showToast("No dataset found", 5000);
-        return;
-      }
+    
+    // check if the datasetDiv exists
+    if (datasetsDiv.length === 0) {
+      showToast("No dataset found", 5000);
+      return;
+    }
     // get the datasetDiv
     const datasetDiv = datasetsDiv[0];   
     
-      // get the datasetJSON from the datasetDiv
-      const dataset = JSON.parse(datasetDiv.getAttribute("dataSet"));
+    // get the datasetJSON from the datasetDiv
+    const dataset = JSON.parse(datasetDiv.getAttribute("dataSet"));
     //  console.log("dataset", dataset);
     
-        // get the fields from the dataset
-        const datasetFields = datasetDiv.getAttribute("dataset-fields-list");
+    // get the fields from the dataset
+    const datasetFields = datasetDiv.getAttribute("dataset-fields-list");
 
-        if (!link) { // if link is not defined
-          link = [];
-        }
-        if (link.length ===0) {
-           //console.log("link.length ===0");
-            const url = `/get-record-by-rowid/${dataset[0].DBName}/${dataset[0].tableName}/${rowId}?fields=${datasetFields}`;
-            //console.log("[FETCH by ROWID] URL:", url);
+    if (!link) { // if link is not defined
+      link = [];
+    }
+    if (link.length ===0) {
+        //console.log("link.length ===0");
+        const url = `/get-record-by-rowid/${dataset[0].DBName}/${dataset[0].tableName}/${rowId}?fields=${datasetFields}`;
+        //console.log("[FETCH by ROWID] URL:", url);
 
-            fetch(url)
-              .then((response) => response.json())
-              .then((data) => {
-                if (data.length > 0) {
-                  updateInputs(data[0], dataset[0].DBName, dataset[0].tableName,datasetDiv);
-                }
-                navbar_EditRecord(true);
-              })
-              .catch((error) => console.error("Error:", error));
-          } // end if link.length ===0
-          else {
-            console.log("link.length !==0");
-            // check if the link exists in the dataset 
-                    
-            // get the fields from the dataset and values from rows
-            // and generate indexes and values in order to pass to             "/get-records-by-idexes/:database/:tableName",
-          
-          
-            let indexes = [];
-            let values = [];
-          for (let j = 0; j < link.length; j++) {
-            const field = link[j];
-              indexes.push(field.fieldName);
-              // get id for filed by array index dataset
-              let idx = -1;
-              // get the index of the field in the dataset
-               console.log("rows", rows); 
-               
-              for (let i = 0; i < dataset.length; i++) {
-                let f = dataset[i];
+        fetch(url)
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.length > 0) {
+              updateInputs(data[0], dataset[0].DBName, dataset[0].tableName,datasetDiv);
+            }
+            navbar_EditRecord(true);
+          })
+          .catch((error) => console.error("Error:", error));
+    } // end if link.length ===0
+    else {
+        console.log("link.length !==0");
+        // check if the link exists in the dataset 
                 
-                if (f.fieldName === field.fieldName) {
-                  console.log("f", f);
-           
-                  f.fieldType = "hidden";
-                  // search the iput with the fieldname
-                  const input = datasetDiv.querySelector(`[dataset-field-name=${f.fieldName}]`);
-                  // convert the input to hidden
-                  input.type = "hidden";
-                  // set the parent to display none
-                  input.parentElement.style.display = "none";
-                     // idx+1 is the value of the field in the rows array considering 0 is the rowid
-                  values.push(rows[field.fieldName]);
-                }  // end if
-                
-          }// end for i
-        } // end for j
-           console.log("indexes", indexes);
-            console.log("values", values);
-            
-
-            const url = `/get-records-by-indexes/${dataset[0].DBName}/${dataset[0].tableName}?indexes=${indexes}&values=${values}&fields=${datasetFields}`;
-            fetch(url)
-              .then((response) => response.json())
-              .then((data) => {
-                // get the divs document.querySelectorAll("#DataSet_" + tableName);
-               
-                
-                // get the data length
-                const dataLength = data.length;
-                // check if datalength = datasetsFieldDiv.length
-                 // if datasetsFieldDiv.length > dataLength remove the extra divs
-                  if (datasetsDiv.length > dataLength && dataLength > 0) {
-                    for (let i = dataLength; i < datasetsDiv.length; i++) {
-                      datasetsDiv[i].remove();
-                    }
-                  }
-                else // if datasetsFieldDiv.length < dataLength add the extra divs and copy the first div
-                  if (datasetsDiv.length < dataLength) {
-                    console.log("datasetsFieldDiv.length < dataLength");
-                    console.log("datasetsFieldDiv", datasetsDiv);
-                    console.log(datasetsDiv[0]);
-                    // get the first div html
-                    const firstDiv = datasetsDiv[0].outerHTML;
-                    for (let i = datasetsDiv.length; i < dataLength; i++) {
-                      // create a new div
-                      const newDiv = document.createElement("div");
-                      newDiv.innerHTML = firstDiv;
-                      // add the new div to the datasetDiv
-                      console.log("newDiv", newDiv);
-                      console.log("datasetsDiv", datasetsDiv);
-                      datasetsDiv[0].parentElement.appendChild(newDiv);
-                    }
-                  } // end else
-
-                  // update datasetsDiv
-                  datasetsDiv = document.querySelectorAll("[tagname='dataSet']");
-                // update the inputs with the data for each datasetDiv
-                datasetsDiv.forEach((datasetDiv, index) => {
-                   console.log(data[index]);
-                   console.log(datasetDiv);
-                  updateInputs(data[index], dataset[0].tableName, dataset[0].DBName, datasetDiv);
-                });
-               
-                navbar_EditRecord(true);
-              })
-              .catch((error) => console.error("Error:", error));
-          } // end else
-
+        // get the fields from the dataset and values from rows
+        // and generate indexes and values in order to pass to             "/get-records-by-idexes/:database/:tableName",
       
+      
+        let indexes = [];
+        let values = [];
+      for (let j = 0; j < link.length; j++) {
+        const field = link[j];
+          indexes.push(field.fieldName);
+          // get id for filed by array index dataset
+          let idx = -1;
+          // get the index of the field in the dataset
+            console.log("rows", rows); 
+            
+          for (let i = 0; i < dataset.length; i++) {
+            let f = dataset[i];
+            
+            if (f.fieldName === field.fieldName) {
+              console.log("f", f);
+        
+              f.fieldType = "hidden";
+              // search the iput with the fieldname
+              const input = datasetDiv.querySelector(`[dataset-field-name=${f.fieldName}]`);
+              // convert the input to hidden
+              input.type = "hidden";
+              // set the parent to display none
+              input.parentElement.style.display = "none";
+                  // idx+1 is the value of the field in the rows array considering 0 is the rowid
+              values.push(rows[field.fieldName]);
+            }  // end if
+            
+      }// end for i
+    } // end for j
+        console.log("indexes", indexes);
+        console.log("values", values);
+        
 
-    
+        const url = `/get-records-by-indexes/${dataset[0].DBName}/${dataset[0].tableName}?indexes=${indexes}&values=${values}&fields=${datasetFields}`;
+        fetch(url)
+          .then((response) => response.json())
+          .then((data) => {
+            // get the divs document.querySelectorAll("#DataSet_" + tableName);
+            
+            
+            // get the data length
+            const dataLength = data.length;
+            // check if datalength = datasetsFieldDiv.length
+              // if datasetsFieldDiv.length > dataLength remove the extra divs
+              if (datasetsDiv.length > dataLength && dataLength > 0) {
+                for (let i = dataLength; i < datasetsDiv.length; i++) {
+                  datasetsDiv[i].remove();
+                }
+              }
+            else // if datasetsFieldDiv.length < dataLength add the extra divs and copy the first div
+              if (datasetsDiv.length < dataLength) {
+                console.log("datasetsFieldDiv.length < dataLength");
+                console.log("datasetsFieldDiv", datasetsDiv);
+                console.log(datasetsDiv[0]);
+                // get the first div html
+                const firstDiv = datasetsDiv[0].outerHTML;
+                for (let i = datasetsDiv.length; i < dataLength; i++) {
+                  // create a new div
+                  const newDiv = document.createElement("div");
+                  newDiv.innerHTML = firstDiv;
+                  // add the new div to the datasetDiv
+                  console.log("newDiv", newDiv);
+                  console.log("datasetsDiv", datasetsDiv);
+                  datasetsDiv[0].parentElement.appendChild(newDiv);
+                }
+              } // end else
+
+              // update datasetsDiv
+              datasetsDiv = document.querySelectorAll("[tagname='dataSet']");
+            // update the inputs with the data for each datasetDiv
+            datasetsDiv.forEach((datasetDiv, index) => {
+                console.log(data[index]);
+                console.log(datasetDiv);
+              updateInputs(data[index], dataset[0].tableName, dataset[0].DBName, datasetDiv);
+            });
+            
+            navbar_EditRecord(true);
+          })
+          .catch((error) => console.error("Error:", error));
+    } // end else
   
   } catch (error) {
     console.error("Error:", error);

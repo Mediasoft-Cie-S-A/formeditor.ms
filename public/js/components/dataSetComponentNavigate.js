@@ -233,7 +233,7 @@ function updatePreviousButtonState(hasPrevious) {
 
 function navbar_movePrev() {
   console.log("Moving prev");
-  let allPanels = document.querySelectorAll("[tagname='dataTable'] div.grid-row");
+  let allPanels = document.querySelectorAll("[tagname='dataTable'] > .grid-body > .grid-row");
   let selectedPanel = document.querySelector(".selected-panel");
 
   if (!selectedPanel && allPanels.length > 0) {
@@ -250,10 +250,16 @@ function navbar_movePrev() {
 
     // Click on the previous panel div if it exists
     if (currentIndex > 0) {
-      panels[currentIndex - 1].classList.add("selected-panel");
-      panels[currentIndex - 1].click();
-      updatePreviousButtonState(currentIndex-1 > 0); // or whatever your logic is
+      currentIndex = currentIndex - 1
+      panels[currentIndex].classList.add("selected-panel");
+      panels[currentIndex].click();
+      //updatePreviousButtonState(currentIndex-1 > 0); 
       return; // Exit after handling panels
+    } else if(currentIndex == 0){
+      currentIndex = panels.length-1;
+      panels[currentIndex].classList.add("selected-panel");
+      panels[currentIndex].click();
+      return;
     } else {
       console.log("No previous panel to select.");
     }
@@ -291,7 +297,7 @@ function navbar_movePrev() {
 function navbar_moveNext() {
   console.log("next has been pressed");
   // Handle selected-panel logic
-  let allPanels = document.querySelectorAll("[tagname='dataTable'] div.grid-row");
+  let allPanels = document.querySelectorAll("[tagname='dataTable'] > .grid-body > .grid-row");
   let selectedPanel = document.querySelector(".selected-panel");
 
   if (!selectedPanel && allPanels.length > 0) {
@@ -313,6 +319,8 @@ function navbar_moveNext() {
       updatePreviousButtonState(currentIndex+1 > 0);
       return; // Exit after handling panels
     } else {
+      console.log("current index : "+currentIndex);
+      console.log("length : "+panels.length);
       console.log("No next panel to select.");
     }
   }
@@ -726,7 +734,6 @@ async function updateRecordDB(DBName, tableName, nextRowId, data,actions) {
     console.error("Error:", error);
   }
 }
-
 
 async function insertRecordDB(DBName, tableName, data,actions) {
   try {
