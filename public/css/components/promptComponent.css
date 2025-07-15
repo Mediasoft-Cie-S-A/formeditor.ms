@@ -35,3 +35,15 @@
 #chat-container input[type="file"] {
       display: none;
     }
+
+#PromptText {
+    user-select: text !important;
+    pointer-events: auto !important;
+    visibility: visible !important;
+    display: block !important;
+    position: relative !important;
+    z-index: 9999 !important;
+    opacity: 1 !important;
+    color: inherit !important;
+    background-color: inherit !important;
+}
