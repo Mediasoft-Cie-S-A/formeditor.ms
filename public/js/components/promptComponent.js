@@ -119,25 +119,116 @@ function handleFill(event) {
 
     `
 
+    prompt = `
+    From the following unstructured text:
+    "${promptText.value}"
+
+    Extract the following fields and generate a JSON object with their inferred values.
+
+    Fields: ${fieldNames}
+
+    Instructions:
+    - Try to match values even if the formatting is irregular or partially labeled.
+    - Use heuristics, patterns, and common field formats to make educated inferences.
+    - For example, if you see a 3-letter + 8-character SWIFT/BIC code, assign it to the field 'ibswift'.
+    - For "clearing", match values labeled as "Clearing", "CB", or "Clearing/CB".
+    - If a value is not clearly present, return 'null' for that field.
+
+    Output Format Rules:
+    - Output must start with: response: {
+    - Output must end with: }
+    - Must be a valid JSON object.
+    - Do not include any comments or explanations.
+    - Always include all listed fields, even if null.
+
+    Example:
+
+    If the input is:
+
+    MyBank AG
+    Bahnhofstrasse 1, Zürich
+    SWIFT: MBAGCHZZ
+    Clearing 123
+
+    And the fields are:
+    rowid, name, address, nccp, ibswift, cler
+
+    Then the response should be exactly:
+    response: {
+        "rowid": null,
+        "name": "MyBank AG",
+        "address": "Bahnhofstrasse 1, Zürich",
+        "nccp": null,
+        "ibswift": "MBAGCHZZ",
+        "cler": "123"
+    }
+    `
+
+    prompt = `
+    From the following unstructured text:
+    """
+    ${promptText.value}
+    """
+
+    Try to fill in the following fields with values inferred from the text:
+
+    Fields: ${fieldNames}
+
+    Guidelines:
+    - The text may be poorly formatted or missing labels — try your best to infer each value.
+    - Use common formats (e.g. SWIFT codes, phone numbers, VAT numbers, etc.) to help identify the values.
+    - Only assign a value if you're reasonably confident it matches the field.
+    - If no reliable value is found for a field, set it to null.
+
+    Output Format:
+    - The response must begin with: response: {
+    - The response must end with: }
+    - The output must be a valid JSON object.
+    - Include all requested fields, even if null.
+    - Do not include any explanation or text outside the JSON.
+
+   Example:
+
+    If the input is:
+    """
+    Bank XYZ
+    SWIFT: XYZABCDG123
+    Clearing 123
+    """
+
+    And the fields are:
+    nom1, ibswift, cler
+
+    Then respond exactly as:
+    response: {
+    "nom1": "Bank XYZ",
+    "ibswift": "XYZABCDG123",
+    "cler": "123"
+    }
+
+    Now complete the JSON response below.
+    response:
+
+
+    `;
+
     console.log(prompt);
     fetchAIResponse(prompt).then(responseText => {
         // handle the response from the AI service
+
+
         console.log("AI response : ", responseText);
         const jsonResponse = extractJsonAfterResponse(responseText);
-
         const responseElement = document.createElement('div');
         responseElement.classList.add('ai-response'); // Add a marker class
         responseElement.innerHTML = `<strong>AI Response:</strong> ${jsonResponse}`;
-
         const parent = event.target.parentElement;
-
         // Remove previously added AI responses only
         parent.querySelectorAll('.ai-response').forEach(el => el.remove());
-
         parent.appendChild(responseElement);
-        //event.target.parentElement.appendChild(responseElement);
-
+        //event.target.parentElement.appendChild(responseElement);^
         console.log('JSON Response:', jsonResponse);
+
         if (jsonResponse) {
             // Update the form fields with the values from the JSON response
             for (const [key, value] of Object.entries(jsonResponse)) {
@@ -217,7 +308,6 @@ async function fetchAIResponse(promptText) {
             "presence_penalty": 0,
             "logit_bias": {},
             "quiet": true,
-            "stop_sequence": ["{{[INPUT]}}", "{{[OUTPUT]}}"],
             "use_default_badwordsids": false,
             "bypass_eos": false,
 
@@ -252,10 +342,6 @@ function extractJsonAfterResponse(text) {
     const keyword = 'response: {';
     const startIndex = text.toLowerCase().indexOf(keyword);
 
-    if (startIndex === -1) {
-        console.error('No "response": {' + ' found in text.');
-        return null;
-    }
 
     let braceCount = 0;
     let inside = false;
