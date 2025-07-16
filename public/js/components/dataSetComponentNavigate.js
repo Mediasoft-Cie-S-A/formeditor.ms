@@ -357,19 +357,7 @@ function navbar_moveNext() {
 }
 
 function load_data(modify) {
-  /*
-  const modal = document.getElementById("editModal");
-  if (modal) {
-    modal.style.display = "none";
-    // set the parentDiv back to its original place
-    const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
-    const parentDiv = dataSetNavigator.parentElement;
-    if (parentDiv._originalParent) {
-      org = parentDiv._originalParent;
-      org.appendChild(parentDiv);
-    }
-  }
-  */
+
   const inputs = document.querySelectorAll(
     `[data-table-name] input[dataset-field-name]`
   );
@@ -404,21 +392,6 @@ function navbar_EditRecord() {
   modal.style.display = "flex";
 
   load_data(false)
-  /*
-  const inputs = document.querySelectorAll(
-    `[data-table-name] input[dataset-field-name]`
-  );
-
-  inputs.forEach((input) => {
-    const tableLabel = input.getAttribute("dataset-table-name");
-    input.readOnly = action;
-    input.disabled = action;
-
-  });
-
-  document.querySelector("[name=SaveDSBtn]").disabled = action;
-  deactivateLoaders();
-  */
 }
 
 function navbar_CancelEdit() {
@@ -438,7 +411,7 @@ function navbar_CancelEdit() {
 }
 
 function navbar_InsertRecord() {
-  navbar_EditRecord(false);
+  //navbar_EditRecord(false);
 
   const inputs = document.querySelectorAll(`[data-table-name] input,select`);
   inputs.forEach((input) => {

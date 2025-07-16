@@ -581,7 +581,7 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum, dataset, link,
           if (data.length > 0) {
             updateInputs(data[0], dataset[0].DBName, dataset[0].tableName, datasetDiv);
           }
-          load_data(true);
+          deactivateLoaders();
         })
         .catch((error) => console.error("Error:", error));
     } // end if link.length ===0
@@ -668,8 +668,7 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum, dataset, link,
             console.log(datasetDiv);
             updateInputs(data[index], dataset[0].tableName, dataset[0].DBName, datasetDiv);
           });
-
-          load_data(true);
+          deactivateLoaders();
         })
         .catch((error) => console.error("Error:", error));
     } // end else

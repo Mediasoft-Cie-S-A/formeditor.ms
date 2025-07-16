@@ -70,12 +70,11 @@ function loadForms() {
                 editButton.innerHTML = '<i class="fa fa-edit" style="margin-left:-5px"></i>'
                 editButton.className = 'portal-edit-button';
                 editButton.onclick = function (event) {
-                    event.preventDefault();
-                    loadFormData(form.objectId, document.getElementById('formContainer'));
-                    const editTab = document.querySelector('.nav-tabs a[href="#editForm"]');
-                    if (editTab) {
-                        editTab.click(); // Simulate click
-                    }  // Simulate click on the edit tab
+                    helperLoadContainer(event, form.objectId);
+                    const showTab = document.querySelector('.nav-tabs a[href="#editForm"]');
+                    if (showTab) {
+                        showTab.click(); // Simulate click
+                    }// if (showTab) {
 
                 }; // edit button functionality
                 // create show button
@@ -83,7 +82,11 @@ function loadForms() {
                 showButton.innerHTML = '<i class="fa fa-eye" style="margin-left:-5px"></i>'
                 showButton.className = 'portal-show-button';
                 showButton.onclick = function (event) {
-                    helperLoadRender(event, form.objectId);
+                    helperLoadContainer(event, form.objectId);
+                    const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
+                    if (showTab) {
+                        showTab.click(); // Simulate click
+                    }// if (showTab) {
                 }; // show button functionality
                 const itemActions = document.createElement('td');
                 container.appendChild(itemActions); // Append the actions cell to the container
@@ -93,7 +96,11 @@ function loadForms() {
                 itemActions.appendChild(editButton);
                 itemActions.appendChild(deleteButton);
                 container.addEventListener('dblclick', function (event) {
-                    helperLoadRender(event, form.objectId);
+                    helperLoadContainer(event, form.objectId);
+                    const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
+                    if (showTab) {
+                        showTab.click(); // Simulate click
+                    }// if (showTab) {
                 }); // Add a double-click event listener to the list item
 
                 container.addEventListener('click', function (e) {
@@ -145,14 +152,10 @@ function loadForms() {
 
 }
 
-function helperLoadRender(event, objectId) {
+function helperLoadContainer(event, objectId) {
     event.preventDefault();
-    loadFormData(objectId, document.getElementById('renderContainer'));
-    loadFormData(objectId, document.getElementById('formContainer'));
-    const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
-    if (showTab) {
-        showTab.click(); // Simulate click
-    }// if (showTab) {
+    loadFormData(objectId, document.getElementById('renderContainer'), true);
+    loadFormData(objectId, document.getElementById('formContainer'), false);
 }
 
 function deleteForm(objectId, listItem) {
@@ -244,7 +247,7 @@ function searchFormbySlug(event) {
     console.log('Search completed.');
 }
 
-function loadFormData(objectId, renderContainer) {
+function loadFormData(objectId, renderContainer, renderElem) {
     console.log("Load form data");
     fetch(`/get-form/${objectId}`)
         .then(response => {
@@ -261,7 +264,9 @@ function loadFormData(objectId, renderContainer) {
 
             // Convert JSON back to DOM and append
             var domContent = jsonToDom(form.formData, renderContainer);
-            renderElements(renderContainer);
+            if (renderElem) {
+                renderElements(renderContainer);
+            }
             rebuildComponents(renderContainer);
 
             // set the header
