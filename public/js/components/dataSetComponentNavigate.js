@@ -308,6 +308,8 @@ function navbar_moveNext() {
     selectedPanel.classList.add("selected-panel");
   }
 
+
+
   if (selectedPanel) {
     selectedPanel.classList.remove("selected-panel");
 
@@ -319,18 +321,23 @@ function navbar_moveNext() {
     if (currentIndex < panels.length) {
       panels[currentIndex].classList.add("selected-panel");
       panels[currentIndex].click();
-      return; // Exit after handling panels
     } else if (currentIndex === panels.length) {
       currentIndex = 0;
       panels[currentIndex].classList.add("selected-panel");
       panels[currentIndex].click();
-      return;
     } else {
       console.log("current index : " + currentIndex);
       console.log("length : " + panels.length);
       console.log("No next panel to select.");
     }
   }
+
+  const modal = document.getElementById("editModal");
+  if (modal) {
+    load_data(false)
+  }
+
+
   /*
     // Fallback: Handle grid-row navigation if no panels or no more panels are available
     let dataGrid = document.querySelectorAll("[tagname='dataGrid']");
@@ -362,7 +369,7 @@ function navbar_moveNext() {
       */
 }
 
-function load_data(modify) {
+function load_data(readOnly) {
   console.log("loading data");
   const inputs = document.querySelectorAll(
     `[data-table-name] input[dataset-field-name]`
@@ -370,12 +377,12 @@ function load_data(modify) {
 
   inputs.forEach((input) => {
     const tableLabel = input.getAttribute("dataset-table-name");
-    input.readOnly = modify;
-    input.disabled = modify;
+    input.readOnly = readOnly;
+    input.disabled = readOnly;
 
   });
 
-  document.querySelector("[name=SaveDSBtn]").disabled = modify;
+  document.querySelector("[name=SaveDSBtn]").disabled = readOnly;
   deactivateLoaders();
 }
 
