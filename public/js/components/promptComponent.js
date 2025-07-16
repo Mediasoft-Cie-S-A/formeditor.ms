@@ -124,9 +124,18 @@ function handleFill(event) {
         // handle the response from the AI service
         console.log("AI response : ", responseText);
         const jsonResponse = extractJsonAfterResponse(responseText);
+
         const responseElement = document.createElement('div');
+        responseElement.classList.add('ai-response'); // Add a marker class
         responseElement.innerHTML = `<strong>AI Response:</strong> ${jsonResponse}`;
-        event.target.parentElement.appendChild(responseElement);
+
+        const parent = event.target.parentElement;
+
+        // Remove previously added AI responses only
+        parent.querySelectorAll('.ai-response').forEach(el => el.remove());
+
+        parent.appendChild(responseElement);
+        //event.target.parentElement.appendChild(responseElement);
 
         console.log('JSON Response:', jsonResponse);
         if (jsonResponse) {
