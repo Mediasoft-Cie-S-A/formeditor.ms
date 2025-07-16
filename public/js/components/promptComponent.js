@@ -70,6 +70,16 @@ function renderPromptComponent(element) {
 
 }
 
+function displayAnswer(event, answer) {
+    const responseElement = document.createElement('div');
+    responseElement.classList.add('ai-response'); // Add a marker class
+    responseElement.innerHTML = answer;
+    const parent = event.target.parentElement;
+    // Remove previously added AI responses only
+    parent.querySelectorAll('.ai-response').forEach(el => el.remove());
+    parent.appendChild(responseElement);
+}
+
 function callAIService(event) {
     event.preventDefault();
     // get the prompt text and button text
@@ -78,14 +88,10 @@ function callAIService(event) {
     // call the AI service with the prompt text
     fetchAIResponse(promptText.value).then(responseText => {
         // handle the response from the AI service
-        const responseElement = document.createElement('div');
-        responseElement.innerHTML = `<strong>AI Response:</strong> ${responseText}`;
-        event.target.parentElement.appendChild(responseElement);
+        displayAnswer(event, `<strong>AI Response:</strong> ${responseText}`);
     }).catch(error => {
         console.error('Error:', error);
-        const errorElement = document.createElement('div');
-        errorElement.innerHTML = `<strong>Error:</strong> ${error.message}`;
-        event.target.parentElement.appendChild(errorElement);
+        displayAnswer(event, `<strong>Error:</strong> ${error.message}`);
     });
 
 }
@@ -218,15 +224,9 @@ function handleFill(event) {
 
 
         console.log("AI response : ", responseText);
+        displayAnswer(event, `<strong>AI Response:</strong> ${responseText}`);
+
         const jsonResponse = extractJsonAfterResponse(responseText);
-        const responseElement = document.createElement('div');
-        responseElement.classList.add('ai-response'); // Add a marker class
-        responseElement.innerHTML = `<strong>AI Response:</strong> ${jsonResponse}`;
-        const parent = event.target.parentElement;
-        // Remove previously added AI responses only
-        parent.querySelectorAll('.ai-response').forEach(el => el.remove());
-        parent.appendChild(responseElement);
-        //event.target.parentElement.appendChild(responseElement);^
         console.log('JSON Response:', jsonResponse);
 
         if (jsonResponse) {
