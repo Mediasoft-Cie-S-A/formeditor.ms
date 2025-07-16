@@ -15,11 +15,11 @@
  */
 
 function createPromptComponent(type) {
-       var main= document.createElement('div');
+    var main = document.createElement('div');
     main.className = 'form-container';
-    main.id=type+ Date.now(); // Unique ID for each new element
+    main.id = type + Date.now(); // Unique ID for each new element
     main.draggable = true;
-    main.tagName=type;
+    main.tagName = type;
     main.setAttribute("promptText", "Please enter your question");
     main.setAttribute("promptPlaceholder", "Type your question here...");
     main.setAttribute("promptButtonText", "Submit");
@@ -32,7 +32,7 @@ function createPromptComponent(type) {
 function editPromptComponent(type, element, content) {
     const button = document.createElement('button');
     button.textContent = 'Update';
-    button.onclick = function(event) {
+    button.onclick = function (event) {
         const propertiesBar = document.getElementById('propertiesBar');
         const panelID = propertiesBar.getAttribute("data-element-id");
         const main = document.getElementById(panelID);
@@ -50,7 +50,7 @@ function editPromptComponent(type, element, content) {
 }
 
 function renderPromptComponent(element) {
-     element.innerHTML = `<div id="chat-container">
+    element.innerHTML = `<div id="chat-container">
                     <textarea id="PromptText" placeholder="Type your message..."></textarea>
 
                     <div class="actions">
@@ -67,14 +67,14 @@ function renderPromptComponent(element) {
                         <img src="img/loader.gif" id="loader" style="display: none; width: 80px; height: 40px;" alt="Loading...">
                     </div>
                     </div> `;
-   
+
 }
 
 function callAIService(event) {
     event.preventDefault();
     // get the prompt text and button text
     const promptText = document.getElementById('PromptText');
-   
+
     // call the AI service with the prompt text
     fetchAIResponse(promptText.value).then(responseText => {
         // handle the response from the AI service
@@ -87,7 +87,7 @@ function callAIService(event) {
         errorElement.innerHTML = `<strong>Error:</strong> ${error.message}`;
         event.target.parentElement.appendChild(errorElement);
     });
-  
+
 }
 
 function handleshowFileUpload() {
@@ -119,15 +119,15 @@ function handleFill(event) {
 
     `
 
-    console.log(prompt);  
+    console.log(prompt);
     fetchAIResponse(prompt).then(responseText => {
         // handle the response from the AI service
-        console.log("AI response : ",responseText);
-        const jsonResponse =  extractJsonAfterResponse(responseText);
+        console.log("AI response : ", responseText);
+        const jsonResponse = extractJsonAfterResponse(responseText);
         const responseElement = document.createElement('div');
         responseElement.innerHTML = `<strong>AI Response:</strong> ${jsonResponse}`;
         event.target.parentElement.appendChild(responseElement);
-        
+
         console.log('JSON Response:', jsonResponse);
         if (jsonResponse) {
             // Update the form fields with the values from the JSON response
@@ -151,12 +151,12 @@ function handleFill(event) {
 }
 
 async function fetchAIResponse(promptText) {
-       const loader = document.getElementById('loader');
+    const loader = document.getElementById('loader');
     // show the loader
     loader.style.display = 'block';
     // call ollama API or any AI service with the prompt text with full URL
-   // return  fetch('http://demo01:5001/api/v1/generate', {
-   return  fetch('http://localhost:5001/api/v1/generate', {
+    // return  fetch('http://demo01:5001/api/v1/generate', {
+    return fetch('http://localhost:5001/api/v1/generate', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -212,36 +212,36 @@ async function fetchAIResponse(promptText) {
             "use_default_badwordsids": false,
             "bypass_eos": false,
 
-            "prompt":  promptText
-        })  
+            "prompt": promptText
+        })
 
     })
 
 
-    .then(response => response.json())
-    .then(data => {
-        // handle the response from the AI service
-        const responseText = data.results[0].text || "No response from AI service";
-        // hide the loader
-        loader.style.display = 'none';
-        return responseText;
-    })  
-    .catch(error => {
-        console.error('Error:', error);
-        // hide the loader
-        loader.style.display = 'none';
+        .then(response => response.json())
+        .then(data => {
+            // handle the response from the AI service
+            const responseText = data.results[0].text || "No response from AI service";
+            // hide the loader
+            loader.style.display = 'none';
+            return responseText;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // hide the loader
+            loader.style.display = 'none';
 
-        const errorElement = document.createElement('div');
-        errorElement.innerHTML = `<strong>Error:</strong> ${error.message}`;
-        //event.target.parentElement.appendChild(errorElement);
-        document.body.appendChild(errorElement);
-        return "No response from AI service";
-    });
+            const errorElement = document.createElement('div');
+            errorElement.innerHTML = `<strong>Error:</strong> ${error.message}`;
+            //event.target.parentElement.appendChild(errorElement);
+            document.body.appendChild(errorElement);
+            return "No response from AI service";
+        });
 }
-    
+
 function extractJsonAfterResponse(text) {
     const keyword = 'response: {';
-    const startIndex = text.indexOf(keyword);
+    const startIndex = text.toLowerCase().indexOf(keyword);
 
     if (startIndex === -1) {
         console.error('No "response": {' + ' found in text.');
