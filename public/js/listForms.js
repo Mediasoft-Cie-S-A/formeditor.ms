@@ -83,14 +83,7 @@ function loadForms() {
                 showButton.innerHTML = '<i class="fa fa-eye" style="margin-left:-5px"></i>'
                 showButton.className = 'portal-show-button';
                 showButton.onclick = function (event) {
-                    event.preventDefault();
-                    loadFormData(form.objectId, document.getElementById('renderContainer'));
-                    loadFormData(form.objectId, document.getElementById('formContainer'));
-                    const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
-                    if (showTab) {
-                        showTab.click(); // Simulate click
-                    }// if (showTab) {
-
+                    helperLoadRender(event, form.objectId);
                 }; // show button functionality
                 const itemActions = document.createElement('td');
                 container.appendChild(itemActions); // Append the actions cell to the container
@@ -100,14 +93,9 @@ function loadForms() {
                 itemActions.appendChild(editButton);
                 itemActions.appendChild(deleteButton);
                 container.addEventListener('dblclick', function (event) {
-                    event.preventDefault();
-                    loadFormData(form.objectId, document.getElementById('renderContainer'));
-                    loadFormData(form.objectId, document.getElementById('formContainer'));
-                    const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
-                    if (showTab) {
-                        showTab.click(); // Simulate click
-                    }
+                    helperLoadRender(event, form.objectId);
                 }); // Add a double-click event listener to the list item
+
                 container.addEventListener('click', function (e) {
                     e.preventDefault();
                     // check if the event is a click on the delete,show or edit button
@@ -155,6 +143,16 @@ function loadForms() {
         });
 
 
+}
+
+function helperLoadRender(event, objectId) {
+    event.preventDefault();
+    loadFormData(objectId, document.getElementById('renderContainer'));
+    loadFormData(objectId, document.getElementById('formContainer'));
+    const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
+    if (showTab) {
+        showTab.click(); // Simulate click
+    }// if (showTab) {
 }
 
 function deleteForm(objectId, listItem) {
