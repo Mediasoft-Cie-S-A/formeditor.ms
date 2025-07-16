@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+let originalParentDiv = null;
+
+
 function createDataSetComponentNavigate(type) {
   var main = document.createElement("div");
   main.className = "dataSetComponentNavigate";
@@ -39,7 +42,7 @@ function editDataSetComponentNavigate(type, element, content) {
   // Button to save all variables as cookies
   const saveButton = document.createElement("button");
   saveButton.textContent = "Update";
-  saveButton.onclick = () => saveActions(element,content);
+  saveButton.onclick = () => saveActions(element, content);
   saveButton.style.width = "100%";
   div.appendChild(saveButton);
   // Create a container div for the variables
@@ -94,9 +97,8 @@ function addAction(element, itemdiv, action) {
   actionType.options.add(new Option("Show Confirm", "confirm"));
   actionType.options.add(new Option("Show Prompt", "prompt"));
   // select the action type by action.actionType
-  if (action.actionType)
-  {
-      actionType.value = action.actionType;
+  if (action.actionType) {
+    actionType.value = action.actionType;
   }
   actionDiv.appendChild(actionType);
   const actionContent = document.createElement("textarea");
@@ -115,28 +117,28 @@ function addAction(element, itemdiv, action) {
   actionDiv.appendChild(deleteButton);
   itemdiv.appendChild(actionDiv);
 }
-  
 
-function saveActions(element,content) {
+
+function saveActions(element, content) {
   const actions = [];
   const actionDivs = content.querySelectorAll("[tagname='actionContainer']");
   actionDivs.forEach((actionDiv) => {
     const action = {};
     const actionEvent = actionDiv.querySelector("[tagname='actionEvent']");
-   
+
     if (actionEvent) {
-       console.log("actionEvent: ", actionEvent.value);
+      console.log("actionEvent: ", actionEvent.value);
       action.actionEvent = actionEvent.value;
-    } 
+    }
     const actionType = actionDiv.querySelector("[tagname='actionType']");
-    
+
     if (actionType) {
-    action.actionType = actionType.value;
+      action.actionType = actionType.value;
     }
     // Get the action content textarea
     const actionContent = actionDiv.querySelector("[tagname='actionContent']");
     if (actionContent) {
-    action.actionContent = actionContent.value;
+      action.actionContent = actionContent.value;
     }
     actions.push(action);
   });
@@ -255,8 +257,8 @@ function navbar_movePrev() {
       panels[currentIndex].click();
       //updatePreviousButtonState(currentIndex-1 > 0); 
       return; // Exit after handling panels
-    } else if(currentIndex == 0){
-      currentIndex = panels.length-1;
+    } else if (currentIndex == 0) {
+      currentIndex = panels.length - 1;
       panels[currentIndex].classList.add("selected-panel");
       panels[currentIndex].click();
       return;
@@ -316,11 +318,11 @@ function navbar_moveNext() {
     if (currentIndex + 1 < panels.length) {
       panels[currentIndex + 1].classList.add("selected-panel");
       panels[currentIndex + 1].click();
-      updatePreviousButtonState(currentIndex+1 > 0);
+      updatePreviousButtonState(currentIndex + 1 > 0);
       return; // Exit after handling panels
     } else {
-      console.log("current index : "+currentIndex);
-      console.log("length : "+panels.length);
+      console.log("current index : " + currentIndex);
+      console.log("length : " + panels.length);
       console.log("No next panel to select.");
     }
   }
@@ -354,42 +356,55 @@ function navbar_moveNext() {
   }
 }
 
-function navbar_EditRecord(action) {
-  console.log(action);
-  if (!action )
-  {
-    // Always ensure modal exists
-    createEditModal();
-
-            const modal = document.getElementById("editModal");
-        console.log("Modal: ", modal);
-            const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
-            const parentDiv = dataSetNavigator.parentElement;
-          console.log("Parent Div: ", parentDiv);
-            const modalContent = modal.querySelector(".modal-content");
-            modalContent.innerHTML = '';
-            // set in parentDiv the id of original parent and next sibling
-        
-            parentDiv._originalParent = parentDiv.parentElement;
-            parentDiv._originalNextSibling = parentDiv.nextSibling;
-        
-            modalContent.appendChild(parentDiv);
-           
-            modal.style.display = "flex";
-            console.log(modal);
-  }else {
- const modal = document.getElementById("editModal");
- if (modal) {
+function load_data(modify) {
+  /*
+  const modal = document.getElementById("editModal");
+  if (modal) {
     modal.style.display = "none";
     // set the parentDiv back to its original place
     const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
     const parentDiv = dataSetNavigator.parentElement;
     if (parentDiv._originalParent) {
-        org= parentDiv._originalParent;
-        org.appendChild(parentDiv);
-      }
+      org = parentDiv._originalParent;
+      org.appendChild(parentDiv);
     }
   }
+  */
+  const inputs = document.querySelectorAll(
+    `[data-table-name] input[dataset-field-name]`
+  );
+
+  inputs.forEach((input) => {
+    const tableLabel = input.getAttribute("dataset-table-name");
+    input.readOnly = modify;
+    input.disabled = modify;
+
+  });
+
+  document.querySelector("[name=SaveDSBtn]").disabled = modify;
+  deactivateLoaders();
+}
+
+function navbar_EditRecord() {
+  // Always ensure modal exists
+  createEditModal();
+
+
+  const modal = document.getElementById("editModal");
+  const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
+  const parentDiv = dataSetNavigator.parentElement;
+  const modalContent = modal.querySelector(".modal-content");
+  modalContent.innerHTML = '';
+  // set in parentDiv the id of original parent and next sibling
+
+  originalParentDiv = parentDiv.parentElement;
+
+  modalContent.appendChild(parentDiv);
+
+  modal.style.display = "flex";
+
+  load_data(false)
+  /*
   const inputs = document.querySelectorAll(
     `[data-table-name] input[dataset-field-name]`
   );
@@ -398,17 +413,28 @@ function navbar_EditRecord(action) {
     const tableLabel = input.getAttribute("dataset-table-name");
     input.readOnly = action;
     input.disabled = action;
-    // }
+
   });
 
   document.querySelector("[name=SaveDSBtn]").disabled = action;
   deactivateLoaders();
+  */
 }
 
-  function navbar_CancelEdit() {
-    console.log("Cancel Edit");
- 
- navbar_EditRecord(true);
+function navbar_CancelEdit() {
+  console.log("Cancel")
+  const modal = document.getElementById("editModal");
+  if (modal) {
+    modal.style.display = "none";
+    const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
+    const parentDiv = dataSetNavigator.parentElement;
+    if (originalParentDiv) {
+      org = originalParentDiv;
+      org.appendChild(parentDiv);
+    }
+  }
+  load_data(true)
+
 }
 
 function navbar_InsertRecord() {
@@ -419,13 +445,13 @@ function navbar_InsertRecord() {
     const field = input.getAttribute("dataset-field-name");
     switch (input.type) {
       case "hidden":
-          if (field === "rowid") {
+        if (field === "rowid") {
           input.value = "new";
-        } 
+        }
         break;
-    default:
-      input.value = "";
-    break;
+      default:
+        input.value = "";
+        break;
     }
   });
 }
@@ -502,7 +528,7 @@ function CreateUpdated(DBName, tableName, divLine) {
         // Only add fields with non-empty values
         fields.push(field);
         values.push(value);
-       
+
       }
     }
 
@@ -520,12 +546,12 @@ function CreateUpdated(DBName, tableName, divLine) {
     if (valuesString) {
       fields.push(prefix); // Add the prefix as a field
       values.push(valuesString); // Add the concatenated values
-     
+
     }
   }
 
   // Return the final formatted string
-  return  { fields: fields, values: values };
+  return { fields: fields, values: values };
 }
 
 function addIdToData(data, id, value) {
@@ -553,7 +579,7 @@ async function navbar_SaveRecord() {
     }
     console.log("SaveRecord");
     // get the dataset navigator
-     const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
+    const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
     // get the dataset div
     const datasetDiv = document.querySelector("[tagname='dataSet']");
     if (!datasetDiv) {
@@ -580,47 +606,47 @@ async function navbar_SaveRecord() {
 
       console.log("Before Loop")
       for (const fieldElement of fields) {
-      
-    
+
+
         const dataFieldContainer = fieldElement.getAttribute('validation');
         const datasetTableName = fieldElement.getAttribute("dataset-table-name");
         const datasetChampName = fieldElement.getAttribute("dataset-field-name");
         if (fieldElement.value == null || fieldElement.value == "") continue;
-          console.log(dataFieldContainer);
-          if (dataFieldContainer == undefined || dataFieldContainer == "undefined" || dataFieldContainer == null || dataFieldContainer == "") continue;
-          const regexValidation = new RegExp(dataFieldContainer);
+        console.log(dataFieldContainer);
+        if (dataFieldContainer == undefined || dataFieldContainer == "undefined" || dataFieldContainer == null || dataFieldContainer == "") continue;
+        const regexValidation = new RegExp(dataFieldContainer);
 
-          console.log(regexValidation.test(fieldElement.value));
-          console.log("Valeur field: " ,fieldElement.value);
-          if (!regexValidation.test(fieldElement.value)) {
-            validationFailed = false;
-            fieldElement.style.border = "2px solid red";
-            console.log("in condition")
-          
-            continue;
-          } else {
-            fieldElement.style.border = ""; // champ valide, on enlève la bordure rouge
-          }
+        console.log(regexValidation.test(fieldElement.value));
+        console.log("Valeur field: ", fieldElement.value);
+        if (!regexValidation.test(fieldElement.value)) {
+          validationFailed = false;
+          fieldElement.style.border = "2px solid red";
+          console.log("in condition")
+
+          continue;
+        } else {
+          fieldElement.style.border = ""; // champ valide, on enlève la bordure rouge
+        }
 
 
       }
-      
+
 
       if (validationFailed === false) {
         showToast("validation error, please fixes");
         return;
       }
-     
+
       let result;
       console.log("before verifiying rowIsValue if new");
-       const actions = dataSetNavigator.getAttribute("actions");
+      const actions = dataSetNavigator.getAttribute("actions");
       if (rowIdValue === "new") {
         let data = await CreateInsert(dbName, tableName, divLine);
-        result = await insertRecordDB(dbName, tableName, JSON.stringify(data),actions);
+        result = await insertRecordDB(dbName, tableName, JSON.stringify(data), actions);
       } else {
         const data = CreateUpdated(dbName, tableName, divLine);
-       
-        result = await updateRecordDB(dbName, tableName, rowIdValue, JSON.stringify(data),actions);
+
+        result = await updateRecordDB(dbName, tableName, rowIdValue, JSON.stringify(data), actions);
       }
 
       document.querySelector("[name=SaveDSBtn]").disabled = true;
@@ -634,7 +660,7 @@ async function navbar_SaveRecord() {
 
 
 // create insert data structure
-async function CreateInsert(DBName, tableName,divLine) {
+async function CreateInsert(DBName, tableName, divLine) {
   // create data for insert following this structure  `INSERT INTO ${tableName} (${data.fields}) VALUES (${data.values})`;
   // return data with data.fields and data.values
   const inputs = divLine.querySelectorAll(`#DataSet_${tableName} input`);
@@ -646,14 +672,14 @@ async function CreateInsert(DBName, tableName,divLine) {
       continue; // Skip this iteration
     }
     switch (inputs[i].type) {
-    
+
       default:
 
         // get the field name from the input
         var field = inputs[i].getAttribute("dataset-field-name");
         var subtype = inputs[i].getAttribute("dataset-field-type");
-        if (field === "rowid")  continue; // Skip rowid field
-        
+        if (field === "rowid") continue; // Skip rowid field
+
         insertFields.push(field); // Add field name to insertFields;
         // get sequence value from the the attribute dataset-field-values
         if (subtype === "sequence") {
@@ -671,7 +697,7 @@ async function CreateInsert(DBName, tableName,divLine) {
         } else {
           insertValues.push(inputs[i].value); // Add input value
         }
-      
+
         break;
     } // end switch
 
@@ -694,7 +720,7 @@ async function navigateSequence(DBName, tableName, sequenceName) {
   }
 }
 
-async function updateRecordDB(DBName, tableName, nextRowId, data,actions) {
+async function updateRecordDB(DBName, tableName, nextRowId, data, actions) {
   try {
     const response = await fetch(
       `/update-record/${DBName}/${tableName}/${nextRowId}`,
@@ -706,9 +732,9 @@ async function updateRecordDB(DBName, tableName, nextRowId, data,actions) {
         // add to the body data and action if it exists
         body: JSON.stringify({
           data: data,
-          actions: actions ,
+          actions: actions,
         }),
-       
+
       }
     );
 
@@ -735,7 +761,7 @@ async function updateRecordDB(DBName, tableName, nextRowId, data,actions) {
   }
 }
 
-async function insertRecordDB(DBName, tableName, data,actions) {
+async function insertRecordDB(DBName, tableName, data, actions) {
   try {
     const response = await fetch(`/insert-record/${DBName}/${tableName}`, {
       method: "POST",
