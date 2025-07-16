@@ -315,49 +315,55 @@ function navbar_moveNext() {
     let currentIndex = panels.indexOf(selectedPanel);
 
     // Click on the next panel div if it exists
-    if (currentIndex + 1 < panels.length) {
-      panels[currentIndex + 1].classList.add("selected-panel");
-      panels[currentIndex + 1].click();
-      updatePreviousButtonState(currentIndex + 1 > 0);
+    currentIndex = currentIndex + 1;
+    if (currentIndex < panels.length) {
+      panels[currentIndex].classList.add("selected-panel");
+      panels[currentIndex].click();
       return; // Exit after handling panels
+    } else if (currentIndex === panels.length) {
+      currentIndex = 0;
+      panels[currentIndex].classList.add("selected-panel");
+      panels[currentIndex].click();
+      return;
     } else {
       console.log("current index : " + currentIndex);
       console.log("length : " + panels.length);
       console.log("No next panel to select.");
     }
   }
-
-  // Fallback: Handle grid-row navigation if no panels or no more panels are available
-  let dataGrid = document.querySelectorAll("[tagname='dataGrid']");
-
-  for (let i = 0; i < dataGrid.length; i++) {
-    let grid = dataGrid[i];
-    let rows = grid.querySelectorAll(".grid-row");
-    let found = false;
-
-    // Iterate through the rows to find the selected one
-    for (let j = rows.length - 1; j >= 0; j--) {
-      if (rows[j].classList.contains("grid-row-selected")) {
-        rows[j].classList.remove("grid-row-selected");
-
-        // Simulate click on the next row
-        if (j + 1 < rows.length) {
-          rows[j + 1].querySelector("div").click();
+  /*
+    // Fallback: Handle grid-row navigation if no panels or no more panels are available
+    let dataGrid = document.querySelectorAll("[tagname='dataGrid']");
+  
+    for (let i = 0; i < dataGrid.length; i++) {
+      let grid = dataGrid[i];
+      let rows = grid.querySelectorAll(".grid-row");
+      let found = false;
+  
+      // Iterate through the rows to find the selected one
+      for (let j = rows.length - 1; j >= 0; j--) {
+        if (rows[j].classList.contains("grid-row-selected")) {
+          rows[j].classList.remove("grid-row-selected");
+  
+          // Simulate click on the next row
+          if (j + 1 < rows.length) {
+            rows[j + 1].querySelector("div").click();
+          }
+          found = true;
+          break;
         }
-        found = true;
-        break;
+      }
+  
+      // If no row is selected, simulate click on the first row
+      if (!found && rows.length > 0) {
+        rows[0].querySelector("div").click();
       }
     }
-
-    // If no row is selected, simulate click on the first row
-    if (!found && rows.length > 0) {
-      rows[0].querySelector("div").click();
-    }
-  }
+      */
 }
 
 function load_data(modify) {
-
+  console.log("loading data");
   const inputs = document.querySelectorAll(
     `[data-table-name] input[dataset-field-name]`
   );
