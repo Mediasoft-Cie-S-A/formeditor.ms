@@ -545,7 +545,7 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum, dataset, link,
   console.log("rows", rows);
   */
   const saveBtn = document.querySelector("[name=SaveDSBtn]");
-  if (saveBtn) saveBtn.disabled = true;
+  // if (saveBtn) saveBtn.disabled = true;
 
   try {
     // activate all the loaders by class name miniLoader

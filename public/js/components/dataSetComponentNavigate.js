@@ -381,8 +381,7 @@ function load_data(readOnly) {
   deactivateLoaders();
 }
 
-function navbar_EditRecord() {
-
+function copyIntoModal() {
   const modal = document.getElementById("editModal");
   if (!modal || modal.style.display === "none") {
     console.log("create modal");
@@ -404,8 +403,6 @@ function navbar_EditRecord() {
 
     modal.style.display = "flex";
 
-
-
     //This part is needed otherwise the navigation is broken for some reason
     const dataSetNavigator2 = document.querySelector("[tagname='dataSetNavigation']");
     const parentDiv2 = dataSetNavigator2.parentElement;
@@ -421,8 +418,12 @@ function navbar_EditRecord() {
         cloned.value = input.value;
       }
     });
-
   }
+}
+
+function navbar_EditRecord() {
+
+  copyIntoModal();
 
 }
 
@@ -445,6 +446,7 @@ function navbar_CancelEdit() {
 function navbar_InsertRecord() {
   //navbar_EditRecord(false);
 
+  copyIntoModal();
   const inputs = document.querySelectorAll(`[data-table-name] input,select`);
   inputs.forEach((input) => {
     const field = input.getAttribute("dataset-field-name");
