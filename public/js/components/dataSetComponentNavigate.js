@@ -158,6 +158,7 @@ function renderNavigationBar(main) {
 
   console.log(navigationBar.id)
 
+
   // Create buttons and append them to the navigation bar
   var buttons = [
 
@@ -177,7 +178,6 @@ function renderNavigationBar(main) {
       event:
         "navbar_moveNext()",
     },
-
     {
       name: "EditDSBtn",
       title: "Edit Record",
@@ -537,6 +537,7 @@ async function navbar_DeleteRecord() {
 
     if (result?.message) {
       showToast(result?.message);
+      loadFormData(activeForm.objectId, document.getElementById('renderContainer'), true);
     } else {
       showToast("Failed to delete record");
     }
@@ -631,89 +632,93 @@ function addIdToData(data, id, value) {
 
 
 async function navbar_SaveRecord() {
-  try {
-    if (document.querySelector("[name=SaveDSBtn]").disabled) {
-      showToast("Save button is disabled");
-      return;
-    }
-    console.log("SaveRecord");
-    // get the dataset navigator
-    const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
-    // get the dataset div
-    const datasetDiv = document.querySelector("[tagname='dataSet']");
-    if (!datasetDiv) {
-      showToast("No dataset found to save");
-      return;
-    }
-    // Select all row ID elements (one per dataset record)
-    const nextRowIds = datasetDiv.querySelectorAll("[dataset-field-type='rowid']");
-    console.log("nextRowIds: ", nextRowIds);
-    for (const nextRowId of nextRowIds) {
-      console.log("Row being processed:", nextRowId);
+  modal = document.getElementById("editModal");
+  if (modal && modal.style.display !== "none") {
+    try {
+      if (document.querySelector("[name=SaveDSBtn]").disabled) {
+        showToast("Save button is disabled");
+        return;
+      }
+      console.log("SaveRecord");
+      // get the dataset navigator
+      const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
+      // get the dataset div
+      const datasetDiv = document.querySelector("[tagname='dataSet']");
+      if (!datasetDiv) {
+        showToast("No dataset found to save");
+        return;
+      }
+      // Select all row ID elements (one per dataset record)
+      const nextRowIds = datasetDiv.querySelectorAll("[dataset-field-type='rowid']");
+      console.log("nextRowIds: ", nextRowIds);
+      for (const nextRowId of nextRowIds) {
+        console.log("Row being processed:", nextRowId);
 
-      const tableName = nextRowId.getAttribute("dataset-table-name");
-      const dbName = nextRowId.getAttribute("dbname");
-      const divLine = nextRowId.closest("[tagname='dataSet']");
-      const rowIdValue = nextRowId.value;
+        const tableName = nextRowId.getAttribute("dataset-table-name");
+        const dbName = nextRowId.getAttribute("dbname");
+        const divLine = nextRowId.closest("[tagname='dataSet']");
+        const rowIdValue = nextRowId.value;
 
-      // Select all fields in the current record with a data-field-type attribute
-      const fields = divLine.querySelectorAll("input,select");
-      console.log("fields where are you: ", fields);
-
-
-      let validationFailed = true;
-
-      console.log("Before Loop")
-      for (const fieldElement of fields) {
+        // Select all fields in the current record with a data-field-type attribute
+        const fields = divLine.querySelectorAll("input,select");
+        console.log("fields where are you: ", fields);
 
 
-        const dataFieldContainer = fieldElement.getAttribute('validation');
-        const datasetTableName = fieldElement.getAttribute("dataset-table-name");
-        const datasetChampName = fieldElement.getAttribute("dataset-field-name");
-        if (fieldElement.value == null || fieldElement.value == "") continue;
-        console.log(dataFieldContainer);
-        if (dataFieldContainer == undefined || dataFieldContainer == "undefined" || dataFieldContainer == null || dataFieldContainer == "") continue;
-        const regexValidation = new RegExp(dataFieldContainer);
+        let validationFailed = true;
 
-        console.log(regexValidation.test(fieldElement.value));
-        console.log("Valeur field: ", fieldElement.value);
-        if (!regexValidation.test(fieldElement.value)) {
-          validationFailed = false;
-          fieldElement.style.border = "2px solid red";
-          console.log("in condition")
+        console.log("Before Loop")
+        for (const fieldElement of fields) {
 
-          continue;
-        } else {
-          fieldElement.style.border = ""; // champ valide, on enlève la bordure rouge
+
+          const dataFieldContainer = fieldElement.getAttribute('validation');
+          const datasetTableName = fieldElement.getAttribute("dataset-table-name");
+          const datasetChampName = fieldElement.getAttribute("dataset-field-name");
+          if (fieldElement.value == null || fieldElement.value == "") continue;
+          console.log(dataFieldContainer);
+          if (dataFieldContainer == undefined || dataFieldContainer == "undefined" || dataFieldContainer == null || dataFieldContainer == "") continue;
+          const regexValidation = new RegExp(dataFieldContainer);
+
+          console.log(regexValidation.test(fieldElement.value));
+          console.log("Valeur field: ", fieldElement.value);
+          if (!regexValidation.test(fieldElement.value)) {
+            validationFailed = false;
+            fieldElement.style.border = "2px solid red";
+            console.log("in condition")
+
+            continue;
+          } else {
+            fieldElement.style.border = ""; // champ valide, on enlève la bordure rouge
+          }
+
+
         }
 
 
+        if (validationFailed === false) {
+          showToast("validation error, please fixes");
+          return;
+        }
+
+        let result;
+        console.log("before verifiying rowIsValue if new");
+        const actions = dataSetNavigator.getAttribute("actions");
+        if (rowIdValue === "new") {
+          let data = await CreateInsert(dbName, tableName, divLine);
+          result = await insertRecordDB(dbName, tableName, JSON.stringify(data), actions);
+        } else {
+          const data = CreateUpdated(dbName, tableName, divLine);
+
+          result = await updateRecordDB(dbName, tableName, rowIdValue, JSON.stringify(data), actions);
+        }
+
+        document.querySelector("[name=SaveDSBtn]").disabled = true;
+        navbar_CancelEdit();
+        loadFormData(activeForm.objectId, document.getElementById('renderContainer'), true);
+
       }
-
-
-      if (validationFailed === false) {
-        showToast("validation error, please fixes");
-        return;
-      }
-
-      let result;
-      console.log("before verifiying rowIsValue if new");
-      const actions = dataSetNavigator.getAttribute("actions");
-      if (rowIdValue === "new") {
-        let data = await CreateInsert(dbName, tableName, divLine);
-        result = await insertRecordDB(dbName, tableName, JSON.stringify(data), actions);
-      } else {
-        const data = CreateUpdated(dbName, tableName, divLine);
-
-        result = await updateRecordDB(dbName, tableName, rowIdValue, JSON.stringify(data), actions);
-      }
-
-      document.querySelector("[name=SaveDSBtn]").disabled = true;
-      navbar_CancelEdit();
-      return result;
+    } catch (error) {
+      console.error("Error:", error);
     }
-  } catch (error) {
-    console.error("Error:", error);
   }
 }
 
@@ -875,16 +880,16 @@ async function deleteRecordDB(DBName, tableName, rowId, actions) {
     let operator = "";
     let searchValue = "";
     let idObject = getIdObject();
+    console.log("idObject : " + idObject?.dataGrid)
+    console.log(idObject)
     if (idObject?.dataGrid) {
       searchGrid(DBName, filedName, operator, searchValue, idObject.dataGrid);
     }
 
-    showToast("Record deleted successfully", 5000);
     return result;
 
   } catch (error) {
     console.error("Error deleting record:", error);
-    showToast("Error deleting record: " + error);
     return { success: false };
   }
 }

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+//Use to read database after insert and delete in dataSetComponentNavigate.js
+let activeForm = null;
 
 function loadForms() {
     console.log('Loading forms...');
@@ -72,6 +74,7 @@ function loadForms() {
                 editButton.onclick = function (event) {
                     helperLoadContainer(event, form.objectId);
                     const showTab = document.querySelector('.nav-tabs a[href="#editForm"]');
+                    activeForm = form;
                     if (showTab) {
                         showTab.click(); // Simulate click
                     }// if (showTab) {
@@ -84,6 +87,7 @@ function loadForms() {
                 showButton.onclick = function (event) {
                     helperLoadContainer(event, form.objectId);
                     const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
+                    activeForm = form;
                     if (showTab) {
                         showTab.click(); // Simulate click
                     }// if (showTab) {
@@ -98,6 +102,7 @@ function loadForms() {
                 container.addEventListener('dblclick', function (event) {
                     helperLoadContainer(event, form.objectId);
                     const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
+                    activeForm = form;
                     if (showTab) {
                         showTab.click(); // Simulate click
                     }// if (showTab) {
@@ -248,7 +253,7 @@ function searchFormbySlug(event) {
 }
 
 function loadFormData(objectId, renderContainer, renderElem) {
-    console.log("Load form data");
+    console.log("Load form data : " + objectId);
     fetch(`/get-form/${objectId}`)
         .then(response => {
             if (!response.ok) {
