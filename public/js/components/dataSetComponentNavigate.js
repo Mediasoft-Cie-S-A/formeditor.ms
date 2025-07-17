@@ -333,12 +333,6 @@ function navbar_moveNext() {
     }
   }
 
-  const modal = document.getElementById("editModal");
-  if (modal && modal.style.display !== "none") {
-    console.log("There is a visible modal");
-    load_data(false);
-  }
-
 
   /*
     // Fallback: Handle grid-row navigation if no panels or no more panels are available
@@ -381,7 +375,6 @@ function load_data(readOnly) {
     const tableLabel = input.getAttribute("dataset-table-name");
     input.readOnly = readOnly;
     input.disabled = readOnly;
-    console.log("Set read Only")
   });
 
   document.querySelector("[name=SaveDSBtn]").disabled = readOnly;
@@ -389,24 +382,48 @@ function load_data(readOnly) {
 }
 
 function navbar_EditRecord() {
-  // Always ensure modal exists
-  createEditModal();
-
 
   const modal = document.getElementById("editModal");
-  const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
-  const parentDiv = dataSetNavigator.parentElement;
-  const modalContent = modal.querySelector(".modal-content");
-  modalContent.innerHTML = '';
-  // set in parentDiv the id of original parent and next sibling
+  if (!modal || modal.style.display === "none") {
+    console.log("create modal");
+    // Always ensure modal exists
+    createEditModal();
 
-  originalParentDiv = parentDiv.parentElement;
+    const modal = document.getElementById("editModal");
+    const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
+    const parentDiv = dataSetNavigator.parentElement;
+    const modalContent = modal.querySelector(".modal-content");
+    modalContent.innerHTML = '';
+    // set in parentDiv the id of original parent and next sibling
 
-  modalContent.appendChild(parentDiv);
+    originalParentDiv = parentDiv.parentElement;
 
-  modal.style.display = "flex";
+    modalContent.appendChild(parentDiv);
 
-  load_data(false)
+    load_data(false);
+
+    modal.style.display = "flex";
+
+
+
+    //This part is needed otherwise the navigation is broken for some reason
+    const dataSetNavigator2 = document.querySelector("[tagname='dataSetNavigation']");
+    const parentDiv2 = dataSetNavigator2.parentElement;
+    modalContent.innerHTML = ''
+    modalContent.appendChild(parentDiv2);
+    //copy the datas from old to new
+    const originalInputs = parentDiv.querySelectorAll("input[dataset-field-name]");
+    const clonedInputs = parentDiv2.querySelectorAll("input[dataset-field-name]");
+
+    originalInputs.forEach((input, i) => {
+      const cloned = clonedInputs[i];
+      if (cloned) {
+        cloned.value = input.value;
+      }
+    });
+
+  }
+
 }
 
 function navbar_CancelEdit() {

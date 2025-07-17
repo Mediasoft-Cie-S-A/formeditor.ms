@@ -316,6 +316,7 @@ function rebuildComponents(container) {
 const formCache = {};
 
 function loadFormDataInModal(objectId, container) {
+    console.log("Load Form Data in modal");
     // ✅ Si le formulaire est déjà en cache, l'afficher
     if (formCache[objectId]) {
         container.innerHTML = ''; // Vider le container actuel

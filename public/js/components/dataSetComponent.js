@@ -695,7 +695,6 @@ async function updateInputs(data, DBName, tableName, dataset) {
     const fieldType = input.getAttribute("type");
     input.value = "";
 
-    console.log("dataset component readonly");
     //input.disabled = true;
     //input.readOnly = true;
 
