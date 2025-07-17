@@ -35,7 +35,7 @@ function editDatabaseGrid(type, element, content) {
     const gridID = propertiesBar.querySelector("label").textContent;
     const main = document.getElementById(gridID);
     updateGridData(main, content);
-    
+
   };
   content.appendChild(button);
   // button showModalDbStrc for show the database structure
@@ -49,8 +49,8 @@ function editDatabaseGrid(type, element, content) {
     showModalDbStrc(content, type);
   };
   content.appendChild(buttonShowDbStrc);
-  
-  
+
+
   content.appendChild(createSQLBox("SQL", "sql", "sql"));
   content.appendChild(createMultiSelectItem("Data", "data", "data"));
   content.appendChild(createMultiSelectItem("Link", "link", "link"));
@@ -70,8 +70,8 @@ function editDatabaseGrid(type, element, content) {
     content.appendChild(filter);
 
     // Initialize with the standard view
-//    switchView(event, content, 'standard');
- //   regenerateFilters(content, jsonData.filter);
+    //    switchView(event, content, 'standard');
+    //   regenerateFilters(content, jsonData.filter);
   }
 
   if (element.getAttribute("datalink") != null) {
@@ -92,38 +92,38 @@ function editDatabaseGrid(type, element, content) {
     });
   }
 
-        // sql
-        if (element.getAttribute("sql") != null) {
-          var target = content.querySelector("#SQL");
-          var jsonData = JSON.parse(element.getAttribute("sql"));
-        
-          // add the db name
-          if (jsonData.DBName != null) {
-            var dbinput = target.querySelector("[tagname='dbname']");
-            dbinput.value = jsonData.DBName;
-          }
-          // add the select
-          if (jsonData.select != null) {
-            var select = target.querySelector("[tagname='select']");
-            select.value = jsonData.select;
-          }
-          // add the update
-          if (jsonData.update != null) {
-            var update = target.querySelector("[tagname='update']");
-            update.value = jsonData.update
-          }
-          // add the insert
-          if (jsonData.insert != null) {
-            var insert = target.querySelector("[tagname='insert']");
-            insert.value = jsonData.insert;
-          }
-          // add the delete
-          if (jsonData.delete != null) {
-            var del = target.querySelector("[tagname='delete']");
-            del.value = jsonData.delete;
+  // sql
+  if (element.getAttribute("sql") != null) {
+    var target = content.querySelector("#SQL");
+    var jsonData = JSON.parse(element.getAttribute("sql"));
 
-        }
-      } // end if sql
+    // add the db name
+    if (jsonData.DBName != null) {
+      var dbinput = target.querySelector("[tagname='dbname']");
+      dbinput.value = jsonData.DBName;
+    }
+    // add the select
+    if (jsonData.select != null) {
+      var select = target.querySelector("[tagname='select']");
+      select.value = jsonData.select;
+    }
+    // add the update
+    if (jsonData.update != null) {
+      var update = target.querySelector("[tagname='update']");
+      update.value = jsonData.update
+    }
+    // add the insert
+    if (jsonData.insert != null) {
+      var insert = target.querySelector("[tagname='insert']");
+      insert.value = jsonData.insert;
+    }
+    // add the delete
+    if (jsonData.delete != null) {
+      var del = target.querySelector("[tagname='delete']");
+      del.value = jsonData.delete;
+
+    }
+  } // end if sql
 
 
 
@@ -135,14 +135,14 @@ async function updateGridData(main, content) {
   var jsonData = [];
   var linkData = [];
   var orderByData = [];
-// set filter empty
+  // set filter empty
   main.setAttribute("filter", "[]");
-//   // get all the span elements from data
+  //   // get all the span elements from data
   var data = content.querySelector("#Data").querySelectorAll("span[name='dataContainer']");
-  var link = content.querySelector("#Link").querySelectorAll("span[name='dataContainer']");$
+  var link = content.querySelector("#Link").querySelectorAll("span[name='dataContainer']"); $
   var orderBy = content.querySelector("#OrderBy").querySelectorAll("span[name='dataContainer']");
   // generate the json of all the data
- 
+
   data.forEach((span) => {
     // get the json data from the span
     var json = JSON.parse(span.getAttribute("data-field"));
@@ -153,65 +153,65 @@ async function updateGridData(main, content) {
 
 
 
-// SQL
-var sqlJson = {}
-//update the sql json
-var sql = content.querySelector("#SQL");
-console.log(sql);
-var DBName = sql.querySelector("[tagname='dbname']");
-console.log(DBName);
-if (DBName != null) {
-  sqlJson["DBName"]=DBName.value;
-}
-// get the textarea with the tagname="select"
-var sqlData = sql.querySelector("[tagname='select']");
-console.log(sqlData);
-if (sqlData != null) {
-  sqlJson["select"]= sqlData.value;
-}
-var sqlData = sql.querySelector("[tagname='update']");
-if (sqlData != null) {
-  sqlJson["update"]= sqlData.value;
-}
-var sqlData = sql.querySelector("[tagname='insert']");
-if (sqlData != null) {
-  sqlJson["insert"]=sqlData.value;
-}
+  // SQL
+  var sqlJson = {}
+  //update the sql json
+  var sql = content.querySelector("#SQL");
+  console.log(sql);
+  var DBName = sql.querySelector("[tagname='dbname']");
+  console.log(DBName);
+  if (DBName != null) {
+    sqlJson["DBName"] = DBName.value;
+  }
+  // get the textarea with the tagname="select"
+  var sqlData = sql.querySelector("[tagname='select']");
+  console.log(sqlData);
+  if (sqlData != null) {
+    sqlJson["select"] = sqlData.value;
+  }
+  var sqlData = sql.querySelector("[tagname='update']");
+  if (sqlData != null) {
+    sqlJson["update"] = sqlData.value;
+  }
+  var sqlData = sql.querySelector("[tagname='insert']");
+  if (sqlData != null) {
+    sqlJson["insert"] = sqlData.value;
+  }
 
-main.setAttribute("sql", JSON.stringify(sqlJson));
-console.log(sqlJson);
-// check if DBName is not empty 
-if (sqlJson.DBName != "") {
-  // get the db name
+  main.setAttribute("sql", JSON.stringify(sqlJson));
+  console.log(sqlJson);
+  // check if DBName is not empty 
+  if (sqlJson.DBName != "") {
+    // get the db name
 
-      // get the data with query select "/table-data-sql/:database/:page/:pageSize"?sqlQuery=select * from table
-      const response = await fetch(`/table-data-sql/${sqlJson.DBName}/1/1?sqlQuery=${sqlJson.select}`).then((response) => {
-        if (!response.ok) {
-          showToast("Error retrieving data", 5000);
-        }
-        return response.json();
+    // get the data with query select "/table-data-sql/:database/:page/:pageSize"?sqlQuery=select * from table
+    const response = await fetch(`/table-data-sql/${sqlJson.DBName}/1/1?sqlQuery=${sqlJson.select}`).then((response) => {
+      if (!response.ok) {
+        showToast("Error retrieving data", 5000);
+      }
+      return response.json();
+    });
+
+    // if data is not empty, update the dataset
+    if (response.length > 0) {
+      // generate the json of all the data
+      const keys = Object.keys(response[0]);
+      jsonData = [];
+      keys.forEach((field) => {
+        jsonData.push({ DBName: sqlJson.DBName, fieldName: field, tabelName: "", fieldType: "string" });
       });
+      main.setAttribute("dataSet", JSON.stringify(jsonData));
+    } // end if data is not empty
+  } // end if DBName is not empty
 
-      // if data is not empty, update the dataset
-      if (response.length > 0) {
-        // generate the json of all the data
-        const keys = Object.keys(response[0]);
-        jsonData = [];
-        keys.forEach((field) => {
-          jsonData.push({ DBName:sqlJson.DBName, fieldName: field, tabelName: "",  fieldType: "string" });
-        });
-        main.setAttribute("dataSet", JSON.stringify(jsonData));
-      } // end if data is not empty
-} // end if DBName is not empty
- 
-  
+
   link.forEach((span) => {
     var json = JSON.parse(span.getAttribute("data-field"));
     linkData.push(json);
   });
   main.setAttribute("datalink", JSON.stringify(linkData));
- 
- 
+
+
   orderBy.forEach((span) => {
     var json = JSON.parse(span.getAttribute("data-field"));
     orderByData.push({ fieldName: json.fieldName });
@@ -224,7 +224,7 @@ if (sqlJson.DBName != "") {
     var filterData = filter.value;
   }
   // create intermedite div container
- 
+
 
   renderGrid(main);
 }
@@ -233,7 +233,7 @@ function renderGrid(main) {
   main.innerHTML = ""; // clear the main div
   // get the data from the element
   var dataset = JSON.parse(main.getAttribute("dataSet"));
-  
+
 
   main.style.padding = "10px";
   main.style.display = "flex";
@@ -245,13 +245,13 @@ function renderGrid(main) {
   table.id = "Data-Grid_" + dataset[0].tableName;
   table.setAttribute("DBName", dataset[0].DBName);
 
-    // Apply responsive grid styles
-    table.style.gridTemplateColumns = "repeat(auto-fill, minmax(200px, 1fr))";
-    table.style.gap = "12px";
-    table.style.padding = "16px";
-    table.style.border = "2px solid #ccc"; // Light border
-    table.style.borderRadius = "10px"; // Rounded corners
-    table.style.backgroundColor = "#fafafa"; // Light background
+  // Apply responsive grid styles
+  table.style.gridTemplateColumns = "repeat(auto-fill, minmax(200px, 1fr))";
+  table.style.gap = "12px";
+  table.style.padding = "16px";
+  table.style.border = "2px solid #ccc"; // Light border
+  table.style.borderRadius = "10px"; // Rounded corners
+  table.style.backgroundColor = "#fafafa"; // Light background
 
   // generate div for the dataset
   var datasetDiv = document.createElement("div");
@@ -263,7 +263,7 @@ function renderGrid(main) {
     datasetDiv,
     dataset[0].DBName,
     dataset[0].tableName,
-    
+
   );
 
   // create the table
@@ -271,7 +271,7 @@ function renderGrid(main) {
     table,
     dataset[0].DBName,
     dataset[0].tableName,
-  
+
     main
   );
   main.appendChild(table);
@@ -283,7 +283,7 @@ function insertNavBar(
   gridContainer,
   DBName,
   tableName,
- 
+
 ) {
   console.log(gridContainer);
 
@@ -337,7 +337,7 @@ function insertNavBar(
   html += `<option value='50'>50</option>`;
   html += `<option value='100'>100</option>`;
   html += `</select>`; // record count options
-  
+
 
   html += `<img class="miniLoader" style="display: none;" src="/img/loader.gif" alt="Loading...">`;
   html += `</div>`;
@@ -353,7 +353,7 @@ function createGrid(
   grid,
   DBName,
   tableName,
- 
+
   main
 ) {
   //header
@@ -372,7 +372,7 @@ function createGrid(
   body.className = "grid-body";
   grid.appendChild(body);
   //set search inputs
-  
+
 }
 
 function switchView(e, DBName, gridID, view) {
@@ -393,7 +393,7 @@ function generateHeaderRow(grid, dataset) {
   } else {
     header = grid.querySelector(".grid-header");
     header.innerHTML = ""; // clear the header
-  } 
+  }
 
   // header
   var row = document.createElement("div");
@@ -443,19 +443,19 @@ function generateHeaderRow(grid, dataset) {
         // invert the field name in the dataset json with the target field name
         console.log("fieldName", fieldName);
         console.log("targetFieldName", targetFieldName);
-       
+
         // get the json field of fieldName
         const field = dataset.find((item) => item.fieldName === fieldName);
         const DBName = field.DBName;
         // get the json field of targetFieldName
         const targetField = dataset.find((item) => item.fieldName === targetFieldName);
         // invert the field name in the dataset json with the target field name
-       // new dataset
+        // new dataset
         const newDataset = dataset.map((item) => {
           if (item.fieldName === fieldName) {
-            return  targetField
+            return targetField
           } else if (item.fieldName === targetFieldName) {
-            return  field ;
+            return field;
           } else {
             return item;
           }
@@ -465,53 +465,52 @@ function generateHeaderRow(grid, dataset) {
         main.setAttribute("dataset", JSON.stringify(newDataset));
         // refresh the grid
         searchGrid(DBName, "", "", "", main.id);
-       
+
       });
       row.appendChild(cell);
-        // adding click action in order to sort the data
-        cell.addEventListener("click", function (e) {
-          console.log("click on cell");
-          e.preventDefault();
-          // get the cell from the event
-          // get the grid id
-          const main = e.currentTarget.closest('[tagname="dataGrid"]');
-          // get the dataset from the main in json format
-          const dataset = JSON.parse(main.getAttribute("dataset"));
-       
-          const DBName = e.currentTarget.getAttribute("DBName");
-          // get the field name from the cell
-          const fieldName = cell.getAttribute("field-name");
-          // get the order direction from the cell by checking if the attribute descending is set
-          var descending = cell.getAttribute("descending");
-          // check if the descending is set to true or false
-          if (descending == null) {
-            descending = "desc";
-          } 
-          // check if the field type is in the dataorderbygrid json in grid
-          let dataOrderByGrid = JSON.parse(main.getAttribute("dataorderbygrid"));
-         // empty the dataorderbygrid json
-         dataOrderByGrid = [];
-            // if fieldOrderBy is null, add it to the dataorderbygrid json
-          if (descending== "asc") {
-           
-            // add the field to the dataorderbygrid json
-            dataOrderByGrid.push({ fieldName: fieldName, order: "desc" });
-            // adding the ascending icon to the cell
-            // create i element for the ascending icon
-           
-          } else
-          {
-            // add the field to the dataorderbygrid json
-            dataOrderByGrid.push({ fieldName: fieldName, order: "asc" });
-          
-          } 
-          
-          // set the dataorderbygrid json to the grid
-          main.setAttribute("dataorderbygrid", JSON.stringify(dataOrderByGrid));
-          // refresh the grid
-          searchGrid(DBName, "", "", "", main.id);
-        });
-      
+      // adding click action in order to sort the data
+      cell.addEventListener("click", function (e) {
+        console.log("click on cell");
+        e.preventDefault();
+        // get the cell from the event
+        // get the grid id
+        const main = e.currentTarget.closest('[tagname="dataGrid"]');
+        // get the dataset from the main in json format
+        const dataset = JSON.parse(main.getAttribute("dataset"));
+
+        const DBName = e.currentTarget.getAttribute("DBName");
+        // get the field name from the cell
+        const fieldName = cell.getAttribute("field-name");
+        // get the order direction from the cell by checking if the attribute descending is set
+        var descending = cell.getAttribute("descending");
+        // check if the descending is set to true or false
+        if (descending == null) {
+          descending = "desc";
+        }
+        // check if the field type is in the dataorderbygrid json in grid
+        let dataOrderByGrid = JSON.parse(main.getAttribute("dataorderbygrid"));
+        // empty the dataorderbygrid json
+        dataOrderByGrid = [];
+        // if fieldOrderBy is null, add it to the dataorderbygrid json
+        if (descending == "asc") {
+
+          // add the field to the dataorderbygrid json
+          dataOrderByGrid.push({ fieldName: fieldName, order: "desc" });
+          // adding the ascending icon to the cell
+          // create i element for the ascending icon
+
+        } else {
+          // add the field to the dataorderbygrid json
+          dataOrderByGrid.push({ fieldName: fieldName, order: "asc" });
+
+        }
+
+        // set the dataorderbygrid json to the grid
+        main.setAttribute("dataorderbygrid", JSON.stringify(dataOrderByGrid));
+        // refresh the grid
+        searchGrid(DBName, "", "", "", main.id);
+      });
+
     } else {
       const cell = document.createElement("div");
       cell.style.display = "none";
@@ -561,17 +560,17 @@ function gridPrev(e, DBName, tableName) {
 function gridNext(e, DBName, tableName) {
   e.preventDefault();
   // get parent grid n
- // get grid from closest e.target class table-container
+  // get grid from closest e.target class table-container
   const mainID = e.target.getAttribute("grid-id");
   const main = document.getElementById(mainID);
- 
+
   const grid = main.querySelector('[dataset-table-name="' + tableName + '"]');
-    
+
   // get the page size
-    
+
 
   if (grid) {
-  //  console.log(grid);
+    //  console.log(grid);
     var currentPage = parseInt(grid.getAttribute("current_page"));
     currentPage++;
     grid.setAttribute("current_page", currentPage);
@@ -588,27 +587,27 @@ function searchGrid(DBName, filterName, FilterOp, filterValue, gridID) {
 
   const tableGrid = grid.querySelector('[tagname="dataTable"]');
   // get the dataset labels
-  
+
   if (tableGrid.getAttribute("current_page") == null) {
     tableGrid.setAttribute("current_page", 1);
   }
   var tableName = tableGrid.getAttribute("Table-Name");
 
- 
- 
+
+
   var page = parseInt(tableGrid.getAttribute("current_page")) || 1;
   var pageSize = parseInt(tableGrid.getAttribute("page_size"));
   // 
   // check if filter is empty
   var filter = filterName + "|" + FilterOp + "|" + filterValue;
- 
+
   // get the view type
   var view = grid.getAttribute("view");
   switch (view) {
     case "standard":
-     
+
       generateHeaderRow(tableGrid, dataset);
-      gridGetData(tableGrid, DBName, tableName, page, pageSize,  filter,0);
+      gridGetData(tableGrid, DBName, tableName, page, pageSize, filter, 0);
       break;
     case "panel":
       // get the header
@@ -617,12 +616,12 @@ function searchGrid(DBName, filterName, FilterOp, filterValue, gridID) {
       if (header) {
         header.remove();
       }
-      gridGetData(tableGrid, DBName, tableName, page, pageSize,  filter,1);
+      gridGetData(tableGrid, DBName, tableName, page, pageSize, filter, 1);
       break;
     default:
-     
+
       generateHeaderRow(tableGrid, dataset);
-      gridGetData(tableGrid, DBName, tableName, page, pageSize, filter,0);
+      gridGetData(tableGrid, DBName, tableName, page, pageSize, filter, 0);
       break;
   }
 }
@@ -631,14 +630,14 @@ function searchGrid(DBName, filterName, FilterOp, filterValue, gridID) {
 function export2CSV(e, DBName, tabelName) {
   e.preventDefault();
   const grid = document.getElementById("Data-Grid_" + tabelName);
- var main = e.currentTarget.closest('[tagname="dataGrid"]');
+  var main = e.currentTarget.closest('[tagname="dataGrid"]');
   // get the dataset from the main in json format
   const dataset = JSON.parse(main.getAttribute("dataset"));
   // get the dataset fields names
   const datasetFields = dataset.map((field) => {
     return field.fieldName;
   });
-  
+
   // call the export service
   const url = `/export-table/${DBName}/${tableName}?fields=${datasetFields}`;
   window.open(url, "_blank");
@@ -698,15 +697,14 @@ function getFilterType(fieldType) {
 }
 
 async function gridGetData(
-                  grid,
-                  DBName,
-                  tableName,
-                  page,
-                  pageSize,                  
-                  filter,
-                  gridType
-                ) 
-{
+  grid,
+  DBName,
+  tableName,
+  page,
+  pageSize,
+  filter,
+  gridType
+) {
   // activate the loaders
   activateLoaders();
   // console.log(grid);
@@ -716,14 +714,14 @@ async function gridGetData(
   var filterJSON = JSON.parse(main.getAttribute("filter"));
   var dataset = JSON.parse(main.getAttribute("dataset"));
   var datalink = JSON.parse(main.getAttribute("datalink"));
-  var orderBy =JSON.parse(main.getAttribute("dataorderbygrid"));
+  var orderBy = JSON.parse(main.getAttribute("dataorderbygrid"));
 
   // datasetfields
   var datasetFields = dataset.map((field) => {
     return field.fieldName;
   });
- // inset rowid to the dataset fields names
- datasetFields.unshift("rowid");
+  // inset rowid to the dataset fields names
+  datasetFields.unshift("rowid");
 
   // check if filter is empty
   if (filterJSON == undefined || filterJSON == null || filterJSON == "") {
@@ -781,7 +779,7 @@ async function gridGetData(
   const body = grid.querySelector(".grid-body");
   const header = grid.querySelector(".grid-header");
   // if gridType is 1, clear the header, body
- 
+
   body.innerHTML = "";
   // Prepare the URL
   var url = `/table-data/${DBName}/${tableName}/${page}/${pageSize}?fields=${datasetFields}&filter=${encodeURIComponent(JSON.stringify(filterJSON))}&orderBy=${JSON.stringify(orderBy)}`;
@@ -789,28 +787,28 @@ async function gridGetData(
   var sqlJson = JSON.parse(main.getAttribute("sql"));
   if (sqlJson.DBName != "") {
     // get the db name
-     url = `/table-data-sql/${sqlJson.DBName}/${page}/${pageSize}?sqlQuery=${sqlJson.select}`;
+    url = `/table-data-sql/${sqlJson.DBName}/${page}/${pageSize}?sqlQuery=${sqlJson.select}`;
   }
   // Fetch the data from the web service
 
-    const request = new XMLHttpRequest();
-    request.open("GET", url, true);
-    request.setRequestHeader("Content-Type", "application/json");
-    request.setRequestHeader("Accept", "application/json");
-    request.setRequestHeader("Access-Control-Allow-Origin", "*");
-    request.setRequestHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    request.send();
-    request.onload = function () {
-      // Check if the request was successful (status code 200)
-      if (request.status >= 200 && request.status < 300) {
-        // Parse the response as JSON
-         
+  const request = new XMLHttpRequest();
+  request.open("GET", url, true);
+  request.setRequestHeader("Content-Type", "application/json");
+  request.setRequestHeader("Accept", "application/json");
+  request.setRequestHeader("Access-Control-Allow-Origin", "*");
+  request.setRequestHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  request.send();
+  request.onload = function () {
+    // Check if the request was successful (status code 200)
+    if (request.status >= 200 && request.status < 300) {
+      // Parse the response as JSON
+
       const data = JSON.parse(request.responseText);
-    // The data is now available
+      // The data is now available
       for (var j = 0; j < data.length; j++) {
         switch (gridType) {
           default:
-         case 0:
+          case 0:
             drawGridRow(
               mainID,
               DBName,
@@ -824,70 +822,71 @@ async function gridGetData(
               page,
               pageSize
             );
-          break;
-        case 1:
-          drawPanelRow(
-            mainID,
-            DBName,
-            tableName,
-            data,
-            datasetFields,
-            dataset,
-            datalink,
-            j,
-            body,
-            page,
-            pageSize
-          );
-          break;
+            break;
+          case 1:
+            drawPanelRow(
+              mainID,
+              DBName,
+              tableName,
+              data,
+              datasetFields,
+              dataset,
+              datalink,
+              j,
+              body,
+              page,
+              pageSize
+            );
+            break;
         }  // end switch (gridType)
-    } // end for (j = 0; j < data.length; j++)
-    let row = document.createElement("div");
-    row.style.height = "100%";
-    body.appendChild(row);
-    let newbutton = document.createElement("button");
-    newbutton.title = "Add New Record";
-    newbutton.innerHTML ='<i class="fa fa-plus" style="color:green;margin-left:-6px">';
-    newbutton.style.width = "40px";
-    newbutton.style.height = "40px";
-    newbutton.addEventListener("click", function (event) {
-      event.preventDefault();
-      // get the tab
-      const tab = document.querySelector('[tagname="Tab"]');
-      console.log(tab);
-      // the header by class ctab_tabs-header
-      const header = tab.querySelector(".ctab_tabs-header");
-      if (header.childNodes.length > 0) {
-        // second tab
-        activateTab(event,header.childNodes[1],document.getElementById(header.childNodes[1].getAttribute("data-tab")));
-        navbar_InsertRecord();
-      } // end if
-    });
-    body.appendChild(newbutton);
-      } else {
-        // Handle error response
-        console.error("Error fetching data:", request.statusText);
-        showToast("Error fetching data", 5000);
-      }
-    };
-    request.onerror = function () {
-      // Handle network error
-      console.error("Network error:", request.statusText);
-      showToast("Network error", 5000);
-    };
-    request.onabort = function () {
-      // Handle request abort
-      console.error("Request aborted:", request.statusText);
-      showToast("Request aborted", 5000);
-    };
-    request.ontimeout = function () {
-      // Handle request timeout
-      console.error("Request timed out:", request.statusText);
-      showToast("Request timed out", 5000);
-    };
+      } // end for (j = 0; j < data.length; j++)
+      let row = document.createElement("div");
+      row.style.height = "100%";
+      body.appendChild(row);
+      let newbutton = document.createElement("button");
+      newbutton.title = "Add New Record";
+      newbutton.innerHTML = '<i class="fa fa-plus" style="color:green;margin-left:-6px">';
+      newbutton.style.width = "40px";
+      newbutton.style.height = "40px";
+      newbutton.addEventListener("click", function (event) {
+        event.preventDefault();
+        // get the tab
+        const tab = document.querySelector('[tagname="Tab"]');
+        console.log(tab);
+        // the header by class ctab_tabs-header
+        const header = tab.querySelector(".ctab_tabs-header");
+        if (header.childNodes.length > 0) {
+          // second tab
+          activateTab(event, header.childNodes[1], document.getElementById(header.childNodes[1].getAttribute("data-tab")));
+          navbar_InsertRecord();
+        } // end if
+      });
+      body.appendChild(newbutton);
+    } else {
+      // Handle error response
+      console.error("Error fetching data:", request.statusText);
+      showToast("Error fetching data", 5000);
+    }
+  };
+  request.onerror = function () {
+    // Handle network error
+    console.error("Network error:", request.statusText);
+    showToast("Network error", 5000);
+  };
+  request.onabort = function () {
+    // Handle request abort
+    console.error("Request aborted:", request.statusText);
+    showToast("Request aborted", 5000);
+  };
+  request.ontimeout = function () {
+    // Handle request timeout
+    console.error("Request timed out:", request.statusText);
+    showToast("Request timed out", 5000);
+  };
   // end fetch
-  
+
 }
+
 function drawGridRow(
   mainID,
   DBName,
@@ -908,136 +907,139 @@ function drawGridRow(
 
   // Create the main div for the row
   var rowDiv = document.createElement("div");
-  
+
   // Alternate row background colors (zebra effect)
   if (j % 2 == 0) {
-      rowDiv.style.backgroundColor = "#f2f2f2"; // Light grey for even rows
+    rowDiv.style.backgroundColor = "#f2f2f2"; // Light grey for even rows
   } else {
-      rowDiv.style.backgroundColor = "#ffffff"; // White for odd rows
+    rowDiv.style.backgroundColor = "#ffffff"; // White for odd rows
   }
 
   rowDiv.className = "grid-row"; // Set the class for styling
   rowDiv.setAttribute("rowid", rowid); // Store the unique row ID
   rowDiv.setAttribute("main-id", mainID); // Store the grid main ID
 
- // console.log("rowData display:",rowData);
+  // console.log("rowData display:",rowData);
 
   // Auto-link the first row when loading
   if (j == 0) {
-      linkRecordToGrid(
-          DBName,
-          tableName,
-          rowid,
-          record + (page - 1) * pageSize,
-          dataset,
-          datalink,
-          rowData
-      );
+    linkRecordToGrid(
+      DBName,
+      tableName,
+      rowid,
+      record + (page - 1) * pageSize,
+      dataset,
+      datalink,
+      rowData
+    );
   }
 
   // Add click event listener to select the row
   rowDiv.addEventListener("click", function (event) {
-      console.log("Click on table element")
-      event.preventDefault();
+    console.log("Click on table element")
+    event.preventDefault();
 
-      // Find the closest parent with class 'grid-row'
-      const closestRow = event.target.closest(".grid-row");
-      if (!closestRow) return; // If no 'grid-row' found, safely exit
+    // Find the closest parent with class 'grid-row'
+    const closestRow = event.target.closest(".grid-row");
+    if (!closestRow) return; // If no 'grid-row' found, safely exit
 
-      // Retrieve the main ID of the grid
-      var mainID = closestRow.getAttribute("main-id");
-      var main = document.getElementById(mainID);
-      var dataset = JSON.parse(main.getAttribute("dataset"));
-      var datalink = JSON.parse(main.getAttribute("datalink"));
+    console.log("closestRow : " + closestRow)
 
-      // Remove the 'grid-row-selected' class from all rows
-      var gridRows = document.querySelectorAll('.grid-row');
-      gridRows.forEach(row => {
-          //row.classList.remove("grid-row-selected");
-          row.classList.remove("selected-panel");
-          
-      });
+    // Retrieve the main ID of the grid
+    var mainID = closestRow.getAttribute("main-id");
+    var main = document.getElementById(mainID);
+    var dataset = JSON.parse(main.getAttribute("dataset"));
+    var datalink = JSON.parse(main.getAttribute("datalink"));
 
-      // Add the 'grid-row-selected' class to the clicked row
-      //closestRow.classList.add("grid-row-selected");
-      closestRow.classList.add("selected-panel");
+    // Remove the 'grid-row-selected' class from all rows
+    var gridRows = document.querySelectorAll('.grid-row');
+    gridRows.forEach(row => {
+      //row.classList.remove("grid-row-selected");
+      row.classList.remove("selected-panel");
 
-      let selectedPanel = document.querySelector(".selected-panel");
-      if (selectedPanel) {
-        let allPanels = document.querySelectorAll("[tagname='dataTable'] div.grid-row");
-        let panels = Array.from(allPanels);
-        let currentIndex = panels.indexOf(selectedPanel);
-        //updatePreviousButtonState(currentIndex > 0);
+    });
+
+    // Add the 'grid-row-selected' class to the clicked row
+    //closestRow.classList.add("grid-row-selected");
+    closestRow.classList.add("selected-panel");
+
+    let selectedPanel = document.querySelector(".selected-panel");
+    if (selectedPanel) {
+      console.log("Selected panel : " + selectedPanel);
+      let allPanels = document.querySelectorAll("[tagname='dataTable'] div.grid-row");
+      let panels = Array.from(allPanels);
+      let currentIndex = panels.indexOf(selectedPanel);
+    }
+
+    // Deactivate loading indicators
+    deactivateLoaders();
+
+    // Link the clicked record to the grid
+
+    linkRecordToGrid(
+      DBName,
+      tableName,
+      rowid,
+      record + (page - 1) * pageSize,
+      dataset,
+      datalink,
+      rowData
+    );
+
+
+    // Try switching to the second tab if it exists
+    const tab = document.querySelector('[tagname="Tab"]');
+    if (tab) {
+      console.log("tab : " + tab);
+      const header = tab.querySelector(".ctab_tabs-header");
+      if (header.childNodes.length > 0) {
+        activateTab(event, header.childNodes[1], document.getElementById(header.childNodes[1].getAttribute("data-tab")));
       }
-
-      // Deactivate loading indicators
-      deactivateLoaders();
-
-      // Link the clicked record to the grid
-      
-      linkRecordToGrid(
-          DBName,
-          tableName,
-          rowid,
-          record + (page - 1) * pageSize,
-          dataset,
-          datalink,
-          rowData
-      );
-      
-
-      // Try switching to the second tab if it exists
-      const tab = document.querySelector('[tagname="Tab"]');
-      if (tab) {
-          const header = tab.querySelector(".ctab_tabs-header");
-          if (header.childNodes.length > 0) {
-              activateTab(event, header.childNodes[1], document.getElementById(header.childNodes[1].getAttribute("data-tab")));
-          }
-      }
+    }
   });
 
   // Now create cells inside the row
   var i = 0;
   Object.values(data[j]).forEach((field, index) => {
-      const cell = document.createElement("div");
-      cell.className = "grid-cell";
+    const cell = document.createElement("div");
+    cell.className = "grid-cell";
 
-      rowDiv.appendChild(cell);
+    rowDiv.appendChild(cell);
 
-      // Hide the cell if it's the rowid field (first field)
-      if (i == 0) {
-          cell.style.display = "none";
-          cell.textContent = field;
-      } else {
-          // If field contains multiple values separated by ';', handle it
-          let subField = field?.toString().trim().split(";");
+    // Hide the cell if it's the rowid field (first field)
+    if (i == 0) {
+      cell.style.display = "none";
+      cell.textContent = field;
+    } else {
+      // If field contains multiple values separated by ';', handle it
+      let subField = field?.toString().trim().split(";");
 
-          if (!subField || subField.length === 0) {
-              subField = [field];
-          }
-
-          if (subField.length > 1) {
-              // Create a nice vertical layout for multi-values
-              cell.innerHTML = "";
-
-              const contentDiv = document.createElement("div");
-              contentDiv.style.maxHeight = "200px";
-              contentDiv.style.overflowY = "auto";
-              contentDiv.style.whiteSpace = "pre-wrap"; // Keep line breaks
-
-              subField.forEach((item, subIndex) => {
-                  const line = document.createElement("div");
-                  line.textContent = `${item}`;
-                  contentDiv.appendChild(line);
-              });
-
-              cell.appendChild(contentDiv);
-          } else {
-              // Standard single value
-              cell.textContent = field;
-          }
+      if (!subField || subField.length === 0) {
+        subField = [field];
       }
-      i++;
+
+      if (subField.length > 1) {
+        // Create a nice vertical layout for multi-values
+        cell.innerHTML = "";
+
+        const contentDiv = document.createElement("div");
+        contentDiv.style.maxHeight = "200px";
+        contentDiv.style.overflowY = "auto";
+        contentDiv.style.whiteSpace = "pre-wrap"; // Keep line breaks
+
+        subField.forEach((item, subIndex) => {
+          const line = document.createElement("div");
+          line.textContent = `${item}`;
+          contentDiv.appendChild(line);
+        });
+
+        cell.appendChild(contentDiv);
+      } else {
+        // Standard single value
+        cell.textContent = field;
+      }
+    }
+    i++;
   });
 
   // Finally, add the row to the grid body
@@ -1057,117 +1059,115 @@ function drawPanelRow(
   body,
   page,
   pageSize
-)
+) {
+  console.log("drawPanelRow");
+  let record = j;
+  const rowid = Object.values(data[j])[0];
+  const rowData = data[j];
+  var rowDiv = document.createElement("div");
+  rowDiv.style.backgroundColor = "#ffffff";
+  rowDiv.className = "panel";
+  rowDiv.setAttribute("rowid", rowid);
+  // add click event to row to call linkRecordToGrid(tableName, rowId)
 
-{
-  console.log("drawPanelRow");  
-        let record = j;
-        const rowid = Object.values(data[j])[0];
-        const rowData = data[j];
-        var rowDiv = document.createElement("div");       
-        rowDiv.style.backgroundColor = "#ffffff";
-        rowDiv.className = "panel";
-        rowDiv.setAttribute("rowid",  rowid);
-        // add click event to row to call linkRecordToGrid(tableName, rowId)
+  if (j == 0) {
+    // call linkRecordToGrid(tableName, rowId)
+    linkRecordToGrid(
+      DBName,
+      tableName,
+      rowid,
+      record + (page - 1) * pageSize,
+      dataset,
+      datalink,
+      rowData
+    );
+  } // end if (j == 0)
 
-        if (j == 0) {
-          // call linkRecordToGrid(tableName, rowId)
-          linkRecordToGrid(
-            DBName,
-            tableName,
-            rowid,
-            record + (page - 1) * pageSize,
-            dataset,
-            datalink,
-            rowData
-          );
-        } // end if (j == 0)
+  rowDiv.setAttribute("main-id", mainID);
+  rowDiv.addEventListener("click", function (event) {
+    event.preventDefault();
+    // get main id
+    var mainID = event.target.closest(".grid-row").getAttribute("main-id");
+    var main = document.getElementById(mainID);
+    var dataset = JSON.parse(main.getAttribute("dataset"));
+    var datalink = JSON.parse(main.getAttribute("datalink"));
+    // remove .grid-row-selected from all rows
+    var gridRows = document.querySelectorAll('.grid-row');
+    gridRows.forEach(row => {
+      row.classList.remove("grid-row-selected");
+    });
+    if (event.target.parentElement.classList.contains("grid-row")) {
+      event.target.parentElement.classList.add("grid-row-selected");
+    }
+    if (event.target.classList.contains("grid-row")) {
+      event.target.classList.add("grid-row-selected");
+    }
 
-        rowDiv.setAttribute("main-id", mainID);
-        rowDiv.addEventListener("click", function (event) {
-                          event.preventDefault();
-                          // get main id
-                          var mainID = event.target.closest(".grid-row").getAttribute("main-id");
-                          var main = document.getElementById(mainID);
-                          var dataset = JSON.parse(main.getAttribute("dataset"));
-                          var datalink = JSON.parse(main.getAttribute("datalink"));
-                          // remove .grid-row-selected from all rows
-                          var gridRows = document.querySelectorAll('.grid-row');
-                          gridRows.forEach(row => {
-                            row.classList.remove("grid-row-selected");
-                          });
-                          if (event.target.parentElement.classList.contains("grid-row")) {
-                            event.target.parentElement.classList.add("grid-row-selected");
-                          }
-                          if (event.target.classList.contains("grid-row")) {
-                            event.target.classList.add("grid-row-selected");
-                          }
-                        
-                          // desactivate the loaders
-                          deactivateLoaders();
-                          linkRecordToGrid(
-                            DBName,
-                            tableName,
-                            rowid,
-                            record + (page - 1) * pageSize,
-                            dataset,
-                            datalink,
-                            rowData 
-                          );
+    // desactivate the loaders
+    deactivateLoaders();
+    linkRecordToGrid(
+      DBName,
+      tableName,
+      rowid,
+      record + (page - 1) * pageSize,
+      dataset,
+      datalink,
+      rowData
+    );
 
-                            // get the tab
-                            const tab = document.querySelector('[tagname="Tab"]');
-                            if (tab) {
-                              
-                              // the header by class ctab_tabs-header
-                            const header = tab.querySelector(".ctab_tabs-header");
-                            
-                              if (header.childNodes.length > 0) {
-                                // second tab
-                                activateTab(event,header.childNodes[1],document.getElementById(header.childNodes[1].getAttribute("data-tab")));
-                              } // end if
-                            } // end if (tab)
-                      } // end addEventListener
-                      );
-        var i = 0;
-        
-        Object.values(data[j]).forEach((field, index) => {
-          const cell = document.createElement("p");
-         
+    // get the tab
+    const tab = document.querySelector('[tagname="Tab"]');
+    if (tab) {
 
-          rowDiv.appendChild(cell);
-          // skip rowid field
-          if (i == 0) {
-            cell.style.display = "none";
-            cell.textContent =  field;
-              } else {
-                let subField = field?.toString().trim().split(";");
-                    if (subField.length > 1) {
-                      // Clear any previous content
-                      cell.innerHTML = "";
+      // the header by class ctab_tabs-header
+      const header = tab.querySelector(".ctab_tabs-header");
 
-                      // Create a container for the content
-                      const contentDiv = document.createElement("div");
-                      contentDiv.style.maxHeight = "200px"; // Adjust height as needed
-                      contentDiv.style.overflowY = "auto";
-                      contentDiv.style.whiteSpace = "pre-wrap"; // Preserve white spaces and line breaks
+      if (header.childNodes.length > 0) {
+        // second tab
+        activateTab(event, header.childNodes[1], document.getElementById(header.childNodes[1].getAttribute("data-tab")));
+      } // end if
+    } // end if (tab)
+  } // end addEventListener
+  );
+  var i = 0;
 
-                      subField.forEach((item, subIndex) => {
-                        const line = document.createElement("div");
-                        line.textContent = `${keys[index] == "gama"}: ${item}`;
-                        contentDiv.appendChild(line);
-                      });
+  Object.values(data[j]).forEach((field, index) => {
+    const cell = document.createElement("p");
 
-                      cell.appendChild(contentDiv);
-                    } else {
-                     
-                      cell.textContent =dataset[index-1].fieldLabel + " : " + field;
-                    } // end if (subField.length > 1)
-                } // end if (i == 0)
-                i++;
-              }// end forEach
-            );
-        body.appendChild(rowDiv);
-      
-     
+
+    rowDiv.appendChild(cell);
+    // skip rowid field
+    if (i == 0) {
+      cell.style.display = "none";
+      cell.textContent = field;
+    } else {
+      let subField = field?.toString().trim().split(";");
+      if (subField.length > 1) {
+        // Clear any previous content
+        cell.innerHTML = "";
+
+        // Create a container for the content
+        const contentDiv = document.createElement("div");
+        contentDiv.style.maxHeight = "200px"; // Adjust height as needed
+        contentDiv.style.overflowY = "auto";
+        contentDiv.style.whiteSpace = "pre-wrap"; // Preserve white spaces and line breaks
+
+        subField.forEach((item, subIndex) => {
+          const line = document.createElement("div");
+          line.textContent = `${keys[index] == "gama"}: ${item}`;
+          contentDiv.appendChild(line);
+        });
+
+        cell.appendChild(contentDiv);
+      } else {
+
+        cell.textContent = dataset[index - 1].fieldLabel + " : " + field;
+      } // end if (subField.length > 1)
+    } // end if (i == 0)
+    i++;
+  }// end forEach
+  );
+  body.appendChild(rowDiv);
+
+
 }

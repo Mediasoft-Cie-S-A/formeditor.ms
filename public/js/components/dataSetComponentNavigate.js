@@ -311,6 +311,7 @@ function navbar_moveNext() {
 
 
   if (selectedPanel) {
+    console.log("There is a selected panel"); //Should always print
     selectedPanel.classList.remove("selected-panel");
 
     let panels = Array.from(allPanels);
@@ -333,8 +334,9 @@ function navbar_moveNext() {
   }
 
   const modal = document.getElementById("editModal");
-  if (modal) {
-    load_data(false)
+  if (modal && modal.style.display !== "none") {
+    console.log("There is a visible modal");
+    load_data(false);
   }
 
 
@@ -370,7 +372,7 @@ function navbar_moveNext() {
 }
 
 function load_data(readOnly) {
-  console.log("loading data");
+  console.log("loading data read only : " + readOnly);
   const inputs = document.querySelectorAll(
     `[data-table-name] input[dataset-field-name]`
   );
@@ -379,7 +381,7 @@ function load_data(readOnly) {
     const tableLabel = input.getAttribute("dataset-table-name");
     input.readOnly = readOnly;
     input.disabled = readOnly;
-
+    console.log("Set read Only")
   });
 
   document.querySelector("[name=SaveDSBtn]").disabled = readOnly;

@@ -236,6 +236,7 @@ function onTabSwitch(event) {
       drageDroptableTableList(document.getElementById("drageDroptablesList"));
       dragDropApiList(document.getElementById("dragDropApiList"));
       break;
+
     case "#renderForm":
       console.log("renderForm");
       break;
@@ -249,8 +250,6 @@ function onTabSwitch(event) {
 
 
 }
-
-
 
 function jsonToDomBusinessComponent(json, parent) {
   // Helper function to create an element from JSON structure
@@ -314,8 +313,6 @@ function jsonToDomBusinessComponent(json, parent) {
     renderCookieStorage(cookieStorageElements[i]); // Custom function to render cookieStorage elements
   }
 }
-
-
 
 // Add event listeners to tab links
 var tabLinks = document.querySelectorAll(".nav-tabs a");

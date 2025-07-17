@@ -485,6 +485,7 @@ function createFieldFromJson(fieldJson) {
     einput.setAttribute("validation", fieldJson.validation);
 
     // set einput disabled and readonly
+    console.log("dataSetComponent einput readonly");
     einput.disabled = true;
     einput.readOnly = true;
     if (fieldJson.fieldMandatory) {
@@ -693,8 +694,11 @@ async function updateInputs(data, DBName, tableName, dataset) {
     // const fieldType = input.tagName.toLowerCase();
     const fieldType = input.getAttribute("type");
     input.value = "";
-    input.disabled = true;
-    input.readOnly = true;
+
+    console.log("dataset component readonly");
+    //input.disabled = true;
+    //input.readOnly = true;
+
     switch (fieldType) {
       case "array":
         let subField = data[fieldLabel]?.toString().trim().split(";");
@@ -866,6 +870,7 @@ async function updateInputs(data, DBName, tableName, dataset) {
               childInput.value = val;
               childInput.style.maxWidth = "60px";
               childInput.style.marginLeft = "8px";
+              console.log("Dtaset component read only child input");
               childInput.readOnly = true;
             }
             fieldContainer.appendChild(createField);
