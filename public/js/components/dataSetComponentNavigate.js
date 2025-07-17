@@ -118,7 +118,6 @@ function addAction(element, itemdiv, action) {
   itemdiv.appendChild(actionDiv);
 }
 
-
 function saveActions(element, content) {
   const actions = [];
   const actionDivs = content.querySelectorAll("[tagname='actionContainer']");
@@ -211,6 +210,12 @@ function renderNavigationBar(main) {
       text: '<p>Cancel</p><i class="fa fa-ban" style="color:#4d61fc;margin-left:-6px"></i>',
       event: "navbar_CancelEdit()",
     },
+    {
+      name: "DeleteDSBtn",
+      title: "Delete",
+      text: '<p>Delete</p><i class="fa fa-trash" style="color:#e74c3c; margin-left: -6px;"></i>',
+      event: "navbar_DeleteRecord()",
+    },
   ];
   var htm = "";
   //for the dom2json is mandatory to create a html for the events
@@ -294,7 +299,6 @@ function navbar_movePrev() {
     }
   }
 }
-
 
 function navbar_moveNext() {
   console.log("next has been pressed");
@@ -422,9 +426,7 @@ function copyIntoModal() {
 }
 
 function navbar_EditRecord() {
-
   copyIntoModal();
-
 }
 
 function navbar_CancelEdit() {
@@ -497,6 +499,56 @@ function navbar_CopyRecord() {
   });
   document.querySelector("[name=SaveDSBtn]").disabled = false;
 }
+
+async function navbar_DeleteRecord() {
+  console.log("Delete record");
+
+  try {
+    const confirmation = confirm("Are you sure you want to delete this record?");
+    if (!confirmation) return;
+
+    const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
+    const datasetDiv = document.querySelector("[tagname='dataSet']");
+    if (!datasetDiv) {
+      showToast("No dataset found to delete");
+      return;
+    }
+
+    const rowIdElement = datasetDiv.querySelector("[dataset-field-type='rowid']");
+    if (!rowIdElement) {
+      showToast("No record selected to delete");
+      return;
+    }
+
+    const rowId = rowIdElement.value;
+    const tableName = rowIdElement.getAttribute("dataset-table-name");
+    const dbName = rowIdElement.getAttribute("dbname");
+    const actions = dataSetNavigator.getAttribute("actions");
+
+    if (!rowId || rowId === "new") {
+      showToast("Cannot delete unsaved record");
+      return;
+    }
+
+    // Perform the delete operation
+    const result = await deleteRecordDB(dbName, tableName, rowId, actions);
+
+    console.log("Result delete : " + result?.success);
+
+    if (result?.message) {
+      showToast(result?.message);
+    } else {
+      showToast("Failed to delete record");
+    }
+
+    return result;
+
+  } catch (error) {
+    console.error("Error deleting record:", error);
+    showToast("Error occurred while deleting record");
+  }
+}
+
 
 function CreateUpdated(DBName, tableName, divLine) {
 
@@ -665,7 +717,6 @@ async function navbar_SaveRecord() {
   }
 }
 
-
 // create insert data structure
 async function CreateInsert(DBName, tableName, divLine) {
   // create data for insert following this structure  `INSERT INTO ${tableName} (${data.fields}) VALUES (${data.values})`;
@@ -792,6 +843,49 @@ async function insertRecordDB(DBName, tableName, data, actions) {
     return result;
   } catch (error) {
     showToast("Error inserting record:" + error);
+  }
+}
+
+async function deleteRecordDB(DBName, tableName, rowId, actions) {
+  console.log("New delete record from data set component navigate");
+  try {
+    const response = await fetch(
+      `/delete-record/${DBName}/${tableName}/${rowId}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          actions: actions,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      showToast(`HTTP error! Status: ${response.status}`);
+      return { success: false };
+    }
+
+    const result = await response.json();
+    console.log(`result async record db : ${result}`);
+    console.log(result);
+
+    let filedName = "";
+    let operator = "";
+    let searchValue = "";
+    let idObject = getIdObject();
+    if (idObject?.dataGrid) {
+      searchGrid(DBName, filedName, operator, searchValue, idObject.dataGrid);
+    }
+
+    showToast("Record deleted successfully", 5000);
+    return result;
+
+  } catch (error) {
+    console.error("Error deleting record:", error);
+    showToast("Error deleting record: " + error);
+    return { success: false };
   }
 }
 
