@@ -452,6 +452,7 @@ class OdbcDatabase {
     return this.queryData(query);
   }
 
+  /*
   async updateRecord(tableName, data, rowID) {
     try {
       let setdata = "";
@@ -486,6 +487,40 @@ class OdbcDatabase {
       throw err;
     }
   }
+    */
+  async updateRecord(tableName, data, rowID) {
+    try {
+      if (!data || !data.fields || !data.values) {
+        throw new Error("Invalid data format. 'fields' and 'values' are required.");
+      }
+      if (!Array.isArray(data.fields) || !Array.isArray(data.values)) {
+        throw new Error("Invalid data format. 'fields' and 'values' should be arrays.");
+      }
+      if (data.fields.length !== data.values.length) {
+        throw new Error("Fields and values length mismatch.");
+      }
+
+      // Build SET clause with ? placeholders
+      const setClauses = data.fields.map(field => `"${field}" = ?`).join(', ');
+      const sql = `UPDATE PUB.${tableName} SET ${setClauses} WHERE ROWID = ?`;
+
+      const params = [...data.values, rowID]; // add rowID at the end for the WHERE clause
+
+      console.log("Executing:", sql, "With values:", params);
+
+      const connection = await odbc.connect(this.connectionString);
+      await connection.setIsolationLevel(odbc.SQL_TXN_READ_COMMITTED);
+
+      const result = await connection.query(sql, params); // ✅ use parameter binding
+      await connection.close();
+
+      return result;
+    } catch (err) {
+      console.log("Error updating record:", err);
+      throw err;
+    }
+  }
+
 
   // insert new record
   async insertRecord(tableName, data) {
