@@ -88,7 +88,7 @@
     "renderFunction": ""
   },
   "inputField": {
-    "type": "input field",
+    "type": "inputField",
     "description": "input field",
     "category": "Business Logic",
     "scriptName": "inputField.js",

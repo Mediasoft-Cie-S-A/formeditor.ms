@@ -14,7 +14,16 @@
  * limitations under the License.
  */
 function createInputField(type) {
-
+  var main = document.createElement('div');
+  main.classList.add('form-container');
+  main.id = type + Date.now(); // Unique ID for each new element
+  main.draggable = true;
+  main.tagName = type;
+  const inputField = document.createElement('input');
+  inputField.type = "text";
+  inputField.className = "form-control";
+  main.appendChild(inputField);
+  return main;
 }
 
 function editInputField(type, element, content) {

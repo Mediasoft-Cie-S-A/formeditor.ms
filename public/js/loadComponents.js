@@ -46,6 +46,7 @@ async function createSidebarSection(elementsData) {
 loadJson("/elementsConfig")
   .then((data) => {
     elementsData = data;
+    console.log("Elements Data:", elementsData);
     const sidebar = document.getElementById("componentsSidebar");
     console.log(sidebar);
     if (sidebar) {
@@ -436,14 +437,13 @@ async function loadJson(url) {
 function createFormElement(elementId) {
   var element = null;
 
-  // console.log(elementId);
-
-  // console.log(elementsData[elementId]);
+  // Check if the elementId exists in elementsData
+  if (!elementsData[elementId]) {
+    return null;
+  }
   // Execute the function
   var functionName = elementsData[elementId].createFunction;
-  // console.log("functionName:" + functionName);
   if (typeof window[functionName] === "function") {
-    // console.log("functionName:" + functionName);
     element = window[functionName](elementId);
   }
 
