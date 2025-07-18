@@ -22,7 +22,7 @@ module.exports = function (app, mongoDbUrl, dbName) {
     }
     res.redirect("/login");
   };
-  
+
   app.post("/store-business-json", checkAuthenticated, async (req, res) => {
     const client = new MongoClient(mongoDbUrl, {});
     try {
@@ -55,10 +55,10 @@ module.exports = function (app, mongoDbUrl, dbName) {
   });
 
   app.get("/list-business-component", checkAuthenticated, async (req, res) => {
-        // create a new MongoClient
-        const client = new MongoClient(mongoDbUrl, {});
+    // create a new MongoClient
+    const client = new MongoClient(mongoDbUrl, {});
     try {
-  
+
       await client.connect();
       const db = client.db(dbName);
       const col = db.collection("businessComponent");
@@ -76,10 +76,10 @@ module.exports = function (app, mongoDbUrl, dbName) {
     "/get-business-component/:componentId",
     checkAuthenticated,
     async (req, res) => {
-          // create a new MongoClient
-          const client = new MongoClient(mongoDbUrl, {});
+      // create a new MongoClient
+      const client = new MongoClient(mongoDbUrl, {});
       try {
-     
+
         await client.connect();
         const db = client.db(dbName);
         const col = db.collection("businessComponent");
@@ -102,10 +102,10 @@ module.exports = function (app, mongoDbUrl, dbName) {
     "/update-business-component/:componentId",
     checkAuthenticated,
     async (req, res) => {
-         // create a new MongoClient
-         const client = new MongoClient(mongoDbUrl, {});
+      // create a new MongoClient
+      const client = new MongoClient(mongoDbUrl, {});
       try {
-       
+
         await client.connect();
         const db = client.db(dbName);
         const col = db.collection("businessComponent");
@@ -138,8 +138,8 @@ module.exports = function (app, mongoDbUrl, dbName) {
     "/delete-business-component/:componentId",
     checkAuthenticated,
     async (req, res) => {
-          // create a new MongoClient
-          const client = new MongoClient(mongoDbUrl, {});
+      // create a new MongoClient
+      const client = new MongoClient(mongoDbUrl, {});
       try {
 
         await client.connect();

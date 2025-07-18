@@ -16,23 +16,22 @@
 let lastDeletedElement = null;
 var moveElementEvent = false;
 const labelheight = 20;
-const htmlEditor =  document.getElementById('formContainer');
+const htmlEditor = document.getElementById('formContainer');
 let undoStack = [];
 let redoStack = [];
 let isRestoring = false;
 
 
 // Save initial state
-if (htmlEditor)
-{
+if (htmlEditor) {
   undoStack.push(htmlEditor.innerHTML);
 }
 
 // Undo
 function EditorUndo() {
-  if (undoStack.length <= 1) return;  
+  if (undoStack.length <= 1) return;
   redoStack.push(htmlEditor.innerHTML);
-  const previousState = undoStack[undoStack.length - 1];  
+  const previousState = undoStack[undoStack.length - 1];
   isRestoring = true;
   htmlEditor.innerHTML = previousState;
   undoStack.pop(); // Remove the last state after restoring
@@ -42,9 +41,9 @@ function EditorUndo() {
 
 // Redo
 function EditorRedo() {
-  if (redoStack.length <= 1) return;  
+  if (redoStack.length <= 1) return;
   undoStack.push(htmlEditor.innerHTML);
-  const previousState = redoStack[redoStack.length - 1];  
+  const previousState = redoStack[redoStack.length - 1];
   isRestoring = true;
   htmlEditor.innerHTML = previousState;
   redoStack.pop(); // Remove the last state after restoring
@@ -76,7 +75,7 @@ function getDataGridObject() {
   const grid = document.querySelector("[tagname='dataGrid']");
   console.log(grid)
   var idObject = {};
-  if (grid != null){
+  if (grid != null) {
     var fullId = grid.id;
     var name = fullId.match(/[a-zA-Z]+/)[0];
     idObject[name] = fullId;
@@ -90,12 +89,12 @@ function createInputItem(id, label, styleProperty, text, type, attribute) {
   lbl.setAttribute("for", id);
   lbl.textContent = label.replace(/-/g, " ").toLocaleLowerCase();
   lbl.style.fontSize = "9px";
-  lbl.style.height = labelheight+"px";
+  lbl.style.height = labelheight + "px";
   var input = document.createElement("input");
   input.type = type;
   input.className = "input-element";
   input.id = id;
-  input.setAttribute("data-style-property", styleProperty); 
+  input.setAttribute("data-style-property", styleProperty);
   input.value = text;
   div.appendChild(lbl);
   div.appendChild(input);
@@ -136,13 +135,13 @@ function createInputDiv(id, labelText, onChangeFunction, text) {
 function editElement(element) {
   const categories = {
     "Text & Font": [
-        "color", "font-size", "font-family", "font-weight", "text-align", "line-height", "text-decoration", "text-transform", "letter-spacing", "white-space"
+      "color", "font-size", "font-family", "font-weight", "text-align", "line-height", "text-decoration", "text-transform", "letter-spacing", "white-space"
     ],
     "Box Model": [
-       "width", "height", "margin", "margin-top", "margin-right", "margin-bottom", "margin-left", "padding", "padding-top", "padding-right", "padding-bottom", "padding-left", "border", "border-width", "border-style", "border-color",  "max-width", "min-width", "max-height", "min-height"
+      "width", "height", "margin", "margin-top", "margin-right", "margin-bottom", "margin-left", "padding", "padding-top", "padding-right", "padding-bottom", "padding-left", "border", "border-width", "border-style", "border-color", "max-width", "min-width", "max-height", "min-height"
     ],
     "Background": [
-        "background-color", "background-image", "background-size", "background-position", "background-repeat"
+      "background-color", "background-image", "background-size", "background-position", "background-repeat"
     ],
     "Visibility": ["display", "visibility", "opacity"],
     "Positioning": ["position", "top", "right", "bottom", "left", "z-index"],
@@ -153,16 +152,16 @@ function editElement(element) {
     "Transitions & Animations": ["transition", "transition-property", "transition-duration", "transition-timing-function", "transition-delay", "animation", "animation-name", "animation-duration", "animation-timing-function", "animation-delay", "animation-iteration-count", "animation-direction"],
     "Filters & Effects": ["clip-path", "filter"],
     "Cursor & Interaction": ["cursor", "pointer-events"]
-};
+  };
 
 
   const predefinedValues = {
-      "display": ["block", "inline", "flex", "grid", "none"],
-      "position": ["static", "relative", "absolute", "fixed", "sticky"],
-      "text-align": ["left", "center", "right", "justify"],
-      "flex-direction": ["row", "row-reverse", "column", "column-reverse"],
-      "justify-content": ["flex-start", "center", "flex-end", "space-between", "space-around"],
-      "align-items": ["flex-start", "center", "flex-end", "stretch", "baseline"]
+    "display": ["block", "inline", "flex", "grid", "none"],
+    "position": ["static", "relative", "absolute", "fixed", "sticky"],
+    "text-align": ["left", "center", "right", "justify"],
+    "flex-direction": ["row", "row-reverse", "column", "column-reverse"],
+    "justify-content": ["flex-start", "center", "flex-end", "space-between", "space-around"],
+    "align-items": ["flex-start", "center", "flex-end", "stretch", "baseline"]
   };
 
   const dialog = document.getElementById("propertiesBar");
@@ -170,37 +169,37 @@ function editElement(element) {
   const content = dialog.querySelector("div");
   content.innerHTML = "";
   const closeIcon = document.createElement("i");
- 
+
   closeIcon.style.color = "red";
   closeIcon.style.fontSize = "18px";
   closeIcon.className = "fa fa-close remove-item";
- // closeIcon.style.float = "right";
+  // closeIcon.style.float = "right";
   closeIcon.onclick = () => (dialog.style.display = "none");
- 
+
 
   const label = document.createElement("label");
   label.style.fontSize = "7px";
   label.textContent = element.id;
   dialog.setAttribute("data-element-id", element.id);
   dialog.setAttribute("data-element-type", element.getAttribute("tagName"));
- // label.style.float = "left";
-  
+  // label.style.float = "left";
+
   label.style.color = "gray";
   label.style.fontSize = "18px";
   content.appendChild(label);
   content.appendChild(closeIcon);
-// Get the type of the element
+  // Get the type of the element
   // if type is null get the element type
   var type = element.getAttribute("tagName");
   currentElement = element;
-    // Execute the function editor delcared in the components js if exists type
-    if (elementsData[type]) {
-      if (elementsData[type].editFunction) {
-        var functionName = elementsData[type].editFunction;
-        window[functionName](type, element, content);
-      }
+  // Execute the function editor delcared in the components js if exists type
+  if (elementsData[type]) {
+    if (elementsData[type].editFunction) {
+      var functionName = elementsData[type].editFunction;
+      window[functionName](type, element, content);
     }
-    // check if in the formDataForm the value of objectType = page
+  }
+  // check if in the formDataForm the value of objectType = page
   const formDataForm = document.getElementById("formDataForm");
   if (formDataForm && formDataForm.objectType && formDataForm.objectType.value === "page") {
     // create a box to show and edit the header of the page and store the it in hidden input pageHeader
@@ -224,11 +223,11 @@ function editElement(element) {
     headerInput.style.fontSize = "9px";
     headerInput.style.marginBottom = "5px";
     headerInput.onchange = () => {
-        const newHeader = headerInput.value.trim();
-        if (newHeader) {
-            formDataForm.pageHeader.value = newHeader; // Update the form's hidden input
-            element.setAttribute("data-page-header", newHeader); // Set the attribute on the element
-        }
+      const newHeader = headerInput.value.trim();
+      if (newHeader) {
+        formDataForm.pageHeader.value = newHeader; // Update the form's hidden input
+        element.setAttribute("data-page-header", newHeader); // Set the attribute on the element
+      }
     };
     // Append the input to the headerBox
     headerBox.appendChild(headerInput);
@@ -261,10 +260,10 @@ function editElement(element) {
   classSelect.setAttribute("data-style-property", "class");
   // create an option for each class
   classList.forEach((cls) => {
-      const option = document.createElement("option");
-      option.value = cls;
-      option.textContent = cls;
-      classSelect.appendChild(option);
+    const option = document.createElement("option");
+    option.value = cls;
+    option.textContent = cls;
+    classSelect.appendChild(option);
   });
   // create an input to add a new class
   const newClassInput = document.createElement("input");
@@ -273,29 +272,29 @@ function editElement(element) {
   newClassInput.style.fontSize = "9px";
   newClassInput.style.marginBottom = "5px";
   newClassInput.onchange = () => {
-      const newClass = newClassInput.value.trim();
-      if (newClass && !classList.includes(newClass)) {
-          classList.push(newClass);
-          const option = document.createElement("option");
-          option.value = newClass;
-          option.textContent = newClass;
-          classSelect.appendChild(option);
-          classSelect.value = newClass; // Select the newly added class
-          element.classList.add(newClass); // Add the class to the element
-      }
-      newClassInput.value = ""; // Clear the input field
+    const newClass = newClassInput.value.trim();
+    if (newClass && !classList.includes(newClass)) {
+      classList.push(newClass);
+      const option = document.createElement("option");
+      option.value = newClass;
+      option.textContent = newClass;
+      classSelect.appendChild(option);
+      classSelect.value = newClass; // Select the newly added class
+      element.classList.add(newClass); // Add the class to the element
+    }
+    newClassInput.value = ""; // Clear the input field
   };
   // create a button to remove the selected class
   const removeClassButton = document.createElement("button");
   removeClassButton.textContent = "Remove Class";
   removeClassButton.style.fontSize = "9px";
   removeClassButton.onclick = () => {
-      const selectedClass = classSelect.value;
-      if (selectedClass && classList.includes(selectedClass)) {
-          classList.splice(classList.indexOf(selectedClass), 1);
-          classSelect.removeChild(classSelect.querySelector(`option[value="${selectedClass}"]`));
-          element.classList.remove(selectedClass); // Remove the class from the element
-      }
+    const selectedClass = classSelect.value;
+    if (selectedClass && classList.includes(selectedClass)) {
+      classList.splice(classList.indexOf(selectedClass), 1);
+      classSelect.removeChild(classSelect.querySelector(`option[value="${selectedClass}"]`));
+      element.classList.remove(selectedClass); // Remove the class from the element
+    }
   };
   // Append the select, input, and button to the classDiv
   classDiv.appendChild(classSelect);
@@ -322,167 +321,169 @@ function editElement(element) {
   idInput.style.fontSize = "9px";
   idInput.style.marginBottom = "5px";
   idInput.onchange = () => {
-      const newId = idInput.value.trim();
-      if (newId) {
-          element.id = newId; // Update the element's ID
-          dialog.setAttribute("data-element-id", newId); // Update the dialog's data attribute
-          label.textContent = newId; // Update the label text
-      }
+    const newId = idInput.value.trim();
+    if (newId) {
+      element.id = newId; // Update the element's ID
+      dialog.setAttribute("data-element-id", newId); // Update the dialog's data attribute
+      label.textContent = newId; // Update the label text
+    }
   };
   // Append the input to the idDiv
   idDiv.appendChild(idInput);
   // Append the idDiv to the content
   content.appendChild(idDiv);
-  
-   
-  
- 
+
+
+
+
   for (const [category, properties] of Object.entries(categories)) {
-      const box = document.createElement("div");
-      box.className = "editor-box";
-      box.style.border = "1px solid #ccc";
-      box.style.marginBottom = "10px";
-      box.style.padding = "5px";
-      box.style.fontSize = "9px";
-      box.style.borderRadius = "5px";
-      box.innerHTML = `<div style='font-weight: bold; width:100%'>${category}</div>`;
-      // add to box a expandable icon and reduce icon of the box, on click of the icon
-      const expandIcon = document.createElement("i");
-      expandIcon.className = "fa fa-chevron-right";
-      expandIcon.style.cursor = "pointer";
-      expandIcon.style.float = "right";
-      expandIcon.style.marginTop = "-5px";
-      // generate the inner div for the box
-      const innerDiv = document.createElement("div");
-      expandIcon.onclick = () => {
-          if (innerDiv.style.display === "none") {
-              innerDiv.style.display = "block";
-              expandIcon.className = "fa fa-chevron-down";
+    const box = document.createElement("div");
+    box.className = "editor-box";
+    box.style.border = "1px solid #ccc";
+    box.style.marginBottom = "10px";
+    box.style.padding = "5px";
+    box.style.fontSize = "9px";
+    box.style.borderRadius = "5px";
+    box.innerHTML = `<div style='font-weight: bold; width:100%'>${category}</div>`;
+    // add to box a expandable icon and reduce icon of the box, on click of the icon
+    const expandIcon = document.createElement("i");
+    expandIcon.className = "fa fa-chevron-right";
+    expandIcon.style.cursor = "pointer";
+    expandIcon.style.float = "right";
+    expandIcon.style.marginTop = "-5px";
+    // generate the inner div for the box
+    const innerDiv = document.createElement("div");
+    expandIcon.onclick = () => {
+      if (innerDiv.style.display === "none") {
+        innerDiv.style.display = "block";
+        expandIcon.className = "fa fa-chevron-down";
+      }
+      else {
+        innerDiv.style.display = "none";
+        expandIcon.className = "fa fa-chevron-right";
+      }
+    };
+    box.appendChild(expandIcon);
+    box.appendChild(innerDiv);
+    // hide the box by default
+    innerDiv.style.display = "none"; // Set to "none" if you want it hidden by default
+
+
+    const inputsContainer = document.createElement("div");
+    inputsContainer.style.display = "grid";
+    inputsContainer.style.gridGap = "5px";
+    inputsContainer.style.gridTemplateColumns = "1fr 1fr";
+
+    const inputElements = properties.map((prop) => {
+      const value = element.style[prop] || "";
+
+      let input;
+      if (prop === "color" || prop === "background-color" || prop === "border-color") {
+        input = document.createElement("div");
+        const label = document.createElement("label");
+        label.textContent = prop.replace(/-/g, " ").toLocaleLowerCase();
+        label.style.fontSize = "9px";
+        label.style.height = labelheight + "px";
+        const colorInput = document.createElement("input");
+        colorInput.type = "color";
+        colorInput.value = value || "#ffffff";
+        colorInput.setAttribute("data-style-property", prop);
+        input.appendChild(label);
+        input.appendChild(colorInput);
+        // get the value from currentElement if exists
+        if (currentElement) {
+          // get the real value of the attribute 
+          var attributeValue = currentElement.getAttribute(prop);
+          if (attributeValue) {
+            colorInput.value = attributeValue;
+          } else {
+            colorInput.value = currentElement.style[prop] || "";
           }
-          else {
-              innerDiv.style.display = "none";
-              expandIcon.className = "fa fa-chevron-right";
+        }
+      } else if (predefinedValues[prop]) {
+        input = document.createElement("div");
+        const label = document.createElement("label");
+        label.textContent = prop.replace(/-/g, " ").toLocaleLowerCase();
+        label.style.fontSize = "9px";
+        label.style.height = labelheight + "px";
+        const select = document.createElement("select");
+        select.setAttribute("data-style-property", prop);
+
+        const emptyOption = document.createElement("option");
+        emptyOption.value = "";
+        emptyOption.textContent = "(none)";
+        if (!value) emptyOption.selected = true;
+        select.appendChild(emptyOption);
+        // add "" option to the select
+        const emptyOption2 = document.createElement("option");
+        emptyOption2.value = "";
+        emptyOption2.textContent = "(empty)";
+        if (value === "") emptyOption2.selected = true;
+        select.appendChild(emptyOption2);
+        // add the predefined values to the select
+        predefinedValues[prop].forEach((option) => {
+          const optionElement = document.createElement("option");
+          optionElement.value = option;
+          optionElement.textContent = option;
+          if (option === value) optionElement.selected = true;
+          select.appendChild(optionElement);
+        });
+
+        input.appendChild(label);
+        input.appendChild(select);
+        // get the value from currentElement if exists
+        if (currentElement) {
+          // get the real value of the attribute 
+          var attributeValue = currentElement.getAttribute(prop);
+          if (attributeValue) {
+            select.value = attributeValue;
+          } else {
+            select.value = currentElement.style[prop] || "";
           }
-      };
-      box.appendChild(expandIcon);
-      box.appendChild(innerDiv);
-      // hide the box by default
-      innerDiv.style.display = "none"; // Set to "none" if you want it hidden by default
-      
+        }
+      } else {
+        input = createInputItem(prop, prop.replace(/-/g, " ").toUpperCase(), prop, value, "text");
+      }
 
-      const inputsContainer = document.createElement("div");
-      inputsContainer.style.display = "grid";
-      inputsContainer.style.gridGap = "5px";
-      inputsContainer.style.gridTemplateColumns = "1fr 1fr";
+      inputsContainer.appendChild(input);
+      return input;
+    });
 
-      const inputElements = properties.map((prop) => {
-          const value = element.style[prop] || "";
+    innerDiv.appendChild(inputsContainer);
 
-          let input;
-          if (prop === "color" || prop === "background-color" || prop === "border-color") {
-              input = document.createElement("div");
-              const label = document.createElement("label");
-              label.textContent = prop.replace(/-/g, " ").toLocaleLowerCase();
-              label.style.fontSize = "9px";
-              label.style.height = labelheight+"px";
-              const colorInput = document.createElement("input");
-              colorInput.type = "color";
-              colorInput.value = value || "#ffffff";
-              colorInput.setAttribute("data-style-property", prop);
-              input.appendChild(label);
-              input.appendChild(colorInput);
-	      // get the value from currentElement if exists
-              if (currentElement) {
-                 // get the real value of the attribute 
-                  var attributeValue = currentElement.getAttribute(prop);
-                    if (attributeValue) {
-                        colorInput.value = attributeValue;
-                    } else {
-                        colorInput.value = currentElement.style[prop] || "";
-                    }
-              }          } else if (predefinedValues[prop]) {
-              input = document.createElement("div");
-              const label = document.createElement("label");
-              label.textContent = prop.replace(/-/g, " ").toLocaleLowerCase();
-              label.style.fontSize = "9px";
-              label.style.height = labelheight+"px";
-              const select = document.createElement("select");
-              select.setAttribute("data-style-property", prop);
+    const updateButton = document.createElement("button");
+    updateButton.textContent = "Update";
 
-              const emptyOption = document.createElement("option");
-              emptyOption.value = "";
-              emptyOption.textContent = "(none)";
-              if (!value) emptyOption.selected = true;
-              select.appendChild(emptyOption);
- 		// add "" option to the select
-              const emptyOption2 = document.createElement("option");
-              emptyOption2.value = "";
-              emptyOption2.textContent = "(empty)";
-              if (value === "") emptyOption2.selected = true;
-              select.appendChild(emptyOption2);
-              // add the predefined values to the select
-              predefinedValues[prop].forEach((option) => {
-                  const optionElement = document.createElement("option");
-                  optionElement.value = option;
-                  optionElement.textContent = option;
-                  if (option === value) optionElement.selected = true;
-                  select.appendChild(optionElement);
-              });
-
-              input.appendChild(label);
-              input.appendChild(select);
-		// get the value from currentElement if exists
-              if (currentElement) {
-                  // get the real value of the attribute 
-                  var attributeValue = currentElement.getAttribute(prop);
-                  if (attributeValue) {
-                      select.value = attributeValue;
-                  } else {
-                      select.value = currentElement.style[prop] || "";
-                  }
-              }          } else {
-              input = createInputItem(prop, prop.replace(/-/g, " ").toUpperCase(), prop, value, "text");
-          }
-
-          inputsContainer.appendChild(input);
-          return input;
-      });
-
-      innerDiv.appendChild(inputsContainer);
-
-      const updateButton = document.createElement("button");
-      updateButton.textContent = "Update";
-
-	updateButton.style.marginTop = "5px";
-      updateButton.style.fontSize = "9px";
-      updateButton.style.width = "100%";
-      updateButton.style.backgroundColor = "#4CAF50";
+    updateButton.style.marginTop = "5px";
+    updateButton.style.fontSize = "9px";
+    updateButton.style.width = "100%";
+    updateButton.style.backgroundColor = "#4CAF50";
+    updateButton.style.color = "white";
+    updateButton.style.border = "1px solid #ccc";
+    updateButton.onmouseover = () => {
+      updateButton.style.backgroundColor = "green";
+      updateButton.style.cursor = "pointer";
       updateButton.style.color = "white";
-      updateButton.style.border = "1px solid #ccc";
-      updateButton.onmouseover = () => {
-          updateButton.style.backgroundColor = "green";
-          updateButton.style.cursor = "pointer";
-          updateButton.style.color = "white";
-                };     
-      updateButton.onclick = () => {
-	// put the htmlEditor in undo stack
-          undoStack.push(htmlEditor.innerHTML);
-          // console.log(undoStack);          
-          inputElements.forEach((input) => {
-              const prop = input.querySelector("select, input").getAttribute("data-style-property");
-              const value = input.querySelector("select, input").value;
-	      // Check if the property is a style property or an attribute
-              updateElementStyle(prop, value);
-          });// insert the button at the beginning of the box
-    
-      }; // onclick
-      
-           
-      box.insertBefore(updateButton, box.firstChild);
-      content.appendChild(box);
-    }
-    
+    };
+    updateButton.onclick = () => {
+      // put the htmlEditor in undo stack
+      undoStack.push(htmlEditor.innerHTML);
+      // console.log(undoStack);          
+      inputElements.forEach((input) => {
+        const prop = input.querySelector("select, input").getAttribute("data-style-property");
+        const value = input.querySelector("select, input").value;
+        // Check if the property is a style property or an attribute
+        updateElementStyle(prop, value);
+      });// insert the button at the beginning of the box
+
+    }; // onclick
+
+
+    box.insertBefore(updateButton, box.firstChild);
+    content.appendChild(box);
   }
+
+}
 
 
 
@@ -512,7 +513,7 @@ function updateElementStyle(type, t) {
   if (t == null) return;
   if (t == "") return;
   console.log("updateElementStyle", type, t);
-  
+
   currentElement.style.setProperty(type, t);
 }
 
@@ -603,7 +604,7 @@ function showProperties() {
   //show editorPropertyInfos
   const editorPropertyInfos = document.getElementById("editorPropertyInfos");
   editorPropertyInfos.style.display = "block";
-  
+
   const inputElementSelected = document.getElementById("editorElementSelected");
   var editorElementSelected = document.getElementById(
     inputElementSelected.value
@@ -617,14 +618,14 @@ function showProperties() {
   for (var i = 0; i < inputElements.length; i++) {
     inputElements[i].removeAttribute("readonly");
     inputElements[i].removeAttribute("disabled"); // remove the disabled attribute
-    if (inputElements[i].getAttribute("tagname")==null || inputElements[i].getAttribute("tagname")=="text")
-    {
-      inputElements[i].setAttribute("tagname","inputField");
+    if (inputElements[i].getAttribute("tagname") == null || inputElements[i].getAttribute("tagname") == "text") {
+      inputElements[i].setAttribute("tagname", "inputField");
     }
     // disable 
 
     inputElements[i].style.backgroundColor = "#ffffff";
-  }}
+  }
+}
 
 function copyHTMLElement() {
   const inputElementSelected = document.getElementById("editorElementSelected");
@@ -649,30 +650,30 @@ function showHTMLCodeEditor() {
   // get the textare element
   //const codeEditorArea = document.getElementById("HTMLCodeEditorArea");
   // beautify the html code
-  const htmlCode = beautifyHTML( editorElementSelected.outerHTML);
+  const htmlCode = beautifyHTML(editorElementSelected.outerHTML);
 
   codeEditorHTML.setValue(htmlCode);
-   
+
 
 }
 
- function decodeHtml(html) {
-      return html.replace(/&amp;/g, '&').replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&quot;/g, '\"')
-        .replace(/&#39;/g, '\'')
-        .replace(/&#x27;/g, '\'')
-        .replace(/&#x2F;/g, '/')
-        .replace(/\\&quot;/g, '\"')
-        .replace(/\\"/g, '\"')
-        .replace(/\\'/g, '\'');
-    }
-  function beautifyHTML(input) {
-      const decoded = decodeHtml(input);
-      const pretty = decoded;
-      
-      return pretty;
-    }
+function decodeHtml(html) {
+  return html.replace(/&amp;/g, '&').replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '\"')
+    .replace(/&#39;/g, '\'')
+    .replace(/&#x27;/g, '\'')
+    .replace(/&#x2F;/g, '/')
+    .replace(/\\&quot;/g, '\"')
+    .replace(/\\"/g, '\"')
+    .replace(/\\'/g, '\'');
+}
+function beautifyHTML(input) {
+  const decoded = decodeHtml(input);
+  const pretty = decoded;
+
+  return pretty;
+}
 
 function saveHTMLCode() {
   undoStack.push(htmlEditor.innerHTML);
@@ -701,13 +702,13 @@ function pasteHTMLElement() {
 }
 
 function setParent() {
-  
+
   // get the element selected by class  gjs-selection
   const editorElementSelected = document.getElementsByClassName("gjs-selection")[0];
   console.log(editorElementSelected.parentNode);
   // simulate click on parent node of editorElementSelected 
   editorElementSelected.parentNode.click();
- 
+
   //  hideEditMenu();
 }
 
@@ -739,21 +740,21 @@ function stopMoveEvent(event) {
       if (closestChild) {
         element.insertBefore(editorElementSelected, closestChild);
       }
-    } else if (parentElement.id === "formContainer"  && parentElementSelected){
+    } else if (parentElement.id === "formContainer" && parentElementSelected) {
       // find the child element of the element closest to the mouse
       const closestChild = findClosestChildToMouse(parentElement, x, y);
       if (closestChild) {
         parentElement.insertBefore(editorElementSelected, closestChild);
       }
-    }else if (parentElement && parentElementSelected) {
+    } else if (parentElement && parentElementSelected) {
       parentElement.appendChild(editorElementSelected);
     }
-   
+
 
     return;
   }
   // execute the drag event
-  
+
 }
 
 function findClosestChildToMouse(element, mouseX, mouseY) {
@@ -796,7 +797,7 @@ function moveElement() {
 
 
 function deleteElement() {
- undoStack.push(htmlEditor.innerHTML);
+  undoStack.push(htmlEditor.innerHTML);
   const inputElementSelected = document.getElementById("editorElementSelected");
   const editorElementSelected = document.getElementById(inputElementSelected.value);
   if (!editorElementSelected) return;
@@ -829,7 +830,7 @@ function deleteElement() {
   document.getElementById("undoDeleteBtn").disabled = false;
 }
 
-window.undoDelete = function() {
+window.undoDelete = function () {
   if (lastDeletedElement && lastDeletedElement.node && lastDeletedElement.parent) {
     const { node, parent, index } = lastDeletedElement;
     const siblings = Array.from(parent.children);
@@ -881,7 +882,7 @@ const codeEditor = CodeMirror.fromTextArea(
 const codeEditorHTML = CodeMirror.fromTextArea(
   document.getElementById("HTMLCodeEditorArea"),
   {
-    
+
     lineNumbers: true,
     mode: "htmlmixed",
     lint: true, // Enable JavaScript linting
@@ -904,7 +905,7 @@ const codeEditorHTML = CodeMirror.fromTextArea(
         }
       }
     }
-   
+
   }
 );
 
@@ -936,7 +937,7 @@ function dropInput(event, id) {
   var fieldDefaultValue = source.getAttribute("data-field-default");
   var filedDBName = source.getAttribute("database-name");
   // generate the json of all the fields attributes
- // console.log(source);
+  // console.log(source);
   var fieldJson = {
     DBName: filedDBName,
     tableName: tableName,
@@ -967,19 +968,19 @@ function dropInput(event, id) {
     var propertiesBar = document.getElementById("propertiesBar");
     // get the select element type 
     var tagName = propertiesBar.getAttribute("data-element-type");
-    var showType= false; 
+    var showType = false;
     if (tagName === "BarChart") {
       showType = true;
     }
     switch (tagName) {
       case "DataPanel":
       case "BarChart":
-        addFunctionsFieldToPropertiesBar(target, fieldJson,showType);
-      break;
+        addFunctionsFieldToPropertiesBar(target, fieldJson, showType);
+        break;
       default:
-      // Otherwise, pass the fieldJson to addFieldToPropertiesBar to create a new field
-      addFieldToPropertiesBar(target, fieldJson,showType);
-      break;
+        // Otherwise, pass the fieldJson to addFieldToPropertiesBar to create a new field
+        addFieldToPropertiesBar(target, fieldJson, showType);
+        break;
     }
   }
 }
@@ -1024,7 +1025,7 @@ function createSelectItem(id, label, styleProperty) {
       var dataType = this.getAttribute("dataset-field-type");
       // empty the select
       setOptionsByType(select, dataType);
-      }
+    }
     // get the object by id
   });
   return div;
@@ -1044,7 +1045,7 @@ function setOptionsByType(select, fieldDataType) {
   ]; */
 
 
-  var options = ["text", "sequence", "array", "combo_array", "combo_sql","search_win"];
+  var options = ["text", "sequence", "array", "combo_array", "combo_sql", "search_win"];
 
   // Clear any existing options in the select element
   select.innerHTML = "";
@@ -1089,7 +1090,7 @@ function setOptionsByTypeWeb(select, fieldDataType) {
     select.appendChild(opt);
   });
 
- 
+
 }
 
 function createMultiSelectItem(id, label, styleProperty) {
@@ -1108,7 +1109,7 @@ function createMultiSelectItem(id, label, styleProperty) {
   div.setAttribute("draggable", "true");
 
   div.id = id;
- 
+
 
   // adding button for reducing the size of the div or reactivate it
   var button = document.createElement("i");
@@ -1141,7 +1142,7 @@ function createMultiSelectItem(id, label, styleProperty) {
   var lbl = document.createElement("span");
 
   lbl.innerText = label;
-  
+
   div.appendChild(lbl);
   div.setAttribute("ondragover", "allowDrop(event)");
   // div.setAttribute("ondrop", "dropInput(event,'${id}')");
@@ -1286,7 +1287,7 @@ function createSQLBox(id, label, styleProperty, isId = false) {
   div.setAttribute("draggable", "true");
 
   div.id = id;
- 
+
 
   // adding button for reducing the size of the div or reactivate it
   var button = document.createElement("i");
@@ -1321,7 +1322,7 @@ function createSQLBox(id, label, styleProperty, isId = false) {
   lbl.innerText = label;
   div.appendChild(lbl);
 
-  var subDiv = document.createElement("div"); 
+  var subDiv = document.createElement("div");
   // add dbname input
   var label = document.createElement("label");
   label.setAttribute("for", id + "Input");
@@ -1337,7 +1338,7 @@ function createSQLBox(id, label, styleProperty, isId = false) {
   subDiv.appendChild(input);
   div.appendChild(subDiv);
 
-  
+
   var subDiv = document.createElement("div");
   // add query 'select * from ' structure
   var label = document.createElement("label");
@@ -1363,7 +1364,7 @@ function createSQLBox(id, label, styleProperty, isId = false) {
   input.id = id + "update";
   input.setAttribute("tagname", "update");
   input.className = "input-element";
- 
+
   input.value = "update PUB.";
   subDiv.appendChild(label);
   subDiv.appendChild(input);
@@ -1379,12 +1380,12 @@ function createSQLBox(id, label, styleProperty, isId = false) {
   input.id = id + "insert";
   input.setAttribute("tagname", "insert");
   input.className = "input-element";
-  
+
   input.value = "insert into PUB.";
   subDiv.appendChild(label);
   subDiv.appendChild(input);
   div.appendChild(subDiv);
-  
+
 
 
 
@@ -1473,10 +1474,9 @@ function addFieldToPropertiesBarWeb(target, fieldJson, isId) {
     div.innerHTML = `<button class='remove-item' onclick='removeItem(event)'>x</button><span name='dataContainer' data-field='${JSON.stringify(
       fieldJson
     )}' >${fieldJson.displayName}</span>`;
-  
-  div.innerHTML += `<div>Mandatory:<input type="checkbox" class="apple-switch" id="mandatory" name="mandatory" value="mandatory" ${
-    fieldJson.fieldMandatory === "true" ? "checked" : ""
-  } onclick="updateMandatory(event, '${elementId}')"> </div>`;
+
+  div.innerHTML += `<div>Mandatory:<input type="checkbox" class="apple-switch" id="mandatory" name="mandatory" value="mandatory" ${fieldJson.fieldMandatory === "true" ? "checked" : ""
+    } onclick="updateMandatory(event, '${elementId}')"> </div>`;
   // adding verification triggers not null fields checkbox
   div.innerHTML += `<div>regexp<input type="text"  tagname="regexp" id="regexp" name="regexp" 
   } onclick="regexp(event, '${elementId}')"></div>`;
@@ -1499,10 +1499,10 @@ function addFieldToPropertiesBarWeb(target, fieldJson, isId) {
     }
     // Update fieldType in fieldJson
     fieldJson.fieldType = select.value;
-   
+
     div.setAttribute("selectedValue", select.value);
     div.setAttribute("data-field", JSON.stringify(fieldJson));
-  
+
 
     const span = div.querySelector("span[name='dataContainer']");
     span.setAttribute("data-field", JSON.stringify(fieldJson));
@@ -1572,8 +1572,7 @@ function addFieldToPropertiesBarWeb(target, fieldJson, isId) {
   // dataObjet.style.height = height + 30 + "px";
 }
 
-function addFunctionsFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false )
- {
+function addFunctionsFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false) {
   var dataObjet = target;
 
   // Create the div container for the new field
@@ -1589,14 +1588,14 @@ function addFunctionsFieldToPropertiesBar(target, fieldJson, dataTypeVisble = fa
   div.innerHTML += `<i class="fa fa-trash" onclick="removeItem(event)" style="color:red" title="Remove"></i>`;
   div.innerHTML += `<i class="fa fa-arrow-up" onclick="moveUp(event)" style="color:blue" title="Move Up"></i>`;
   div.innerHTML += `<i class="fa fa-arrow-down" onclick="moveDown(event)" style="color:blue"  title="Move Up"></i>`;
-    // add expand the div size and reduce it button
+  // add expand the div size and reduce it button
   div.innerHTML += `<hr style="margin: 0px;"></hr>`;
-  var tableName = fieldJson.tableName || "unk"; 
-  var fieldName = fieldJson.fieldName || "unknownField"; 
+  var tableName = fieldJson.tableName || "unk";
+  var fieldName = fieldJson.fieldName || "unknownField";
   const prefix = tableName.slice(0, 3).toLowerCase() + '_';
-  fieldJson.displayName = prefix + fieldName; 
-  
-  
+  fieldJson.displayName = prefix + fieldName;
+
+
   div.innerHTML += `<span name='dataContainer' data-field='${JSON.stringify(fieldJson)}' style="  font-weight: bold;">${fieldJson.displayName}</span>`;
   // add the input for the name of the panel  
   var input = document.createElement("input");
@@ -1606,7 +1605,7 @@ function addFunctionsFieldToPropertiesBar(target, fieldJson, dataTypeVisble = fa
   input.className = "input-element";
   input.value = fieldJson.fieldLabel;
   div.appendChild(input);
- 
+
 
   // Create a select dropdown
   var select = document.createElement("select");
@@ -1627,12 +1626,12 @@ function addFunctionsFieldToPropertiesBar(target, fieldJson, dataTypeVisble = fa
   });
   div.appendChild(select);
 
- 
+
   // Set the selected value as an attribute in the div
   div.setAttribute("selectedValue", select.value);
 
- dataObjet.appendChild(div);
-   // force the change event to set the fieldJson
+  dataObjet.appendChild(div);
+  // force the change event to set the fieldJson
   select.dispatchEvent(new Event("change"));
   // Adjust the height of the parent element to accommodate the new field
   var height = dataObjet.clientHeight + div.clientHeight;
@@ -1644,18 +1643,17 @@ function addFunctionsFieldToPropertiesBar(target, fieldJson, dataTypeVisble = fa
     subDiv.style.display = "none";
   });
   // set the height of the parent div
-    // ✅ NEW : Add scroll if too many fields
-    if (dataObjet.scrollHeight > 600) { // You can adjust 600px as needed
-      dataObjet.style.maxHeight = "600px";
-      dataObjet.style.overflowY = "auto";
-      dataObjet.style.paddingBottom = "80px"; // ✅ Add bottom padding for easier drop
-    }
-  
+  // ✅ NEW : Add scroll if too many fields
+  if (dataObjet.scrollHeight > 600) { // You can adjust 600px as needed
+    dataObjet.style.maxHeight = "600px";
+    dataObjet.style.overflowY = "auto";
+    dataObjet.style.paddingBottom = "80px"; // ✅ Add bottom padding for easier drop
+  }
+
   return div;
 }
 
-function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false )
- {
+function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false) {
   var dataObjet = target;
 
   // Create the div container for the new field
@@ -1671,22 +1669,21 @@ function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false )
   div.innerHTML += `<i class="fa fa-trash" onclick="removeItem(event)" style="color:red" title="Remove"></i>`;
   div.innerHTML += `<i class="fa fa-arrow-up" onclick="moveUp(event)" style="color:blue" title="Move Up"></i>`;
   div.innerHTML += `<i class="fa fa-arrow-down" onclick="moveDown(event)" style="color:blue"  title="Move Up"></i>`;
-    // add expand the div size and reduce it button
+  // add expand the div size and reduce it button
   div.innerHTML += `<hr style="margin: 0px;"></hr>`;
-  var tableName = fieldJson.tableName || "unk"; 
-  var fieldName = fieldJson.fieldName || "unknownField"; 
+  var tableName = fieldJson.tableName || "unk";
+  var fieldName = fieldJson.fieldName || "unknownField";
   const prefix = tableName.slice(0, 3).toLowerCase() + '_';
-  fieldJson.displayName = prefix + fieldName; 
-  
-  
+  fieldJson.displayName = prefix + fieldName;
+
+
   div.innerHTML += `<span name='dataContainer' data-field='${JSON.stringify(fieldJson)}' style="  font-weight: bold;">${fieldJson.displayName}</span>`;
-  
+
   dataObjet.appendChild(div);
 
   // adding verification triggers mandatories fields checkbox
-  div.innerHTML += `<div>Mandatory:<input type="checkbox" class="apple-switch" id="mandatory" name="mandatory" value="mandatory" ${
-    fieldJson.fieldMandatory === "true" ? "checked" : ""
-  } onclick="updateMandatory(event, '${elementId}')"> </div>`;
+  div.innerHTML += `<div>Mandatory:<input type="checkbox" class="apple-switch" id="mandatory" name="mandatory" value="mandatory" ${fieldJson.fieldMandatory === "true" ? "checked" : ""
+    } onclick="updateMandatory(event, '${elementId}')"> </div>`;
   // adding verification triggers not null fields checkbox
   div.innerHTML += `<div>regexp<input type="text"  tagname="regexp" id="regexp" name="regexp" onchange="regexp(event, '${elementId}')" value="${fieldJson.validation}"></div>`;
 
@@ -1709,13 +1706,13 @@ function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false )
     }
     // Update fieldType in fieldJson
     fieldJson.fieldType = select.value;
-    
+
     div.setAttribute("selectedValue", select.value);
     div.setAttribute("data-field", JSON.stringify(fieldJson));
-   
+
     const span = div.querySelector("span[name='dataContainer']");
     span.setAttribute("data-field", JSON.stringify(fieldJson));
-    
+
     switch (select.value) {
       case "combo_array":
       case "combo_sql":
@@ -1781,13 +1778,13 @@ function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false )
   // Adjust the height of the parent element to accommodate the new field
   var height = dataObjet.clientHeight + div.clientHeight;
   dataObjet.style.height = height + 30 + "px";
-   // generate checkbox for the fieldJson.isIndex
+  // generate checkbox for the fieldJson.isIndex
   const checkbox = document.createElement("input");
   checkbox.type = "checkbox";
   checkbox.id = "isIndex";
   checkbox.name = "isIndex";
   checkbox.value = "isIndex";
-  checkbox.class="apple-switch";
+  checkbox.class = "apple-switch";
   checkbox.checked = fieldJson.isIndex;
   checkbox.onclick = function (event) {
     fieldJson.isIndex = event.target.checked;
@@ -1800,8 +1797,8 @@ function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false )
   // adding select datatype if 
   if (dataTypeVisble) {
     // create the div
-    var selectType = document.createElement("select");   
-    selectType.id = elementId+"select";
+    var selectType = document.createElement("select");
+    selectType.id = elementId + "select";
     selectType.setAttribute("name", "chartSelect");
     selectType.setAttribute("data-field", JSON.stringify(fieldJson));
     console.log(fieldJson);
@@ -1815,13 +1812,13 @@ function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false )
     subDiv.style.display = "none";
   });
   // set the height of the parent div
-    // ✅ NEW : Add scroll if too many fields
-    if (dataObjet.scrollHeight > 600) { // You can adjust 600px as needed
-      dataObjet.style.maxHeight = "600px";
-      dataObjet.style.overflowY = "auto";
-      dataObjet.style.paddingBottom = "80px"; // ✅ Add bottom padding for easier drop
-    }
-  
+  // ✅ NEW : Add scroll if too many fields
+  if (dataObjet.scrollHeight > 600) { // You can adjust 600px as needed
+    dataObjet.style.maxHeight = "600px";
+    dataObjet.style.overflowY = "auto";
+    dataObjet.style.paddingBottom = "80px"; // ✅ Add bottom padding for easier drop
+  }
+
 }
 
 // function to expand or reduce the div size
@@ -1856,45 +1853,44 @@ function expandReduceDiv(event, elementId) {
   var subDivs = dataObjet.querySelectorAll("div");
   // loop through the subDivs
   subDivs.forEach((subDiv) => {
-    height += subDiv.clientHeight+30;
+    height += subDiv.clientHeight + 30;
   });
   // set the height of the parent div
   dataObjet.style.height = height + "px";
 }
 
 // function get options by type
-function setOptionsByTypeChart(select,type)
-{
-    // empty the select
-    select.innerHTML = '';
-    // create the options
-    var options=[];
-    switch (type) {
-        case 'string':
-            options=['value','count','distinct'];
-            break;
-        case 'number':
-        case 'integer':
-        case 'decimal':        
-            options=['value','sum','count','avg','min','max','distinct','std','var','median','mode','percentile'];
-            break;
-        case 'date':
-            options=['value','count','distinct'];
-            break;
-        default:
-            options=['value','count','distinct'];
-            break;
-    }
-    console.log(options);
-    // add the options
-    options.forEach(option => {
-      
-        var opt = document.createElement('option');
-        opt.value = option;
-        opt.innerHTML = option;
-        select.appendChild(opt);
-    });
-    console.log(select);
+function setOptionsByTypeChart(select, type) {
+  // empty the select
+  select.innerHTML = '';
+  // create the options
+  var options = [];
+  switch (type) {
+    case 'string':
+      options = ['value', 'count', 'distinct'];
+      break;
+    case 'number':
+    case 'integer':
+    case 'decimal':
+      options = ['value', 'sum', 'count', 'avg', 'min', 'max', 'distinct', 'std', 'var', 'median', 'mode', 'percentile'];
+      break;
+    case 'date':
+      options = ['value', 'count', 'distinct'];
+      break;
+    default:
+      options = ['value', 'count', 'distinct'];
+      break;
+  }
+  console.log(options);
+  // add the options
+  options.forEach(option => {
+
+    var opt = document.createElement('option');
+    opt.value = option;
+    opt.innerHTML = option;
+    select.appendChild(opt);
+  });
+  console.log(select);
 }
 
 // function to remove the item
@@ -1924,283 +1920,283 @@ function moveDown(event) {
   if (next) {
     dataObjet.insertBefore(next, item);
   }
-} 
+}
 
 // filter 
 
 // Function to initialize the filter box
 function createFilterBox(main) {
-    var div = document.createElement("div");
-    div.id = 'filterBox';
-    
-    var lbl = document.createElement("label");
-    lbl.setAttribute("for", div.id);
-    lbl.textContent = "Filter:";
-    div.appendChild(lbl);
+  var div = document.createElement("div");
+  div.id = 'filterBox';
 
-    // Add button to add a new filter
-    var addButton = document.createElement("button");
-    addButton.innerHTML = '<i class="fa fa-plus"></i>';
-    addButton.onclick = function() {
-        const filterBoxContainer = main.querySelector('#filterBoxContainer');
-        filterBoxContainer.appendChild(createFilterField(main));
-    };
-    div.appendChild(addButton);
+  var lbl = document.createElement("label");
+  lbl.setAttribute("for", div.id);
+  lbl.textContent = "Filter:";
+  div.appendChild(lbl);
 
-    // Clear button for the filter with icon
-    var clearButton = document.createElement("button");
-    clearButton.innerHTML = '<i class="fa fa-trash"></i>';
-    clearButton.onclick = function() {
-        const chart = document.getElementById(main.getAttribute("elementId"));
-        chart.removeAttribute("filter");
-        const filterBoxContainer = main.querySelector('#filterBoxContainer');
-        filterBoxContainer.innerHTML = '';
-        const viewSelect = main.querySelector('#viewSelect');
-        switchView(event, main, viewSelect.value);
-    };
-    div.appendChild(clearButton);
+  // Add button to add a new filter
+  var addButton = document.createElement("button");
+  addButton.innerHTML = '<i class="fa fa-plus"></i>';
+  addButton.onclick = function () {
+    const filterBoxContainer = main.querySelector('#filterBoxContainer');
+    filterBoxContainer.appendChild(createFilterField(main));
+  };
+  div.appendChild(addButton);
 
-    // Create container for the filter box
-    const filterBoxContainer = document.createElement('div');
-    filterBoxContainer.id = 'filterBoxContainer';
+  // Clear button for the filter with icon
+  var clearButton = document.createElement("button");
+  clearButton.innerHTML = '<i class="fa fa-trash"></i>';
+  clearButton.onclick = function () {
+    const chart = document.getElementById(main.getAttribute("elementId"));
+    chart.removeAttribute("filter");
+    const filterBoxContainer = main.querySelector('#filterBoxContainer');
+    filterBoxContainer.innerHTML = '';
+    const viewSelect = main.querySelector('#viewSelect');
+    switchView(event, main, viewSelect.value);
+  };
+  div.appendChild(clearButton);
 
-    // Create the view select dropdown
-    const viewSelect = document.createElement('select');
-    viewSelect.id = 'viewSelect';
-    ['standard', 'advanced'].forEach(view => {
-        const option = new Option(view, view);
-        viewSelect.options.add(option);
-    });
+  // Create container for the filter box
+  const filterBoxContainer = document.createElement('div');
+  filterBoxContainer.id = 'filterBoxContainer';
 
-    // Append the view select to the container
-    div.appendChild(viewSelect);
+  // Create the view select dropdown
+  const viewSelect = document.createElement('select');
+  viewSelect.id = 'viewSelect';
+  ['standard', 'advanced'].forEach(view => {
+    const option = new Option(view, view);
+    viewSelect.options.add(option);
+  });
 
-    // Event listener for changing views
-    viewSelect.addEventListener('change', function(event) {
-        switchView(event, main, this.value);
-    });
-    div.appendChild(filterBoxContainer);
+  // Append the view select to the container
+  div.appendChild(viewSelect);
 
-    // Create button to apply filter
-    const generateJsonBtn = document.createElement('button');
-    generateJsonBtn.textContent = 'Apply';
-    generateJsonBtn.setAttribute("onclick", "generateJson(event)");
-    div.appendChild(generateJsonBtn);
+  // Event listener for changing views
+  viewSelect.addEventListener('change', function (event) {
+    switchView(event, main, this.value);
+  });
+  div.appendChild(filterBoxContainer);
 
-    return div;
+  // Create button to apply filter
+  const generateJsonBtn = document.createElement('button');
+  generateJsonBtn.textContent = 'Apply';
+  generateJsonBtn.setAttribute("onclick", "generateJson(event)");
+  div.appendChild(generateJsonBtn);
+
+  return div;
 }
 
 // Function to create individual filter fields
 function createFilterField(main) {
-    const container = document.createElement('div');
-    container.className = 'filterField';
+  const container = document.createElement('div');
+  container.className = 'filterField';
 
-    const textField = document.createElement('input');
-    textField.placeholder = 'Field';
-    textField.name = 'field';
-    textField.setAttribute('ObjectType', 'filters');
-    textField.setAttribute('ondragover', 'allowDrop(event)');
-    textField.setAttribute('ondrop', 'dropInput(event)');
+  const textField = document.createElement('input');
+  textField.placeholder = 'Field';
+  textField.name = 'field';
+  textField.setAttribute('ObjectType', 'filters');
+  textField.setAttribute('ondragover', 'allowDrop(event)');
+  textField.setAttribute('ondrop', 'dropInput(event)');
 
-    container.appendChild(textField);
+  container.appendChild(textField);
 
-    // Create and append input fields based on view
-    const viewSelect = main.querySelector('#viewSelect').value;
-    if (viewSelect === 'standard') {
-        const multiSelect = document.createElement('select');
-        multiSelect.multiple = true;
-        multiSelect.className = '';
+  // Create and append input fields based on view
+  const viewSelect = main.querySelector('#viewSelect').value;
+  if (viewSelect === 'standard') {
+    const multiSelect = document.createElement('select');
+    multiSelect.multiple = true;
+    multiSelect.className = '';
 
-        textField.addEventListener('change', function(event) {
-            const datafield = JSON.parse( this.getAttribute('data-field'));
-            const DBName = datafield.DBName;
-            const tableName = datafield.tableName;
-            const fieldName = datafield.fieldName;
-            const url= `/select-distinct/${DBName}/${tableName}/${fieldName}`;
-        //    const url = '/getDatasetDataDistinct/' + dataset + '/' + this.value;
+    textField.addEventListener('change', function (event) {
+      const datafield = JSON.parse(this.getAttribute('data-field'));
+      const DBName = datafield.DBName;
+      const tableName = datafield.tableName;
+      const fieldName = datafield.fieldName;
+      const url = `/select-distinct/${DBName}/${tableName}/${fieldName}`;
+      //    const url = '/getDatasetDataDistinct/' + dataset + '/' + this.value;
 
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    multiSelect.innerHTML = '';
-                    data.forEach(value => {
-                        var opt = document.createElement('option');
-                        opt.className = 'filter-item';
-                        opt.value = value[fieldName];
-                        opt.innerHTML = value[fieldName];
-                        multiSelect.appendChild(opt);
-                    });
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          multiSelect.innerHTML = '';
+          data.forEach(value => {
+            var opt = document.createElement('option');
+            opt.className = 'filter-item';
+            opt.value = value[fieldName];
+            opt.innerHTML = value[fieldName];
+            multiSelect.appendChild(opt);
+          });
 
-                    
-                });
+
         });
+    });
 
-        container.appendChild(multiSelect); 
-    } else if (viewSelect === 'advanced') {
-        const operatorSelect = document.createElement('select');
-        ['=', '!=', '<', '>', '>=', '<='].forEach(op => {
-            const option = new Option(op, op);
-            operatorSelect.options.add(option);
-        });
+    container.appendChild(multiSelect);
+  } else if (viewSelect === 'advanced') {
+    const operatorSelect = document.createElement('select');
+    ['=', '!=', '<', '>', '>=', '<='].forEach(op => {
+      const option = new Option(op, op);
+      operatorSelect.options.add(option);
+    });
 
-        const valueInput = document.createElement('input');
-        valueInput.placeholder = 'Value';
+    const valueInput = document.createElement('input');
+    valueInput.placeholder = 'Value';
 
-        container.appendChild(operatorSelect);
-        container.appendChild(valueInput);
-    }
+    container.appendChild(operatorSelect);
+    container.appendChild(valueInput);
+  }
 
-    return container;
+  return container;
 }
 
 // Function to switch views
 function switchView(event, main, view) {
-    event.preventDefault();
-    const container = main.querySelector('#filterBoxContainer');
-    container.innerHTML = '';
+  event.preventDefault();
+  const container = main.querySelector('#filterBoxContainer');
+  container.innerHTML = '';
 
-    const addFilterField = createFilterField(main);
-    container.appendChild(addFilterField);
+  const addFilterField = createFilterField(main);
+  container.appendChild(addFilterField);
 }
-  
- // Function to collect data and generate JSON
+
+// Function to collect data and generate JSON
 function generateJson(event) {
-    event.preventDefault();
-    console.log("generateJson");
-    // get the main element
-   
-    
-   
-    const viewSelect = event.target.parentNode.parentNode.querySelector('#viewSelect');
-   
-    if (!viewSelect) return;
-    
-    const view = viewSelect.options[viewSelect.selectedIndex].value;
-    let filterInfo = { view: view, filters: [] };
-    
-    const filterFields = event.target.parentNode.parentNode.querySelectorAll('#filterBoxContainer .filterField');
+  event.preventDefault();
+  console.log("generateJson");
+  // get the main element
 
- 
 
-    filterFields.forEach(filterField => {
-       
-        const fieldInput = filterField.querySelector('input[name="field"]');
-        const dataType = fieldInput.getAttribute('dataType');
-        
-        if (view === 'standard') {
-            const multiSelect = filterField.querySelector('select');
-          
-            const selectedOptions = Array.from(multiSelect.selectedOptions).map(option => option.value);
-            let filterValues = [];
-            datafield = JSON.parse( fieldInput.getAttribute('data-field'));
-            console.log(selectedOptions);
-            switch (datafield.fieldDataType) {
-                case 'string':
-                    filterValues = selectedOptions;
-                    break;
-                case 'number':
-                    filterValues = selectedOptions.map(option => parseFloat(option));
-                    break;
-                case 'date':
-                    filterValues = selectedOptions.map(option => new Date(option));
-                    break;
-                default:
-                    filterValues = selectedOptions;
-                    break;
-            }
 
-           
+  const viewSelect = event.target.parentNode.parentNode.querySelector('#viewSelect');
 
-            filterInfo.filters.push({
-                field: datafield.fieldName,
-                DBName: datafield.DBName,
-                type: datafield.fieldDataType,
-                operator: '',
-                value: '',
-                values: filterValues
-            });
+  if (!viewSelect) return;
 
-        } else if (view === 'advanced') {
-            const operatorSelect = filterField.querySelector('select');
-            const valueInput = filterField.querySelector('input[placeholder="Value"]');
-            let value = null;
+  const view = viewSelect.options[viewSelect.selectedIndex].value;
+  let filterInfo = { view: view, filters: [] };
 
-            switch (dataType) {
-                case 'string':
-                    value = valueInput.value;
-                    break;
-                case 'number':
-                    value = parseFloat(valueInput.value);
-                    break;
-                case 'date':
-                    value = new Date(valueInput.value);
-                    break;
-            }
+  const filterFields = event.target.parentNode.parentNode.querySelectorAll('#filterBoxContainer .filterField');
 
-            filterInfo.filters.push({
-                field: fieldInput.value,
-                DBName: fieldInput.getAttribute('DBName'),
-                type: dataType,
-                operator: operatorSelect.value,
-                value: value,
-                values: []
-            });
-        }
-    });
 
-     // Display the JSON for demonstration purposes
-   //  console.log(JSON.stringify(filterInfo));
-    const propertiesBar = document.getElementById("propertiesBar");
-    // get id of the element
-    const element = document.getElementById( propertiesBar.getAttribute("data-element-id"));
-    // console.log(element);
-    element.setAttribute("filter", JSON.stringify(filterInfo));
 
-    // Here you could also send the JSON to a server, save it, or use it in some other way
-    // For example:
-    // fetch('/api/filters', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(filterInfo) });
-}
+  filterFields.forEach(filterField => {
 
- // Function to regenerate filters from JSON
-function regenerateFilters(content, filterConfig) {
-    if (!filterConfig) return;
-    switchView(event, content, filterConfig.view); // Ensure the correct view is set
-    
-    if (!filterConfig.filters) return;
+    const fieldInput = filterField.querySelector('input[name="field"]');
+    const dataType = fieldInput.getAttribute('dataType');
 
-    if (filterConfig.filters.length > 0) {
-        filterConfig.filters.forEach(filter => {
-            const filterBoxContainer = content.querySelector('#filterBoxContainer');
-            const filterField = createFilterField(content);
-            filterBoxContainer.appendChild(filterField);
-            
-            const textField = filterField.querySelector('input[name="field"]');
-            textField.value = filter.field;
-            textField.setAttribute('dataType', filter.type);
-            textField.setAttribute('dataset', filter.dataset);
+    if (view === 'standard') {
+      const multiSelect = filterField.querySelector('select');
 
-            if (filterConfig.view === 'standard') {
-                const multiSelect = filterField.querySelector('select');
-                textField.dispatchEvent(new Event('input')); // Trigger input event to populate options
-                setTimeout(() => {
-                    filter.values.forEach(val => {
-                        for (let option of multiSelect.options) {
-                            if (option.value === val) option.selected = true;
-                        }
-                    });
-                }, 1000); // Adjust timeout as needed to ensure options are populated
-            } else if (filterConfig.view === 'advanced') {
-                filterField.querySelector('select').value = filter.operator;
-                filterField.querySelector('input[placeholder="Value"]').value = filter.value;
-            }
-        });
+      const selectedOptions = Array.from(multiSelect.selectedOptions).map(option => option.value);
+      let filterValues = [];
+      datafield = JSON.parse(fieldInput.getAttribute('data-field'));
+      console.log(selectedOptions);
+      switch (datafield.fieldDataType) {
+        case 'string':
+          filterValues = selectedOptions;
+          break;
+        case 'number':
+          filterValues = selectedOptions.map(option => parseFloat(option));
+          break;
+        case 'date':
+          filterValues = selectedOptions.map(option => new Date(option));
+          break;
+        default:
+          filterValues = selectedOptions;
+          break;
+      }
+
+
+
+      filterInfo.filters.push({
+        field: datafield.fieldName,
+        DBName: datafield.DBName,
+        type: datafield.fieldDataType,
+        operator: '',
+        value: '',
+        values: filterValues
+      });
+
+    } else if (view === 'advanced') {
+      const operatorSelect = filterField.querySelector('select');
+      const valueInput = filterField.querySelector('input[placeholder="Value"]');
+      let value = null;
+
+      switch (dataType) {
+        case 'string':
+          value = valueInput.value;
+          break;
+        case 'number':
+          value = parseFloat(valueInput.value);
+          break;
+        case 'date':
+          value = new Date(valueInput.value);
+          break;
+      }
+
+      filterInfo.filters.push({
+        field: fieldInput.value,
+        DBName: fieldInput.getAttribute('DBName'),
+        type: dataType,
+        operator: operatorSelect.value,
+        value: value,
+        values: []
+      });
     }
-    
+  });
+
+  // Display the JSON for demonstration purposes
+  //  console.log(JSON.stringify(filterInfo));
+  const propertiesBar = document.getElementById("propertiesBar");
+  // get id of the element
+  const element = document.getElementById(propertiesBar.getAttribute("data-element-id"));
+  // console.log(element);
+  element.setAttribute("filter", JSON.stringify(filterInfo));
+
+  // Here you could also send the JSON to a server, save it, or use it in some other way
+  // For example:
+  // fetch('/api/filters', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(filterInfo) });
+}
+
+// Function to regenerate filters from JSON
+function regenerateFilters(content, filterConfig) {
+  if (!filterConfig) return;
+  switchView(event, content, filterConfig.view); // Ensure the correct view is set
+
+  if (!filterConfig.filters) return;
+
+  if (filterConfig.filters.length > 0) {
+    filterConfig.filters.forEach(filter => {
+      const filterBoxContainer = content.querySelector('#filterBoxContainer');
+      const filterField = createFilterField(content);
+      filterBoxContainer.appendChild(filterField);
+
+      const textField = filterField.querySelector('input[name="field"]');
+      textField.value = filter.field;
+      textField.setAttribute('dataType', filter.type);
+      textField.setAttribute('dataset', filter.dataset);
+
+      if (filterConfig.view === 'standard') {
+        const multiSelect = filterField.querySelector('select');
+        textField.dispatchEvent(new Event('input')); // Trigger input event to populate options
+        setTimeout(() => {
+          filter.values.forEach(val => {
+            for (let option of multiSelect.options) {
+              if (option.value === val) option.selected = true;
+            }
+          });
+        }, 1000); // Adjust timeout as needed to ensure options are populated
+      } else if (filterConfig.view === 'advanced') {
+        filterField.querySelector('select').value = filter.operator;
+        filterField.querySelector('input[placeholder="Value"]').value = filter.value;
+      }
+    });
+  }
+
 
 }
 
-function showDiv(divId,btn) {
- // get the div parent of button
+function showDiv(divId, btn) {
+  // get the div parent of button
   const parent = btn.parentNode;
   // get all the buttons
   const buttons = parent.querySelectorAll('button');
@@ -2210,13 +2206,12 @@ function showDiv(divId,btn) {
   });
 
   document.querySelectorAll('.tab-div').forEach(div => {
-      div.style.display = 'none';
-      div.style.boxshadow = 'none';
+    div.style.display = 'none';
+    div.style.boxshadow = 'none';
   });
   const div = document.getElementById(divId);
   div.style.display = 'block';
   // inset shadow
-  
+
 }
 
-  

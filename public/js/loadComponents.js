@@ -49,10 +49,9 @@ loadJson("/elementsConfig")
     const sidebar = document.getElementById("componentsSidebar");
     console.log(sidebar);
     if (sidebar) {
-         createSidebarSection(elementsData);
+      createSidebarSection(elementsData);
     }
-    else
-    {
+    else {
       let components = [];
       const data = replaceNameWithDescription(components);
       console.log(data);
@@ -68,19 +67,23 @@ function loadCssIfNotLoaded(cssUrl, csslist) {
   // Check if the css is already loaded
   if (csslist.indexOf(cssUrl) === -1) {
     // The css is not loaded, check if it exists and load it
-    fetch(cssUrl).then((response) => {
-      if (response.ok) {
-        // The css exists, load it
-        var link = document.createElement("link");
-        link.rel = "stylesheet";
-        link.type = "text/css";
-        link.href = cssUrl;
-        document.head.appendChild(link);
-        csslist.push(cssUrl);
-      } else {
-        console.log("CSS not found: " + cssUrl);
-      }
-    });
+    fetch(cssUrl)
+      .then((response) => {
+        if (response.ok) {
+          // The css exists, load it
+          var link = document.createElement("link");
+          link.rel = "stylesheet";
+          link.type = "text/css";
+          link.href = cssUrl;
+          document.head.appendChild(link);
+          csslist.push(cssUrl);
+        } else {
+          console.log("CSS not found: " + cssUrl);
+        }
+      })
+      .catch((error) => {
+        console.log("Error while loading css : " + error)
+      });
   }
 }
 
@@ -89,8 +92,8 @@ function loadScriptIfNotLoaded(scriptUrl, scriptslist) {
   // Check if the script is already loaded
 
   // The script is not loaded, check if it exists and load it
-  try {
-    return fetch(scriptUrl).then((response) => {
+  return fetch(scriptUrl)
+    .then((response) => {
       if (response.ok) {
         // The script exists, load it
         var script = document.createElement("script");
@@ -100,15 +103,15 @@ function loadScriptIfNotLoaded(scriptUrl, scriptslist) {
       } else {
         console.log("Script not found: " + scriptUrl);
       }
+    })
+    .catch((err) => {
+      console.log("Script not found: " + scriptUrl);
     });
-  } catch (err) {
-    console.log("Script not found: " + scriptUrl);
-  }
 }
 // Create the sidebar
 function createSidebar(elementsData, components) {
   const sidebar = document.getElementById("componentsSidebar");
-  if (sidebar===null || sidebar === undefined) return;
+  if (sidebar === null || sidebar === undefined) return;
   sidebar.innerHTML = ""; // Clear existing content
   sidebar.style.display = "flex";
   sidebar.style.flexDirection = "column";
@@ -173,12 +176,12 @@ function createSidebar(elementsData, components) {
     const button = document.createElement("div");
     button.textContent = category;
     button.className = "category-button";
-   
+
     button.style.backgroundColor = "#fff";
     button.style.borderRight = "3px solid green";
     button.style.justifyContent = "center";
     button.style.boxShadow = "0 2px 5px rgba(0, 0, 0, 0.3)";
-   
+
     categoryDiv.appendChild(button);
     const divContainer = document.createElement("div");
     divContainer.style.display = "none";
@@ -189,7 +192,7 @@ function createSidebar(elementsData, components) {
     categoryDiv.appendChild(divContainer);
 
     button.addEventListener("click", function () {
-     
+
       if (divContainer.style.display === "none") {
         divContainer.style.display = "flex";
       } else {
@@ -239,17 +242,20 @@ function createSidebar(elementsData, components) {
       });
       itemDiv.addEventListener("dblclick", doubleclick);
       itemDiv.title = elementData.description;
-     
+
       divContainer.appendChild(itemDiv);
 
-      // Check if the css exists
-      var cssUrl = "/css/components/" + elementData.styles;
-      console.log("cssUrl:" + cssUrl);
-      var existingCss = csslist.find((css) => css === cssUrl);
-      if (!existingCss) {
-        console.log("cssUrl in:" + cssUrl);
-        loadCssIfNotLoaded(cssUrl, csslist);
-        csslist.push(cssUrl);
+      //check if name is valid
+      if (elementData.styles) {
+        // Check if the css exists
+        var cssUrl = "/css/components/" + elementData.styles;
+        //console.log("cssUrl:" + cssUrl);
+        var existingCss = csslist.find((css) => css === cssUrl);
+        if (!existingCss) {
+          //console.log("cssUrl in:" + cssUrl);
+          loadCssIfNotLoaded(cssUrl, csslist);
+          csslist.push(cssUrl);
+        }
       }
 
       // Check if the script exists
@@ -259,8 +265,8 @@ function createSidebar(elementsData, components) {
       var existingScript = scriptslist.find((script) => script === scriptUrl);
 
       if (!existingScript) {
-        console.log("scriptUrl:" + scriptUrl);
-        loadScriptIfNotLoaded(scriptUrl).catch((error) => {
+        //console.log("scriptUrl:" + scriptUrl);
+        loadScriptIfNotLoaded(scriptUrl, scriptslist).catch((error) => {
           console.log("Error loading script:", error);
         });
         scriptslist.push(scriptUrl);
@@ -297,14 +303,14 @@ function loadComponentsFromConfig(elementsData, components) {
 
   // Create sidebar items
   for (const category in categories) {
-    
+
 
     const elements = categories[category];
 
     for (const elementData of elements) {
       // Check if the css exists
       var cssUrl = "/css/components/" + elementData.styles;
-      console.log("cssUrl:" + cssUrl);
+      //console.log("cssUrl:" + cssUrl);
       var existingCss = csslist.find((css) => css === cssUrl);
       if (!existingCss) {
         console.log("cssUrl in:" + cssUrl);
@@ -319,13 +325,13 @@ function loadComponentsFromConfig(elementsData, components) {
       var existingScript = scriptslist.find((script) => script === scriptUrl);
 
       if (!existingScript) {
-        console.log("scriptUrl:" + scriptUrl);
+        //console.log("scriptUrl:" + scriptUrl);
         loadScriptIfNotLoaded(scriptUrl).catch((error) => {
           console.log("Error loading script:", error);
         });
         scriptslist.push(scriptUrl);
       }
-    }    
+    }
   }
 }
 
@@ -430,14 +436,14 @@ async function loadJson(url) {
 function createFormElement(elementId) {
   var element = null;
 
-  console.log(elementId);
+  // console.log(elementId);
 
-  console.log(elementsData[elementId]);
+  // console.log(elementsData[elementId]);
   // Execute the function
   var functionName = elementsData[elementId].createFunction;
-  console.log("functionName:" + functionName);
+  // console.log("functionName:" + functionName);
   if (typeof window[functionName] === "function") {
-    console.log("functionName:" + functionName);
+    // console.log("functionName:" + functionName);
     element = window[functionName](elementId);
   }
 

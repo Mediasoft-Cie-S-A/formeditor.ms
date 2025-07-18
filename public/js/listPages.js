@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-function  loadPages () {
-  
-      fetch("/pages").then(response => {
+
+
+function loadPages() {
+
+    fetch("/pages").then(response => {
         if (!response.ok) {
-          throw new Error("Network response was not ok");
+            throw new Error("Network response was not ok");
         }
         return response.json();
-      }).then(pages => {
+    }).then(pages => {
         const pagesList = document.getElementById("pageListContainerBody");
         pagesList.innerHTML = ""; // Clear existing content
         pages.forEach(page => {
-          const container = document.createElement("tr");
+            const container = document.createElement("tr");
             container.innerHTML = `
                 <td>${page.objectId}</td>
                 <td>${page.slug}</td>
@@ -34,51 +36,51 @@ function  loadPages () {
                 <td>${page.meta}</td>
                 <td>${page.meta}</td>
             `;
-             // Create delete button
-                const deleteButton = document.createElement('button');
-                deleteButton.innerHTML='<i class="fa fa-trash" style="margin-left:-5px"></i>'
-                deleteButton.className = 'portal-delete-button';        
-                deleteButton.onclick = function(event) {
-                    event.preventDefault();
-                    deletePage(page.objectId);
-                }; // delete button functionality
+            // Create delete button
+            const deleteButton = document.createElement('button');
+            deleteButton.innerHTML = '<i class="fa fa-trash" style="margin-left:-5px"></i>'
+            deleteButton.className = 'portal-delete-button';
+            deleteButton.onclick = function (event) {
+                event.preventDefault();
+                deletePage(page.objectId);
+            }; // delete button functionality
 
-                // create edit button
-                const editButton = document.createElement('button');
-                editButton.innerHTML='<i class="fa fa-edit" style="margin-left:-5px"></i>'
-                editButton.className = 'portal-edit-button';
-                editButton.onclick = function(event) {
-                    event.preventDefault();
-                    loadPage(page.objectId);
-                    const editTab = document.querySelector('.nav-tabs a[href="#editForm"]');
-                    if (editTab) {
-                        editTab.click(); // Simulate click
-                    }  // Simulate click on the edit tab
-                   
-                }; // edit button functionality
-                // create show button
-                const showButton = document.createElement('button');
-                showButton.innerHTML='<i class="fa fa-eye" style="margin-left:-5px"></i>'
-                showButton.className = 'portal-show-button';
-                showButton.onclick = function(event) {
-                  event.preventDefault();
-                  // call window.open with the page slug
-                    const pageUrl = `/${page.slug}`;
-                    window.open(pageUrl, '_blank'); // Open the page in a new tab
-                }; // show button functionality
-                const itemActions = document.createElement('td');
-                itemActions.appendChild(showButton); // Append the show button
-                itemActions.appendChild(editButton); // Append the edit button
-                itemActions.appendChild(deleteButton); // Append the delete button
-                container.appendChild(itemActions); // Append the actions cell to the container
+            // create edit button
+            const editButton = document.createElement('button');
+            editButton.innerHTML = '<i class="fa fa-edit" style="margin-left:-5px"></i>'
+            editButton.className = 'portal-edit-button';
+            editButton.onclick = function (event) {
+                event.preventDefault();
+                loadPage(page.objectId);
+                const editTab = document.querySelector('.nav-tabs a[href="#editForm"]');
+                if (editTab) {
+                    editTab.click(); // Simulate click
+                }  // Simulate click on the edit tab
+
+            }; // edit button functionality
+            // create show button
+            const showButton = document.createElement('button');
+            showButton.innerHTML = '<i class="fa fa-eye" style="margin-left:-5px"></i>'
+            showButton.className = 'portal-show-button';
+            showButton.onclick = function (event) {
+                event.preventDefault();
+                // call window.open with the page slug
+                const pageUrl = `/${page.slug}`;
+                window.open(pageUrl, '_blank'); // Open the page in a new tab
+            }; // show button functionality
+            const itemActions = document.createElement('td');
+            itemActions.appendChild(showButton); // Append the show button
+            itemActions.appendChild(editButton); // Append the edit button
+            itemActions.appendChild(deleteButton); // Append the delete button
+            container.appendChild(itemActions); // Append the actions cell to the container
 
             pagesList.appendChild(container);
         });
-      }).catch(error => {
+    }).catch(error => {
         console.error("Error fetching pages:", error);
         const pagesList = document.getElementById("pagesList");
         pagesList.innerHTML = "<li>Error loading pages</li>";
-      });
+    });
 }
 
 function loadPage(pageId) {
@@ -99,7 +101,7 @@ function loadPage(pageId) {
             document.getElementById("userCreated").value = page.userCreated;
             document.getElementById("userModified").value = page.userModified;
             document.getElementById("objectTypeHidden").value = page.header || ""; // Use header if available
-             var objectType = document.getElementById('objectType');
+            var objectType = document.getElementById('objectType');
             // select in the objecttype the value form
             objectType.value = 'page';
             // Assuming formContainer is where the page content is displayed
@@ -111,7 +113,7 @@ function loadPage(pageId) {
                     formContainer.innerHTML = page.content; // Directly set the HTML content
                     break;
                 case "default":
-                     jsonToDom(page.content,formContainer);
+                    jsonToDom(page.content, formContainer);
                     break;
                 default:
                     console.error("Unknown layout type:", page.layout);
@@ -130,7 +132,7 @@ function registerObject(e) {
     console.log("submit");
 
     var type = document.getElementById("objectType").value;
-    switch (type) { 
+    switch (type) {
         case "form":
             registerForm(e);
             break;
@@ -150,7 +152,7 @@ function registerPage(e) {
     e.preventDefault();
     console.log("submit");
 
-       var objectId = document.getElementById("objectId").value;
+    var objectId = document.getElementById("objectId").value;
     var objectName = document.getElementById("objectName").value;
     var objectSlug = document.getElementById("objectSlug").value;
     var userCreated = document.getElementById("userCreated").value;
@@ -159,17 +161,17 @@ function registerPage(e) {
     var header = document.getElementById("objectTypeHidden").value;
 
     var formContainer = document.getElementById("formContainer");
-   // var jsonData = domToJson(formContainer);
-   // removet gjs-selection class from all elements in formContainer
+    // var jsonData = domToJson(formContainer);
+    // removet gjs-selection class from all elements in formContainer
     var elements = formContainer.querySelectorAll('.gjs-selection');
-    elements.forEach(function(element) {
+    elements.forEach(function (element) {
         element.classList.remove('gjs-selection');
     });
     // get the innerHTML of the formContainer
-   var htmlContent = formContainer.innerHTML;
+    var htmlContent = formContainer.innerHTML;
     if (type == "page") {
 
-      // genere form data based on slug, title, layout = "default", content = "", meta = {}
+        // genere form data based on slug, title, layout = "default", content = "", meta = {}
         const formData = {
             objectId: objectId,
             slug: objectSlug,
@@ -184,24 +186,24 @@ function registerPage(e) {
             userModified: userModified,
             header: header,
         };
-      // post the form data to the server to store it /page
+        // post the form data to the server to store it /page
         fetch("/pages", {
             method: "POST",
             headers: {
-            "Content-Type": "application/json"
+                "Content-Type": "application/json"
             },
             body: JSON.stringify(formData)
         })
-        .then(response => {
-            if (!response.ok) {
-                showToast("Error registering page: " + response.statusText);
-            }
-            showToast("Page registered successfully");
-           
-        }).catch(error => {
-            console.error("Error registering page:", error);
-            showToast("Error registering page: " + error.message);
-        });
+            .then(response => {
+                if (!response.ok) {
+                    showToast("Error registering page: " + response.statusText);
+                }
+                showToast("Page registered successfully");
+
+            }).catch(error => {
+                console.error("Error registering page:", error);
+                showToast("Error registering page: " + error.message);
+            });
     }
 }
 
@@ -210,18 +212,18 @@ function deletePage(pageID) {
         fetch(`/pages/${pageID}`, {
             method: "DELETE"
         })
-        .then(response => {
-            if (!response.ok) {
-                showToast("Error deleting page: " + response.statusText);
-            } else {
-                showToast("Page deleted successfully");
-                loadPages(); // Reload the pages list
-            }
-        }).catch(error => {
-            console.error("Error deleting page:", error);
-            showToast("Error deleting page: " + error.message);
-        });
+            .then(response => {
+                if (!response.ok) {
+                    showToast("Error deleting page: " + response.statusText);
+                } else {
+                    showToast("Page deleted successfully");
+                    loadPages(); // Reload the pages list
+                }
+            }).catch(error => {
+                console.error("Error deleting page:", error);
+                showToast("Error deleting page: " + error.message);
+            });
     }
 }
 
-loadPages ();
+loadPages();

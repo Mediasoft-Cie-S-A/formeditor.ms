@@ -29,8 +29,8 @@ function renderNavigationBarWeb(
   var buttons = [
 
     {
-      name: "PreviusDSBtn",
-      title: "Previus",
+      name: "PreviousDSBtn",
+      title: "Previous",
       text: '<i class="bi bi-arrow-left-circle-fill" style="color:green;margin-left:-6px"></i>',
       event:
         "movePrevWeb()",

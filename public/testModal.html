@@ -1,96 +1,118 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-<meta charset="utf-8" />
-<title>Exemple de modal JS</title>
-<style>
-  /* ==========  Mise en forme de base  ========== */
-  body {font-family: system-ui, sans-serif; margin: 0; padding: 2rem;}
+  <meta charset="utf-8" />
+  <title>Exemple de modal JS</title>
+  <style>
+    /* ==========  Mise en forme de base  ========== */
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      padding: 2rem;
+    }
 
-  /* ----------  Bouton déclencheur  ---------- */
-  #openModalBtn {padding: .6rem 1rem; border: none; border-radius: .4rem; cursor: pointer;}
+    /* ----------  Bouton déclencheur  ---------- */
+    #openModalBtn {
+      padding: .6rem 1rem;
+      border: none;
+      border-radius: .4rem;
+      cursor: pointer;
+    }
 
-  /* ----------  Fond semi-transparent  ---------- */
-  .modal-backdrop {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,.55);
-    display: none;          /* caché par défaut */
-    align-items: center;    /* centre verticalement */
-    justify-content: center;/* centre horizontalement */
-    z-index: 1000;
-  }
+    /* ----------  Fond semi-transparent  ---------- */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .55);
+      display: none;
+      /* caché par défaut */
+      align-items: center;
+      /* centre verticalement */
+      justify-content: center;
+      /* centre horizontalement */
+      z-index: 1000;
+    }
 
-  /* ----------  Conteneur du modal  ---------- */
-  .modal-content {
-    background: #fff;
-    padding: 2rem;
-    max-width: 30rem;
-    width: 90%;
-    border-radius: .6rem;
-    box-shadow: 0 8px 24px rgba(0,0,0,.2);
-    position: relative;
-  }
+    /* ----------  Conteneur du modal  ---------- */
+    .modal-content {
+      background: #fff;
+      padding: 2rem;
+      max-width: 30rem;
+      width: 90%;
+      border-radius: .6rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .2);
+      position: relative;
+    }
 
-  /* ----------  Bouton de fermeture  ---------- */
-  .close-btn {
-    position: absolute;
-    top: .6rem; right: .6rem;
-    background: none; border: none; font-size: 1.5rem; cursor: pointer;
-  }
+    /* ----------  Bouton de fermeture  ---------- */
+    .close-btn {
+      position: absolute;
+      top: .6rem;
+      right: .6rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
 
-  /* ----------  Classe qui rend le modal visible  ---------- */
-  .show {display: flex;}
-</style>
+    /* ----------  Classe qui rend le modal visible  ---------- */
+    .show {
+      display: flex;
+    }
+  </style>
 </head>
 
 <body>
-    <!-- Bouton qui ouvre le modal -->
-    <button id="openModalBtn">Ouvrir le modal</button>
+  <!-- Bouton qui ouvre le modal -->
+  <button id="openModalBtn">Ouvrir le modal</button>
 
-    <!-- Modal + son fond -->
-    <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true">
-        <div class="modal-content">
-            <button class="close-btn" aria-label="Fermer le modal">&times;</button>
-            <h2 id="modalTitle">Titre du modal</h2>
-            <p>Ceci est le contenu du modal. Ajoutez ici ce que vous voulez&nbsp;!</p>
-        </div>
+  <!-- Modal + son fond -->
+  <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle"
+    aria-hidden="true">
+    <div class="modal-content">
+      <button class="close-btn" aria-label="Fermer le modal">&times;</button>
+      <h2 id="modalTitle">Titre du modal</h2>
+      <p>Ceci est le contenu du modal. Ajoutez ici ce que vous voulez&nbsp;!</p>
     </div>
+  </div>
 
-<script>
-/* ===== Logique JavaScript ===== */
-const openBtn  = document.getElementById('openModalBtn');
-const modal    = document.getElementById('modal');
-const closeBtn = modal.querySelector('.close-btn');
+  <script>
+    /* ===== Logique JavaScript ===== */
+    const openBtn = document.getElementById('openModalBtn');
+    const modal = document.getElementById('modal');
+    const closeBtn = modal.querySelector('.close-btn');
 
-/* --- Ouvrir le modal --- */
-openBtn.addEventListener('click', () => {
-  modal.classList.add('show');
-  modal.removeAttribute('aria-hidden');        // accessibilité
-  document.body.style.overflow = 'hidden';     // bloque le scroll derrière
-  closeBtn.focus();                            // place le focus dans le modal
-});
+    /* --- Ouvrir le modal --- */
+    openBtn.addEventListener('click', () => {
+      modal.classList.add('show');
+      modal.removeAttribute('aria-hidden');        // accessibilité
+      document.body.style.overflow = 'hidden';     // bloque le scroll derrière
+      closeBtn.focus();                            // place le focus dans le modal
+    });
 
-/* --- Fermer le modal (bouton X) --- */
-closeBtn.addEventListener('click', closeModal);
+    /* --- Fermer le modal (bouton X) --- */
+    closeBtn.addEventListener('click', closeModal);
 
-/* --- Fermer en cliquant hors du contenu --- */
-modal.addEventListener('click', (e) => {
-  if (e.target === modal) closeModal();
-});
+    /* --- Fermer en cliquant hors du contenu --- */
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
 
-/* --- Fermer avec la touche Échap --- */
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && modal.classList.contains('show')) {
-    closeModal();
-  }
-});
+    /* --- Fermer avec la touche Échap --- */
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('show')) {
+        closeModal();
+      }
+    });
 
-function closeModal() {
-  modal.classList.remove('show');
-  modal.setAttribute('aria-hidden', 'true');
-  document.body.style.overflow = '';
-  openBtn.focus();                 // rend le focus au bouton initial
-}
-</script>
+    function closeModal() {
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      openBtn.focus();                 // rend le focus au bouton initial
+    }
+  </script>
 </body>
+
 </html>

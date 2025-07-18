@@ -37,7 +37,7 @@ function createElementPanel(type) {
 function editElementPanel(type, element, content) {
     const button = document.createElement('button');
     button.textContent = 'Update';
-    button.onclick = function(event) {
+    button.onclick = function (event) {
         const propertiesBar = document.getElementById('propertiesBar');
         const panelID = propertiesBar.getAttribute("data-element-id");
         const main = document.getElementById(panelID);
@@ -127,7 +127,7 @@ function updatePanelData(element) {
     var dataConfig = JSON.parse(element.getAttribute("dataConfig"));
     var pivotConfig = JSON.parse(element.getAttribute("pivotConfig"));
     const sort = JSON.parse(element.getAttribute("sort"));
-    const limit = {value: 1};
+    const limit = { value: 1 };
 
     // Get the dataset data from the server, using the filter
     var url = `/getDatasetDataByFilter?datasetName=${element.getAttribute("dataset")}`;
@@ -166,12 +166,12 @@ function updatePanelData(element) {
     }
 
     renderFirstRecord(dataset, labels, element);
-   
+
 }
 
 // Function to render the first record component
 function renderFirstRecord(dataset, labels, container) {
-    
+
     console.log("renderFirstRecord");
     console.log(labels);
     if (!container) {
@@ -183,23 +183,21 @@ function renderFirstRecord(dataset, labels, container) {
         return;
     }
     dataconfig = JSON.parse(container.getAttribute("dataConfig"));
-    
+
     container.innerHTML = '';  // Clear the container at the beginning
     //generate the panel
     var panel = document.createElement('div');
     panel.className = 'panel';
-    panel.id = 'panel'+dataset[0].id;
+    panel.id = 'panel' + dataset[0].id;
     panel.draggable = true;
     // create control panel with select to select the function to apply to the field
-    panel.innerHTML ="";
-    createPanelControlPanel(['sum','avg','min','max','count','first','last'], container);
-    try
-    {
-    panel.innerHTML += `<div class="panel-header">${dataconfig[0].fieldName}:</div>`;	
-    panel.innerHTML += `<div class="panel-content">${dataset[0][dataconfig[0].fieldName]}</div>`;
+    panel.innerHTML = "";
+    createPanelControlPanel(['sum', 'avg', 'min', 'max', 'count', 'first', 'last'], container);
+    try {
+        panel.innerHTML += `<div class="panel-header">${dataconfig[0].fieldName}:</div>`;
+        panel.innerHTML += `<div class="panel-content">${dataset[0][dataconfig[0].fieldName]}</div>`;
     }
-    catch(err)
-    {
+    catch (err) {
         console.log(err);
     }
 
@@ -219,27 +217,25 @@ function createPanelControlPanel(data, container) {
     var select = document.createElement('select');
     select.id = 'function';
     select.className = 'function';
-   
+
     data.forEach(function (item) {
-        try
-        {
+        try {
             var option = document.createElement('option');
             option.value = item;
             option.text = item;
-            
+
             if (dataconfig[0].functionName === item) {
                 option.selected = true;
             }
             select.appendChild(option);
         }
-        catch(err)
-        {
+        catch (err) {
             console.log(err);
         }
-       
+
     });
     // Add event listener to the select
-   select.setAttribute('onchange', 'applyFunction(event)');
+    select.setAttribute('onchange', 'applyFunction(event)');
     controlPanel.appendChild(select);
     container.appendChild(controlPanel);
 }

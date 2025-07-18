@@ -1,4 +1,4 @@
-.grid-container{
+.grid-container {
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -7,14 +7,14 @@
     padding: 10px;
     -webkit-box-shadow: 5px 0px 12px 2px #000000;
     box-shadow: 5px 0px 12px 2px #000000;
-    flex-wrap: wrap ;
+    flex-wrap: wrap;
     flex-flow: column wrap;
 
 }
 
-.table-container{
+.table-container {
     float: left;
-    padding : 10px;
+    padding: 10px;
     width: 90%;
     height: 100%;
     align-items: left;
@@ -24,12 +24,12 @@
     display: table;
 }
 
-    
 
-.dataset-container{
+
+.dataset-container {
     float: right;
-    padding : 10px;
-    display : flex;
+    padding: 10px;
+    display: flex;
     flex-Direction: column;
     width: 10%;
     height: 100%;
@@ -46,10 +46,11 @@
 
 .grid-table {
     display: flex;
-    overflow-y: auto; 
+    overflow-y: auto;
     vertical-align: top;
-   
+
 }
+
 .right-panel {
     display: flex;
     flex-direction: row;
@@ -60,7 +61,7 @@
     padding: 10px;
     flex-wrap: wrap;
     justify-content: flex-start;
-    
+
 }
 
 
@@ -70,26 +71,26 @@
     padding: 5px;
     display: table-cell;
     overflow: hidden;
-    
+
 }
 
 .grid-body {
-   vertical-align: top;
-   display: table-row-group;
-   align-items: top;
+    vertical-align: top;
+    display: table-row-group;
+    align-items: top;
 }
 
 
 .grid-cell-header {
     padding: 5px;
- 
+
     background-color: #6d7fcc;
     color: white;
     display: table-cell;
 
 }
 
-.grid-header{
+.grid-header {
     display: table-header-group;
     background-color: #6d7fcc;
     color: white;

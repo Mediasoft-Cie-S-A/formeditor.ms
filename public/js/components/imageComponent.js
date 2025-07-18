@@ -15,14 +15,14 @@
  */
 
 function createElementImage(type) {
-  
+
     element = document.createElement('img');
-            element.src="/img/empty.png";
-    element.id=type+ Date.now(); // Unique ID for each new element
-    element.tagName=type;
-            element.setAttribute('alt', 'na');
-            element.setAttribute('height', '150px');
-            element.setAttribute('width', '150px');
+    element.src = "/img/empty.png";
+    element.id = type + Date.now(); // Unique ID for each new element
+    element.tagName = type;
+    element.setAttribute('alt', 'na');
+    element.setAttribute('height', '150px');
+    element.setAttribute('width', '150px');
     return element;
 }
 

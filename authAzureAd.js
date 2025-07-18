@@ -16,69 +16,71 @@
 
 const OIDCStrategy = require('passport-azure-ad').OIDCStrategy;
 
-module.exports = function(app,session, passport) {
+module.exports = function (app, session, passport) {
 
 
-// Configure the local strategy for use by Passport.
- let strategy={
-  identityMetadata: `https://login.microsoftonline.com/${app.config.authentication.azureAd.tenantId}/v2.0/.well-known/openid-configuration`,
-  clientID: app.config.authentication.azureAd.clientId,
-  responseType: 'code',
-  responseMode: 'query',
-  redirectUrl: 'http://localhost:3000/auth/openid/return',
-  allowHttpForRedirectUrl: true,
-  clientSecret: app.config.authentication.azureAd.clientSecret,
-  validateIssuer: false,
-  passReqToCallback: true,
-  scope: ['profile', 'offline_access', 'https://graph.microsoft.com/mail.read']
-};
+  // Configure the local strategy for use by Passport.
+  let strategy = {
+    identityMetadata: `https://login.microsoftonline.com/${app.config.authentication.azureAd.tenantId}/v2.0/.well-known/openid-configuration`,
+    clientID: app.config.authentication.azureAd.clientId,
+    responseType: 'code',
+    responseMode: 'query',
+    redirectUrl: 'http://localhost:3000/auth/openid/return',
+    allowHttpForRedirectUrl: true,
+    clientSecret: app.config.authentication.azureAd.clientSecret,
+    validateIssuer: false,
+    passReqToCallback: true,
+    scope: ['profile', 'offline_access', 'https://graph.microsoft.com/mail.read']
+  };
 
-console.log(strategy);
+  console.log(strategy);
 
- // Configure the Azure AD strategy for Passport
-passport.use(new OIDCStrategy(strategy,
-  (req, iss, sub, profile, accessToken, refreshToken, params, done) => {
-    if (!profile.oid) {
-      return done(new Error("No oid found"), null);
+  // Configure the Azure AD strategy for Passport
+  passport.use(new OIDCStrategy(strategy,
+    (req, iss, sub, profile, accessToken, refreshToken, params, done) => {
+      if (!profile.oid) {
+        return done(new Error("No oid found"), null);
+      }
+      // You can save the profile information to your user database here
+      return done(null, profile);
     }
-    // You can save the profile information to your user database here
-    return done(null, profile);
-  }
-));
+  ));
 
 
-// Authentication request
-app.get('/auth/openid',
-  passport.authenticate('azuread-openidconnect', { failureRedirect: '/login', 
-  failureMessage: true // This enables failure messages to be provided when authentication fails.
- }),  
-  (req, res) => {
-    res.redirect('/');
-  }
-);
+  // Authentication request
+  app.get('/auth/openid',
+    passport.authenticate('azuread-openidconnect', {
+      failureRedirect: '/login',
+      failureMessage: true // This enables failure messages to be provided when authentication fails.
+    }),
+    (req, res) => {
+      res.redirect('/');
+    }
+  );
 
 
-// Logout
-app.get('/logout', (req, res) => {
-  req.session.destroy((err) => {
-    req.logout();
-    res.redirect('/');
+  // Logout
+  app.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+      req.logout();
+      res.redirect('/');
+    });
   });
-});
 
-// ... [previous code]
+  // ... [previous code]
 
-// Authentication callback
-app.get('/auth/openid/return', 
-    passport.authenticate('azuread-openidconnect', { failureRedirect: '/login'    , 
-  failureMessage: true // This enables failure messages to be provided when authentication fails.
- }),
-   (req, res) => {
-    // Authentication was successful
-    // get username from req.user.oid
-    console.log(req.user);
-    const username = req.user.displayName;
-    res.send(`
+  // Authentication callback
+  app.get('/auth/openid/return',
+    passport.authenticate('azuread-openidconnect', {
+      failureRedirect: '/login',
+      failureMessage: true // This enables failure messages to be provided when authentication fails.
+    }),
+    (req, res) => {
+      // Authentication was successful
+      // get username from req.user.oid
+      console.log(req.user);
+      const username = req.user.displayName;
+      res.send(`
       <!DOCTYPE html>
       <html>
       <head>
@@ -92,11 +94,11 @@ app.get('/auth/openid/return',
       </body>
       </html>
     `);
-  }
-);
+    }
+  );
 
 
-  
+
 
 
 };

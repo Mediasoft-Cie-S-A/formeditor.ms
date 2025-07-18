@@ -14,25 +14,24 @@
  * limitations under the License.
  */
 document.addEventListener("DOMContentLoaded", () => {
-    const modal = document.getElementById("confirmClearModal");
-    const confirmBtn = document.getElementById("confirmClearYes");
-    const cancelBtn = document.getElementById("confirmClearCancel");
-  
-    window.showClearConfirmation = function () {
-      modal.style.display = "flex";
-    };
-  
-    window.confirmClear = function (confirmed) {
-      modal.style.display = "none";
-      if (confirmed) {
-        const formContainer = document.getElementById("formContainer");
-        if (formContainer) {
-          formContainer.innerHTML = "";
-        }
+  const modal = document.getElementById("confirmClearModal");
+  const confirmBtn = document.getElementById("confirmClearYes");
+  const cancelBtn = document.getElementById("confirmClearCancel");
+
+  window.showClearConfirmation = function () {
+    modal.style.display = "flex";
+  };
+
+  window.confirmClear = function (confirmed) {
+    modal.style.display = "none";
+    if (confirmed) {
+      const formContainer = document.getElementById("formContainer");
+      if (formContainer) {
+        formContainer.innerHTML = "";
       }
-    };
-  
-    confirmBtn.addEventListener("click", () => confirmClear(true));
-    cancelBtn.addEventListener("click", () => confirmClear(false));
-  });
-  
+    }
+  };
+
+  confirmBtn.addEventListener("click", () => confirmClear(true));
+  cancelBtn.addEventListener("click", () => confirmClear(false));
+});

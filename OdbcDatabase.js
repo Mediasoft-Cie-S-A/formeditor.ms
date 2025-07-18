@@ -35,10 +35,10 @@ class OdbcDatabase {
       }
       console.log(sql);
       // Execute the query
-    
-      
-       const connection =  await odbc.connect(this.connectionString);  
-       await connection.setIsolationLevel(odbc.SQL_TXN_READ_UNCOMMITTED);
+
+
+      const connection = await odbc.connect(this.connectionString);
+      await connection.setIsolationLevel(odbc.SQL_TXN_READ_UNCOMMITTED);
       const result = await connection.query(sql);
       await connection.close();
       return result;
@@ -63,9 +63,9 @@ class OdbcDatabase {
       sql += ` FETCH FIRST 10 ROWS ONLY`;
       console.log(sql);
       // Execute the query
-     
-       const connection =  await odbc.connect(this.connectionString);
-       await connection.setIsolationLevel(odbc.SQL_TXN_READ_UNCOMMITTED);
+
+      const connection = await odbc.connect(this.connectionString);
+      await connection.setIsolationLevel(odbc.SQL_TXN_READ_UNCOMMITTED);
       const result = await connection.query(sql);
       await connection.close();
       return result;
@@ -89,9 +89,9 @@ class OdbcDatabase {
       console.log(sql);
       // Execute the query
 
-      
-       const connection =  await odbc.connect(this.connectionString);
-       await connection.setIsolationLevel(odbc.SQL_TXN_READ_UNCOMMITTED);
+
+      const connection = await odbc.connect(this.connectionString);
+      await connection.setIsolationLevel(odbc.SQL_TXN_READ_UNCOMMITTED);
       const result = await connection.query(sql);
       await connection.close();
       return result;
@@ -105,9 +105,9 @@ class OdbcDatabase {
     try {
       console.log(queryString);
       // Execute the query
-  
-       const connection =  await odbc.connect(this.connectionString);
-       await connection.setIsolationLevel(odbc.SQL_TXN_READ_UNCOMMITTED);
+
+      const connection = await odbc.connect(this.connectionString);
+      await connection.setIsolationLevel(odbc.SQL_TXN_READ_UNCOMMITTED);
       const result = await connection.query(queryString);
       await connection.close();
       return result;
@@ -120,12 +120,12 @@ class OdbcDatabase {
   async updateData(updateQuery) {
     try {
       // Execute the update query
-  
-      const connection =  await odbc.connect(this.connectionString);
+
+      const connection = await odbc.connect(this.connectionString);
       await connection.setIsolationLevel(odbc.SQL_TXN_READ_COMMITTED);
       const result = await connection.query(updateQuery);
       await connection.close();
-      
+
       return result;
     } catch (err) {
       console.log("Error updating data:", err);
@@ -133,11 +133,11 @@ class OdbcDatabase {
     }
   }
 
-  async deleteData(deleteQuery) {
+  async deleteRecord(deleteQuery) {
     try {
       // Execute the delete query
-      
-      const connection =  await odbc.connect(this.connectionString);  
+
+      const connection = await odbc.connect(this.connectionString);
       await connection.setIsolationLevel(odbc.SQL_TXN_READ_COMMITTED);
       const result = await connection.query(deleteQuery);
       await connection.close();
@@ -148,14 +148,14 @@ class OdbcDatabase {
     }
   }
 
-  
+
   async getTablesList() {
     try {
       // Query to get list of tables in OpenEdge
       console.log("getTablesList");
       const query = `SELECT "_File-Name" name, "_Desc" label FROM PUB."_File" WHERE "_file-Number">0 and "_file-Number"<32768 ORDER BY "_File-Name"`;
       console.log(this.connectionString);
-      const connection =  await odbc.connect(this.connectionString);
+      const connection = await odbc.connect(this.connectionString);
       await connection.setIsolationLevel(odbc.SQL_TXN_READ_UNCOMMITTED);
       const result = await connection.query(query);
       await connection.close();
@@ -173,8 +173,8 @@ class OdbcDatabase {
       query += ` "_Format" 'FORMAT', "_Decimals" 'DECIMAL', "_Width" 'WIDTH', "_Initial" 'DEFAULT' FROM PUB."_Field" `;
       query += ` WHERE PUB."_Field"."_File-Recid" = (SELECT ROWID FROM PUB."_File" WHERE "_File-Name" = '${tableName}')`;
       console.log(query);
-      
-      const connection =  await odbc.connect(this.connectionString);
+
+      const connection = await odbc.connect(this.connectionString);
       await connection.setIsolationLevel(odbc.SQL_TXN_READ_UNCOMMITTED);
       const result = await connection.query(query);
       await connection.close();
@@ -190,8 +190,8 @@ class OdbcDatabase {
       // Query to get indexes of a table in OpenEdge
       const query = `select "_index-name" Name from PUB."_index" idx, PUB."_file" fi where fi."_file-name"='${tableName}' and idx.rowid =(select"_file"."_prime-index" from PUB."_file" fs where fs."_file-name"='${tableName}')`;
       console.log(query);
-      
-      const connection =  await odbc.connect(this.connectionString);
+
+      const connection = await odbc.connect(this.connectionString);
       await connection.setIsolationLevel(odbc.SQL_TXN_READ_UNCOMMITTED);
       const result = await connection.query(query);
       await connection.close();
@@ -203,7 +203,7 @@ class OdbcDatabase {
   }
 
   async queryDataWithPagination(tableName, page, pageSize, fields, filter, orderBy) {
-    
+
     try {
       // create filter base on filer paramenter, for search based on the input values,
       //with field name and value separated by | and each filter separated by ,
@@ -218,16 +218,16 @@ class OdbcDatabase {
         const offset = (page - 1) * pageSize;
 
         var paginatedQuery = `select  ${fieldList} FROM PUB."${tableName}"`;
-        if (filter ) {
-        //  console.log("filter", filter);
+        if (filter) {
+          //  console.log("filter", filter);
           paginatedQuery += this.jsonToWhereClause(filter);
         }
         // order by
         // paginatedQuery += ` ORDER BY ....
-       
+
         if (orderBy && Array.isArray(orderBy) && orderBy.length > 0) {
           const orderClause = orderBy
-            .map((order) => `"${order.fieldName}" ${order.order== "desc" ? "DESC" : "ASC"}`)
+            .map((order) => `"${order.fieldName}" ${order.order == "desc" ? "DESC" : "ASC"}`)
             .join(", ");
           paginatedQuery += ` ORDER BY ${orderClause}`;
         }
@@ -235,19 +235,19 @@ class OdbcDatabase {
         paginatedQuery += ` OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
         console.log(paginatedQuery);
 
-      
+
         // Execute the paginated query
-        
-        const connection =  await odbc.connect(this.connectionString);
+
+        const connection = await odbc.connect(this.connectionString);
         await connection.setIsolationLevel(odbc.SQL_TXN_READ_UNCOMMITTED);
         const result = await connection.query(paginatedQuery);
-          
+
         await connection.close();
         console.log("close connection");
         // Return the result
         return result;
       }
-        // sum up of what filter has
+      // sum up of what filter has
       if (!filterJSON || !filterJSON.filters || filterJSON.filters.length === 0) {
         console.log("[FILTRES] Aucun filtre actif.");
       } else {
@@ -266,40 +266,40 @@ class OdbcDatabase {
     } // finally block to ensure connection is closed
   }
 
-   jsonToWhereClause(json) {
-    
+  jsonToWhereClause(json) {
+
     let whereClause = '';
     console.log("json ->", json);
     if (json.filters) {
-     
-        let conditions = json.filters.map(filter => {
-            console.log(filter);
-            const { field, operator, value, values, type } = filter;
-            const dbField = field;
 
-            // If values array is present, use IN clause
-            if (values && values.length > 0) {
-                const formattedValues = values.map(val => 
-                    type === 'character' ? `'${val}'` : val
-                ).join(', ');
-                return `${dbField} IN (${formattedValues})`;
-            }
-            
-            // If single value, use operator directly
-            if (value && operator) {
-                const formattedValue = type === 'character' ? `'${value}'` : value;
-                return `${dbField} ${operator} ${formattedValue}`;
-            }
-            
-            return ''; // Return empty string if no valid condition found
-        });
+      let conditions = json.filters.map(filter => {
+        console.log(filter);
+        const { field, operator, value, values, type } = filter;
+        const dbField = field;
 
-        // Join all conditions with AND
-        whereClause = conditions.filter(Boolean).join(' AND ');
+        // If values array is present, use IN clause
+        if (values && values.length > 0) {
+          const formattedValues = values.map(val =>
+            type === 'character' ? `'${val}'` : val
+          ).join(', ');
+          return `${dbField} IN (${formattedValues})`;
+        }
+
+        // If single value, use operator directly
+        if (value && operator) {
+          const formattedValue = type === 'character' ? `'${value}'` : value;
+          return `${dbField} ${operator} ${formattedValue}`;
+        }
+
+        return ''; // Return empty string if no valid condition found
+      });
+
+      // Join all conditions with AND
+      whereClause = conditions.filter(Boolean).join(' AND ');
     }
 
     return whereClause ? ` WHERE ${whereClause}` : '';
-}
+  }
 
 
 
@@ -465,7 +465,7 @@ class OdbcDatabase {
       if (data.fields.length !== data.values.length) {
         throw new Error("Fields and values length mismatch.");
       }
-      for( let i = 0; i < data.fields.length; i++) {
+      for (let i = 0; i < data.fields.length; i++) {
         setdata += `"${data.fields[i]}" = '${data.values[i]}',`;
       }
       // remove the last comma
@@ -475,8 +475,8 @@ class OdbcDatabase {
 
       console.log(sql);
       // Execute the query
-     
-      const connection =  await odbc.connect(this.connectionString);
+
+      const connection = await odbc.connect(this.connectionString);
       await connection.setIsolationLevel(odbc.SQL_TXN_READ_COMMITTED);
       const result = await connection.query(sql);
       await connection.close();
@@ -489,6 +489,7 @@ class OdbcDatabase {
 
   // insert new record
   async insertRecord(tableName, data) {
+    console.log("We use this to do insert");
     try {
       let fields = "";
       let values = "";
@@ -497,21 +498,21 @@ class OdbcDatabase {
         throw new Error("Invalid data format. 'fields' and 'values' are required.");
       }
       if (typeof data.fields === "object") {
-        fields = "\""+ data.fields.join("\",\"") + "\""; // add quotes around each field
+        fields = "\"" + data.fields.join("\",\"") + "\""; // add quotes around each field
       }
       if (typeof data.values === "object") {
-        values =  "'"+ data.values.join("','") + "'"; // add quotes around each value  
+        values = "'" + data.values.join("','") + "'"; // add quotes around each value  
       }
       // remove the last comma and quote
-   
-      
+
+
       // Construct the full SQL statement
       const sql = `INSERT INTO PUB.${tableName} (${fields}) VALUES (${values})`;
       // Note: The values should be properly escaped to prevent SQL injection
       console.log(sql);
       // Execute the query
-      const connection =  await odbc.connect(this.connectionString);
-      await connection.setIsolationLevel(odbc.SQL_TXN_READ_COMMITTED);     
+      const connection = await odbc.connect(this.connectionString);
+      await connection.setIsolationLevel(odbc.SQL_TXN_READ_COMMITTED);
 
       const result = await connection.query(sql);
       await connection.close();
@@ -531,7 +532,7 @@ class OdbcDatabase {
       const sql = `ALTER TABLE PUB.${tableName} ADD ${columnName} ${columnType}`;
       console.log(sql);
       // Execute the query
-      const connection =  await odbc.connect(this.connectionString);
+      const connection = await odbc.connect(this.connectionString);
       await connection.setIsolationLevel(odbc.SQL_TXN_READ_COMMITTED);
       const result = await connection.query(sql);
       await connection.close();
@@ -550,7 +551,7 @@ class OdbcDatabase {
 
       // Execute the query
       console.log(sql);
-      const connection =  await odbc.connect(this.connectionString);
+      const connection = await odbc.connect(this.connectionString);
       await connection.setIsolationLevel(odbc.SQL_TXN_READ_COMMITTED);
       let result = await connection.query(sql);
       await connection.close();
@@ -568,7 +569,7 @@ class OdbcDatabase {
       const sql = `CREATE TABLE PUB.${tableName} (${columns.join(", ")})`;
       console.log(sql);
       // Execute the query
-      const connection =  await odbc.connect(this.connectionString);
+      const connection = await odbc.connect(this.connectionString);
       await connection.setIsolationLevel(odbc.SQL_TXN_READ_COMMITTED);
       const result = await connection.query(sql);
       await connection.close();
@@ -591,7 +592,7 @@ class OdbcDatabase {
       }
       console.log(sql);
       // Execute the query
-      const connection =  await odbc.connect(this.connectionString);
+      const connection = await odbc.connect(this.connectionString);
       await connection.setIsolationLevel(odbc.SQL_TXN_READ_UNCOMMITTED);
       const result = await connection.query(sql);
       await connection.close();
@@ -612,7 +613,7 @@ class OdbcDatabase {
       const sql = `SELECT ${fieldList} FROM PUB.${tableName}`;
       console.log(sql);
       // Execute the query
-      const connection =  await odbc.connect(this.connectionString);
+      const connection = await odbc.connect(this.connectionString);
       await connection.setIsolationLevel(odbc.SQL_TXN_READ_UNCOMMITTED);
       const result = await connection.query(sql);
       await connection.close();
@@ -628,7 +629,7 @@ class OdbcDatabase {
     }
   }
 
-  async nextSequence(seqTable,seqName) {
+  async nextSequence(seqTable, seqName) {
     let query = `SELECT TOP 1 PUB.${seqName}.NEXTVAL FROM PUB."${seqTable}"`;
     console.log(".........................................................");
     console.log(query);

@@ -13,37 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-function createQRCodeScanner(type){
-    var main= document.createElement('div');
+function createQRCodeScanner(type) {
+    var main = document.createElement('div');
     main.classList.add('form-container');
-    main.id=type+ Date.now(); // Unique ID for each new element
+    main.id = type + Date.now(); // Unique ID for each new element
     main.draggable = true;
-    main.tagName=type;
+    main.tagName = type;
     const qrCodeScanner = document.createElement('div');
-    qrCodeScanner.id="QRScan"+Date.now();
-    qrCodeScanner.tagName="QRScan";
-    qrCodeScanner.style.width="500px";
+    qrCodeScanner.id = "QRScan" + Date.now();
+    qrCodeScanner.tagName = "QRScan";
+    qrCodeScanner.style.width = "500px";
     main.appendChild(qrCodeScanner);
     const qrCodeScannerResult = document.createElement('div');
-    qrCodeScannerResult.id="QRScanResult"+Date.now();
-    qrCodeScannerResult.tagName="QRScanResult";
+    qrCodeScannerResult.id = "QRScanResult" + Date.now();
+    qrCodeScannerResult.tagName = "QRScanResult";
     main.appendChild(qrCodeScannerResult);
     const qrCodeScannerButton = document.createElement('button');
-    qrCodeScannerButton.innerHTML="Scan QRCode";
-    qrCodeScannerButton.setAttribute("onclick","startScanner('"+qrCodeScanner.id+"')");
-      
+    qrCodeScannerButton.innerHTML = "Scan QRCode";
+    qrCodeScannerButton.setAttribute("onclick", "startScanner('" + qrCodeScanner.id + "')");
+
 
     main.appendChild(qrCodeScannerButton);
 
     return main;
 }
 
-function editQRCodeScanner(type,element,content)
-{
+function editQRCodeScanner(type, element, content) {
 
 }
-function startScanner(ID)
-{
+function startScanner(ID) {
     var html5QrcodeScanner = new Html5QrcodeScanner(
         ID, { fps: 10, qrbox: 250 });
     html5QrcodeScanner.render(onScanSuccess);

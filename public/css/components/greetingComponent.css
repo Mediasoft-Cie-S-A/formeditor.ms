@@ -15,8 +15,10 @@
 
     /* fait du composant une boîte « bloc » à largeur intrinsèque,
        puis le centre horizontalement dans son parent */
-    display: block;          /* ou inline-block si vous préférez   */
-    margin: 0 auto;          /* ←→ centre dans le parent           */
+    display: block;
+    /* ou inline-block si vous préférez   */
+    margin: 0 auto;
+    /* ←→ centre dans le parent           */
 }
 
 
@@ -24,6 +26,7 @@
     display: block;
     margin-top: 6px;
 }
+
 .greeting-editor input[type="checkbox"] {
     width: 100%;
     box-sizing: border-box;

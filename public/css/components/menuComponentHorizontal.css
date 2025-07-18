@@ -2,78 +2,89 @@
 
 /* Container for the whole horizontal menu */
 .horizontal-menu {
-    display: flex;
-    align-items: center;
-    background-color: #f9f9f9;
-    padding: 10px 20px;
-    gap: 30px;
-    flex-wrap: wrap; /* Allows items to wrap onto multiple lines */
-    gap: 5px; /* Optional: adds spacing between items */
-    padding: 0;
-    margin: 0;
-    list-style: none;
-  }
-  
-  /* Each top-level item */
-  .horizontal-menu > li {
-    padding: 6px 10px; /* Réduit le padding interne */
-    list-style: none;
-    position: relative;
-    padding: 8px 12px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-  }
-  
-  .horizontal-menu > li:hover {
-    background-color: #eaeaea;
-    border-radius: 8px;
-  }
-  
-  /* Submenu (hidden by default) */
-  .horizontal-submenu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    border-radius: 8px;
-    min-width: 180px;
-    padding: 10px 0;
-    z-index: 1000;
-  }
-  
-  /* Submenu items */
-  .horizontal-submenu li {
-    list-style: none;
-    padding: 8px 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .horizontal-submenu li:hover {
-    background-color: #fff9f9;
-  }
-  
-  /* Animation for submenu */
-  .horizontal-submenu.show {
-    display: block;
-    animation: fadeIn 0.3s ease;
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  
-  .menu-editor-container {
-    width: 100%;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 10px;
+  display: flex;
+  align-items: center;
+  background-color: #f9f9f9;
+  padding: 10px 20px;
+  gap: 30px;
+  flex-wrap: wrap;
+  /* Allows items to wrap onto multiple lines */
+  gap: 5px;
+  /* Optional: adds spacing between items */
+  padding: 0;
+  margin: 0;
+  list-style: none;
 }
+
+/* Each top-level item */
+.horizontal-menu>li {
+  padding: 6px 10px;
+  /* Réduit le padding interne */
+  list-style: none;
+  position: relative;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.horizontal-menu>li:hover {
+  background-color: #eaeaea;
+  border-radius: 8px;
+}
+
+/* Submenu (hidden by default) */
+.horizontal-submenu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  min-width: 180px;
+  padding: 10px 0;
+  z-index: 1000;
+}
+
+/* Submenu items */
+.horizontal-submenu li {
+  list-style: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.horizontal-submenu li:hover {
+  background-color: #fff9f9;
+}
+
+/* Animation for submenu */
+.horizontal-submenu.show {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.menu-editor-container {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+}
+
 .menu-bar-wrapper {
   display: flex;
   justify-content: space-between;
@@ -88,10 +99,14 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background-color: #f9f9f9; /* ✅ AJOUTÉ pour égalité avec menu */
-  padding: 5px 10px;          /* ✅ AJOUTÉ */
-  border: 1px solid #ccc;     /* ✅ AJOUTÉ */
-  border-radius: 6px;         /* ✅ cohérence */
+  background-color: #f9f9f9;
+  /* ✅ AJOUTÉ pour égalité avec menu */
+  padding: 5px 10px;
+  /* ✅ AJOUTÉ */
+  border: 1px solid #ccc;
+  /* ✅ AJOUTÉ */
+  border-radius: 6px;
+  /* ✅ cohérence */
 }
 
 .translate-container div {
@@ -107,7 +122,7 @@
   justify-content: center;
   align-items: center;
   background-color: #e6f0ff;
-color: #333;
+  color: #333;
 }
 
 .translate-container select {
@@ -123,8 +138,10 @@ color: #333;
 
 
 .horizontal-menu li {
-  flex: 0 1 auto; /* Items will not grow but can shrink and have a base size */
-  margin: 5px; /* Optional: adds spacing around each menu item */
+  flex: 0 1 auto;
+  /* Items will not grow but can shrink and have a base size */
+  margin: 5px;
+  /* Optional: adds spacing around each menu item */
 }
 
 .horizontal-menu li {
@@ -139,15 +156,14 @@ color: #333;
   background-color: #e6f0ff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
-.horizontal-menu > li > a span {
+
+.horizontal-menu>li>a span {
   color: #666;
   font-weight: normal;
 }
+
 #rightSideMenu {
   display: flex;
   justify-content: center;
   align-items: center;
 }
-
-
-

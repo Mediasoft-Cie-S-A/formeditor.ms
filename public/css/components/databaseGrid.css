@@ -45,6 +45,7 @@
   overflow-y: auto;
   vertical-align: top;
 }
+
 .right-panel {
   display: flex;
   flex-direction: row;
@@ -65,6 +66,7 @@
   align-items: left;
   padding: 5px;
 }
+
 .grid-row:hover {
   color: #6d7fcc;
 }
@@ -101,23 +103,30 @@
 }
 
 .grid-row-selected {
-  background-color: #fff3cd !important; /* Light pastel yellow */
-  color: #212529 !important; /* Dark text for good readability */
-  border: 2px solid #ffc107 !important; /* Amber border */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow around the selected row */
-  transform: scale(1.02); /* Slight zoom effect */
-  transition: all 0.3s ease; /* Smooth animation for all properties */
+  background-color: #fff3cd !important;
+  /* Light pastel yellow */
+  color: #212529 !important;
+  /* Dark text for good readability */
+  border: 2px solid #ffc107 !important;
+  /* Amber border */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  /* Soft shadow around the selected row */
+  transform: scale(1.02);
+  /* Slight zoom effect */
+  transition: all 0.3s ease;
+  /* Smooth animation for all properties */
 }
 
 .grid-row-selected:hover {
-  background-color: #ffe8a1 !important; /* Even lighter on hover */
+  background-color: #ffe8a1 !important;
+  /* Even lighter on hover */
 }
 
 
 
 .grid-row-selected:hover {
   background-color: #859bfc;
- 
+
 }
 
 .panel {
@@ -134,6 +143,8 @@
 }
 
 .selected-panel {
-  background-color: #d3f2d3 !important; /* Light green for selected panel */
-  border-color: #28a745; /* Green border for selected panel */
+  background-color: #d3f2d3 !important;
+  /* Light green for selected panel */
+  border-color: #28a745;
+  /* Green border for selected panel */
 }

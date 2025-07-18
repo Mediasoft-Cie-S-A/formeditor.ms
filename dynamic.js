@@ -18,74 +18,74 @@ const mongoClient = require("mongodb").MongoClient;
 
 module.exports = function (app, mongoDbUrl, dbName) {
   const checkAuthenticated = (req, res, next) => {
-  //  console.log(app.passport);
+    //  console.log(app.passport);
     if (req.isAuthenticated()) {
       return next();
     }
     res.redirect("/login");
   };
- 
-   async function registerDynamicRoutes() {
+
+  async function registerDynamicRoutes() {
     console.log("Registering dynamic routes from the database...");
-        const client = new mongoClient(mongoDbUrl, {});
-        client.connect();
-        const db = client.db(dbName);
-        const pageCol = db.collection("pages");
-        // Create a new collection for pages if it doesn't exist
-        if (!pageCol) {
-          console.error("Collection 'Pages' does not exist in the database.");
-          return;
+    const client = new mongoClient(mongoDbUrl, {});
+    client.connect();
+    const db = client.db(dbName);
+    const pageCol = db.collection("pages");
+    // Create a new collection for pages if it doesn't exist
+    if (!pageCol) {
+      console.error("Collection 'Pages' does not exist in the database.");
+      return;
+    }
+
+    pageCol.find({}).toArray().then(pages => {
+      console.log(`Found ${pages.length} pages in the database.`);
+      if (pages.length === 0) {
+        console.warn("No pages found in the database.");
+        return;
+      }
+      pages.forEach(({ slug, layout, content, title, meta, header }) => {
+        console.log(`Defining route for slug: ${slug}, layout: ${layout}, title: ${title}`);
+        // Evita collisioni con rotte già definite
+        if (app._router.stack.some(r => r.route?.path === slug)) return;
+        console.log(`Registering route: ${slug}`);
+        // check if the first character of the slug is a slash
+        if (!slug.startsWith("/")) {
+          slug = `/${slug}`;
         }
-       
-        pageCol.find({}).toArray().then(pages => {
-          console.log(`Found ${pages.length} pages in the database.`);
-          if (pages.length === 0) {
-            console.warn("No pages found in the database.");
-            return;
-          }
-          pages.forEach(({ slug, layout, content, title, meta, header }) => {
-            console.log(`Defining route for slug: ${slug}, layout: ${layout}, title: ${title}`);
-          // Evita collisioni con rotte già definite
-          if (app._router.stack.some(r => r.route?.path === slug)) return;
-            console.log(`Registering route: ${slug}`);
-          // check if the first character of the slug is a slash
-          if (!slug.startsWith("/")) {
-           slug = `/${slug}`;
-          }
-          // check if meta is an object
-          if (typeof meta !== 'object' || meta === null) {
-            meta = {};
-          }
-          // assign meta.description if not defined
-          if (!meta.description) {
-            meta.description = `Page ${title}`;
-          }
-          // assign meta.keywords if not defined
-          if (!meta.keywords) {
-            meta.keywords = title.split(" ").join(", ");
-          }
-          app.get(slug, (req, res) => {
-            res.render(`layouts/${layout}.ejs`, {
-              title,
-              meta,
-              body: content ,  // verrà iniettato nella view
-              description: meta.description,
-              keywords: meta.keywords,
-              header: header || "" // Aggiungi header se esiste
-            });
+        // check if meta is an object
+        if (typeof meta !== 'object' || meta === null) {
+          meta = {};
+        }
+        // assign meta.description if not defined
+        if (!meta.description) {
+          meta.description = `Page ${title}`;
+        }
+        // assign meta.keywords if not defined
+        if (!meta.keywords) {
+          meta.keywords = title.split(" ").join(", ");
+        }
+        app.get(slug, (req, res) => {
+          res.render(`layouts/${layout}.ejs`, {
+            title,
+            meta,
+            body: content,  // verrà iniettato nella view
+            description: meta.description,
+            keywords: meta.keywords,
+            header: header || "" // Aggiungi header se esiste
           });
         });
-        }
-        ).catch(err => {
-          console.error("Error fetching pages:", err);
-        });
-      } // register dynamic routes from the database
+      });
+    }
+    ).catch(err => {
+      console.error("Error fetching pages:", err);
+    });
+  } // register dynamic routes from the database
 
-  
+
 
 
   app.get("/", (req, res) => {
-    res.redirect("/index");
+    res.redirect("/dashboard");
   });
 
   app.get("/index", (req, res) => {
@@ -99,7 +99,7 @@ module.exports = function (app, mongoDbUrl, dbName) {
     res.render("editor.ejs");
   });
 
-   // 👇 Export registerDynamicRoutes so it can be called externally
+  // 👇 Export registerDynamicRoutes so it can be called externally
   return {
     registerDynamicRoutes
   };

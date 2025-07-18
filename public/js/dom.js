@@ -67,11 +67,11 @@ function jsonToDom(json, parent) {
   } else {
     createDomElement(json, parent);
   }
-  
-}
-  // planning
 
-function renderElements(parent){
+}
+// planning
+
+function renderElements(parent) {
   /*  var planningElements = parent.querySelectorAll('div[tagname="planning"]');
   for (var i = 0; i < planningElements.length; i++) {
     console.log("planning:" + planningElements[i]);
@@ -102,53 +102,53 @@ function renderElements(parent){
     console.log("menuComponent:" + menuElements[i]);
     rendenderMenuComponent(menuElements[i].getAttribute("tagName"), menuElements[i]);
   } */
- // load the config in the element.json
- loadJson("/elementsConfig")
-  .then((data) => {
-     console.log(data);
+  // load the config in the element.json
+  loadJson("/elementsConfig")
+    .then((data) => {
+      console.log(data);
 
-    
-    // Loop through each element in the data
-    for (const elementId in data) {
-      {
-        const element = data[elementId];
-       
-        
-            // Check if the element has a tagname attribute
-            if (element.type) {
-              // Find all elements with the specified tagname
-              var elements = parent.querySelectorAll('div[tagname="' + element.type + '"]');
-              // Loop through each found element and apply the configuration
-              for (var j = 0; j < elements.length; j++) {
-                      var el = elements[j];
-                      console.log("el:" + el);
-                      // Apply the configuration to the element
-                    // get the render function from the config
-                      var renderFunction = element.renderFunction;
-                      if (renderFunction) {
-                        console.log("renderFunction:", renderFunction);
-                      
-                        // ⚠️ Sécurité spécifique pour renderMenuComponentHorizontal
-                        if (
-                          renderFunction === "renderMenuComponentHorizontal" &&
-                          (!el.getAttribute("items") || el.getAttribute("items") === "null")
-                        ) {
-                          console.warn("⛔ Menu ignoré temporairement car 'items' est vide.");
-                          continue; // Skip this element
-                        }
-                      
-                        window[renderFunction](el);
-                      } else {
-                        console.log("No render function found for tagname: " + element.type);
-                      } // end if renderFunction
-                  } // end for (var j = 0; j < elements.length; j++)
-              } // end  
+
+      // Loop through each element in the data
+      for (const elementId in data) {
+        {
+          const element = data[elementId];
+
+
+          // Check if the element has a tagname attribute
+          if (element.type) {
+            // Find all elements with the specified tagname
+            var elements = parent.querySelectorAll('div[tagname="' + element.type + '"]');
+            // Loop through each found element and apply the configuration
+            for (var j = 0; j < elements.length; j++) {
+              var el = elements[j];
+              console.log("el:" + el);
+              // Apply the configuration to the element
+              // get the render function from the config
+              var renderFunction = element.renderFunction;
+              if (renderFunction) {
+                console.log("renderFunction:", renderFunction);
+
+                // ⚠️ Sécurité spécifique pour renderMenuComponentHorizontal
+                if (
+                  renderFunction === "renderMenuComponentHorizontal" &&
+                  (!el.getAttribute("items") || el.getAttribute("items") === "null")
+                ) {
+                  console.warn("⛔ Menu ignoré temporairement car 'items' est vide.");
+                  continue; // Skip this element
+                }
+
+                window[renderFunction](el);
+              } else {
+                console.log("No render function found for tagname: " + element.type);
+              } // end if renderFunction
+            } // end for (var j = 0; j < elements.length; j++)
+          } // end  
         } // end if (element.tagname)  
       }
-  })
-  .catch((err) => {
-    console.error(err);
-  });
+    })
+    .catch((err) => {
+      console.error(err);
+    });
 
 }
 // Function to create DOM element from JSON
@@ -159,8 +159,16 @@ function createDomElement(json, parent) {
 
     // Set attributes
     if (json.attributes) {
+
       for (var attr in json.attributes) {
-        element.setAttribute(attr, json.attributes[attr]);
+
+
+        try {
+          element.setAttribute(attr, json.attributes[attr]);
+        }
+        catch {
+          console.log("error: " + attr);
+        }
       }
     }
 
@@ -216,33 +224,32 @@ function onTabSwitch(event) {
       break;
 
     case "#formsList":
-          console.log("formsList");
-          // Load forms
-          loadForms();
-          
-        break;
-        
+      console.log("formsList");
+      // Load forms
+      loadForms();
+
+      break;
+
     case "#editForm":
-          console.log("editForm");
-          // Load forms
-          drageDroptableTableList(document.getElementById("drageDroptablesList"));
-          dragDropApiList(document.getElementById("dragDropApiList"));
-        break;
+      console.log("editForm");
+      // Load forms
+      drageDroptableTableList(document.getElementById("drageDroptablesList"));
+      dragDropApiList(document.getElementById("dragDropApiList"));
+      break;
+
     case "#renderForm":
-          console.log("renderForm");
-          break;
+      console.log("renderForm");
+      break;
 
     case "#DatabaseForm":
-              const list = document.getElementById("ContentTableListBar");
-          const detailsDiv = document.getElementById("mtableDetails");
-          createEditableTableList(list, detailsDiv);
-          break;
+      const list = document.getElementById("ContentTableListBar");
+      const detailsDiv = document.getElementById("mtableDetails");
+      createEditableTableList(list, detailsDiv);
+      break;
   }
 
 
 }
-
-
 
 function jsonToDomBusinessComponent(json, parent) {
   // Helper function to create an element from JSON structure
@@ -276,7 +283,7 @@ function jsonToDomBusinessComponent(json, parent) {
     createDomElement(json, parent);
   }
 
-  
+
   // Processing specific elements with `tagname` attribute
   // Planning
   var planningElements = parent.querySelectorAll('div[tagname="planning"]');
@@ -307,8 +314,6 @@ function jsonToDomBusinessComponent(json, parent) {
   }
 }
 
- 
-
 // Add event listeners to tab links
 var tabLinks = document.querySelectorAll(".nav-tabs a");
 tabLinks.forEach(function (link) {
@@ -320,6 +325,6 @@ tabLinks.forEach(function (link) {
 
 // Set the first tab as active
 if (tabLinks.length > 0) {
- // simulate a click on the first tab
+  // simulate a click on the first tab
   tabLinks[0].click();
 }

@@ -32,8 +32,8 @@ const gridDataStruct = {
     "999": "9,3",
     "1010": "10,2",
     "1111": "11,1",
-    "1212": "12"    
-   
+    "1212": "12"
+
 };
 
 function createGridElement(type, id) {
@@ -117,7 +117,7 @@ function drawGridImage(dimensions) {
 
     ctx.strokeStyle = '#000';
     ctx.lineWidth = 1;
-    
+
     parts.forEach(part => {
         const partWidth = (canvas.width * part) / totalParts;
         ctx.strokeRect(currentX, 0, partWidth, canvas.height);
@@ -149,13 +149,13 @@ function showHtmlGridModal(main) {
         modal.style.width = '550px';
         modal.style.height = '250px';
         modal.style.borderTop = '5px solid #007bff';
-        modal.style.borderBottom = '5px solid #007bff'; 
-       document.body.appendChild(modal);
+        modal.style.borderBottom = '5px solid #007bff';
+        document.body.appendChild(modal);
     }
-    
-    
+
+
     // Generate modal content dynamically in a loop
-    let  modalContent ='<div id="htmlGridOptions" class="row"><div  style="width:500px;padding:10px;magin:10px;flex-direction: row;" >';
+    let modalContent = '<div id="htmlGridOptions" class="row"><div  style="width:500px;padding:10px;magin:10px;flex-direction: row;" >';
 
     Object.entries(gridDataStruct).forEach(([id, dimensions]) => {
         const imgSrc = drawGridImage(dimensions);
@@ -172,7 +172,7 @@ function showHtmlGridModal(main) {
     // add space between the grid and the close button
     modalContent += '<div class="row" style="height:50px;"></div>';
     modalContent += '<div class="row"><button class="button float-right"  onclick="closeHtmlGridModal()">Close</button></div>';
-  
+
     modal.innerHTML = modalContent;
     modal.setAttribute('data-main-id', main.id);
     const overl = document.getElementById('overlayModal');

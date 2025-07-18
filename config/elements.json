@@ -109,7 +109,7 @@
     "icon": "fa fa-list",
     "renderFunction": "refreshCombox"
   },
-   "booleanSearch": {
+  "booleanSearch": {
     "type": "booleanSearch",
     "description": "Boolean Search",
     "category": "Business Logic",
@@ -130,8 +130,8 @@
     "styles": "cookieStorage.css",
     "icon": "fa fa-cookie",
     "renderFunction": "renderCookieStorage"
-},
- "SearchWindow": {
+  },
+  "SearchWindow": {
     "type": "SearchWindow",
     "description": "Search Window",
     "category": "Business Logic",
@@ -153,7 +153,6 @@
     "icon": "fa fa-th-large",
     "renderFunction": "renderDataPanel"
   },
-
   "workflow": {
     "type": "workflow",
     "description": "Workflow",
@@ -175,7 +174,7 @@
     "styles": "fileExplorer.css",
     "icon": "fa fa-folder-open",
     "renderFunction": ""
-  },  
+  },
   "jscode": {
     "type": "jscode",
     "description": "javascript code",
@@ -285,8 +284,8 @@
     "styles": "chart.css",
     "icon": "fa fa-bar-chart",
     "renderFunction": "renderDataChart"
-},
-"lineChart": {
+  },
+  "lineChart": {
     "type": "lineChart",
     "description": "Line Chart",
     "category": "Charts",
@@ -319,7 +318,6 @@
     "icon": "fa fa-dot-circle-o",
     "renderFunction": "renderDataChart"
   },
-
   "radarChart": {
     "type": "padarChart",
     "description": "Radar Chart",
@@ -640,15 +638,15 @@
     "renderFunction": ""
   },
   "buttonLink": {
-  "type": "buttonLink",                
-  "description": "Link Button",        
-  "category": "Form",
-  "scriptName": "buttonLinkComponent.js", 
-  "createFunction": "createButtonLink",
-  "editFunction":  "editButtonLink",
-  "styles": "genericInput.css",         
-  "icon": "fa fa-link",                 
-  "renderFunction": ""                  
+    "type": "buttonLink",
+    "description": "Link Button",
+    "category": "Form",
+    "scriptName": "buttonLinkComponent.js",
+    "createFunction": "createButtonLink",
+    "editFunction": "editButtonLink",
+    "styles": "genericInput.css",
+    "icon": "fa fa-link",
+    "renderFunction": ""
   },
   "submit": {
     "type": "submit",
@@ -727,7 +725,6 @@
     "icon": "fa fa-calendar",
     "renderFunction": ""
   },
-
   "month": {
     "type": "month",
     "description": "Month field",
@@ -793,8 +790,7 @@
     "styles": "greetingComponent.css",
     "icon": "fa fa-smile-o",
     "renderFunction": "renderGreetingComponent"
-  }
-  ,
+  },
   "tel": {
     "type": "tel",
     "description": "Telephone field",

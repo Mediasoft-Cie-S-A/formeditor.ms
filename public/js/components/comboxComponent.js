@@ -18,18 +18,18 @@
 function createElementCombox(type) {
     element = document.createElement("div");
     element.textContent = type;
-    element.id=type+ Date.now(); // Unique ID for each new element
-    element.tagName=type;
+    element.id = type + Date.now(); // Unique ID for each new element
+    element.tagName = type;
     element.className = 'container';
     // create label
     var label = document.createElement('label');
     label.textContent = 'label';
-    
-    label.tagName=type;
+
+    label.tagName = type;
     // create select
     var select = document.createElement('select');
     select.textContent = 'select';
-    select.tagName=type;
+    select.tagName = type;
     select.setAttribute('onclik', 'filterData(this)');
     // create options
     // insert options
@@ -41,101 +41,97 @@ function createElementCombox(type) {
 
 
 
-function editElementCombox(type,element,content)
-{
-   // adding tableName property to the element
-   const button = document.createElement('button');
-   button.textContent = 'update';
-   button.onclick = function() {
+function editElementCombox(type, element, content) {
+    // adding tableName property to the element
+    const button = document.createElement('button');
+    button.textContent = 'update';
+    button.onclick = function () {
         const propertiesBar = document.getElementById('propertiesBar');
-        const gridID=propertiesBar.getAttribute("data-element-id");                
-        const main = document.getElementById(gridID);  
-        updateComboBoxData(main,content);
-   };
-   content.appendChild(button);
-   content.appendChild(createMultiSelectItem("Data", "data", "data"));
-   content.appendChild(createMultiSelectItem("Link", "link", "link")); 
-   content.appendChild(createSelectItem("Filter", "filter", "filter",element.getAttribute('filter'),"text",true));  
+        const gridID = propertiesBar.getAttribute("data-element-id");
+        const main = document.getElementById(gridID);
+        updateComboBoxData(main, content);
+    };
+    content.appendChild(button);
+    content.appendChild(createMultiSelectItem("Data", "data", "data"));
+    content.appendChild(createMultiSelectItem("Link", "link", "link"));
+    content.appendChild(createSelectItem("Filter", "filter", "filter", element.getAttribute('filter'), "text", true));
 
-   // load the data
-   // check if jsonData is not empty
-   if (element.getAttribute('datasearch')!=null)
-   {
-       var target=content.querySelector('#Data');
-       var jsonData=JSON.parse(element.getAttribute('datasearch'));
-       jsonData.forEach(fieldJson => {
-           addFieldToPropertiesBar(target,fieldJson);
-       });
-   }
+    // load the data
+    // check if jsonData is not empty
+    if (element.getAttribute('datasearch') != null) {
+        var target = content.querySelector('#Data');
+        var jsonData = JSON.parse(element.getAttribute('datasearch'));
+        jsonData.forEach(fieldJson => {
+            addFieldToPropertiesBar(target, fieldJson);
+        });
+    }
 
-   if (element.getAttribute('datalink')!=null)
-   {
-       var target=content.querySelector('#Link');
-       var jsonData=JSON.parse(element.getAttribute('datalink'));
-       jsonData.forEach(fieldJson => {
-           addFieldToPropertiesBar(target,fieldJson);
-       });
-   }
+    if (element.getAttribute('datalink') != null) {
+        var target = content.querySelector('#Link');
+        var jsonData = JSON.parse(element.getAttribute('datalink'));
+        jsonData.forEach(fieldJson => {
+            addFieldToPropertiesBar(target, fieldJson);
+        });
+    }
 }
 
-function updateComboBoxData(main,content)
-{
-   // get all the span elements from data 
-    var data=content.querySelectorAll('#Data span[name="dataContainer"]');
+function updateComboBoxData(main, content) {
+    // get all the span elements from data 
+    var data = content.querySelectorAll('#Data span[name="dataContainer"]');
     // generate the json of all the data
-    var jsonData=[];
+    var jsonData = [];
     data.forEach(span => {
         console.log(span.getAttribute("data-field"));
         // get the json data from the span
-        var json=JSON.parse(span.getAttribute("data-field"));
+        var json = JSON.parse(span.getAttribute("data-field"));
         // add the field to the json
         jsonData.push(json);
     });
-    main.setAttribute("datasearch",JSON.stringify(jsonData));
+    main.setAttribute("datasearch", JSON.stringify(jsonData));
 
     // get all the span elements from data 
-    var link=content.querySelectorAll('#Link span[name="dataContainer"]');
+    var link = content.querySelectorAll('#Link span[name="dataContainer"]');
     // generate the json of all the data
-    var jsonData=[];
+    var jsonData = [];
     link.forEach(span => {
         console.log(span.getAttribute("data-field"));
         // get the json data from the span
-        var json=JSON.parse(span.getAttribute("data-field"));
+        var json = JSON.parse(span.getAttribute("data-field"));
         // add the field to the json
         jsonData.push(json);
     });
-    main.setAttribute("datalink",JSON.stringify(jsonData));
+    main.setAttribute("datalink", JSON.stringify(jsonData));
 
     refreshCombox(main);
 }
 
 function refreshCombox(element) {
-  // get the data from the element
-  var data=element.getAttribute("dataSearch");
-  // parse the json
-  var jsonData=JSON.parse(data);
-  console.log(jsonData);
-  // get the main div
- 
-  const tableName = jsonData[0].tableName;
-  const fieldName = jsonData[0].fieldName;
-  const DBName = jsonData[0].DBName;
-  element.querySelector("label").innerText=fieldName;
-  var url = "/select-distinct/"+DBName+"/"+tableName+"/"+fieldName;
-  fetch(url)
-  .then(response => response.json())
-  .then(data => {
-      var select=element.querySelector("select");
-      data.forEach(row => {          
-        var option = document.createElement("option");
-        option.text = row[fieldName];
-        option.value = row[fieldName];
-        select.add(option);          
-      });
-  })
-  .catch(error => {
-      console.error(error);
-  });
+    // get the data from the element
+    var data = element.getAttribute("dataSearch");
+    // parse the json
+    var jsonData = JSON.parse(data);
+    console.log(jsonData);
+    // get the main div
+
+    const tableName = jsonData[0].tableName;
+    const fieldName = jsonData[0].fieldName;
+    const DBName = jsonData[0].DBName;
+    element.querySelector("label").innerText = fieldName;
+    var url = "/select-distinct/" + DBName + "/" + tableName + "/" + fieldName;
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            var select = element.querySelector("select");
+            data.forEach(row => {
+                var option = document.createElement("option");
+                option.text = row[fieldName];
+                option.value = row[fieldName];
+                select.add(option);
+            });
+        })
+        .catch(error => {
+            console.error(error);
+        });
 
 
 }

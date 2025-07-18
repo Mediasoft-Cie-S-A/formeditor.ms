@@ -15,7 +15,7 @@
  */
 // Translation Dictionary Example (Replace with Google Translate API generated data)
 const translationDictionary = {
-    
+
     "fr": {
         // Add French translations here if needed
         "Tableau de bord": "Tableau de bord",
@@ -92,7 +92,7 @@ function createTranslateComponent(type) {
     mainDiv.setAttribute("tagName", type);
     mainDiv.className = "form-element";
     mainDiv.id = `translateComponent-${Date.now()}`;
- 
+
     renderTranslationComponent(mainDiv);
     return mainDiv;
 }
@@ -112,7 +112,7 @@ function editTranslateComponent(type, element, content) {
             const languageDictionary = languageBox.querySelector("textarea").value;
             translationDictionary[languageName] = JSON.parse(languageDictionary);
         });
-      
+
     };
     content.appendChild(updateButton);
 
@@ -121,7 +121,7 @@ function editTranslateComponent(type, element, content) {
     addLanguageButton.textContent = "Add Language";
     addLanguageButton.onclick = () => {
         console.log("addLanguageButton");
-      // generate a box to add a new language
+        // generate a box to add a new language
         const newLanguageBox = document.createElement("div");
         newLanguageBox.tagName = "language";
         const languageNameInput = document.createElement("input");
@@ -131,23 +131,23 @@ function editTranslateComponent(type, element, content) {
         newLanguageBox.appendChild(languageNameInput);
         newLanguageBox.appendChild(languageDictionaryInput);
         content.appendChild(newLanguageBox);
-    
+
     };
     content.appendChild(addLanguageButton);
 
 }
 
 
-function renderTranslationComponent( mainDiv) {
-   
+function renderTranslationComponent(mainDiv) {
+
     mainDiv.innerHTML = ''; // Clear the mainDiv content
     const floatButton = document.createElement('div');
-   // floatButton.style.position = 'fixed';
-   
+    // floatButton.style.position = 'fixed';
+
     floatButton.style.backgroundColor = '#007bff';
     floatButton.style.color = '#fff';
     floatButton.style.padding = '5px';
-        floatButton.style.borderRadius = '50%';
+    floatButton.style.borderRadius = '50%';
     floatButton.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.3)';
     floatButton.style.cursor = 'pointer';
     floatButton.textContent = '🌐';
@@ -156,7 +156,7 @@ function renderTranslationComponent( mainDiv) {
     floatButton.style.height = '30px';
 
     const languageSelector = document.createElement('select');
-    languageSelector.id = 'landSelector'+Date.now();
+    languageSelector.id = 'landSelector' + Date.now();
     languageSelector.style.position = 'absolute';
     languageSelector.style.width = '150px';
     languageSelector.style.padding = '5px';
@@ -172,17 +172,17 @@ function renderTranslationComponent( mainDiv) {
     });
 
     floatButton.setAttribute('onclick', `showlanguageSelector('${languageSelector.id}')`);
-    
+
 
     languageSelector.setAttribute('onchange', `translatePage('${languageSelector.id}', this.value)`);
-    
-  
+
+
     mainDiv.appendChild(floatButton);
     mainDiv.appendChild(languageSelector);
 }
 
-function showlanguageSelector(langSelectorID){
-  const languageSelector = document.getElementById(langSelectorID);
+function showlanguageSelector(langSelectorID) {
+    const languageSelector = document.getElementById(langSelectorID);
     languageSelector.style.display = languageSelector.style.display === 'none' ? 'block' : 'none'
 }
 
@@ -205,7 +205,7 @@ function translatePage(language) {
     });
 }*/
 
-function translatePage(langSelectorID,language) {
+function translatePage(langSelectorID, language) {
     const dictionary = translationDictionary[language];
     const languageSelector = document.getElementById(langSelectorID);
     if (!dictionary) {
@@ -214,7 +214,7 @@ function translatePage(langSelectorID,language) {
     }
 
     const replaceTextInDOM = (node) => {
-      //  console.log(node);
+        //  console.log(node);
         if (node.nodeType === Node.TEXT_NODE) {
             console.log(node.textContent);
             const textContent = node.textContent.trim();
