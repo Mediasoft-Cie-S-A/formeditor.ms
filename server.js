@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 const express = require("express");
 //Import the main Passport and Express-Session library
 const passport = require("passport");
@@ -218,6 +219,28 @@ process.on('multipleResolves', (type, promise, reason) => {
 
 process.on('rejectionHandled', (promise) => {
   console.warn('🔁 Rejection Handled:', promise);
+});
+
+app.post('/api/lm', async (req, res) => {
+  const { prompt } = req.body;
+
+  const response = await fetch("http://localhost:1234/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer lm-studio"
+    },
+    body: JSON.stringify({
+      model: "local-model",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.4,
+      max_tokens: 512
+    }),
+    headersTimeout: 960_000  // 16 minutes (in ms)
+  });
+
+  const result = await response.json();
+  res.json(result);
 });
 
 try {
