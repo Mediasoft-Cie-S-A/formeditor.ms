@@ -682,9 +682,9 @@ class dblayer {
 
         try {
 
-          const condition = `rowid = '${rowId}'`; // assuming rowid is your primary key field
-          const sql = `DELETE FROM PUB."${tableName}" WHERE ${condition}`;
-          const result = await db.deleteRecord(sql);
+          const sql = `DELETE FROM PUB."${tableName}" WHERE rowid = ?`;
+          const result = await db.deleteRecord(sql, [rowId]);
+
           res.json({ message: "Record deleted successfully", result });
 
 
