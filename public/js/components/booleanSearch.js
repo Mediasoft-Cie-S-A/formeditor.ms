@@ -50,7 +50,11 @@ function editBooleanSearch(type,element,content)
    button.textContent = 'update';
    button.onclick = function() {
         const propertiesBar = document.getElementById('propertiesBar');
-        const gridID=propertiesBar.getAttribute("data-element-id");              
+        if (!propertiesBar) {
+            console.warn("Element with ID 'propertiesBar' not found.");
+            return;
+        }
+        const gridID = propertiesBar.getAttribute("data-element-id");              
         const main = document.getElementById(gridID);  
         updateBooleanData(main,content);
    };
