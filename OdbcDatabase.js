@@ -133,13 +133,13 @@ class OdbcDatabase {
     }
   }
 
-  async deleteRecord(deleteQuery) {
+  async deleteRecord(deleteQuery, params) {
     try {
       // Execute the delete query
 
       const connection = await odbc.connect(this.connectionString);
       await connection.setIsolationLevel(odbc.SQL_TXN_READ_COMMITTED);
-      const result = await connection.query(deleteQuery);
+      const result = await connection.query(deleteQuery, params);
       await connection.close();
       return result;
     } catch (err) {
@@ -524,33 +524,36 @@ class OdbcDatabase {
 
   // insert new record
   async insertRecord(tableName, data) {
-    console.log("We use this to do insert");
     try {
-      let fields = "";
-      let values = "";
-      // convert array data.fields and data.values to string
       if (!data || !data.fields || !data.values) {
         throw new Error("Invalid data format. 'fields' and 'values' are required.");
       }
-      if (typeof data.fields === "object") {
-        fields = "\"" + data.fields.join("\",\"") + "\""; // add quotes around each field
+      if (!Array.isArray(data.fields) || !Array.isArray(data.values)) {
+        throw new Error("'fields' and 'values' should be arrays.");
       }
-      if (typeof data.values === "object") {
-        values = "'" + data.values.join("','") + "'"; // add quotes around each value  
+      if (data.fields.length !== data.values.length) {
+        throw new Error("Fields and values length mismatch.");
       }
-      // remove the last comma and quote
 
+      // Build field names list, quoted
+      const fields = data.fields.map(field => `"${field}"`).join(", ");
 
-      // Construct the full SQL statement
-      const sql = `INSERT INTO PUB.${tableName} (${fields}) VALUES (${values})`;
-      // Note: The values should be properly escaped to prevent SQL injection
-      console.log(sql);
-      // Execute the query
+      // Build placeholders string for values
+      const placeholders = data.values.map(() => "?").join(", ");
+
+      // Full SQL string with placeholders
+      const sql = `INSERT INTO PUB.${tableName} (${fields}) VALUES (${placeholders})`;
+
+      console.log("Executing:", sql, "With values:", data.values);
+
+      // Connect and execute with bound parameters
       const connection = await odbc.connect(this.connectionString);
       await connection.setIsolationLevel(odbc.SQL_TXN_READ_COMMITTED);
 
-      const result = await connection.query(sql);
+      const result = await connection.query(sql, data.values);
+
       await connection.close();
+
       return result;
     } catch (err) {
       console.log("Error inserting record:", err);
