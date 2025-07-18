@@ -103,29 +103,27 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // authentication
 // init session
 
-require('./authentication')(app,session, passport);
-require('./authCustom')(app,session, passport);
-require('./authStatic')(app,session, passport);
+require('./authentication')(app, session, passport);
+require('./authCustom')(app, session, passport);
+require('./authStatic')(app, session, passport);
 
 const dblayer = require('./dblayer');
-const dbs= new dblayer(app,session, passport);
+const dbs = new dblayer(app, session, passport);
 dbs.init();
-try
-{
-dbs.generateRoutes(app,dbs);
+try {
+  dbs.generateRoutes(app, dbs);
 }
-catch(err)
-{
-    console.log(err);
+catch (err) {
+  console.log(err);
 }
 // Import routes
-require('./formService')(app, mongoDbUrl,  dbName);
-require('./businessComponentService')(app, mongoDbUrl,  dbName);
-require('./GED')(app,session, passport);
-const { registerDynamicRoutes } =  require("./dynamic")(app, mongoDbUrl,  dbName);
+require('./formService')(app, mongoDbUrl, dbName);
+require('./businessComponentService')(app, mongoDbUrl, dbName);
+require('./GED')(app, session, passport);
+const { registerDynamicRoutes } = require("./dynamic")(app, mongoDbUrl, dbName);
 // Register the dynamic routes
 registerDynamicRoutes();
-require("./pageService")(app, mongoDbUrl,  dbName, registerDynamicRoutes);
+require("./pageService")(app, mongoDbUrl, dbName, registerDynamicRoutes);
 
 // Swagger definition
 const swaggerDefinition = {
@@ -207,7 +205,7 @@ process.on('message', (msg) => {
 process.on('SIGUSR1', () => {
   console.log('📩 Received SIGUSR1 signal. Performing custom action...');
   // Custom action here
-} );
+});
 
 process.on('SIGUSR2', () => {
   console.log('📩 Received SIGUSR2 signal. Performing custom action...');
@@ -216,7 +214,7 @@ process.on('SIGUSR2', () => {
 
 process.on('multipleResolves', (type, promise, reason) => {
   console.error('🔁 Multiple Resolves:', type, promise, reason);
-} );
+});
 
 process.on('rejectionHandled', (promise) => {
   console.warn('🔁 Rejection Handled:', promise);

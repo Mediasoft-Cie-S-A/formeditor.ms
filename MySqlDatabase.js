@@ -1,8 +1,7 @@
 const mysql = require("mysql2/promise");
 
 class MySqlDatabase {
-  constructor(connectionConfig) 
-  {
+  constructor(connectionConfig) {
     connectionConfig = connectionConfig;
   }
 
@@ -80,13 +79,13 @@ class MySqlDatabase {
   async getTableFields(tableName) {
     try {
       var query = "SELECT COLUMN_NAME AS NAME, ";
-    query+= " SUBSTRING_INDEX(COLUMN_TYPE, '(', 1) AS `TYPE`, COLUMN_NAME AS LABEL, 0 MANDATORY, ";
-    query+= " COLUMN_TYPE AS `FORMAT`, ";
-    query+= " REGEXP_SUBSTR(COLUMN_TYPE, '\\(([^)]+)\\)') AS `DECIMAL`, ";
-    query+= " REGEXP_SUBSTR(COLUMN_TYPE, '\\(([^)]+)\\)') AS `WIDTH`, ";
-    query+= " COLUMN_DEFAULT AS `Default`, IS_NULLABLE AS `NULL`,  COLUMN_KEY AS `Key`,    EXTRA AS `Extra` ";
-  query+= "FROM information_schema.COLUMNS   "
-query+= `WHERE TABLE_NAME = '${tableName}' AND TABLE_SCHEMA = DATABASE()`;
+      query += " SUBSTRING_INDEX(COLUMN_TYPE, '(', 1) AS `TYPE`, COLUMN_NAME AS LABEL, 0 MANDATORY, ";
+      query += " COLUMN_TYPE AS `FORMAT`, ";
+      query += " REGEXP_SUBSTR(COLUMN_TYPE, '\\(([^)]+)\\)') AS `DECIMAL`, ";
+      query += " REGEXP_SUBSTR(COLUMN_TYPE, '\\(([^)]+)\\)') AS `WIDTH`, ";
+      query += " COLUMN_DEFAULT AS `Default`, IS_NULLABLE AS `NULL`,  COLUMN_KEY AS `Key`,    EXTRA AS `Extra` ";
+      query += "FROM information_schema.COLUMNS   "
+      query += `WHERE TABLE_NAME = '${tableName}' AND TABLE_SCHEMA = DATABASE()`;
       return await this.queryData(query);
     } catch (err) {
       console.log(`Error retrieving fields for table ${tableName}:`, err);
@@ -104,12 +103,12 @@ query+= `WHERE TABLE_NAME = '${tableName}' AND TABLE_SCHEMA = DATABASE()`;
     }
   }
 
-  async queryDataWithPagination(tableName, page, pageSize, fields , filter ) {
+  async queryDataWithPagination(tableName, page, pageSize, fields, filter) {
     try {
       const offset = (page - 1) * pageSize;
       let sql = `SELECT ${fields} FROM \`${tableName}\``;
       console.log("filter", filter);
-      if (filter) sql +=this.jsonToWhereClause(filter);
+      if (filter) sql += this.jsonToWhereClause(filter);
       sql += ` LIMIT ${pageSize} OFFSET ${offset}`;
       return await this.queryData(sql);
     } catch (err) {
@@ -129,27 +128,27 @@ query+= `WHERE TABLE_NAME = '${tableName}' AND TABLE_SCHEMA = DATABASE()`;
 
         // If values array is present, use IN clause
         if (values && values.length > 0) {
-            const formattedValues = values.map(val => 
-                type === 'character' ? `'${val}'` : val
-            ).join(', ');
-            return `${dbField} IN (${formattedValues})`;
+          const formattedValues = values.map(val =>
+            type === 'character' ? `'${val}'` : val
+          ).join(', ');
+          return `${dbField} IN (${formattedValues})`;
         }
-        
+
         // If single value, use operator directly
         if (value && operator) {
-            const formattedValue = type === 'character' ? `'${value}'` : value;
-            return `${dbField} ${operator} ${formattedValue}`;
+          const formattedValue = type === 'character' ? `'${value}'` : value;
+          return `${dbField} ${operator} ${formattedValue}`;
         }
-        
+
         return ''; // Return empty string if no valid condition found
-    });
+      });
 
-    // Join all conditions with AND
-    whereClause = conditions.filter(Boolean).join(' AND ');
-}
+      // Join all conditions with AND
+      whereClause = conditions.filter(Boolean).join(' AND ');
+    }
 
-return whereClause ? ` WHERE ${whereClause}` : '';
-}
+    return whereClause ? ` WHERE ${whereClause}` : '';
+  }
 
 
 

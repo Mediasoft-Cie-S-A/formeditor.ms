@@ -51,7 +51,7 @@ function createMenuComponentHorizontal(type) {
             console.warn("⚠️ Tentative de render, mais 'items' est toujours null.");
         }
     }, 0);
-    
+
 
     return wrapper;
 }
@@ -148,7 +148,7 @@ function renderMenuComponentHorizontal(content) {
                         if (component.innerHTML && component.tag === "div") {
                             el.innerHTML = component.innerHTML;
                         }
-                        
+
                         el.draggable = !!component.draggable;
                         if (component.onclick) {
                             try {
@@ -160,13 +160,13 @@ function renderMenuComponentHorizontal(content) {
                                 console.error("❌ Erreur lors de l’exécution du onclick avec eval :", e);
                             }
                         }
-                        
+
 
                         rightSide.appendChild(el);
                         if (state.rightSide) {
                             console.log("📦 Nombre d’éléments posés dans le rightSide :", state.rightSide.length);
                         }
-                        
+
                     });
                 }
             } catch (e) {
@@ -333,11 +333,11 @@ function addMenuItemsHorizontal(element, itemdiv, itemObj) {
     }
     deleteButton.textContent = "Delete";
     deleteButton.onclick = () => {
-    if (confirm("Are you sure you want to delete this item?")) {
-        internalDiv.remove();
-    }
-};
-internalDiv.appendChild(deleteButton);
+        if (confirm("Are you sure you want to delete this item?")) {
+            internalDiv.remove();
+        }
+    };
+    internalDiv.appendChild(deleteButton);
 }
 
 

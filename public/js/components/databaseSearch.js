@@ -88,7 +88,7 @@ function RenderDataSearch(main) {
       "<div class='search' id='search_" + field.tableName + "_searchDiv'>";
     html +=
       "<input type='text' id='search_" +
-      field.tableName +  "_" + field.fieldName +
+      field.tableName + "_" + field.fieldName +
       "_input' list='searchList' placeholder='" +
       field.fieldLabel +
       "'  autocomplete='off' ";
@@ -155,7 +155,7 @@ function gridSearch(event) {
   }
   // get all the grid div with attribute tagname=dataGrid
   let idObjects = document.querySelectorAll("div[tagname='dataGrid']");
-  
+
 
   idObjects.forEach((idObject) => {
     // if the grid is visible
@@ -163,10 +163,10 @@ function gridSearch(event) {
       // call the searchGrid function
       searchGrid(DBName, filedName, operator, searchValue, idObject.id);
     }
- 
+
   });
 
-  
+
 }
 // searchAutoComplete that call the search function "/select-distinct/:tableName/:fieldName" and display the result in the autocomplete div
 function searchAutoComplete(event, element) {
@@ -188,8 +188,8 @@ function searchAutoComplete(event, element) {
     fieldName +
     "?id=" +
     fieldName;
-    const isWhitespaceString = str => !str.replace(/\s/g, '').length
-    console.log(isWhitespaceString(searchValue))
+  const isWhitespaceString = str => !str.replace(/\s/g, '').length
+  console.log(isWhitespaceString(searchValue))
   // generate filter from searchValue if fieldType is text with openedge syntax
   if (searchValue.length > 0 && !isWhitespaceString(searchValue)) {
     switch (fieldType) {
@@ -212,51 +212,51 @@ function searchAutoComplete(event, element) {
     var cookieStorage = document.querySelectorAll("div[tagname=cookieStorage]");
     // foreach cookieStorage extract the field name and value = select.value
     cookieStorage.forEach((storage) => {
-      select=storage.querySelectorAll("select");
+      select = storage.querySelectorAll("select");
       select.forEach((select) => {
         var fieldName = select.getAttribute("var_name");
         var fieldValue = select.value;
         // add the field to the url
-        url = url + " and " + fieldName + "='" + fieldValue+ "'";
+        url = url + " and " + fieldName + "='" + fieldValue + "'";
       });
     });
-      fetch(url)
-        .then((response) => response.json())
-        .then((data) => {
-          autocomplete.innerHTML = "";
-          // current element position
-          var elementPosition = getAbsoluteOffset(element);
-          autocomplete.setAttribute(
-            "style",
-            "display:block;top:" +
-              (elementPosition.top  - element.offsetTop - 15) +
-              "px;left:" +
-              (elementPosition.left - element.offsetLeft - element.offsetWidth/3) +
-              "px;"
-          );
+    fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        autocomplete.innerHTML = "";
+        // current element position
+        var elementPosition = getAbsoluteOffset(element);
+        autocomplete.setAttribute(
+          "style",
+          "display:block;top:" +
+          (elementPosition.top - element.offsetTop - 15) +
+          "px;left:" +
+          (elementPosition.left - element.offsetLeft - element.offsetWidth / 3) +
+          "px;"
+        );
 
-          data.forEach((row) => {
-            var rowDiv = document.createElement("div");
-            rowDiv.className = "autocomplete-row";
-            rowDiv.setAttribute("data-value-DBName", DBName);
-            rowDiv.setAttribute("data-value-table-name", tableName);
-            rowDiv.setAttribute("data-value-field-name", fieldName);
-            rowDiv.setAttribute("data-value-field-type", fieldType);
-            rowDiv.addEventListener("click", function (event) {
-              event.preventDefault();
+        data.forEach((row) => {
+          var rowDiv = document.createElement("div");
+          rowDiv.className = "autocomplete-row";
+          rowDiv.setAttribute("data-value-DBName", DBName);
+          rowDiv.setAttribute("data-value-table-name", tableName);
+          rowDiv.setAttribute("data-value-field-name", fieldName);
+          rowDiv.setAttribute("data-value-field-type", fieldType);
+          rowDiv.addEventListener("click", function (event) {
+            event.preventDefault();
 
-              element.value = row[fieldName];
-              autocomplete.style.display = "none";
-            });
-
-            rowDiv.innerHTML = row[fieldName];
-            autocomplete.appendChild(rowDiv);
+            element.value = row[fieldName];
+            autocomplete.style.display = "none";
           });
-        })
-        .catch((error) => {
-          console.error(error);
+
+          rowDiv.innerHTML = row[fieldName];
+          autocomplete.appendChild(rowDiv);
         });
-   }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
 }
 
 

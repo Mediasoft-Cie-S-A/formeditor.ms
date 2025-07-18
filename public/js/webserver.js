@@ -6,8 +6,8 @@ function parseOpenApiJson(openApiJson) {
   const openApiVersion = openApiJson.openapi
     ? "3.0"
     : openApiJson.swagger
-    ? "2.0"
-    : null;
+      ? "2.0"
+      : null;
   if (!openApiVersion) {
     throw new Error("Unsupported OpenAPI version");
   }
@@ -32,8 +32,8 @@ function parseOpenApiJson(openApiJson) {
       const summary = Array.isArray(methodObj.summary)
         ? methodObj.summary
         : typeof methodObj.summary === "string"
-        ? [methodObj.summary]
-        : [];
+          ? [methodObj.summary]
+          : [];
 
       const parameters = methodObj.parameters || [];
       const requestBody = methodObj.requestBody || {};
@@ -123,11 +123,11 @@ function parseRequestBody(requestBody, components) {
       type: content.schema.type,
       properties: content.schema.properties
         ? Object.keys(content.schema.properties).map((propertyName) => ({
-            name: propertyName,
-            type: content.schema.properties[propertyName].type,
-            required: content.schema.required?.includes(propertyName) || false,
-            format: content.schema.properties[propertyName].format || false,
-          }))
+          name: propertyName,
+          type: content.schema.properties[propertyName].type,
+          required: content.schema.required?.includes(propertyName) || false,
+          format: content.schema.properties[propertyName].format || false,
+        }))
         : [],
     },
   };
@@ -148,36 +148,36 @@ function parseResponseContent(schema, components) {
       type: schema.type,
       properties: schema.properties
         ? Object.keys(schema.properties).map((propertyName) => {
-            const propertySchema = schema.properties[propertyName];
-            if (propertySchema.$ref) {
-              return {
-                name: propertyName,
-                type: resolveSchemaType(propertySchema, components),
-                properties: resolveSchemaProperties(
-                  propertySchema.$ref,
-                  components
-                ),
-              };
-            } else if (
-              propertySchema.type === "array" &&
-              propertySchema.items.$ref
-            ) {
-              return {
-                name: propertyName,
-                type: propertySchema.type,
-                properties: resolveSchemaProperties(
-                  propertySchema.items.$ref,
-                  components
-                ),
-              };
-            } else {
-              return {
-                name: propertyName,
-                type: propertySchema.type,
-                format: propertySchema.format || false,
-              };
-            }
-          })
+          const propertySchema = schema.properties[propertyName];
+          if (propertySchema.$ref) {
+            return {
+              name: propertyName,
+              type: resolveSchemaType(propertySchema, components),
+              properties: resolveSchemaProperties(
+                propertySchema.$ref,
+                components
+              ),
+            };
+          } else if (
+            propertySchema.type === "array" &&
+            propertySchema.items.$ref
+          ) {
+            return {
+              name: propertyName,
+              type: propertySchema.type,
+              properties: resolveSchemaProperties(
+                propertySchema.items.$ref,
+                components
+              ),
+            };
+          } else {
+            return {
+              name: propertyName,
+              type: propertySchema.type,
+              format: propertySchema.format || false,
+            };
+          }
+        })
         : [],
     },
   };

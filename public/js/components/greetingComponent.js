@@ -30,8 +30,8 @@ function normaliseUser(u = {}) {
 function getGreetingMessage(date = new Date()) {
     const h = date.getHours();
     return h < 12 ? "Bonjour"      // 00 h → 11 h 59
-     : h < 18 ? "Bonjour" // 12 h → 17 h 59
-              : "Bonsoir";       // 18 h → 23 h 59
+        : h < 18 ? "Bonjour" // 12 h → 17 h 59
+            : "Bonsoir";       // 18 h → 23 h 59
 
 }
 

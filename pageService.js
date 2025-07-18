@@ -6,8 +6,8 @@ function isValidSlug(slug) {
   return /^\/[a-z0-9\-\/]*$/.test(slug);
 }
 
-module.exports = async function (app,mongoDbUrl, dbName, dynamic) {
- 
+module.exports = async function (app, mongoDbUrl, dbName, dynamic) {
+
 
   // Middleware d'authentification
   const checkAuthenticated = (req, res, next) => {
@@ -19,22 +19,22 @@ module.exports = async function (app,mongoDbUrl, dbName, dynamic) {
 
   // Crée une nouvelle page
   app.post("/pages", checkAuthenticated, async (req, res) => {
-    const { objectId, 
-            slug, 
-            title, 
-            layout = "raw", 
-            content = "", 
-            meta = {},  
-            userCreated ="",
-            userModified ="",
-            header ="" } = req.body;
-   const client = new mongoClient(mongoDbUrl, {});
+    const { objectId,
+      slug,
+      title,
+      layout = "raw",
+      content = "",
+      meta = {},
+      userCreated = "",
+      userModified = "",
+      header = "" } = req.body;
+    const client = new mongoClient(mongoDbUrl, {});
     try {
       if (!title) throw new Error("Le titre est requis");
-       await client.connect();
-       const db = client.db(dbName);
-       const pageCol = db.collection("pages");
-       const id = objectId;
+      await client.connect();
+      const db = client.db(dbName);
+      const pageCol = db.collection("pages");
+      const id = objectId;
       const existing = await pageCol.findOne({ objectId: id });
       //if existi update 
       if (existing) {
@@ -47,7 +47,7 @@ module.exports = async function (app,mongoDbUrl, dbName, dynamic) {
           meta,
           updatedAt: new Date(),
           userCreated,
-          userModified, 
+          userModified,
           header,
         };
         // update
@@ -55,44 +55,44 @@ module.exports = async function (app,mongoDbUrl, dbName, dynamic) {
           { objectId: id },         // critère de sélection
           { $set: update }          // données à mettre à jour
         );
-        res.json({ msg: "update"});
+        res.json({ msg: "update" });
         return result;
       }
 
       const now = new Date();
 
       const page = { objectId, slug, title, layout, content, meta, createdAt: now, updatedAt: now };
-       
-      
+
+
       const result = await pageCol.insertOne(page);
       res.json({ insertedId: result.insertedId });
     } catch (err) {
       res.status(400).json({ error: err.message });
-    }finally {
+    } finally {
       await client.close();
       dynamic(); // Re-register dynamic routes after creating a page
     }
   });
 
-  
+
 
   // Supprime une page
   app.delete("/pages/:id", checkAuthenticated, async (req, res) => {
     const id = req.params.id;
     const client = new mongoClient(mongoDbUrl, {});
     try {
-    
+
       await client.connect();
       const db = client.db(dbName);
       const pageCol = db.collection("pages");
-      const result = await pageCol.deleteOne({objectId: id });
-      
+      const result = await pageCol.deleteOne({ objectId: id });
+
       if (result.deletedCount === 0) throw new Error("Page non trouvée ou déjà supprimée");
 
       res.json({ success: true });
     } catch (err) {
       res.status(400).json({ error: err.message });
-    }finally {
+    } finally {
       await client.close();
     }
   });
@@ -104,7 +104,7 @@ module.exports = async function (app,mongoDbUrl, dbName, dynamic) {
     const id = req.params.id;
     const client = new mongoClient(mongoDbUrl, {});
     try {
-     
+
       await client.connect();
       const db = client.db(dbName);
       const pageCol = db.collection("pages");

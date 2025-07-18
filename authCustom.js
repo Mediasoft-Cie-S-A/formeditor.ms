@@ -18,65 +18,66 @@ const { authenticate } = require('passport');
 
 const LocalStrategy = require('passport-local').Strategy;
 
-module.exports = function(app,session, passport) {
+module.exports = function (app, session, passport) {
 
 
 
-    authUser = (user, token, done) => {
-        console.log(`Value of "User" in authUser function ----> ${user}`)         //passport will populate, user = req.body.username
-        console.log(`Value of "token" in authUser function ----> ${token}`) //passport will popuplate, password = req.body.password
-            
-        const headers = new Headers();
-        const bearer = `Bearer ${token}`;
-    
-        headers.append("Authorization", bearer);
-    
-        const options = {
-            method: "GET",
-            headers: headers
-        };
-    
-        console.log('request made to Graph API at: ' + new Date().toString());
-    
-        fetch(app.config.authentication.azureAd.graphMeEndpoint, options)
-            .then(response => response.json())
-            .then(  function (data){
-              console.log(data);
-              if (user==data.userPrincipalName  ) {
-                  let authenticated_user = {}
-                  authenticated_user.oid = data.id;   
-                  authenticated_user.username=data.userPrincipalName;
-                  return done (null, authenticated_user);
-              }
-            } )
-            .catch(error => done(error, null));  
+  authUser = (user, token, done) => {
+    console.log(`Value of "User" in authUser function ----> ${user}`)         //passport will populate, user = req.body.username
+    console.log(`Value of "token" in authUser function ----> ${token}`) //passport will popuplate, password = req.body.password
+
+    const headers = new Headers();
+    const bearer = `Bearer ${token}`;
+
+    headers.append("Authorization", bearer);
+
+    const options = {
+      method: "GET",
+      headers: headers
+    };
+
+    console.log('request made to Graph API at: ' + new Date().toString());
+
+    fetch(app.config.authentication.azureAd.graphMeEndpoint, options)
+      .then(response => response.json())
+      .then(function (data) {
+        console.log(data);
+        if (user == data.userPrincipalName) {
+          let authenticated_user = {}
+          authenticated_user.oid = data.id;
+          authenticated_user.username = data.userPrincipalName;
+          return done(null, authenticated_user);
+        }
+      })
+      .catch(error => done(error, null));
 
 
-         
-    }
-     
 
-    passport.use("custom", new LocalStrategy (authUser));
-    
-   
-    
-    
-    app.post ("/customLogin", passport.authenticate('custom', { failureMessage: true // This enables failure messages to be provided when authentication fails.
-}),
-  (req, res) => {
-   // Authentication was successful
-   // get username from req.user.oid
-   console.log(req.user);
-   const username = req.user.displayName;
-   res.send({authenticated: true, username: username});
- });
-    
+  }
 
-    
-    
 
-    
-     
+  passport.use("custom", new LocalStrategy(authUser));
+
+
+
+
+  app.post("/customLogin", passport.authenticate('custom', {
+    failureMessage: true // This enables failure messages to be provided when authentication fails.
+  }),
+    (req, res) => {
+      // Authentication was successful
+      // get username from req.user.oid
+      console.log(req.user);
+      const username = req.user.displayName;
+      res.send({ authenticated: true, username: username });
+    });
+
+
+
+
+
+
+
 
 
 

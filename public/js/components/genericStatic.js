@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 function createElementStatic(type) {
-//    console.log("createElement:"+type);
-    let tagType ="";
-    let html="..."
-    switch(type) {
+    //    console.log("createElement:"+type);
+    let tagType = "";
+    let html = "..."
+    switch (type) {
         case 'heading1':
             tagType = 'h1';
             html = "Heading 1";
@@ -69,21 +69,20 @@ function createElementStatic(type) {
         default:
             console.error("Unknown static element type: " + type);
             return null; // Return null for unsupported types
-        
+
     }
-    var main= document.createElement(tagType);
-    main.id=type+ Date.now(); // Unique ID for each new element
-    main.setAttribute("tagName",type);
+    var main = document.createElement(tagType);
+    main.id = type + Date.now(); // Unique ID for each new element
+    main.setAttribute("tagName", type);
     main.innerHTML = html;
     console.log(main);
     return main;
 }
 
-function editElementStatic(type,element,content)
-{
+function editElementStatic(type, element, content) {
     // Create and append the elements
-     // add to the editor the properties of the element for modify the 
-   
+    // add to the editor the properties of the element for modify the 
+
 
 }
 

@@ -29,7 +29,7 @@ function createCookieStorage(type) {
 
     // Display message when no variables are set
     main.textContent = "No variables set yet.";
-    
+
     return main;
 }
 
@@ -44,13 +44,13 @@ function editCookieStorage(type, element, content) {
     // Button to save all variables as cookies
     const saveButton = document.createElement("button");
     saveButton.textContent = "Update";
-    saveButton.onclick = () => saveAllCookies(element,content);
+    saveButton.onclick = () => saveAllCookies(element, content);
     saveButton.style.width = "100%";
     div.appendChild(saveButton);
     // Create a container div for the variables
     const vardiv = document.createElement("div");
     vardiv.id = "cookieStorage";
-    vardiv.draggable = true;   
+    vardiv.draggable = true;
     div.appendChild(vardiv);
 
     // Button to add new variables
@@ -59,7 +59,7 @@ function editCookieStorage(type, element, content) {
     addButton.onclick = () => addVariableInput(element, vardiv);
     addButton.style.width = "100%";
 
-    
+
     // Append the Add and Save buttons to the property bar
     div.appendChild(addButton);
     content.appendChild(div);
@@ -76,26 +76,26 @@ function editCookieStorage(type, element, content) {
 function renderCookieStorage(main) {
     // Clear previous content
     main.innerHTML = "";
-    main.border= "none";    
+    main.border = "none";
     //get main.dataset.cookies
     variables = JSON.parse(main.getAttribute("data-cookies"));
     // Retrieve or initialize the variables from cookies
     // Render each variable as a <select> element with the stored cookie value
-    variables.forEach(({ name,description, type, value , DBName }) => {
+    variables.forEach(({ name, description, type, value, DBName }) => {
         // Create a container for each variable
         const varContainer = document.createElement("div");
         varContainer.className = "variable-container";
-       
+
         varContainer.style.padding = "5px";
-    
+
         let label = document.createElement("label");
         if (description) {
             label.textContent = `${description}: `;
         } else {
-        label.textContent = `${name}: `;
+            label.textContent = `${name}: `;
         }
         varContainer.appendChild(label);
-        var cookieValue = getCookie(name);  
+        var cookieValue = getCookie(name);
         switch (type) {
             case "Value":
                 // write variable value
@@ -111,21 +111,21 @@ function renderCookieStorage(main) {
                 let array = value.split(",");
                 // write array values in select
                 select = document.createElement("select");
-                select.setAttribute("var_name", name);  
+                select.setAttribute("var_name", name);
                 select.style.width = "150px";
                 select.title = cookieValue;
                 array.forEach((val) => {
-                    
+
                     let option = document.createElement("option");
                     // check if in val there is a |
                     if (val.includes("|")) {
                         // split the val to get the value and the text
                         let splitVal = val.split("|");
-                        option.textContent = splitVal[1];   
+                        option.textContent = splitVal[1];
                         option.value = splitVal[0];
                     } else {
-                    option.textContent = val;
-                    option.value = val;
+                        option.textContent = val;
+                        option.value = val;
                     }
                     // set the value of the variable to the selected value
                     select.appendChild(option);
@@ -137,97 +137,99 @@ function renderCookieStorage(main) {
                 }
                 );
                 // excute the search when the select changes
-                updateDataObjects(name,select,DBName);
+                updateDataObjects(name, select, DBName);
                 // change the value of the variable when the select changes
                 select.onchange = () => {
-                    console.log("select onchange",name,select,DBName);
-                    updateDataObjects(name,select,DBName);
+                    console.log("select onchange", name, select, DBName);
+                    updateDataObjects(name, select, DBName);
                 };
 
                 varContainer.appendChild(select);
-            break;
+                break;
             case "Query":
                 // execute the query and write the result in select
                 let SQL = value;
-                
+
                 select = document.createElement("select");
-                select.setAttribute("var_name", name);  
+                select.setAttribute("var_name", name);
                 select.style.width = "150px";
                 select.title = cookieValue;
                 const url = `/query-data/${DBName}/${SQL}`;
                 fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach((val) => {
-                        let option = document.createElement("option");
-                        // convert the val json in array
-                        val = Object.values(val);
-                        // check if in val there is a , 
-                        if (val.length > 1) {
-                            
-                            option.textContent = val[1];
-                            option.value = val[0]; 
-                        } else {
-                        option.textContent = val[0];
-                        option.value = val[0];
-                        }
-                        // set the value of the variable to the selected value
-                        select.appendChild(option);
-                        // set the value of the variable to the selected value
-                        if (val === cookieValue) {
-                            console.log(cookieValue);
-                            select.value = cookieValue;
-                        }
-                    });
-                });
-               // excute the search when the select changes
-               updateDataObjects(name,select,DBName);
-               // change the value of the variable when the select changes
-               select.onchange = () => {
-                   updateDataObjects(name,select,DBName);
-               };
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach((val) => {
+                            let option = document.createElement("option");
+                            // convert the val json in array
+                            val = Object.values(val);
+                            // check if in val there is a , 
+                            if (val.length > 1) {
 
-               varContainer.appendChild(select);
-            break;
+                                option.textContent = val[1];
+                                option.value = val[0];
+                            } else {
+                                option.textContent = val[0];
+                                option.value = val[0];
+                            }
+                            // set the value of the variable to the selected value
+                            select.appendChild(option);
+                            // set the value of the variable to the selected value
+                            if (val === cookieValue) {
+                                console.log(cookieValue);
+                                select.value = cookieValue;
+                            }
+                        });
+                    });
+                // excute the search when the select changes
+                updateDataObjects(name, select, DBName);
+                // change the value of the variable when the select changes
+                select.onchange = () => {
+                    updateDataObjects(name, select, DBName);
+                };
+
+                varContainer.appendChild(select);
+                break;
         }
-                
+
 
         // Add the variable container to the main display
         main.appendChild(varContainer);
     });
 }
 
-function updateDataObjects(name,select,DBName){
-    console.log("updateDataObjects",name,select,DBName);
+function updateDataObjects(name, select, DBName) {
+    console.log("updateDataObjects", name, select, DBName);
     cookieValue = select.value;
-                    setCookie(name, cookieValue, 1);
-                    //let test = getDataGridObject();
-                      // get all the grid div with attribute tagname=dataGrid
-                     let idObjects = document.querySelectorAll("div[tagname='dataGrid']");
-                                       
-                    idObjects.forEach((idObject) => {{
-                      console.log(idObject.id);
-                      // get data from 
-                   
-                      const var_name = select.getAttribute("var_name");
-                        searchGrid(DBName, var_name, "=", cookieValue, idObject.id);
-                    
-                        }
-                     });
-                     // get dataPanel div with attribute tagname=dataPanel
-                     let idObjects2 = document.querySelectorAll("div[tagname='DataPanel']");
-                        idObjects2.forEach((idObject) => {{
-                        console.log(idObject.id);
-                        // get data from 
-                    
-                        const var_name = select.getAttribute("var_name");
-                        // set filter in dataPanel
-                        idObject.setAttribute("filter", JSON.stringify({ [var_name]: cookieValue }));
-                        // search in dataPanel
-                        renderDataPanel(idObject);  
-                        
-                            }
-                        });
+    setCookie(name, cookieValue, 1);
+    //let test = getDataGridObject();
+    // get all the grid div with attribute tagname=dataGrid
+    let idObjects = document.querySelectorAll("div[tagname='dataGrid']");
+
+    idObjects.forEach((idObject) => {
+        {
+            console.log(idObject.id);
+            // get data from 
+
+            const var_name = select.getAttribute("var_name");
+            searchGrid(DBName, var_name, "=", cookieValue, idObject.id);
+
+        }
+    });
+    // get dataPanel div with attribute tagname=dataPanel
+    let idObjects2 = document.querySelectorAll("div[tagname='DataPanel']");
+    idObjects2.forEach((idObject) => {
+        {
+            console.log(idObject.id);
+            // get data from 
+
+            const var_name = select.getAttribute("var_name");
+            // set filter in dataPanel
+            idObject.setAttribute("filter", JSON.stringify({ [var_name]: cookieValue }));
+            // search in dataPanel
+            renderDataPanel(idObject);
+
+        }
+    });
 }
 // Helper function to get a cookie by name
 function getCookie(name) {
@@ -252,29 +254,29 @@ function setCookie(name, value, days) {
 // Adds a variable input section in the property bar
 function addVariableInput(element, content, name = "") {
     console.log("Adding variable input");
-     datacookies = JSON.parse(element.getAttribute("data-cookies"));
-     if (datacookies === null) {
+    datacookies = JSON.parse(element.getAttribute("data-cookies"));
+    if (datacookies === null) {
         datacookies = [];
-        }
+    }
     currentVariables = datacookies.find(({ name: n }) => n === name);
     console.log(currentVariables);
     // Container for the variable input fields
     const varContainer = document.createElement("div");
     varContainer.className = "variable-container";
-    
+
     const description = document.createElement("input");
     description.type = "text";
     description.placeholder = "Description";
-    description.value = currentVariables?.description!=undefined?currentVariables?.description:"";
+    description.value = currentVariables?.description != undefined ? currentVariables?.description : "";
     description.setAttribute("tag", "var_description");
-    
+
     // Input for the variable name
     const nameInput = document.createElement("input");
     nameInput.type = "text";
     nameInput.placeholder = "Variable Name";
-    nameInput.value = name!=undefined?name:"";
+    nameInput.value = name != undefined ? name : "";
     nameInput.setAttribute("tag", "var_name");
-    
+
     // Predefined options for the select dropdown¨
     // Select dropdown for the variable value
     const valueSelect = document.createElement("select");
@@ -291,23 +293,23 @@ function addVariableInput(element, content, name = "") {
         if (currentVariables?.type === opt) {
             valueSelect.value = opt;
         }
-    });    
+    });
     valueSelect.addEventListener("drop", function (event) {
         // drop input
-      });
-    
+    });
+
     const valueDB = document.createElement("input");
     valueDB.type = "text";
     valueDB.placeholder = "Database Name";
-    valueDB.value = currentVariables?.DBName!=undefined?currentVariables?.DBName:"msdb";
+    valueDB.value = currentVariables?.DBName != undefined ? currentVariables?.DBName : "msdb";
     valueDB.setAttribute("tag", "db_name");
 
 
-    
+
     valueInput = document.createElement("input");
     valueInput.type = "text";
     valueInput.placeholder = "Variable Value";
-    valueInput.value = currentVariables?.value!=undefined?currentVariables?.value:"";
+    valueInput.value = currentVariables?.value != undefined ? currentVariables?.value : "";
     valueInput.setAttribute("tag", "var_value");
 
     // Predefined options for the select dropdown
@@ -318,13 +320,13 @@ function addVariableInput(element, content, name = "") {
     removeButton.style.width = "100%";
     removeButton.onclick = () => {
         varContainer.remove();
-        updateStoredVariables(element,content);
+        updateStoredVariables(element, content);
     };
 
-    
+
     // Append inputs and remove button to the container
     varContainer.appendChild(nameInput);
-    varContainer.appendChild(description);   
+    varContainer.appendChild(description);
     varContainer.appendChild(valueSelect);
     varContainer.appendChild(valueInput);
     varContainer.appendChild(valueDB);
@@ -332,21 +334,21 @@ function addVariableInput(element, content, name = "") {
 
     // Add the container to the property bar
     content.appendChild(varContainer);
-    updateStoredVariables(element,content);
+    updateStoredVariables(element, content);
 }
 
 // Save all defined variables as cookies
-function saveAllCookies(element,content) {
-   // generate the variables from the div cookieStorage
+function saveAllCookies(element, content) {
+    // generate the variables from the div cookieStorage
     console.log("Saving all cookies");
-    updateStoredVariables(element,content);
+    updateStoredVariables(element, content);
     const cookieStorage = content.querySelector("#cookieStorage");
     const variables = Array.from(cookieStorage.querySelectorAll(".variable-container")).map(container => {
         return {
             name: container.querySelector("[tag=var_name]").value,
             type: container.querySelector("[tag=var_type]").value,
             value: container.querySelector("[tag=var_value]").value
-            
+
         };
     });
     // set the cookie for each variable
@@ -355,7 +357,7 @@ function saveAllCookies(element,content) {
 }
 
 // Update the stored variables in the component's dataset
-function updateStoredVariables(element,content) {
+function updateStoredVariables(element, content) {
     // generate the variables from the div cookieStorage
     const variables = Array.from(content.querySelectorAll(".variable-container")).map(container => {
         return {
@@ -369,7 +371,7 @@ function updateStoredVariables(element,content) {
 
     console.log(variables);
     element.setAttribute("data-cookies", JSON.stringify(variables));
-    
+
 }
 
 // Helper function to set a cookie
