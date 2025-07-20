@@ -53,6 +53,16 @@ function EditorRedo() {
 // floating window for the editor
 
 function removeAllChildNodes(parent) {
+  //check if parent is not null
+  if (!parent) {
+    console.log("Parent element is null or undefined.");
+    return;
+  }
+  // check if parent has child nodes
+  if (!parent.hasChildNodes()) {
+    console.log("Parent element has no child nodes to remove.");
+    return;
+  }
   while (parent.firstChild) {
     parent.removeChild(parent.firstChild);
   }

@@ -28,6 +28,9 @@ var tableList = [];
 // is called when the page is loaded and when the user click on the table list
 function fetchTablesList(list, tableDetailsDiv) {
 
+    console.log('fetchTablesList called');
+    console.log('list:', list);
+    console.log('tableDetailsDiv:', tableDetailsDiv);
     // sychronous call to get the table list
     const request = new XMLHttpRequest();
     request.open("GET", '/tables-list', false); // `false` makes the request synchronous
@@ -61,11 +64,13 @@ function fetchTablesList(list, tableDetailsDiv) {
                 listItem.setAttribute('data-table-name', table.NAME);
                 listItem.setAttribute('data-table-label', table.LABEL);
                 listItem.setAttribute('title', table.LABEL);
-                listItem.onclick = function (event) {
-                    event.preventDefault();
-                    const tableName = event.target.getAttribute('data-table-name');
-                    const tableLabel = event.target.getAttribute('data-table-label');
-                    fetchTableDetails(dbname, tableName, tableLabel, tableDetailsDiv);
+                if (tableDetailsDiv) {
+                    listItem.onclick = function (event) {
+                        event.preventDefault();
+                        const tableName = event.target.getAttribute('data-table-name');
+                        const tableLabel = event.target.getAttribute('data-table-label');
+                        fetchTableDetails(dbname, tableName, tableLabel, tableDetailsDiv);
+                    }
                 }
                 list.appendChild(listItem);
                 tableList.push(table.NAME);
@@ -77,18 +82,24 @@ function fetchTablesList(list, tableDetailsDiv) {
     }
 }
 
-function createTableList(list, tableDetails) {
 
-    fetchTablesList(list);
-
-}
 
 
 // called when you change the tab to create a new table
 function createEditableTableList(list, tableDetails) {
+    console.log('createEditableTableList called');
+    // Clear the list
+    list.innerHTML = '';
+    console.log('list:', list);
+    // get the table list from the server
+    console.log(tableDetails);
+    if (tableDetails) {
+        tableDetails.innerHTML = '';
+    }
     fetchTablesList(list);
 
     list.addEventListener('click', function (event) {
+        console.log('list click event:', event);
         event.preventDefault();
         if (event.target.classList.contains('table-item')) {
             const DBName = event.target.getAttribute('database-name');
@@ -96,7 +107,7 @@ function createEditableTableList(list, tableDetails) {
             const tableLabel = event.target.getAttribute('data-table-label');
             editTableDetails(DBName, tableName, tableLabel, tableDetails);
         }
-    }, { capture: true, once: true });
+    });
 
 }
 
@@ -167,7 +178,13 @@ function drageDroptableTableList(list) {
 
 
 function fetchTableFields(database, tableName, detailsDiv) {
+    console.log('fetchTableFields called');
+    // Clear previous fields
+    console.log('database:', database);
+    console.log('tableName:', tableName);
+    console.log('detailsDiv:', detailsDiv);
     removeAllChildNodes(detailsDiv);
+
     fetch(`/table-fields/${database}/${tableName}`)
         .then(response => response.json())
         .then(data => {
@@ -210,6 +227,12 @@ function fetchTableFields(database, tableName, detailsDiv) {
 
 // table structure
 function fetchTableDetails(DBName, tableName, tableLabel, detailsDiv) {
+    console.log('fetchTableDetails called');
+    // Remove all child nodes
+    console.log('DBName:', DBName);
+    console.log('tableName:', tableName);
+    console.log('tableLabel:', tableLabel);
+    console.log('detailsDiv:', detailsDiv);
     removeAllChildNodes(detailsDiv);
     Promise.all([
         fetch(`/table-fields/${DBName}/${tableName}`).then(response => response.json())
@@ -227,7 +250,7 @@ function fetchTableDetails(DBName, tableName, tableLabel, detailsDiv) {
             table.style.cellpadding = '10px';
 
 
-            const isNotSearch = document.getElementById('_insertSearch').style.display == 'none';
+            //  const isNotSearch = document.getElementById('_insertSearch').style.display == 'none';
             const header = ['X', 'NAME', 'TYPE', 'LABEL', 'FORMAT', '*', 'WIDTH', 'TYPE', 'TABLE', 'FIELD', 'ORDER'];
             // create table header with th elements base on the foreach
             const thead = document.createElement('thead');
@@ -409,8 +432,7 @@ function loadFieldsList(DBName, fieldName) {
 // table structure
 async function editTableDetails(DBName, tableName, tableLabel, detailsDiv) {
     // Remove all child nodes
-    removeAllChildNodes(detailsDiv);
-
+    detailsDiv.innerHTML = '';
     try {
         // Fetch table fields
         const response = await fetch(`/table-fields/${DBName}/${tableName}`);

@@ -159,7 +159,8 @@
         <div class="row display-flex" id="formProperties" style="width: 100%; padding: 10px; ">
           <!-- Form properties will be added here -->
           <form class="container-fluid" id="formDataForm">
-            <div class="row table-hover editor-fields" style="display: flex;align-items: top;justify-content: center;">
+            <div class="row table-hover editor-fields"
+              style="display: flex;align-items: flex-start;justify-content: center;">
               <div class="col" style="display: inline-block;">
                 <label for="objectId">ID:</label><br>
                 <input class="input-element" id="objectId" name="objectId" placeholder="ID" required="" type="text"
@@ -283,63 +284,63 @@
             </td>
           </tr>
         </table>
-
-        <div class="tab-pane fade" id="DatabaseForm">
-          <!-- Rendered form will be displayed here -->
-          <div class="container-fluid">
-            <div class="row">
-              <div class="title-element">
-                <h2>Database Structure</h2>
-              </div>
-              <button class="button database-header-button" onclick="newTable()">
-                Add Table
-              </button>
+      </div>
+      <div class="tab-pane fade" id="DatabaseForm">
+        <!-- Rendered form will be displayed here -->
+        <div class="container-fluid">
+          <div class="row">
+            <div class="title-element">
+              <h2>Database Structure</h2>
             </div>
-            <div class="row">
-              <table class="table" id="componentsList_database">
-                <tr>
-                  <td style="width: 200px; max-height: 2000px; overflow: auto">
-                    <!-- Sidebar -->
-                    <div class="col table-bordered" id="tableListBar" style="width: 115px;">
-                      <!-- Tables will be listed here -->
-                      <div>
-                        <input name="searchtable" onchange="searchtable(this.value,'ContentTableListBar')"
-                          placeholder="filter.. table" type="text">
-                      </div>
-                      <div id="ContentTableListBar" style="overflow: auto"></div>
+            <button class="button database-header-button" onclick="newTable()">
+              Add Table
+            </button>
+          </div>
+          <div class="row">
+            <table class="table" id="componentsList_database">
+              <tr>
+                <td style="width: 200px; max-height: 2000px; overflow: auto">
+                  <!-- Sidebar -->
+                  <div class="col table-bordered" id="tableListBar" style="width: 115px;">
+                    <!-- Tables will be listed here -->
+                    <div>
+                      <input name="searchtable" onchange="searchtable(this.value,'ContentTableListBar')"
+                        placeholder="filter.. table" type="text">
                     </div>
-                  </td>
-                  <td style="width: 100%">
-                    <div class="col" id="mtableDetails"></div>
-                  </td>
-                </tr>
-              </table>
-            </div>
+                    <div id="ContentTableListBar" style="overflow: auto"></div>
+                  </div>
+                </td>
+                <td style="width: 100%">
+                  <div class="col" id="mtableDetails"></div>
+                </td>
+              </tr>
+            </table>
           </div>
         </div>
-        <div class="tab-pane fade" id="WebServer">
-          <!-- Rendered form will be displayed here -->
-          <div class="container-fluid">
-            <div class="row">
-              <div class="title-element">
-                <h2>Web Server</h2>
-              </div>
-              <div>
-                <div style="display: inline-block; margin: 10px">
-                  <input class="input-element" id="apiUrlLink" name="apiUrlLink" placeholder="API URL" required=""
-                    type="link" value=""><br>
-                  <input accept=".yaml,.yml,.json" id="fileInput" name="fileInput" style="display: inline-block"
-                    type="file">
-                </div>
-              </div>
-              <button class="button database-header-button" onclick="loadWebServer()">Load Web Server</button>
-              <div id="web-api-container"></div>
+      </div>
+      <div class="tab-pane fade" id="WebServer">
+        <!-- Rendered form will be displayed here -->
+        <div class="container-fluid">
+          <div class="row">
+            <div class="title-element">
+              <h2>Web Server</h2>
             </div>
+            <div>
+              <div style="display: inline-block; margin: 10px">
+                <input class="input-element" id="apiUrlLink" name="apiUrlLink" placeholder="API URL" required=""
+                  type="link" value=""><br>
+                <input accept=".yaml,.yml,.json" id="fileInput" name="fileInput" style="display: inline-block"
+                  type="file">
+              </div>
+            </div>
+            <button class="button database-header-button" onclick="loadWebServer()">Load Web Server</button>
+            <div id="web-api-container"></div>
           </div>
         </div>
       </div>
     </div>
-  </div> <!-- Main -->
+  </div><!-- Main -->
+
   <div class="gjs-toolbar" id="editorFloatMenu" style="pointer-events: all; top: 200px; left: 545.438px">
     <input id="editorElementSelected" type="hidden" value="">
     <div class="gjs-toolbar-items">
@@ -425,14 +426,7 @@
   <!-- Footer -->
   <footer class="mt-auto">
     <!-- Grid container -->
-    <div class="container p-4 pb-0">
-      <!-- Section: Social media -->
-      <div class="mb-4">
-        <!-- Github -->
-        <a class="btn btn-outline-light m-1" href="#!" role="button"><i class="fab fa-github"></i></a>
-      </div>
-      <!-- Section: Social media -->
-    </div>
+
     <!-- Grid container -->
     <!-- Copyright -->
     <div class="text-center p-3">
