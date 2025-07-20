@@ -14,7 +14,16 @@
  * limitations under the License.
  */
 function createInputField(type) {
-
+  var main = document.createElement('div');
+  main.classList.add('form-container');
+  main.id = type + Date.now(); // Unique ID for each new element
+  main.draggable = true;
+  main.tagName = type;
+  const inputField = document.createElement('input');
+  inputField.type = "text";
+  inputField.className = "form-control";
+  main.appendChild(inputField);
+  return main;
 }
 
 function editInputField(type, element, content) {
@@ -22,8 +31,8 @@ function editInputField(type, element, content) {
 
   const tableName = element.getAttribute('dataset-table-name') || "";
   const tablePrefix = tableName.substring(0, 5); // Prend maximum 5 lettres
-  const columnName  = element.getAttribute('dataset-field-name') || "";
-  const nameColumn = `${tablePrefix}_${columnName}`; 
+  const columnName = element.getAttribute('dataset-field-name') || "";
+  const nameColumn = `${tablePrefix}_${columnName}`;
 
   const button = document.createElement("button");
   button.textContent = "update";
@@ -40,13 +49,13 @@ function editInputField(type, element, content) {
 
   const multiSelectDiv = createMultiSelectItem("Data", "data", "data");
   content.appendChild(multiSelectDiv);
- 
+
   const maindiv = element.closest("[dataset]");
   //console.log("maindiv:", maindiv);
-  const json= JSON.parse(maindiv.getAttribute("dataset"));
- 
-  const fieldJson=json.find(field => field.fieldName === columnName);
-  
+  const json = JSON.parse(maindiv.getAttribute("dataset"));
+
+  const fieldJson = json.find(field => field.fieldName === columnName);
+
   addFieldToPropertiesBar(multiSelectDiv, fieldJson);
 }
 
@@ -54,9 +63,9 @@ function editInputField(type, element, content) {
 
 async function updatefieldDataSet(main, content) {
   console.log("updatefieldDataSet");
-  const columnName  = main.getAttribute('dataset-field-name') || "";
+  const columnName = main.getAttribute('dataset-field-name') || "";
   var data = content.querySelector("#Data").querySelectorAll("span[name='dataContainer']");
-  
+
   if (data.length == 0) return;
   const fields = {};
 
@@ -65,17 +74,17 @@ async function updatefieldDataSet(main, content) {
     const fieldName = field.fieldName; // on prend le nom de la colonne comme clé
     fields[fieldName] = field; // on ajoute au format clé/valeur
   });
-  
+
   console.log(fields); // tu as un objet JSON { fieldName1: {...}, fieldName2: {...} }
-  
+
 
   const maindiv = main.closest("[dataset]");
   //console.log("maindiv:", maindiv);
-  let jsonDataset= JSON.parse(maindiv.getAttribute("dataset"));
- 
-  jsonDataset= updateFieldInDataset(jsonDataset,columnName,fields);
- 
-  maindiv.setAttribute("dataset",JSON.stringify(jsonDataset));
+  let jsonDataset = JSON.parse(maindiv.getAttribute("dataset"));
+
+  jsonDataset = updateFieldInDataset(jsonDataset, columnName, fields);
+
+  maindiv.setAttribute("dataset", JSON.stringify(jsonDataset));
   // get the data from the main
 }
 

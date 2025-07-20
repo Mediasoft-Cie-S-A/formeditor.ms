@@ -1,4 +1,4 @@
-.DataPanel{
+.DataPanel {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -14,7 +14,7 @@
     box-sizing: border-box;
 }
 
-.DataPanel.DataPanel:h3{
+.DataPanel.DataPanel:h3 {
     margin: 0;
     padding: 16px;
     font-size: 1.5em;
@@ -22,7 +22,7 @@
     color: #333;
 }
 
-.DataPanel:h1{
+.DataPanel:h1 {
     margin: 0;
     padding: 16px;
     font-size: 1.5em;

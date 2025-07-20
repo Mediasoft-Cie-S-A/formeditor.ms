@@ -16,79 +16,79 @@
 
 // store form data in mongoDB
 
- function registerForm(e) {
-    e.preventDefault();
-    console.log("submit");
+function registerForm(e) {
+  e.preventDefault();
+  console.log("submit");
 
-    var objectId = document.getElementById("objectId").value;
-    var objectName = document.getElementById("objectName").value;
-    var objectSlug = document.getElementById("objectSlug").value;
-    var userCreated = document.getElementById("userCreated").value;
-    var userModified = document.getElementById("userModified").value;
-    var type = document.getElementById("objectType").value;
+  var objectId = document.getElementById("objectId").value;
+  var objectName = document.getElementById("objectName").value;
+  var objectSlug = document.getElementById("objectSlug").value;
+  var userCreated = document.getElementById("userCreated").value;
+  var userModified = document.getElementById("userModified").value;
+  var type = document.getElementById("objectType").value;
 
-    var formContainer = document.getElementById("formContainer");
-    var jsonData = domToJson(formContainer);
-    console.log(jsonData);
+  var formContainer = document.getElementById("formContainer");
+  var jsonData = domToJson(formContainer);
+  console.log(jsonData);
 
-    if (type == "form") {
-      const formData = {
-        objectId: objectId,
-        objectName: objectName,
-        objectSlug: objectSlug,
-        userCreated: userCreated,
-        userModified: userModified,
-        modificationDate: new Date(),
-        creationDate: new Date(),
-        formData: jsonData, // Assuming formDataJson is a valid JSON string
-      };
+  if (type == "form") {
+    const formData = {
+      objectId: objectId,
+      objectName: objectName,
+      objectSlug: objectSlug,
+      userCreated: userCreated,
+      userModified: userModified,
+      modificationDate: new Date(),
+      creationDate: new Date(),
+      formData: jsonData, // Assuming formDataJson is a valid JSON string
+    };
 
-      // Check if form exists
-      fetch(`/get-form/${objectId}`)
-        .then((response) => {
-          console.log("response");
-          console.log(response);
-          if (response.ok) {
-            return response.json();
-          } else {
-            throw new Error("Form does not exist");
-          }
-        })
-        .then((existingForm) => {
-          console.log("existingForm");
-          console.log(existingForm);
-          // If form exists, update it
-          return fetch(`/update-form/${objectId}`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formData),
-          });
-        })
-        .catch((error) => {
-          console.log("error");
-          console.log(error);
-          // If form does not exist, store it
-          return fetch("/store-json", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formData),
-          });
-        })
-        .then((response) => response.json())
-        .then((data) => {
-          showToast("Success!", 5000); // Show toast for 5 seconds
-          console.log("Success:", data);
-        })
-        .catch((error) => {
-          showToast("Error! " + error, 5000); // Show toast for 5 seconds
-          console.error("Error:", error);
+    // Check if form exists
+    fetch(`/get-form/${objectId}`)
+      .then((response) => {
+        console.log("response");
+        console.log(response);
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error("Form does not exist");
+        }
+      })
+      .then((existingForm) => {
+        console.log("existingForm");
+        console.log(existingForm);
+        // If form exists, update it
+        return fetch(`/update-form/${objectId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
         });
-    }
+      })
+      .catch((error) => {
+        console.log("error");
+        console.log(error);
+        // If form does not exist, store it
+        return fetch("/store-json", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        showToast("Success!", 5000); // Show toast for 5 seconds
+        console.log("Success:", data);
+      })
+      .catch((error) => {
+        showToast("Error! " + error, 5000); // Show toast for 5 seconds
+        console.error("Error:", error);
+      });
   }
+}
 
 
 

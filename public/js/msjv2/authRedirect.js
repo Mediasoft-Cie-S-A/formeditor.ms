@@ -10,7 +10,7 @@ myMSALObj.handleRedirectPromise()
         console.error(error);
     });
 
-function selectAccount () {
+function selectAccount() {
 
     /**
      * See here for more info on account retrieval: 
@@ -51,7 +51,7 @@ function signIn() {
 
 
 
-const myMSALObj = new msal.PublicClientApplication(msalConfig);
+//const myMSALObj = new msal.PublicClientApplication(msalConfig);
 
 function signOut() {
 
@@ -63,22 +63,22 @@ function signOut() {
     const logoutRequest = {
         account: myMSALObj.getAccountByUsername(username),
         postLogoutRedirectUri: msalConfig.auth.redirectUri,
-        
+
     };
 
-  // 🔐 Déconnexion Azure
-  myMSALObj.logoutPopup(logoutRequest).then(() => {
-    // 🔐 Déconnexion backend (Express)
-    fetch('/logout', { credentials: 'include' })
-      .then(() => {
-        window.location.href = '../../../../views/login.ejs'; // ← chemin vers ton vrai login
-      })
-      .catch(err => {
-        console.error("Erreur logout serveur :", err);
-      });
-  }).catch(err => {
-    console.error("Erreur logout Azure AD :", err);
-  });
+    // 🔐 Déconnexion Azure
+    myMSALObj.logoutPopup(logoutRequest).then(() => {
+        // 🔐 Déconnexion backend (Express)
+        fetch('/logout', { credentials: 'include' })
+            .then(() => {
+                window.location.href = '../../../../views/login.ejs'; // ← chemin vers ton vrai login
+            })
+            .catch(err => {
+                console.error("Erreur logout serveur :", err);
+            });
+    }).catch(err => {
+        console.error("Erreur logout Azure AD :", err);
+    });
 }
 
 

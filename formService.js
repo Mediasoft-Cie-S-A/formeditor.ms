@@ -24,7 +24,7 @@ const { deletedComponents } = require('./utils/deletedStore');
 
 module.exports = function (app, mongoDbUrl, dbName) {
   const checkAuthenticated = (req, res, next) => {
-  //  console.log(app.passport);
+    //  console.log(app.passport);
     if (req.isAuthenticated()) {
       return next();
     }
@@ -33,19 +33,19 @@ module.exports = function (app, mongoDbUrl, dbName) {
 
   const requireCheckpoint = (requiredCheckPoint) => {
     return (req, res, next) => {
-        if (!req.isAuthenticated()) {
-          res.redirect("/login");
-        }
-        console.log(req.user.checkPoints);
-        const userCheckpoints = req.user.checkPoints || [];
+      if (!req.isAuthenticated()) {
+        res.redirect("/login");
+      }
+      console.log(req.user.checkPoints);
+      const userCheckpoints = req.user.checkPoints || [];
 
-        if (userCheckpoints.includes('*') || userCheckpoints.includes(requiredCheckPoint)) {
-            return next(); // User has access
-        } else {
-            return res.status(403).json({ message: 'Access Denied. Insufficient privileges.' });
-        }
+      if (userCheckpoints.includes('*') || userCheckpoints.includes(requiredCheckPoint)) {
+        return next(); // User has access
+      } else {
+        return res.status(403).json({ message: 'Access Denied. Insufficient privileges.' });
+      }
     };
-};
+  };
 
   // Configure multer for file uploads
   const upload = multer({
@@ -65,7 +65,7 @@ module.exports = function (app, mongoDbUrl, dbName) {
       }
     }),
     fileFilter: (req, file, cb) => {
-      const allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/bmp','video/mp4'];
+      const allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/bmp', 'video/mp4'];
       if (allowedTypes.includes(file.mimetype)) {
         cb(null, true);
       } else {
@@ -74,16 +74,16 @@ module.exports = function (app, mongoDbUrl, dbName) {
     }
   });
 
- 
+
   app.get("/dashboard", checkAuthenticated, (req, res) => {
     console.log(req.user.username);
     res.render("dashboard.ejs", { userName: req.user.username, checkPoints: req.user.checkPoints });
   });
   app.post("/store-json", checkAuthenticated, async (req, res) => {
-     // create a new MongoClient
-     const client = new mongoClient(mongoDbUrl, {});
+    // create a new MongoClient
+    const client = new mongoClient(mongoDbUrl, {});
     try {
-   
+
       await client.connect();
       const db = client.db(dbName);
       const col = db.collection("forms");
@@ -112,53 +112,53 @@ module.exports = function (app, mongoDbUrl, dbName) {
     }
   });
 
-  app.get("/list-forms", 
+  app.get("/list-forms",
     requireCheckpoint("0001100001"), // Require specific checkpoint
     async (req, res) => {
       const client = new mongoClient(mongoDbUrl, {});
-    try {
-       // create a new MongoClient
-    
-      await client.connect();
-     
-      const db = client.db(dbName);
-      const col = db.collection("forms");
-      const forms = await col.find({}).toArray();
+      try {
+        // create a new MongoClient
 
-      res.send(forms);
-    } catch (err) {
-      console.log(err.stack);
-      res.status(500).send("Error retrieving forms");
-    } finally {
-      await client.close();
-    }
-  });
+        await client.connect();
 
-  app.get("/get-form/:objectId", 
+        const db = client.db(dbName);
+        const col = db.collection("forms");
+        const forms = await col.find({}).toArray();
+
+        res.send(forms);
+      } catch (err) {
+        console.log(err.stack);
+        res.status(500).send("Error retrieving forms");
+      } finally {
+        await client.close();
+      }
+    });
+
+  app.get("/get-form/:objectId",
     requireCheckpoint("0001100002"), // Require specific checkpoint 
     async (req, res) => {
-       // create a new MongoClient
-       const client = new mongoClient(mongoDbUrl, {});
+      // create a new MongoClient
+      const client = new mongoClient(mongoDbUrl, {});
       try {
 
-      await client.connect();
-      const db = client.db(dbName);
-      const col = db.collection("forms");
+        await client.connect();
+        const db = client.db(dbName);
+        const col = db.collection("forms");
 
-      const form = await col.findOne({ objectId: req.params.objectId });
+        const form = await col.findOne({ objectId: req.params.objectId });
 
-      if (form) {
-        res.send(form);
-      } else {
-        res.status(404).send("Form not found");
+        if (form) {
+          res.send(form);
+        } else {
+          res.status(404).send("Form not found");
+        }
+      } catch (err) {
+        console.log(err.stack);
+        res.status(500).send("Error retrieving form");
+      } finally {
+        await client.close();
       }
-    } catch (err) {
-      console.log(err.stack);
-      res.status(500).send("Error retrieving form");
-    } finally {
-      await client.close();
-    }
-  });
+    });
 
   app.post('/api/delete-component', (req, res) => {
     const { id } = req.body;
@@ -172,8 +172,8 @@ module.exports = function (app, mongoDbUrl, dbName) {
   });
 
   app.put("/update-form/:objectId", checkAuthenticated, async (req, res) => {
-           // create a new MongoClient
-           const client = new mongoClient(mongoDbUrl, {});
+    // create a new MongoClient
+    const client = new mongoClient(mongoDbUrl, {});
     try {
 
       await client.connect();
@@ -207,8 +207,8 @@ module.exports = function (app, mongoDbUrl, dbName) {
   });
 
   app.delete("/delete-form/:objectId", checkAuthenticated, async (req, res) => {
-       // create a new MongoClient
-       const client = new MongoClient(mongoDbUrl, {});
+    // create a new MongoClient
+    const client = new MongoClient(mongoDbUrl, {});
     try {
 
       await client.connect();
@@ -234,7 +234,7 @@ module.exports = function (app, mongoDbUrl, dbName) {
   app.get('/media', checkAuthenticated, (req, res) => {
     const imgDir = path.join(__dirname, 'public/media/img'); // Replace with your target directory
     const videoDir = path.join(__dirname, 'public/media/video');
-    
+
     const getAllImages = (dir, baseDir = dir) => {
       const images = [];
       const supportedExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp']; // Add supported image extensions here
@@ -278,10 +278,10 @@ module.exports = function (app, mongoDbUrl, dbName) {
 
       return videos;
     };
-    
+
 
     try {
-     
+
       const imagePaths = getAllImages(imgDir);
       const videoPaths = getAllVideos(videoDir);
       res.json({ images: imagePaths, videos: videoPaths });
@@ -299,7 +299,7 @@ module.exports = function (app, mongoDbUrl, dbName) {
       console.log(req.file.filename)
       res.json({ imagePath: `${req.file.filename}` });
 
-      
+
     } catch (error) {
       console.error('Error uploading image/video:', error);
       res.status(500).json({ error: 'Unable to upload mediaformData' });

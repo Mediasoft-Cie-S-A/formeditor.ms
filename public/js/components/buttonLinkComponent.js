@@ -54,7 +54,7 @@ function createButtonLink(type) {
         };
     };
     */
-    btn._applyClick = () => {}; // noop
+    btn._applyClick = () => { }; // noop
 
     btn._applyClick();
 
@@ -247,16 +247,16 @@ function openMenuInModal(titleText, screenUrl) {
 
     setTimeout(() => {
         activateEditTabIn(screen);
-// Désactiver l'onglet "Table" s'il existe
-const tabHeaders = screen.querySelectorAll('.ctab_HeaderButton');
-tabHeaders.forEach(header => {
-    if (header.innerText.trim().toLowerCase() === "table") {
-        header.classList.add('disabled');
-        header.onclick = (e) => e.preventDefault(); // bloque le clic
-        header.style.pointerEvents = "none"; // optionnel : désactive les clics
-        header.style.opacity = "0.5"; // optionnel : grise le bouton
-    }
-});
+        // Désactiver l'onglet "Table" s'il existe
+        const tabHeaders = screen.querySelectorAll('.ctab_HeaderButton');
+        tabHeaders.forEach(header => {
+            if (header.innerText.trim().toLowerCase() === "table") {
+                header.classList.add('disabled');
+                header.onclick = (e) => e.preventDefault(); // bloque le clic
+                header.style.pointerEvents = "none"; // optionnel : désactive les clics
+                header.style.opacity = "0.5"; // optionnel : grise le bouton
+            }
+        });
 
         // Attendre encore un peu pour s'assurer que les éléments sont bien dans le DOM
         setTimeout(() => {

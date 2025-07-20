@@ -18,59 +18,59 @@ const { authenticate } = require('passport');
 
 const LocalStrategy = require('passport-local').Strategy;
 
-module.exports = function(app,session, passport) {
+module.exports = function (app, session, passport) {
 
 
 
     authUser = (user, password, done) => {
         console.log(`Value of "User" in authUser function ----> ${user}`)         //passport will populate, user = req.body.username
         console.log(`Value of "Password" in authUser function ----> ${password}`) //passport will popuplate, password = req.body.password
-            
-            // 1. Check if user exists in config file
-            // 2. Check if password is correct
-            // 3. If both are correct, return user
-            // 4. If not, return false
-            // 5. If error, return error
-        const foundUser  = app.config.authentication.static.find( u => u.username === user && u.password === password) ;
-            if (foundUser) {
-                console.log(`User ${foundUser.username} authenticated`);
-                // define authenticated_user object
-                // Include checkpoints in the authenticated user object
-                let authenticated_user = {
-                    oid: foundUser.username,
-                    username: foundUser.username,
-                    checkPoints: foundUser.checkPoints || [] // Ensure it exists
-                };
 
-                console.log(authenticated_user);
-                return done (null, authenticated_user ) 
-            }
-            else {
-                console.log(`-------> User ${user} not authenticated`)
-                return done (null, false, {message: "Incorrect username or password"})
-            }
+        // 1. Check if user exists in config file
+        // 2. Check if password is correct
+        // 3. If both are correct, return user
+        // 4. If not, return false
+        // 5. If error, return error
+        const foundUser = app.config.authentication.static.find(u => u.username === user && u.password === password);
+        if (foundUser) {
+            console.log(`User ${foundUser.username} authenticated`);
+            // define authenticated_user object
+            // Include checkpoints in the authenticated user object
+            let authenticated_user = {
+                oid: foundUser.username,
+                username: foundUser.username,
+                checkPoints: foundUser.checkPoints || [] // Ensure it exists
+            };
+
+            console.log(authenticated_user);
+            return done(null, authenticated_user)
         }
-     
-    passport.use(new LocalStrategy (authUser))
+        else {
+            console.log(`-------> User ${user} not authenticated`)
+            return done(null, false, { message: "Incorrect username or password" })
+        }
+    }
 
-    
-    
+    passport.use(new LocalStrategy(authUser))
+
+
+
     app.get("/login", (req, res) => {
         res.render("login.ejs")
-    
+
     })
-    
-    app.delete("/logout", (req,res) => {
+
+    app.delete("/logout", (req, res) => {
         req.logOut()
         res.redirect("/login")
         console.log(`-------> User Logged out`)
-     })
-    
-    app.post ("/login", passport.authenticate('local', {
+    })
+
+    app.post("/login", passport.authenticate('local', {
         successRedirect: "/dashboard",
         failureRedirect: "/login",
     }))
-    
-    
-  
+
+
+
 };

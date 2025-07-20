@@ -8,7 +8,10 @@
       "url": "http://localhost:3000", // Replace with your app's URL
       "webRoot": "${workspaceFolder}",
       "sourceMaps": true,
-      "skipFiles": ["<node_internals>/**", "chrome-error://**"]
+      "skipFiles": [
+        "<node_internals>/**",
+        "chrome-error://**"
+      ]
     }
   ]
 }

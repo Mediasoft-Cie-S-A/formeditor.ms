@@ -15,10 +15,10 @@
  */
 const menuItems = [];
 menuItems.push({
-    item: "Tableau de bord", 
-    url: "#", 
-    icon: "fa fa-home", 
-    target: "new",  
+    item: "Tableau de bord",
+    url: "#",
+    icon: "fa fa-home",
+    target: "new",
     checkpoint: "0",
     children: [
         { item: "Apercu", url: "#", icon: "fa fa-eye", target: "_self", checkpoint: "0" },
@@ -37,7 +37,7 @@ menuItems.push({
         { item: "Fournisseurs", url: "#", icon: "fa fa-truck", target: "_self", checkpoint: "0" },
         { item: "Produits", url: "#", icon: "fa fa-box", target: "_self", checkpoint: "0" },
         { item: "Stocks", url: "#", icon: "fa fa-cubes", target: "_self", checkpoint: "0" },
-        { item: "Commandes", url: "#", icon: "fa fa-shopping-cart", target: "_self", checkpoint: "0" },              
+        { item: "Commandes", url: "#", icon: "fa fa-shopping-cart", target: "_self", checkpoint: "0" },
         { item: "Factures", url: "#", icon: "fa fa-file-invoice", target: "_self", checkpoint: "0" },
         { item: "Paiements", url: "#", icon: "fa fa-money-bill-wave", target: "_self", checkpoint: "0" },
         { item: "Banques", url: "#", icon: "fa fa-university", target: "_self", checkpoint: "0" },
@@ -45,10 +45,10 @@ menuItems.push({
     ]
 });
 menuItems.push({
-    item: "Reports", 
-    url: "#", 
-    icon: "fa fa-file", 
-    target: "new", 
+    item: "Reports",
+    url: "#",
+    icon: "fa fa-file",
+    target: "new",
     checkpoint: "0",
     children: [
         { item: "Daily Report", url: "#", icon: "fa fa-calendar", target: "_self", checkpoint: "0" },
@@ -61,13 +61,13 @@ function createMenuComponent(type) {
     mainDiv.setAttribute("tagName", type);
     mainDiv.className = "form-element";
     mainDiv.id = `menuComponent-${Date.now()}`;
-    const internalDiv = document.createElement('div');  
+    const internalDiv = document.createElement('div');
     const menu = document.createElement('ul');
     menu.className = 'menu-component';
     internalDiv.appendChild(menu);
     mainDiv.appendChild(internalDiv);
     mainDiv.setAttribute("items", JSON.stringify(menuItems));
-    rendenderMenuComponent( mainDiv);
+    rendenderMenuComponent(mainDiv);
     return mainDiv;
 }
 
@@ -136,7 +136,7 @@ function addmenuItems(element, itemdiv, itemObj) {
     checkpoint.placeholder = "Checkpoint";
     checkpoint.value = itemObj.checkpoint || "";
     internalDiv.appendChild(checkpoint);
-    
+
 
     const subMenuButton = document.createElement("button");
     subMenuButton.textContent = "Add Sub-menu";
@@ -187,7 +187,7 @@ function saveMenuItems(element) {
     const itemdiv = document.getElementById("menu-items");
     const items = parseMenuItems(itemdiv);
     element.setAttribute("items", JSON.stringify(items));
-    rendenderMenuComponent( element);
+    rendenderMenuComponent(element);
 }
 
 function rendenderMenuComponent(content) {
@@ -202,15 +202,15 @@ function rendenderMenuComponent(content) {
         const i = document.createElement('i');
 
         a.textContent = item.item;
-       
+
         i.className = item.icon;
         li.appendChild(i);
         li.appendChild(a);
-       
-        
+
+
         // Create sub-menu if there are children
         if (item.children && item.children.length > 0) {
-          
+
             const subMenu = document.createElement('ul');
             subMenu.className = "sub-menu";
             subMenu.style.display = "none"; // Initially hidden
@@ -218,22 +218,21 @@ function rendenderMenuComponent(content) {
             item.children.forEach(subItem => {
                 subMenu.appendChild(createMenuItem(subItem));
             });
-           
-            
-            
+
+
+
             li.appendChild(subMenu);
 
             li.setAttribute('onclick', `toggleSubMenu(event, this)`);
-           
+
         }
-        else
-        {
-            
-                if (item.url.startsWith("http") || item.url.startsWith("/")) {
-                    li.setAttribute('onclick', `window.location.href='${item.url}'; window.target='${item.target}'`);
-                } else {
+        else {
+
+            if (item.url.startsWith("http") || item.url.startsWith("/")) {
+                li.setAttribute('onclick', `window.location.href='${item.url}'; window.target='${item.target}'`);
+            } else {
                 li.setAttribute('onclick', `loadFormData('${item.url}',document.getElementById('${item.target}'))`);
-                }
+            }
         }
 
         return li;

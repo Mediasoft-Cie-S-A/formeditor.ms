@@ -1,6 +1,8 @@
 // Create the main myMSALObj instance
 // configuration parameters are located at authConfig.js
 
+
+
 const myMSALObj = new msal.PublicClientApplication(msalConfig);
 let username = "";
 
@@ -77,7 +79,7 @@ function getTokenPopup(request) {
      * https://github.com/AzureAD/microsoft-authentication-library-for-js/blob/dev/lib/msal-common/docs/Accounts.md
      */
     request.account = myMSALObj.getAccountByUsername(username);
-    
+
     return myMSALObj.acquireTokenSilent(request)
         .catch(error => {
             console.warn("silent token acquisition fails. acquiring token using popup");
@@ -91,9 +93,9 @@ function getTokenPopup(request) {
                         console.error(error);
                     });
             } else {
-                console.warn(error);   
+                console.warn(error);
             }
-    });
+        });
 }
 
 function seeProfile() {
@@ -117,30 +119,30 @@ function readMail() {
 
 function showWelcomeMessage(username) {
     console.log('Welcome ' + username + '!');
- // call customlogin api to authenticate the user
+    // call customlogin api to authenticate the user
     // and print the response in innerHTML
     getTokenRedirect(loginRequest)
         .then(response => {
-             fetch('/customLogin', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        username: username,
-                        password: response.accessToken
-                    })
-                }).catch((error) => {
-                    console.error('Error:', error);
-                }).then(response => response.json())
+            fetch('/customLogin', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: response.accessToken
+                })
+            }).catch((error) => {
+                console.error('Error:', error);
+            }).then(response => response.json())
                 .then(data => {
-                // redirect to dashboard
+                    // redirect to dashboard
                     window.location.href = "/dashboard";
                 });
-            }).catch(error => {
-                console.error(error);
-            });
-                
+        }).catch(error => {
+            console.error(error);
+        });
+
 
 }
 
@@ -158,7 +160,7 @@ function getTokenRedirect(request) {
                 // fallback to interaction when silent call fails
                 return myMSALObj.acquireTokenRedirect(request);
             } else {
-                console.warn(error);   
+                console.warn(error);
             }
         });
 }

@@ -54,8 +54,8 @@ function editElementDataSet(type, element, content) {
   content.appendChild(createMultiSelectItem("SQL", "sql", "sql"));
   content.appendChild(createMultiSelectItem("Data", "data", "data"));
   content.appendChild(createMultiSelectItem("Link", "link", "link"));
-  content.appendChild(createMultiSelectItem("Exception","exception","exception"));
-  content.appendChild(createSelectItem("Filter","filter","filter",element.getAttribute("filter"),"text",true));
+  content.appendChild(createMultiSelectItem("Exception", "exception", "exception"));
+  content.appendChild(createSelectItem("Filter", "filter", "filter", element.getAttribute("filter"), "text", true));
 
 
   // load the data
@@ -85,35 +85,35 @@ function editElementDataSet(type, element, content) {
     });
   }
 
-    // sql
-    if (element.getAttribute("sql") != null) {
-      var target = content.querySelector("#SQL");
-      var jsonData = JSON.parse(element.getAttribute("sql"));
-    
-      // add the db name
-      if (jsonData.DBName != null) {
-        var dbinput = target.querySelector("[tagname='dbname']");
-        dbinput.value = jsonData.DBName;
-      }
-      // add the select
-      if (jsonData.select != null) {
-        var select = target.querySelector("[tagname='select']");
-        select.value = jsonData.select;
-      }
-      // add the update
-      if (jsonData.update != null) {
-        var update = target.querySelector("[tagname='update']");
-        update.value = jsonData.update
-      }
-      // add the insert
-      if (jsonData.insert != null) {
-        var insert = target.querySelector("[tagname='insert']");
-        insert.value = jsonData.insert;
-      }
-      // add the delete
-      if (jsonData.delete != null) {
-        var del = target.querySelector("[tagname='delete']");
-        del.value = jsonData.delete;
+  // sql
+  if (element.getAttribute("sql") != null) {
+    var target = content.querySelector("#SQL");
+    var jsonData = JSON.parse(element.getAttribute("sql"));
+
+    // add the db name
+    if (jsonData.DBName != null) {
+      var dbinput = target.querySelector("[tagname='dbname']");
+      dbinput.value = jsonData.DBName;
+    }
+    // add the select
+    if (jsonData.select != null) {
+      var select = target.querySelector("[tagname='select']");
+      select.value = jsonData.select;
+    }
+    // add the update
+    if (jsonData.update != null) {
+      var update = target.querySelector("[tagname='update']");
+      update.value = jsonData.update
+    }
+    // add the insert
+    if (jsonData.insert != null) {
+      var insert = target.querySelector("[tagname='insert']");
+      insert.value = jsonData.insert;
+    }
+    // add the delete
+    if (jsonData.delete != null) {
+      var del = target.querySelector("[tagname='delete']");
+      del.value = jsonData.delete;
 
     }
   } // end if sql
@@ -137,85 +137,82 @@ async function updateDataSet(main, content) {
   data = Array.from(data).filter((span) => !span.closest("#exception"));
 
   if (data.length == 0) return;
- 
+
   data.forEach((span) => {
     var json = JSON.parse(span.getAttribute("data-field"));
     // check if the field exists in the jsonData
     console.log(json);
-    if (jsonData.find((field) => field.fieldName === json.fieldName) == null)
-    {
+    if (jsonData.find((field) => field.fieldName === json.fieldName) == null) {
       jsonData.push(json);
     }
-     
+
   });
 
- // SQL
-var sqlJson = {}
-//update the sql json
-var sql = content.querySelector("#SQL");
-console.log(sql);
-var DBName = sql.querySelector("[tagname='dbname']");
-console.log(DBName);
-if (DBName != null) {
-  sqlJson["DBName"]=DBName.value;
-}
-// get the textarea with the tagname="select"
-var sqlData = sql.querySelector("[tagname='select']");
-console.log(sqlData);
-if (sqlData != null) {
-  sqlJson["select"]= sqlData.value;
-}
-var sqlData = sql.querySelector("[tagname='update']");
-if (sqlData != null) {
-  sqlJson["update"]= sqlData.value;
-}
-var sqlData = sql.querySelector("[tagname='insert']");
-if (sqlData != null) {
-  sqlJson["insert"]=sqlData.value;
-}
+  // SQL
+  var sqlJson = {}
+  //update the sql json
+  var sql = content.querySelector("#SQL");
+  console.log(sql);
+  var DBName = sql.querySelector("[tagname='dbname']");
+  console.log(DBName);
+  if (DBName != null) {
+    sqlJson["DBName"] = DBName.value;
+  }
+  // get the textarea with the tagname="select"
+  var sqlData = sql.querySelector("[tagname='select']");
+  console.log(sqlData);
+  if (sqlData != null) {
+    sqlJson["select"] = sqlData.value;
+  }
+  var sqlData = sql.querySelector("[tagname='update']");
+  if (sqlData != null) {
+    sqlJson["update"] = sqlData.value;
+  }
+  var sqlData = sql.querySelector("[tagname='insert']");
+  if (sqlData != null) {
+    sqlJson["insert"] = sqlData.value;
+  }
 
 
-main.setAttribute("sql", JSON.stringify(sqlJson));
-console.log(sqlJson);
+  main.setAttribute("sql", JSON.stringify(sqlJson));
+  console.log(sqlJson);
 
-if (sqlJson.DBName != null) {
-  // get the db name
+  if (sqlJson.DBName != null) {
+    // get the db name
 
-      // get the data with query select "/table-data-sql/:database/:page/:pageSize"?sqlQuery=select * from table
-      const response = await fetch(`/table-data-sql/${sqlJson.DBName}/1/1?sqlQuery=${sqlJson.select}`).then((response) => {
-        if (!response.ok) {
-          showToast("Error retrieving data", 5000);
-        }
-        return response.json();
+    // get the data with query select "/table-data-sql/:database/:page/:pageSize"?sqlQuery=select * from table
+    const response = await fetch(`/table-data-sql/${sqlJson.DBName}/1/1?sqlQuery=${sqlJson.select}`).then((response) => {
+      if (!response.ok) {
+        showToast("Error retrieving data", 5000);
+      }
+      return response.json();
+    });
+
+    // if data is not empty, update the dataset
+    if (response.length > 0) {
+      // generate the json of all the data
+      const keys = Object.keys(response[0]);
+      jsonData = [];
+      keys.forEach((field) => {
+        jsonData.push({ DBName: sqlJson.DBName, fieldName: field, tabelName: "", fieldType: "string" });
       });
+      main.setAttribute("dataSet", JSON.stringify(jsonData));
+    } // end if data is not empty
+  } // end if DBName is not empty
 
-      // if data is not empty, update the dataset
-      if (response.length > 0) {
-        // generate the json of all the data
-        const keys = Object.keys(response[0]);
-        jsonData = [];
-        keys.forEach((field) => {
-          jsonData.push({ DBName:sqlJson.DBName, fieldName: field, tabelName: "",  fieldType: "string" });
-        });
-        main.setAttribute("dataSet", JSON.stringify(jsonData));
-      } // end if data is not empty
-} // end if DBName is not empty
- 
 
   datalink.forEach((span) => {
     var json = JSON.parse(span.getAttribute("data-field"));
     // check if the field exists in the linkData
-    if (linkData.find((field) => field.fieldName === json.fieldName) == null)
-    {
-          linkData.push(json);
+    if (linkData.find((field) => field.fieldName === json.fieldName) == null) {
+      linkData.push(json);
     }
   });
   exception.forEach((span) => {
     var json = JSON.parse(span.getAttribute("data-field"));
     // check if the field exists in the exceptionData
-    if (exceptionData.find((field) => field.fieldName === json.fieldName) == null)
-    {
-    exceptionData.push(json);
+    if (exceptionData.find((field) => field.fieldName === json.fieldName) == null) {
+      exceptionData.push(json);
     }
   });
 
@@ -288,7 +285,7 @@ function renderDataSet(main) {
       if (fieldJson.fieldType === "hidden" || fieldJson.fieldType === "rowid") {
         createField.style.display = "none"; // Hide hidden and rowid fields
       } else {
-      createField.style.display = "flex";
+        createField.style.display = "flex";
       }
       createField.style.flexDirection = "column";
       createField.style.justifyContent = "center";
@@ -303,9 +300,9 @@ function renderDataSet(main) {
       panel.style.backgroundColor = "#fff";
       panel.style.boxSizing = "border-box";
       if (fieldJson.fieldType === "hidden" || fieldJson.fieldType === "rowid") {
-      panel.style.display = "none"; // Hide the panel for hidden and rowid fields
-      }else {
-      panel.style.display = "flex"; // Show the panel for visible fields
+        panel.style.display = "none"; // Hide the panel for hidden and rowid fields
+      } else {
+        panel.style.display = "flex"; // Show the panel for visible fields
       }
       panel.style.flexDirection = "column";
       panel.style.justifyContent = "center";
@@ -339,16 +336,16 @@ function createFieldFromJson(fieldJson) {
   var element = null;
   let einput = null;
   switch (fieldJson.fieldType) {
-    
+
     case "array":
-      case "combo_array":
-        case "combo_sql":
+    case "combo_array":
+    case "combo_sql":
       element = createElementInput(fieldJson.fieldType);
       einput = element.querySelector("input"); // Adjust to your combobox selector
       einput.style.display = "none";
       break;
-     
-      
+
+
     case "sequence":
       element = createElementInput(fieldJson.fieldType);
       einput = element.querySelector("input"); // Adjust to your combobox selector
@@ -360,19 +357,19 @@ function createFieldFromJson(fieldJson) {
       // adding the search button
       var searchButton = document.createElement("button");
       searchButton.style.float = "right";
-      searchButton.style.width = "20px" ;
-      searchButton.style.height = "20px" ;
+      searchButton.style.width = "20px";
+      searchButton.style.height = "20px";
       searchButton.style.padding = "0px";
       // icon for the search button
       var icon = document.createElement("i");
-      icon.className = "fas fa-search";      
+      icon.className = "fas fa-search";
       searchButton.appendChild(icon);
       searchButton.onclick = function () {
         var input = einput;
         var filter = input.value.toUpperCase();
         // generate the modalwindow for the search
         // Example JSON dataset and query
-        
+
         query = einput.getAttribute("dataset-field-SQL");
         console.log("query", query);
         // split the query
@@ -384,80 +381,79 @@ function createFieldFromJson(fieldJson) {
         // extract all fields from the query
         var fields = query.match(/SELECT(.*?)FROM/)[1];
         // get the dataset from the query in this format  { fieldName: "field", fieldType: "string" },
-       const datasetJson = fields.split(",").map((field) => {
+        const datasetJson = fields.split(",").map((field) => {
           return {
             fieldName: field.trim(),
             fieldType: "string",
           };
         });
-     // Show the modal with the query results
-          showQueryResultModal(DBName, datasetJson, queryArray[1],einput.id);
+        // Show the modal with the query results
+        showQueryResultModal(DBName, datasetJson, queryArray[1], einput.id);
       };
       element.appendChild(searchButton);
       break;
-    
+
     case "text":
-         switch(fieldJson.fieldDataType)
-         {
-          case "integer":
-          case "bigint":
-          case "float":
-          case "double":
-          case "decimal":
-          case "int64":
-            element = createElementInput("number");
-            einput = element.querySelector("input");
-            break;
-          case "date":
-          case "datetime":
-                element = createElementInput("date");
-                einput = element.querySelector("input");
+      switch (fieldJson.fieldDataType) {
+        case "integer":
+        case "bigint":
+        case "float":
+        case "double":
+        case "decimal":
+        case "int64":
+          element = createElementInput("number");
+          einput = element.querySelector("input");
           break;
-          case "time":
-                element = createElementInput("time");
-                einput = element.querySelector("input");
-                break;
-          case "logical":
-          case "boolean":
-          case "bool":
-          case "bit":
-            element = createElementInput("checkbox");
-            einput = element.querySelector("input");
-            einput.className = "apple-switch";
-            
-            // Set initial state
-            if (fieldJson.fieldValues == "1") {
-              einput.checked = true;
+        case "date":
+        case "datetime":
+          element = createElementInput("date");
+          einput = element.querySelector("input");
+          break;
+        case "time":
+          element = createElementInput("time");
+          einput = element.querySelector("input");
+          break;
+        case "logical":
+        case "boolean":
+        case "bool":
+        case "bit":
+          element = createElementInput("checkbox");
+          einput = element.querySelector("input");
+          einput.className = "apple-switch";
+
+          // Set initial state
+          if (fieldJson.fieldValues == "1") {
+            einput.checked = true;
+            einput.value = "1";
+          } else {
+            einput.checked = false;
+            einput.value = "0";
+          }
+
+          // Listen to changes
+          einput.addEventListener("change", function () {
+            if (einput.checked) {
               einput.value = "1";
             } else {
-              einput.checked = false;
               einput.value = "0";
             }
-            
-            // Listen to changes
-            einput.addEventListener("change", function () {
-              if (einput.checked) {
-                einput.value = "1";
-              } else {
-                einput.value = "0";
-              }
-            });
-                break;
-          default:
-            element = createElementInput("text");
-            einput = element.querySelector("input");
-            break;
-         }
-   
-      
+          });
+          break;
+        default:
+          element = createElementInput("text");
+          einput = element.querySelector("input");
+          break;
+      }
+
+
       break;
     case "rowid":
     case "hidden":
       element = createElementInput("hidden");
       einput = element.querySelector("input");
       element.style.display = "none";
-   break;
-   
+      break;
+
     default:
       // Handle default case or unknown types
       element = createElementInput("text");
@@ -488,7 +484,8 @@ function createFieldFromJson(fieldJson) {
     einput.setAttribute("tagname", fieldJson.fieldType);
     einput.setAttribute("validation", fieldJson.validation);
 
-      // set einput disabled and readonly
+    // set einput disabled and readonly
+    console.log("dataSetComponent einput readonly");
     einput.disabled = true;
     einput.readOnly = true;
     if (fieldJson.fieldMandatory) {
@@ -536,7 +533,7 @@ function RefreshRecord(DBName, tableName) {
 // use the fetch function to call the web service and update the inputs with the data
 // use the updateInputs function to update the inputs with the data
 // use the setRowID function to set the current row id in the navigation bar
-async function linkRecordToGrid(DBName, tableName, rowId, rowNum,dataset,link,rows) {
+async function linkRecordToGrid(DBName, tableName, rowId, rowNum, dataset, link, rows) {
   /*
   console.log("linkRecordToGrid");
   console.log("DBName", DBName);
@@ -548,379 +545,378 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum,dataset,link,ro
   console.log("rows", rows);
   */
   const saveBtn = document.querySelector("[name=SaveDSBtn]");
-  if (saveBtn) saveBtn.disabled = true;
-  
+  // if (saveBtn) saveBtn.disabled = true;
+
   try {
     // activate all the loaders by class name miniLoader
     activateLoaders();
     // get all the datasets
     var datasetsDiv = document.querySelectorAll("[tagname='dataSet']");
-      // check if the datasetDiv exists
-      if (datasetsDiv.length === 0) {
-        showToast("No dataset found", 5000);
-        return;
-      }
+
+    // check if the datasetDiv exists
+    if (datasetsDiv.length === 0) {
+      showToast("No dataset found", 5000);
+      return;
+    }
     // get the datasetDiv
-    const datasetDiv = datasetsDiv[0];   
-    
-      // get the datasetJSON from the datasetDiv
-      const dataset = JSON.parse(datasetDiv.getAttribute("dataSet"));
+    const datasetDiv = datasetsDiv[0];
+
+    // get the datasetJSON from the datasetDiv
+    const dataset = JSON.parse(datasetDiv.getAttribute("dataSet"));
     //  console.log("dataset", dataset);
-    
-        // get the fields from the dataset
-        const datasetFields = datasetDiv.getAttribute("dataset-fields-list");
 
-        if (!link) { // if link is not defined
-          link = [];
-        }
-        if (link.length ===0) {
-           //console.log("link.length ===0");
-            const url = `/get-record-by-rowid/${dataset[0].DBName}/${dataset[0].tableName}/${rowId}?fields=${datasetFields}`;
-            //console.log("[FETCH by ROWID] URL:", url);
+    // get the fields from the dataset
+    const datasetFields = datasetDiv.getAttribute("dataset-fields-list");
 
-            fetch(url)
-              .then((response) => response.json())
-              .then((data) => {
-                if (data.length > 0) {
-                  updateInputs(data[0], dataset[0].DBName, dataset[0].tableName,datasetDiv);
-                }
-                navbar_EditRecord(true);
-              })
-              .catch((error) => console.error("Error:", error));
-          } // end if link.length ===0
-          else {
-            console.log("link.length !==0");
-            // check if the link exists in the dataset 
-                    
-            // get the fields from the dataset and values from rows
-            // and generate indexes and values in order to pass to             "/get-records-by-idexes/:database/:tableName",
-          
-          
-            let indexes = [];
-            let values = [];
-          for (let j = 0; j < link.length; j++) {
-            const field = link[j];
-              indexes.push(field.fieldName);
-              // get id for filed by array index dataset
-              let idx = -1;
-              // get the index of the field in the dataset
-               console.log("rows", rows); 
-               
-              for (let i = 0; i < dataset.length; i++) {
-                let f = dataset[i];
-                
-                if (f.fieldName === field.fieldName) {
-                  console.log("f", f);
-           
-                  f.fieldType = "hidden";
-                  // search the iput with the fieldname
-                  const input = datasetDiv.querySelector(`[dataset-field-name=${f.fieldName}]`);
-                  // convert the input to hidden
-                  input.type = "hidden";
-                  // set the parent to display none
-                  input.parentElement.style.display = "none";
-                     // idx+1 is the value of the field in the rows array considering 0 is the rowid
-                  values.push(rows[field.fieldName]);
-                }  // end if
-                
-          }// end for i
-        } // end for j
-           console.log("indexes", indexes);
-            console.log("values", values);
-            
+    if (!link) { // if link is not defined
+      link = [];
+    }
+    if (link.length === 0) {
+      //console.log("link.length ===0");
+      const url = `/get-record-by-rowid/${dataset[0].DBName}/${dataset[0].tableName}/${rowId}?fields=${datasetFields}`;
+      //console.log("[FETCH by ROWID] URL:", url);
 
-            const url = `/get-records-by-indexes/${dataset[0].DBName}/${dataset[0].tableName}?indexes=${indexes}&values=${values}&fields=${datasetFields}`;
-            fetch(url)
-              .then((response) => response.json())
-              .then((data) => {
-                // get the divs document.querySelectorAll("#DataSet_" + tableName);
-               
-                
-                // get the data length
-                const dataLength = data.length;
-                // check if datalength = datasetsFieldDiv.length
-                 // if datasetsFieldDiv.length > dataLength remove the extra divs
-                  if (datasetsDiv.length > dataLength && dataLength > 0) {
-                    for (let i = dataLength; i < datasetsDiv.length; i++) {
-                      datasetsDiv[i].remove();
-                    }
-                  }
-                else // if datasetsFieldDiv.length < dataLength add the extra divs and copy the first div
-                  if (datasetsDiv.length < dataLength) {
-                    console.log("datasetsFieldDiv.length < dataLength");
-                    console.log("datasetsFieldDiv", datasetsDiv);
-                    console.log(datasetsDiv[0]);
-                    // get the first div html
-                    const firstDiv = datasetsDiv[0].outerHTML;
-                    for (let i = datasetsDiv.length; i < dataLength; i++) {
-                      // create a new div
-                      const newDiv = document.createElement("div");
-                      newDiv.innerHTML = firstDiv;
-                      // add the new div to the datasetDiv
-                      console.log("newDiv", newDiv);
-                      console.log("datasetsDiv", datasetsDiv);
-                      datasetsDiv[0].parentElement.appendChild(newDiv);
-                    }
-                  } // end else
+      fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.length > 0) {
+            updateInputs(data[0], dataset[0].DBName, dataset[0].tableName, datasetDiv);
+          }
+          deactivateLoaders();
+        })
+        .catch((error) => console.error("Error:", error));
+    } // end if link.length ===0
+    else {
+      console.log("link.length !==0");
+      // check if the link exists in the dataset 
 
-                  // update datasetsDiv
-                  datasetsDiv = document.querySelectorAll("[tagname='dataSet']");
-                // update the inputs with the data for each datasetDiv
-                datasetsDiv.forEach((datasetDiv, index) => {
-                   console.log(data[index]);
-                   console.log(datasetDiv);
-                  updateInputs(data[index], dataset[0].tableName, dataset[0].DBName, datasetDiv);
-                });
-               
-                navbar_EditRecord(true);
-              })
-              .catch((error) => console.error("Error:", error));
-          } // end else
+      // get the fields from the dataset and values from rows
+      // and generate indexes and values in order to pass to             "/get-records-by-idexes/:database/:tableName",
 
-      
 
-    
-  
+      let indexes = [];
+      let values = [];
+      for (let j = 0; j < link.length; j++) {
+        const field = link[j];
+        indexes.push(field.fieldName);
+        // get id for filed by array index dataset
+        let idx = -1;
+        // get the index of the field in the dataset
+        console.log("rows", rows);
+
+        for (let i = 0; i < dataset.length; i++) {
+          let f = dataset[i];
+
+          if (f.fieldName === field.fieldName) {
+            console.log("f", f);
+
+            f.fieldType = "hidden";
+            // search the iput with the fieldname
+            const input = datasetDiv.querySelector(`[dataset-field-name=${f.fieldName}]`);
+            // convert the input to hidden
+            input.type = "hidden";
+            // set the parent to display none
+            input.parentElement.style.display = "none";
+            // idx+1 is the value of the field in the rows array considering 0 is the rowid
+            values.push(rows[field.fieldName]);
+          }  // end if
+
+        }// end for i
+      } // end for j
+      console.log("indexes", indexes);
+      console.log("values", values);
+
+
+      const url = `/get-records-by-indexes/${dataset[0].DBName}/${dataset[0].tableName}?indexes=${indexes}&values=${values}&fields=${datasetFields}`;
+      fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+          // get the divs document.querySelectorAll("#DataSet_" + tableName);
+
+
+          // get the data length
+          const dataLength = data.length;
+          // check if datalength = datasetsFieldDiv.length
+          // if datasetsFieldDiv.length > dataLength remove the extra divs
+          if (datasetsDiv.length > dataLength && dataLength > 0) {
+            for (let i = dataLength; i < datasetsDiv.length; i++) {
+              datasetsDiv[i].remove();
+            }
+          }
+          else // if datasetsFieldDiv.length < dataLength add the extra divs and copy the first div
+            if (datasetsDiv.length < dataLength) {
+              console.log("datasetsFieldDiv.length < dataLength");
+              console.log("datasetsFieldDiv", datasetsDiv);
+              console.log(datasetsDiv[0]);
+              // get the first div html
+              const firstDiv = datasetsDiv[0].outerHTML;
+              for (let i = datasetsDiv.length; i < dataLength; i++) {
+                // create a new div
+                const newDiv = document.createElement("div");
+                newDiv.innerHTML = firstDiv;
+                // add the new div to the datasetDiv
+                console.log("newDiv", newDiv);
+                console.log("datasetsDiv", datasetsDiv);
+                datasetsDiv[0].parentElement.appendChild(newDiv);
+              }
+            } // end else
+
+          // update datasetsDiv
+          datasetsDiv = document.querySelectorAll("[tagname='dataSet']");
+          // update the inputs with the data for each datasetDiv
+          datasetsDiv.forEach((datasetDiv, index) => {
+            console.log(data[index]);
+            console.log(datasetDiv);
+            updateInputs(data[index], dataset[0].tableName, dataset[0].DBName, datasetDiv);
+          });
+          deactivateLoaders();
+        })
+        .catch((error) => console.error("Error:", error));
+    } // end else
+
   } catch (error) {
     console.error("Error:", error);
   }
 }
 
-async function updateInputs(data, DBName, tableName,dataset) {
+async function updateInputs(data, DBName, tableName, dataset) {
   /*
   console.log("updateInputs");
   console.log("data", data);
   */
-    const datasetTableName = dataset.getAttribute("data-table-name");
- 
-      const inputs = dataset.querySelectorAll("input, select");
+  const datasetTableName = dataset.getAttribute("data-table-name");
 
-      inputs.forEach(async (input) => {
-        const dbFieldName = input.getAttribute("DBName");
-        const fieldLabel = input.getAttribute("dataset-field-name");
-        // const fieldType = input.tagName.toLowerCase();
-        const fieldType = input.getAttribute("type");
-        input.value = "";
-        input.disabled = true;
-        input.readOnly = true;
-        switch (fieldType) {
-          case "array":
-            let subField = data[fieldLabel]?.toString().trim().split(";");
-            let arrayType = subField.every(
-              (item) =>
-                item === true || item === false || item == 0 || item == 1
-            );
-            input.value = data[fieldLabel];
+  const inputs = dataset.querySelectorAll("input, select");
 
-            input.style.display = "none"; // Hide the original input
-            let fieldId = input.getAttribute("data-field-name");
-            let existingFieldContainer = document.getElementById(fieldId);
-            if (existingFieldContainer) {
-              existingFieldContainer.parentElement.removeChild(
-                existingFieldContainer
-              );
-            }
+  inputs.forEach(async (input) => {
+    const dbFieldName = input.getAttribute("DBName");
+    const fieldLabel = input.getAttribute("dataset-field-name");
+    // const fieldType = input.tagName.toLowerCase();
+    const fieldType = input.getAttribute("type");
+    input.value = "";
 
-            let fieldContainer = document.createElement("div");
-            fieldContainer.style.height = "600px";
-            fieldContainer.style.maxWidth = "400%";
-            fieldContainer.style.overflowX = "scroll";
-            fieldContainer.style.display = "flex";
-            fieldContainer.style.flexDirection = "column";
-            fieldContainer.style.flexWrap = "wrap";
-            fieldContainer.className = "subFieldContainer";
-            fieldContainer.id = fieldId;
-            input.parentElement.appendChild(fieldContainer);
-            let labelsvalues = input.getAttribute("dataset-field-values");
-            let labels = labelsvalues.split(",");
-            if (arrayType) {
-              // Function to render subfields
-              function renderSubFields(
+    //input.disabled = true;
+    //input.readOnly = true;
+
+    switch (fieldType) {
+      case "array":
+        let subField = data[fieldLabel]?.toString().trim().split(";");
+        let arrayType = subField.every(
+          (item) =>
+            item === true || item === false || item == 0 || item == 1
+        );
+        input.value = data[fieldLabel];
+
+        input.style.display = "none"; // Hide the original input
+        let fieldId = input.getAttribute("data-field-name");
+        let existingFieldContainer = document.getElementById(fieldId);
+        if (existingFieldContainer) {
+          existingFieldContainer.parentElement.removeChild(
+            existingFieldContainer
+          );
+        }
+
+        let fieldContainer = document.createElement("div");
+        fieldContainer.style.height = "600px";
+        fieldContainer.style.maxWidth = "400%";
+        fieldContainer.style.overflowX = "scroll";
+        fieldContainer.style.display = "flex";
+        fieldContainer.style.flexDirection = "column";
+        fieldContainer.style.flexWrap = "wrap";
+        fieldContainer.className = "subFieldContainer";
+        fieldContainer.id = fieldId;
+        input.parentElement.appendChild(fieldContainer);
+        let labelsvalues = input.getAttribute("dataset-field-values");
+        let labels = labelsvalues.split(",");
+        if (arrayType) {
+          // Function to render subfields
+          function renderSubFields(
+            input,
+            subField,
+            fieldLabel,
+            fieldContainer,
+            data
+          ) {
+            // Clear any existing content inside the field container
+            fieldContainer.innerHTML = "";
+
+            subField.forEach((val, index) => {
+              // Create a container for the checkbox and its label
+              let checkboxWrapper = document.createElement("div");
+              checkboxWrapper.style.display = "flex";
+              checkboxWrapper.style.alignItems = "center";
+              checkboxWrapper.style.justifyContent = "space-between"; // Space between label and checkbox
+              checkboxWrapper.style.width = "140px"; // Fixed width for each checkbox container
+              checkboxWrapper.style.marginBottom = "10px"; // Spacing between checkboxes
+
+              // Create label for the checkbox
+              let label = document.createElement("label");
+              label.htmlFor = `checkbox_${index}`;
+              label.innerText =
+                labels[index] === undefined || labels[index] === "undefined"
+                  ? input.getAttribute("dataset-field-name") + "__" + index
+                  : labels[index];
+
+              // Create checkbox
+              let checkbox = document.createElement("input");
+              checkbox.type = "checkbox";
+              checkbox.id = `${fieldLabel}__checkbox_${index}`; // Give each checkbox a unique id
+              checkbox.checked = val != 0; // Set checked based on value (1 or 0)
+              checkbox.style.marginLeft = "1px"; // Spacing between checkbox and label
+
+              checkbox.addEventListener("click", (event) => {
+                const isChecked = event.target.checked;
+                subField[index] = isChecked ? 1 : 0;
+                data[fieldLabel] = subField.join(";");
+                input.value = data[fieldLabel];
+                input.disabled = false;
+                // console.log(
+                //   `Updated data for ${fieldLabel}:`,
+                //   data[0][fieldLabel]
+                // );
+                renderSubFields(
+                  input,
+                  subField,
+                  fieldLabel,
+                  fieldContainer,
+                  data
+                );
+              });
+              checkboxWrapper.appendChild(label);
+              checkboxWrapper.appendChild(checkbox);
+              fieldContainer.appendChild(checkboxWrapper);
+            });
+          }
+
+          // Function to handle initial setup of subfields
+          function setupSubFields(input, data, fieldLabel) {
+            let subField = data[fieldLabel]
+              ?.toString()
+              .trim()
+              .split(";");
+
+            if (subField.length > 1) {
+              input.style.display = "none"; // Hide the original input
+              let fieldId = input.getAttribute("data-field-name");
+              let existingFieldContainer = document.getElementById(fieldId);
+
+              if (existingFieldContainer) {
+                existingFieldContainer.parentElement.removeChild(
+                  existingFieldContainer
+                );
+              }
+
+              let fieldContainer = document.createElement("div");
+              fieldContainer.style.height = "600px";
+              fieldContainer.style.maxWidth = "400%";
+              fieldContainer.style.overflowX = "scroll";
+              fieldContainer.style.display = "flex";
+              fieldContainer.style.flexDirection = "column";
+              fieldContainer.style.flexWrap = "wrap";
+              fieldContainer.className = "subFieldContainer";
+              fieldContainer.id = fieldId;
+              input.parentElement.appendChild(fieldContainer);
+              // Initial render of the subfields
+              renderSubFields(
                 input,
                 subField,
                 fieldLabel,
                 fieldContainer,
                 data
-              ) {
-                // Clear any existing content inside the field container
-                fieldContainer.innerHTML = "";
+              );
+            }
+          }
+          datasets.forEach((dataset) => {
+            const datasetTableName =
+              dataset.getAttribute("data-table-name");
 
-                subField.forEach((val, index) => {
-                  // Create a container for the checkbox and its label
-                  let checkboxWrapper = document.createElement("div");
-                  checkboxWrapper.style.display = "flex";
-                  checkboxWrapper.style.alignItems = "center";
-                  checkboxWrapper.style.justifyContent = "space-between"; // Space between label and checkbox
-                  checkboxWrapper.style.width = "140px"; // Fixed width for each checkbox container
-                  checkboxWrapper.style.marginBottom = "10px"; // Spacing between checkboxes
+            if (datasetTableName === tableName) {
+              const inputs = dataset.querySelectorAll("input, select");
 
-                  // Create label for the checkbox
-                  let label = document.createElement("label");
-                  label.htmlFor = `checkbox_${index}`;
-                  label.innerText =
-                    labels[index] === undefined || labels[index] === "undefined"
-                      ? input.getAttribute("dataset-field-name") + "__" + index
-                      : labels[index];
-
-                  // Create checkbox
-                  let checkbox = document.createElement("input");
-                  checkbox.type = "checkbox";
-                  checkbox.id = `${fieldLabel}__checkbox_${index}`; // Give each checkbox a unique id
-                  checkbox.checked = val != 0; // Set checked based on value (1 or 0)
-                  checkbox.style.marginLeft = "1px"; // Spacing between checkbox and label
-
-                  checkbox.addEventListener("click", (event) => {
-                    const isChecked = event.target.checked;
-                    subField[index] = isChecked ? 1 : 0;
-                    data[fieldLabel] = subField.join(";");
-                    input.value = data[fieldLabel];
-                    input.disabled = false;
-                    // console.log(
-                    //   `Updated data for ${fieldLabel}:`,
-                    //   data[0][fieldLabel]
-                    // );
-                    renderSubFields(
-                      input,
-                      subField,
-                      fieldLabel,
-                      fieldContainer,
-                      data
-                    );
-                  });
-                  checkboxWrapper.appendChild(label);
-                  checkboxWrapper.appendChild(checkbox);
-                  fieldContainer.appendChild(checkboxWrapper);
-                });
-              }
-
-              // Function to handle initial setup of subfields
-              function setupSubFields(input, data, fieldLabel) {
-                let subField = data[fieldLabel]
-                  ?.toString()
-                  .trim()
-                  .split(";");
-
-                if (subField.length > 1) {
-                  input.style.display = "none"; // Hide the original input
-                  let fieldId = input.getAttribute("data-field-name");
-                  let existingFieldContainer = document.getElementById(fieldId);
-
-                  if (existingFieldContainer) {
-                    existingFieldContainer.parentElement.removeChild(
-                      existingFieldContainer
-                    );
-                  }
-
-                  let fieldContainer = document.createElement("div");
-                  fieldContainer.style.height = "600px";
-                  fieldContainer.style.maxWidth = "400%";
-                  fieldContainer.style.overflowX = "scroll";
-                  fieldContainer.style.display = "flex";
-                  fieldContainer.style.flexDirection = "column";
-                  fieldContainer.style.flexWrap = "wrap";
-                  fieldContainer.className = "subFieldContainer";
-                  fieldContainer.id = fieldId;
-                  input.parentElement.appendChild(fieldContainer);
-                  // Initial render of the subfields
-                  renderSubFields(
-                    input,
-                    subField,
-                    fieldLabel,
-                    fieldContainer,
-                    data
-                  );
-                }
-              }
-              datasets.forEach((dataset) => {
-                const datasetTableName =
-                  dataset.getAttribute("data-table-name");
-
-                if (datasetTableName === tableName) {
-                  const inputs = dataset.querySelectorAll("input, select");
-
-                  inputs.forEach((input) => {
-                    const fieldLabel = input.getAttribute("dataset-field-name");
-                    setupSubFields(input, data, fieldLabel);
-                  });
-                }
-              });
-            } else {
-              subField.forEach((val, index) => {
-                let fieldJson = {
-                  fieldDataType: input.getAttribute("data-field-type"), // fixed typo: "dataset-field-type" to "data-field-type"
-                  fieldDefaultValue: val,
-                  fieldLabel:
-                    labels[index] === undefined || labels[index] === "undefined"
-                      ? input.getAttribute("dataset-field-name") + "__" + index
-                      : labels[index],
-                  fieldMandatory: "0",
-                  fieldName:
-                    input.getAttribute("dataset-field-name") + "__" + index,
-                  fieldWidth: "1",
-                  tableName: input.getAttribute("data-table-name"), // fixed typo: "dataset-table-name" to "data-table-name"
-                };
-
-                let createField = createFieldFromJson(fieldJson);
-                createField.style.display = "flex";
-                createField.style.maxWidth = "180px";
-                createField.style.alignItems = "center";
-                createField.style.justifyContent = "space-between";
-                let childInput = createField.querySelector("input");
+              inputs.forEach((input) => {
                 const fieldLabel = input.getAttribute("dataset-field-name");
-
-                if (childInput) {
-                  childInput.id = `${fieldLabel}__childInput_${index}`; // Give each checkbox a unique id
-
-                  childInput.value = val;
-                  childInput.style.maxWidth = "60px";
-                  childInput.style.marginLeft = "8px";
-                  childInput.readOnly = true;
-                }
-                fieldContainer.appendChild(createField);
+                setupSubFields(input, data, fieldLabel);
               });
             }
+          });
+        } else {
+          subField.forEach((val, index) => {
+            let fieldJson = {
+              fieldDataType: input.getAttribute("data-field-type"), // fixed typo: "dataset-field-type" to "data-field-type"
+              fieldDefaultValue: val,
+              fieldLabel:
+                labels[index] === undefined || labels[index] === "undefined"
+                  ? input.getAttribute("dataset-field-name") + "__" + index
+                  : labels[index],
+              fieldMandatory: "0",
+              fieldName:
+                input.getAttribute("dataset-field-name") + "__" + index,
+              fieldWidth: "1",
+              tableName: input.getAttribute("data-table-name"), // fixed typo: "dataset-table-name" to "data-table-name"
+            };
 
-            break;
-          // Handle specific cases based on fieldLabel for select fields
-          case "combo_array":
-            // get the values of the field
-            let fieldvalues = input.getAttribute("dataset-field-values");
-            handleSelectField(input, fieldvalues, data[fieldLabel]);
-            break;
-          case "combo_sql":
-         
-            // get the values of the field
-            let fieldSQL = input.getAttribute("dataset-field-SQL");
-            handleSelectFieldSQL(
-              DBName,
-              input,
-              fieldSQL,
-              fieldLabel,
-              data[fieldLabel]
-            );
-            break;
-         
-          default:
-            // if (fieldType === "input") {
-            input.value = data[fieldLabel]?.toString().trim() || "";
-            input.disabled = false;
-            if (input.type === "checkbox") {
-              input.checked = data[fieldLabel] == 1 ? true : false;
-            }
-            if (input.tagName.toLowerCase() === "select") {
-              input.value = data[fieldLabel]?.toString().trim() || "";
-            }
+            let createField = createFieldFromJson(fieldJson);
+            createField.style.display = "flex";
+            createField.style.maxWidth = "180px";
+            createField.style.alignItems = "center";
+            createField.style.justifyContent = "space-between";
+            let childInput = createField.querySelector("input");
+            const fieldLabel = input.getAttribute("dataset-field-name");
 
-            // }
-            break;
-        } // end switch
-        // Enable the save button for the dataset
-        // dataset.parentElement.querySelector(
-        //   "[name=SaveDSBtn]"
-        // ).disabled = false;
-      }); // end inputs.forEach
-   
- 
+            if (childInput) {
+              childInput.id = `${fieldLabel}__childInput_${index}`; // Give each checkbox a unique id
+
+              childInput.value = val;
+              childInput.style.maxWidth = "60px";
+              childInput.style.marginLeft = "8px";
+              console.log("Dtaset component read only child input");
+              childInput.readOnly = true;
+            }
+            fieldContainer.appendChild(createField);
+          });
+        }
+
+        break;
+      // Handle specific cases based on fieldLabel for select fields
+      case "combo_array":
+        // get the values of the field
+        let fieldvalues = input.getAttribute("dataset-field-values");
+        handleSelectField(input, fieldvalues, data[fieldLabel]);
+        break;
+      case "combo_sql":
+
+        // get the values of the field
+        let fieldSQL = input.getAttribute("dataset-field-SQL");
+        handleSelectFieldSQL(
+          DBName,
+          input,
+          fieldSQL,
+          fieldLabel,
+          data[fieldLabel]
+        );
+        break;
+
+      default:
+        // if (fieldType === "input") {
+        input.value = data[fieldLabel]?.toString().trim() || "";
+        input.disabled = false;
+        if (input.type === "checkbox") {
+          input.checked = data[fieldLabel] == 1 ? true : false;
+        }
+        if (input.tagName.toLowerCase() === "select") {
+          input.value = data[fieldLabel]?.toString().trim() || "";
+        }
+
+        // }
+        break;
+    } // end switch
+    // Enable the save button for the dataset
+    // dataset.parentElement.querySelector(
+    //   "[name=SaveDSBtn]"
+    // ).disabled = false;
+  }); // end inputs.forEach
+
+
 }
 
 // Helper function to handle select fields
@@ -948,7 +944,7 @@ function handleSelectField(input, options, selectedValue) {
         optionElement.value = value.trim();
         optionElement.text = text.trim();
       } else if (option.includes("=")) {
-        const [value, text] = option.split("=");  
+        const [value, text] = option.split("=");
         optionElement.value = value.trim();
         optionElement.text = text.trim();
       } else if (option.includes(":")) {
@@ -960,7 +956,7 @@ function handleSelectField(input, options, selectedValue) {
         optionElement.value = value.trim();
         optionElement.text = text.trim();
       }
-       else {
+      else {
         optionElement.value = option;
         optionElement.text = option;
       }
@@ -1096,8 +1092,8 @@ function regexp(event, fieldtable) {
   const newRegexp = event.target.value.trim();
   console.log(newRegexp);
 
-  fieldJson['validation']=newRegexp;
-  
+  fieldJson['validation'] = newRegexp;
+
   // Save the updated JSON back into the 'data-field' attribute
   closestDataFieldElement.setAttribute('data-field', JSON.stringify(fieldJson));
   dataContainer.setAttribute('data-field', JSON.stringify(fieldJson));

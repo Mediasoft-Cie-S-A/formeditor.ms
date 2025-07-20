@@ -191,10 +191,10 @@ function renderElementButton(element) {
 
     element.onclick = () => {
         console.log("🖱️ Bouton cliqué :", element.id);
-    
+
         const freshConfig = JSON.parse(element.getAttribute("config") || "{}");
         console.log("📦 Config actuelle :", freshConfig);
-    
+
         if (freshConfig.url && freshConfig.target) {
             const targetDiv = document.getElementById(freshConfig.target);
             if (targetDiv) {
@@ -207,7 +207,7 @@ function renderElementButton(element) {
             console.warn("⚠️ Clic ignoré : URL ou Target manquant.");
         }
     };
-    
+
 }
 
 
@@ -229,7 +229,7 @@ document.addEventListener("click", (e) => {
     }
 
     console.log(`🔁 Chargement de l’écran '${config.url}' dans '${config.target}'`);
-    console.log("targetDiv: ",targetDiv);
+    console.log("targetDiv: ", targetDiv);
     loadFormData(config.url, targetDiv);
 });
 
@@ -321,19 +321,19 @@ function loadGlobalState() {
         rightSide.innerHTML = ""; // vide l'existant avant restauration
         state.rightSide.forEach(component => {
             if (!component.tagName || !component.config) return;
-    
+
             if (component.tagName === "elementButton") {
                 const btn = createElementButton(component.config.label || "Button");
                 btn.setAttribute("config", JSON.stringify(component.config));
                 renderElementButton(btn);
                 rightSide.appendChild(btn);
             }
-    
+
             // Tu peux ajouter d'autres composants ici s'il y en a d'autres à gérer
         });
     }
-    
-    
+
+
 }
 window.addEventListener("DOMContentLoaded", () => {
     loadGlobalState();

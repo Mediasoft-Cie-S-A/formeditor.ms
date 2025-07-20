@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+let originalParentDiv = null;
+
+
 function createDataSetComponentNavigate(type) {
   var main = document.createElement("div");
   main.className = "dataSetComponentNavigate";
@@ -39,7 +42,7 @@ function editDataSetComponentNavigate(type, element, content) {
   // Button to save all variables as cookies
   const saveButton = document.createElement("button");
   saveButton.textContent = "Update";
-  saveButton.onclick = () => saveActions(element,content);
+  saveButton.onclick = () => saveActions(element, content);
   saveButton.style.width = "100%";
   div.appendChild(saveButton);
   // Create a container div for the variables
@@ -94,9 +97,8 @@ function addAction(element, itemdiv, action) {
   actionType.options.add(new Option("Show Confirm", "confirm"));
   actionType.options.add(new Option("Show Prompt", "prompt"));
   // select the action type by action.actionType
-  if (action.actionType)
-  {
-      actionType.value = action.actionType;
+  if (action.actionType) {
+    actionType.value = action.actionType;
   }
   actionDiv.appendChild(actionType);
   const actionContent = document.createElement("textarea");
@@ -115,28 +117,27 @@ function addAction(element, itemdiv, action) {
   actionDiv.appendChild(deleteButton);
   itemdiv.appendChild(actionDiv);
 }
-  
 
-function saveActions(element,content) {
+function saveActions(element, content) {
   const actions = [];
   const actionDivs = content.querySelectorAll("[tagname='actionContainer']");
   actionDivs.forEach((actionDiv) => {
     const action = {};
     const actionEvent = actionDiv.querySelector("[tagname='actionEvent']");
-   
+
     if (actionEvent) {
-       console.log("actionEvent: ", actionEvent.value);
+      console.log("actionEvent: ", actionEvent.value);
       action.actionEvent = actionEvent.value;
-    } 
+    }
     const actionType = actionDiv.querySelector("[tagname='actionType']");
-    
+
     if (actionType) {
-    action.actionType = actionType.value;
+      action.actionType = actionType.value;
     }
     // Get the action content textarea
     const actionContent = actionDiv.querySelector("[tagname='actionContent']");
     if (actionContent) {
-    action.actionContent = actionContent.value;
+      action.actionContent = actionContent.value;
     }
     actions.push(action);
   });
@@ -146,6 +147,8 @@ function saveActions(element,content) {
 
 function renderNavigationBar(main) {
 
+  console.log("Rendering navigation Bar");
+
   // Create the navigation bar div
   var navigationBar = document.createElement("div");
   navigationBar.id = "navigationBar_" + Date.now();
@@ -153,15 +156,20 @@ function renderNavigationBar(main) {
   //   navigationBar.className = "navigation-bar";
   navigationBar.style.display = "block";
 
+  console.log(navigationBar.id)
+
+
   // Create buttons and append them to the navigation bar
   var buttons = [
 
     {
-      name: "PreviusDSBtn",
-      title: "Previus",
-      text: '<p>Previus</p> <i class="fa fa-chevron-left" style="color:#4d61fc;margin-left:-6px"></i>',
+      name: "PreviousDSBtn",
+      title: "Previous",
+      text: '<p>Previous</p> <i class="fa fa-chevron-left" style="color:#4d61fc;margin-left:-6px"></i>',
       event:
         "navbar_movePrev()",
+      id: "btnPrevious",
+
     },
     {
       name: "NextDSBtn",
@@ -170,7 +178,6 @@ function renderNavigationBar(main) {
       event:
         "navbar_moveNext()",
     },
-
     {
       name: "EditDSBtn",
       title: "Edit Record",
@@ -203,11 +210,17 @@ function renderNavigationBar(main) {
       text: '<p>Cancel</p><i class="fa fa-ban" style="color:#4d61fc;margin-left:-6px"></i>',
       event: "navbar_CancelEdit()",
     },
+    {
+      name: "DeleteDSBtn",
+      title: "Delete",
+      text: '<p>Delete</p><i class="fa fa-trash" style="color:#e74c3c; margin-left: -6px;"></i>',
+      event: "navbar_DeleteRecord()",
+    },
   ];
   var htm = "";
   //for the dom2json is mandatory to create a html for the events
   buttons.forEach((buttonInfo) => {
-    htm += `<button name='${buttonInfo.name}'  title="${buttonInfo.title
+    htm += `<button id="${buttonInfo.id || ''}" name='${buttonInfo.name}' title="${buttonInfo.title
       }" onclick="${buttonInfo.event.trim()}" style="width:150px;">${buttonInfo.text
       }</button>`;
   });
@@ -216,8 +229,18 @@ function renderNavigationBar(main) {
   main.appendChild(navigationBar);
 }
 
+function updatePreviousButtonState(hasPrevious) {
+  const btn = document.getElementById("btnPrevious");
+  if (btn) {
+    btn.disabled = !hasPrevious;
+    btn.style.opacity = hasPrevious ? "1" : "0.5";
+    btn.style.pointerEvents = hasPrevious ? "auto" : "none";
+  }
+}
+
 function navbar_movePrev() {
-  let allPanels = document.querySelectorAll("[tagname='dataTable'] div.grid-row");
+  console.log("Moving prev");
+  let allPanels = document.querySelectorAll("[tagname='dataTable'] > .grid-body > .grid-row");
   let selectedPanel = document.querySelector(".selected-panel");
 
   if (!selectedPanel && allPanels.length > 0) {
@@ -234,9 +257,16 @@ function navbar_movePrev() {
 
     // Click on the previous panel div if it exists
     if (currentIndex > 0) {
-      panels[currentIndex - 1].classList.add("selected-panel");
-      panels[currentIndex - 1].click();
+      currentIndex = currentIndex - 1
+      panels[currentIndex].classList.add("selected-panel");
+      panels[currentIndex].click();
+      //updatePreviousButtonState(currentIndex-1 > 0); 
       return; // Exit after handling panels
+    } else if (currentIndex == 0) {
+      currentIndex = panels.length - 1;
+      panels[currentIndex].classList.add("selected-panel");
+      panels[currentIndex].click();
+      return;
     } else {
       console.log("No previous panel to select.");
     }
@@ -270,11 +300,10 @@ function navbar_movePrev() {
   }
 }
 
-
 function navbar_moveNext() {
   console.log("next has been pressed");
   // Handle selected-panel logic
-  let allPanels = document.querySelectorAll("[tagname='dataTable'] div.grid-row");
+  let allPanels = document.querySelectorAll("[tagname='dataTable'] > .grid-body > .grid-row");
   let selectedPanel = document.querySelector(".selected-panel");
 
   if (!selectedPanel && allPanels.length > 0) {
@@ -283,123 +312,155 @@ function navbar_moveNext() {
     selectedPanel.classList.add("selected-panel");
   }
 
+
+
   if (selectedPanel) {
+    console.log("There is a selected panel"); //Should always print
     selectedPanel.classList.remove("selected-panel");
 
     let panels = Array.from(allPanels);
     let currentIndex = panels.indexOf(selectedPanel);
 
     // Click on the next panel div if it exists
-    if (currentIndex + 1 < panels.length) {
-      panels[currentIndex + 1].classList.add("selected-panel");
-      panels[currentIndex + 1].click();
-      return; // Exit after handling panels
+    currentIndex = currentIndex + 1;
+    if (currentIndex < panels.length) {
+      panels[currentIndex].classList.add("selected-panel");
+      panels[currentIndex].click();
+    } else if (currentIndex === panels.length) {
+      currentIndex = 0;
+      panels[currentIndex].classList.add("selected-panel");
+      panels[currentIndex].click();
     } else {
+      console.log("current index : " + currentIndex);
+      console.log("length : " + panels.length);
       console.log("No next panel to select.");
     }
   }
 
-  // Fallback: Handle grid-row navigation if no panels or no more panels are available
-  let dataGrid = document.querySelectorAll("[tagname='dataGrid']");
 
-  for (let i = 0; i < dataGrid.length; i++) {
-    let grid = dataGrid[i];
-    let rows = grid.querySelectorAll(".grid-row");
-    let found = false;
-
-    // Iterate through the rows to find the selected one
-    for (let j = rows.length - 1; j >= 0; j--) {
-      if (rows[j].classList.contains("grid-row-selected")) {
-        rows[j].classList.remove("grid-row-selected");
-
-        // Simulate click on the next row
-        if (j + 1 < rows.length) {
-          rows[j + 1].querySelector("div").click();
+  /*
+    // Fallback: Handle grid-row navigation if no panels or no more panels are available
+    let dataGrid = document.querySelectorAll("[tagname='dataGrid']");
+  
+    for (let i = 0; i < dataGrid.length; i++) {
+      let grid = dataGrid[i];
+      let rows = grid.querySelectorAll(".grid-row");
+      let found = false;
+  
+      // Iterate through the rows to find the selected one
+      for (let j = rows.length - 1; j >= 0; j--) {
+        if (rows[j].classList.contains("grid-row-selected")) {
+          rows[j].classList.remove("grid-row-selected");
+  
+          // Simulate click on the next row
+          if (j + 1 < rows.length) {
+            rows[j + 1].querySelector("div").click();
+          }
+          found = true;
+          break;
         }
-        found = true;
-        break;
+      }
+  
+      // If no row is selected, simulate click on the first row
+      if (!found && rows.length > 0) {
+        rows[0].querySelector("div").click();
       }
     }
-
-    // If no row is selected, simulate click on the first row
-    if (!found && rows.length > 0) {
-      rows[0].querySelector("div").click();
-    }
-  }
+      */
 }
 
-function navbar_EditRecord(action) {
-  console.log(action);
-  if (!action )
-  {
-    // Always ensure modal exists
-    createEditModal();
-
-            const modal = document.getElementById("editModal");
-        console.log("Modal: ", modal);
-            const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
-            const parentDiv = dataSetNavigator.parentElement;
-          console.log("Parent Div: ", parentDiv);
-            const modalContent = modal.querySelector(".modal-content");
-            modalContent.innerHTML = '';
-            // set in parentDiv the id of original parent and next sibling
-        
-            parentDiv._originalParent = parentDiv.parentElement;
-            parentDiv._originalNextSibling = parentDiv.nextSibling;
-        
-            modalContent.appendChild(parentDiv);
-           
-            modal.style.display = "flex";
-            console.log(modal);
-  }else {
- const modal = document.getElementById("editModal");
- if (modal) {
-    modal.style.display = "none";
-    // set the parentDiv back to its original place
-    const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
-    const parentDiv = dataSetNavigator.parentElement;
-    if (parentDiv._originalParent) {
-        org= parentDiv._originalParent;
-        org.appendChild(parentDiv);
-      }
-    }
-  }
+function load_data(readOnly) {
+  console.log("loading data read only : " + readOnly);
   const inputs = document.querySelectorAll(
     `[data-table-name] input[dataset-field-name]`
   );
 
   inputs.forEach((input) => {
     const tableLabel = input.getAttribute("dataset-table-name");
-    input.readOnly = action;
-    input.disabled = action;
-    // }
+    input.readOnly = readOnly;
+    input.disabled = readOnly;
   });
 
-  document.querySelector("[name=SaveDSBtn]").disabled = action;
+  document.querySelector("[name=SaveDSBtn]").disabled = readOnly;
   deactivateLoaders();
 }
 
-  function navbar_CancelEdit() {
-    console.log("Cancel Edit");
- 
- navbar_EditRecord(true);
+function copyIntoModal() {
+  const modal = document.getElementById("editModal");
+  if (!modal || modal.style.display === "none") {
+    console.log("create modal");
+    // Always ensure modal exists
+    createEditModal();
+
+    const modal = document.getElementById("editModal");
+    const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
+    const parentDiv = dataSetNavigator.parentElement;
+    const modalContent = modal.querySelector(".modal-content");
+    modalContent.innerHTML = '';
+    // set in parentDiv the id of original parent and next sibling
+
+    originalParentDiv = parentDiv.parentElement;
+
+    modalContent.appendChild(parentDiv);
+
+    load_data(false);
+
+    modal.style.display = "flex";
+
+    //This part is needed otherwise the navigation is broken for some reason
+    const dataSetNavigator2 = document.querySelector("[tagname='dataSetNavigation']");
+    const parentDiv2 = dataSetNavigator2.parentElement;
+    modalContent.innerHTML = ''
+    modalContent.appendChild(parentDiv2);
+    //copy the datas from old to new
+    const originalInputs = parentDiv.querySelectorAll("input[dataset-field-name]");
+    const clonedInputs = parentDiv2.querySelectorAll("input[dataset-field-name]");
+
+    originalInputs.forEach((input, i) => {
+      const cloned = clonedInputs[i];
+      if (cloned) {
+        cloned.value = input.value;
+      }
+    });
+  }
+}
+
+function navbar_EditRecord() {
+  copyIntoModal();
+}
+
+function navbar_CancelEdit() {
+  console.log("Cancel")
+  const modal = document.getElementById("editModal");
+  if (modal) {
+    modal.style.display = "none";
+    const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
+    const parentDiv = dataSetNavigator.parentElement;
+    if (originalParentDiv) {
+      org = originalParentDiv;
+      org.appendChild(parentDiv);
+    }
+  }
+  load_data(true)
+
 }
 
 function navbar_InsertRecord() {
-  navbar_EditRecord(false);
+  //navbar_EditRecord(false);
 
+  copyIntoModal();
   const inputs = document.querySelectorAll(`[data-table-name] input,select`);
   inputs.forEach((input) => {
     const field = input.getAttribute("dataset-field-name");
     switch (input.type) {
       case "hidden":
-          if (field === "rowid") {
+        if (field === "rowid") {
           input.value = "new";
-        } 
+        }
         break;
-    default:
-      input.value = "";
-    break;
+      default:
+        input.value = "";
+        break;
     }
   });
 }
@@ -439,6 +500,57 @@ function navbar_CopyRecord() {
   document.querySelector("[name=SaveDSBtn]").disabled = false;
 }
 
+async function navbar_DeleteRecord() {
+  console.log("Delete record");
+
+  try {
+    const confirmation = confirm("Are you sure you want to delete this record?");
+    if (!confirmation) return;
+
+    const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
+    const datasetDiv = document.querySelector("[tagname='dataSet']");
+    if (!datasetDiv) {
+      showToast("No dataset found to delete");
+      return;
+    }
+
+    const rowIdElement = datasetDiv.querySelector("[dataset-field-type='rowid']");
+    if (!rowIdElement) {
+      showToast("No record selected to delete");
+      return;
+    }
+
+    const rowId = rowIdElement.value;
+    const tableName = rowIdElement.getAttribute("dataset-table-name");
+    const dbName = rowIdElement.getAttribute("dbname");
+    const actions = dataSetNavigator.getAttribute("actions");
+
+    if (!rowId || rowId === "new") {
+      showToast("Cannot delete unsaved record");
+      return;
+    }
+
+    // Perform the delete operation
+    const result = await deleteRecordDB(dbName, tableName, rowId, actions);
+
+    console.log("Result delete : " + result?.success);
+
+    if (result?.message) {
+      showToast(result?.message);
+      loadFormData(activeForm.objectId, document.getElementById('renderContainer'), true);
+    } else {
+      showToast("Failed to delete record");
+    }
+
+    return result;
+
+  } catch (error) {
+    console.error("Error deleting record:", error);
+    showToast("Error occurred while deleting record");
+  }
+}
+
+
 function CreateUpdated(DBName, tableName, divLine) {
 
   const inputs = divLine.querySelectorAll(
@@ -476,7 +588,7 @@ function CreateUpdated(DBName, tableName, divLine) {
         // Only add fields with non-empty values
         fields.push(field);
         values.push(value);
-       
+
       }
     }
 
@@ -494,12 +606,12 @@ function CreateUpdated(DBName, tableName, divLine) {
     if (valuesString) {
       fields.push(prefix); // Add the prefix as a field
       values.push(valuesString); // Add the concatenated values
-     
+
     }
   }
 
   // Return the final formatted string
-  return  { fields: fields, values: values };
+  return { fields: fields, values: values };
 }
 
 function addIdToData(data, id, value) {
@@ -520,95 +632,98 @@ function addIdToData(data, id, value) {
 
 
 async function navbar_SaveRecord() {
-  try {
-    if (document.querySelector("[name=SaveDSBtn]").disabled) {
-      showToast("Save button is disabled");
-      return;
-    }
-    console.log("SaveRecord");
-    // get the dataset navigator
-     const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
-    // get the dataset div
-    const datasetDiv = document.querySelector("[tagname='dataSet']");
-    if (!datasetDiv) {
-      showToast("No dataset found to save");
-      return;
-    }
-    // Select all row ID elements (one per dataset record)
-    const nextRowIds = datasetDiv.querySelectorAll("[dataset-field-type='rowid']");
-    console.log("nextRowIds: ", nextRowIds);
-    for (const nextRowId of nextRowIds) {
-      console.log("Row being processed:", nextRowId);
+  modal = document.getElementById("editModal");
+  if (modal && modal.style.display !== "none") {
+    try {
+      if (document.querySelector("[name=SaveDSBtn]").disabled) {
+        showToast("Save button is disabled");
+        return;
+      }
+      console.log("SaveRecord");
+      // get the dataset navigator
+      const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
+      // get the dataset div
+      const datasetDiv = document.querySelector("[tagname='dataSet']");
+      if (!datasetDiv) {
+        showToast("No dataset found to save");
+        return;
+      }
+      // Select all row ID elements (one per dataset record)
+      const nextRowIds = datasetDiv.querySelectorAll("[dataset-field-type='rowid']");
+      console.log("nextRowIds: ", nextRowIds);
+      for (const nextRowId of nextRowIds) {
+        console.log("Row being processed:", nextRowId);
 
-      const tableName = nextRowId.getAttribute("dataset-table-name");
-      const dbName = nextRowId.getAttribute("dbname");
-      const divLine = nextRowId.closest("[tagname='dataSet']");
-      const rowIdValue = nextRowId.value;
+        const tableName = nextRowId.getAttribute("dataset-table-name");
+        const dbName = nextRowId.getAttribute("dbname");
+        const divLine = nextRowId.closest("[tagname='dataSet']");
+        const rowIdValue = nextRowId.value;
 
-      // Select all fields in the current record with a data-field-type attribute
-      const fields = divLine.querySelectorAll("input,select");
-      console.log("fields where are you: ", fields);
+        // Select all fields in the current record with a data-field-type attribute
+        const fields = divLine.querySelectorAll("input,select");
+        console.log("fields where are you: ", fields);
 
 
-      let validationFailed = true;
+        let validationFailed = true;
 
-      console.log("Before Loop")
-      for (const fieldElement of fields) {
-      
-    
-        const dataFieldContainer = fieldElement.getAttribute('validation');
-        const datasetTableName = fieldElement.getAttribute("dataset-table-name");
-        const datasetChampName = fieldElement.getAttribute("dataset-field-name");
-        if (fieldElement.value == null || fieldElement.value == "") continue;
+        console.log("Before Loop")
+        for (const fieldElement of fields) {
+
+
+          const dataFieldContainer = fieldElement.getAttribute('validation');
+          const datasetTableName = fieldElement.getAttribute("dataset-table-name");
+          const datasetChampName = fieldElement.getAttribute("dataset-field-name");
+          if (fieldElement.value == null || fieldElement.value == "") continue;
           console.log(dataFieldContainer);
           if (dataFieldContainer == undefined || dataFieldContainer == "undefined" || dataFieldContainer == null || dataFieldContainer == "") continue;
           const regexValidation = new RegExp(dataFieldContainer);
 
           console.log(regexValidation.test(fieldElement.value));
-          console.log("Valeur field: " ,fieldElement.value);
+          console.log("Valeur field: ", fieldElement.value);
           if (!regexValidation.test(fieldElement.value)) {
             validationFailed = false;
             fieldElement.style.border = "2px solid red";
             console.log("in condition")
-          
+
             continue;
           } else {
             fieldElement.style.border = ""; // champ valide, on enlève la bordure rouge
           }
 
 
-      }
-      
+        }
 
-      if (validationFailed === false) {
-        showToast("validation error, please fixes");
-        return;
-      }
-     
-      let result;
-      console.log("before verifiying rowIsValue if new");
-       const actions = dataSetNavigator.getAttribute("actions");
-      if (rowIdValue === "new") {
-        let data = await CreateInsert(dbName, tableName, divLine);
-        result = await insertRecordDB(dbName, tableName, JSON.stringify(data),actions);
-      } else {
-        const data = CreateUpdated(dbName, tableName, divLine);
-       
-        result = await updateRecordDB(dbName, tableName, rowIdValue, JSON.stringify(data),actions);
-      }
 
-      document.querySelector("[name=SaveDSBtn]").disabled = true;
-      navbar_CancelEdit();
-      return result;
+        if (validationFailed === false) {
+          showToast("validation error, please fixes");
+          return;
+        }
+
+        let result;
+        console.log("before verifiying rowIsValue if new");
+        const actions = dataSetNavigator.getAttribute("actions");
+        if (rowIdValue === "new") {
+          let data = await CreateInsert(dbName, tableName, divLine);
+          result = await insertRecordDB(dbName, tableName, JSON.stringify(data), actions);
+        } else {
+          const data = CreateUpdated(dbName, tableName, divLine);
+
+          result = await updateRecordDB(dbName, tableName, rowIdValue, JSON.stringify(data), actions);
+        }
+
+        document.querySelector("[name=SaveDSBtn]").disabled = true;
+        navbar_CancelEdit();
+        loadFormData(activeForm.objectId, document.getElementById('renderContainer'), true);
+
+      }
+    } catch (error) {
+      console.error("Error:", error);
     }
-  } catch (error) {
-    console.error("Error:", error);
   }
 }
 
-
 // create insert data structure
-async function CreateInsert(DBName, tableName,divLine) {
+async function CreateInsert(DBName, tableName, divLine) {
   // create data for insert following this structure  `INSERT INTO ${tableName} (${data.fields}) VALUES (${data.values})`;
   // return data with data.fields and data.values
   const inputs = divLine.querySelectorAll(`#DataSet_${tableName} input`);
@@ -620,14 +735,14 @@ async function CreateInsert(DBName, tableName,divLine) {
       continue; // Skip this iteration
     }
     switch (inputs[i].type) {
-    
+
       default:
 
         // get the field name from the input
         var field = inputs[i].getAttribute("dataset-field-name");
         var subtype = inputs[i].getAttribute("dataset-field-type");
-        if (field === "rowid")  continue; // Skip rowid field
-        
+        if (field === "rowid") continue; // Skip rowid field
+
         insertFields.push(field); // Add field name to insertFields;
         // get sequence value from the the attribute dataset-field-values
         if (subtype === "sequence") {
@@ -645,7 +760,7 @@ async function CreateInsert(DBName, tableName,divLine) {
         } else {
           insertValues.push(inputs[i].value); // Add input value
         }
-      
+
         break;
     } // end switch
 
@@ -668,7 +783,7 @@ async function navigateSequence(DBName, tableName, sequenceName) {
   }
 }
 
-async function updateRecordDB(DBName, tableName, nextRowId, data,actions) {
+async function updateRecordDB(DBName, tableName, nextRowId, data, actions) {
   try {
     const response = await fetch(
       `/update-record/${DBName}/${tableName}/${nextRowId}`,
@@ -680,9 +795,9 @@ async function updateRecordDB(DBName, tableName, nextRowId, data,actions) {
         // add to the body data and action if it exists
         body: JSON.stringify({
           data: data,
-          actions: actions ,
+          actions: actions,
         }),
-       
+
       }
     );
 
@@ -709,8 +824,7 @@ async function updateRecordDB(DBName, tableName, nextRowId, data,actions) {
   }
 }
 
-
-async function insertRecordDB(DBName, tableName, data,actions) {
+async function insertRecordDB(DBName, tableName, data, actions) {
   try {
     const response = await fetch(`/insert-record/${DBName}/${tableName}`, {
       method: "POST",
@@ -734,6 +848,49 @@ async function insertRecordDB(DBName, tableName, data,actions) {
     return result;
   } catch (error) {
     showToast("Error inserting record:" + error);
+  }
+}
+
+async function deleteRecordDB(DBName, tableName, rowId, actions) {
+  console.log("New delete record from data set component navigate");
+  try {
+    const response = await fetch(
+      `/delete-record/${DBName}/${tableName}/${rowId}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          actions: actions,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      showToast(`HTTP error! Status: ${response.status}`);
+      return { success: false };
+    }
+
+    const result = await response.json();
+    console.log(`result async record db : ${result}`);
+    console.log(result);
+
+    let filedName = "";
+    let operator = "";
+    let searchValue = "";
+    let idObject = getIdObject();
+    console.log("idObject : " + idObject?.dataGrid)
+    console.log(idObject)
+    if (idObject?.dataGrid) {
+      searchGrid(DBName, filedName, operator, searchValue, idObject.dataGrid);
+    }
+
+    return result;
+
+  } catch (error) {
+    console.error("Error deleting record:", error);
+    return { success: false };
   }
 }
 

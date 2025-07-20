@@ -15,11 +15,11 @@
  */
 
 function createPromptComponent(type) {
-       var main= document.createElement('div');
+    var main = document.createElement('div');
     main.className = 'form-container';
-    main.id=type+ Date.now(); // Unique ID for each new element
+    main.id = type + Date.now(); // Unique ID for each new element
     main.draggable = true;
-    main.tagName=type;
+    main.tagName = type;
     main.setAttribute("promptText", "Please enter your question");
     main.setAttribute("promptPlaceholder", "Type your question here...");
     main.setAttribute("promptButtonText", "Submit");
@@ -32,7 +32,7 @@ function createPromptComponent(type) {
 function editPromptComponent(type, element, content) {
     const button = document.createElement('button');
     button.textContent = 'Update';
-    button.onclick = function(event) {
+    button.onclick = function (event) {
         const propertiesBar = document.getElementById('propertiesBar');
         const panelID = propertiesBar.getAttribute("data-element-id");
         const main = document.getElementById(panelID);
@@ -50,7 +50,7 @@ function editPromptComponent(type, element, content) {
 }
 
 function renderPromptComponent(element) {
-     element.innerHTML = `<div id="chat-container">
+    element.innerHTML = `<div id="chat-container">
                     <textarea id="PromptText" placeholder="Type your message..."></textarea>
 
                     <div class="actions">
@@ -67,27 +67,33 @@ function renderPromptComponent(element) {
                         <img src="img/loader.gif" id="loader" style="display: none; width: 80px; height: 40px;" alt="Loading...">
                     </div>
                     </div> `;
-   
+
+}
+
+function displayAnswer(event, answer) {
+    const responseElement = document.createElement('div');
+    responseElement.classList.add('ai-response'); // Add a marker class
+    responseElement.innerHTML = answer;
+    const parent = event.target.parentElement;
+    // Remove previously added AI responses only
+    parent.querySelectorAll('.ai-response').forEach(el => el.remove());
+    parent.appendChild(responseElement);
 }
 
 function callAIService(event) {
     event.preventDefault();
     // get the prompt text and button text
     const promptText = document.getElementById('PromptText');
-   
+
     // call the AI service with the prompt text
     fetchAIResponse(promptText.value).then(responseText => {
         // handle the response from the AI service
-        const responseElement = document.createElement('div');
-        responseElement.innerHTML = `<strong>AI Response:</strong> ${responseText}`;
-        event.target.parentElement.appendChild(responseElement);
+        displayAnswer(event, `<strong>AI Response:</strong> ${responseText}`);
     }).catch(error => {
         console.error('Error:', error);
-        const errorElement = document.createElement('div');
-        errorElement.innerHTML = `<strong>Error:</strong> ${error.message}`;
-        event.target.parentElement.appendChild(errorElement);
+        displayAnswer(event, `<strong>Error:</strong> ${error.message}`);
     });
-  
+
 }
 
 function handleshowFileUpload() {
@@ -104,19 +110,125 @@ function handleFill(event) {
     // get all the nams of the fields
     const fieldNames = Array.from(formFields).map(field => field.getAttribute('dataset-field-name')).join(', ');
     // get the prompt text and set it to the promptText
-    let prompt = `From the following text: "${promptText.value}"\n tExtract the following fields and generate a JSON object with their names and values:\n Fields:${fieldNames} Only include values that can be inferred from the text. For missing fields, return null.
+    let prompt = `
+    From the following text: 
+    "${promptText.value}"
+    Extract the following fields and generate a JSON object with their names and values:
+    Fields:${fieldNames} Only include values that can be inferred from the text. For missing fields, return null.
+    Always answer in a valid json format, for example if the field are a,b,c and you can only infer the value of b the output will be
+    {
+        "a": null,
+        "b": "infered value",
+        "c": null
+    }
+    You should output "response:" and then the json, the first characters you print should always be response: { and the last always }
 
-Respond **only** with a JSON object with the following format: {
-  "response": { ...`;
-    console.log(prompt);  
+    `
+
+    prompt = `
+    From the following unstructured text:
+    "${promptText.value}"
+
+    Extract the following fields and generate a JSON object with their inferred values.
+
+    Fields: ${fieldNames}
+
+    Instructions:
+    - Try to match values even if the formatting is irregular or partially labeled.
+    - Use heuristics, patterns, and common field formats to make educated inferences.
+    - For example, if you see a 3-letter + 8-character SWIFT/BIC code, assign it to the field 'ibswift'.
+    - For "clearing", match values labeled as "Clearing", "CB", or "Clearing/CB".
+    - If a value is not clearly present, return 'null' for that field.
+
+    Output Format Rules:
+    - Output must start with: response: {
+    - Output must end with: }
+    - Must be a valid JSON object.
+    - Do not include any comments or explanations.
+    - Always include all listed fields, even if null.
+
+    Example:
+
+    If the input is:
+
+    MyBank AG
+    Bahnhofstrasse 1, Zürich
+    SWIFT: MBAGCHZZ
+    Clearing 123
+
+    And the fields are:
+    rowid, name, address, nccp, ibswift, cler
+
+    Then the response should be exactly:
+    response: {
+        "rowid": null,
+        "name": "MyBank AG",
+        "address": "Bahnhofstrasse 1, Zürich",
+        "nccp": null,
+        "ibswift": "MBAGCHZZ",
+        "cler": "123"
+    }
+    `
+
+    prompt = `
+    From the following unstructured text:
+    """
+    ${promptText.value}
+    """
+
+    Try to fill in the following fields with values inferred from the text:
+
+    Fields: ${fieldNames}
+
+    Guidelines:
+    - The text may be poorly formatted or missing labels — try your best to infer each value.
+    - Use common formats (e.g. SWIFT codes, phone numbers, VAT numbers, etc.) to help identify the values.
+    - Only assign a value if you're reasonably confident it matches the field.
+    - If no reliable value is found for a field, set it to null.
+
+    Output Format:
+    - The response must begin with: response: {
+    - The response must end with: }
+    - The output must be a valid JSON object.
+    - Include all requested fields, even if null.
+    - Do not include any explanation or text outside the JSON.
+
+   Example:
+
+    If the input is:
+    """
+    Bank XYZ
+    SWIFT: XYZABCDG123
+    Clearing 123
+    """
+
+    And the fields are:
+    nom1, ibswift, cler
+
+    Then respond exactly as:
+    response: {
+    "nom1": "Bank XYZ",
+    "ibswift": "XYZABCDG123",
+    "cler": "123"
+    }
+
+    Now complete the JSON response below.
+    response:
+
+
+    `;
+
+    console.log(prompt);
     fetchAIResponse(prompt).then(responseText => {
         // handle the response from the AI service
-        const jsonResponse =  extractJsonAfterResponse(responseText);
-        const responseElement = document.createElement('div');
-        responseElement.innerHTML = `<strong>AI Response:</strong> ${jsonResponse}`;
-        event.target.parentElement.appendChild(responseElement);
-        
+
+
+        console.log("AI response : ", responseText);
+        displayAnswer(event, `<strong>AI Response:</strong> ${responseText}`);
+
+        const jsonResponse = extractJsonAfterResponse(responseText);
         console.log('JSON Response:', jsonResponse);
+
         if (jsonResponse) {
             // Update the form fields with the values from the JSON response
             for (const [key, value] of Object.entries(jsonResponse)) {
@@ -139,15 +251,17 @@ Respond **only** with a JSON object with the following format: {
 }
 
 async function fetchAIResponse(promptText) {
-       const loader = document.getElementById('loader');
+    const loader = document.getElementById('loader');
     // show the loader
     loader.style.display = 'block';
     // call ollama API or any AI service with the prompt text with full URL
-   return  fetch('http://demo01:5001/api/v1/generate', {
+    // return  fetch('http://demo01:5001/api/v1/generate', {
+    return fetch('http://localhost:5001/api/v1/generate', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
+        /*
         body: JSON.stringify({            
             "max_context_length": 2048,
             "max_length": 100,
@@ -164,31 +278,70 @@ async function fetchAIResponse(promptText) {
             "typical": 1,
 
         }),
-    })  
-    .then(response => response.json())
-    .then(data => {
-        // handle the response from the AI service
-        const responseText = data.results[0].text || "No response from AI service";
-        // hide the loader
-        loader.style.display = 'none';
-        return responseText;
-    })  
-    .catch(error => {
-        console.error('Error:', error);
-        const errorElement = document.createElement('div');
-        errorElement.innerHTML = `<strong>Error:</strong> ${error.message}`;
-        event.target.parentElement.appendChild(errorElement);
-    });
-}
-    
-function extractJsonAfterResponse(text) {
-    const keyword = '"response": {';
-    const startIndex = text.indexOf(keyword);
+        */
+        body: JSON.stringify({
+            "n": 1,
+            "max_context_length": 4096,
+            "max_length": 512,
+            "rep_pen": 1.07,
+            "temperature": 0.75,
+            "top_p": 0.92,
+            "top_k": 100,
+            "top_a": 0,
+            "typical": 1,
+            "tfs": 1,
+            "rep_pen_range": 360,
+            "rep_pen_slope": 0.7,
+            "sampler_order": [6, 0, 1, 3, 4, 2, 5],
+            "memory": "",
+            "trim_stop": true,
+            "genkey": "KCPP9485",
+            "min_p": 0,
+            "dynatemp_range": 0,
+            "dynatemp_exponent": 1,
+            "smoothing_factor": 0,
+            "nsigma": 0,
+            "banned_tokens": [],
+            "render_special": false,
+            "logprobs": false,
+            "replace_instruct_placeholders": true,
+            "presence_penalty": 0,
+            "logit_bias": {},
+            "quiet": true,
+            "use_default_badwordsids": false,
+            "bypass_eos": false,
 
-    if (startIndex === -1) {
-        console.error('No "response": {' + ' found in text.');
-        return null;
-    }
+            "prompt": promptText
+        })
+
+    })
+
+
+        .then(response => response.json())
+        .then(data => {
+            // handle the response from the AI service
+            const responseText = data.results[0].text || "No response from AI service";
+            // hide the loader
+            loader.style.display = 'none';
+            return responseText;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // hide the loader
+            loader.style.display = 'none';
+
+            const errorElement = document.createElement('div');
+            errorElement.innerHTML = `<strong>Error:</strong> ${error.message}`;
+            //event.target.parentElement.appendChild(errorElement);
+            document.body.appendChild(errorElement);
+            return "No response from AI service";
+        });
+}
+
+function extractJsonAfterResponse(text) {
+    const keyword = 'response: {';
+    const startIndex = text.toLowerCase().indexOf(keyword);
+
 
     let braceCount = 0;
     let inside = false;

@@ -1,14 +1,23 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8">
   <title>Éditeur de page HTML</title>
-  <link href="https://unpkg.com/grapesjs/dist/css/grapes.min.css" rel="stylesheet"/>
+  <link href="https://unpkg.com/grapesjs/dist/css/grapes.min.css" rel="stylesheet" />
   <style>
-    body, html { margin: 0; height: 100%; }
-    #editor { height: 100vh; }
+    body,
+    html {
+      margin: 0;
+      height: 100%;
+    }
+
+    #editor {
+      height: 100vh;
+    }
   </style>
 </head>
+
 <body>
   <div id="editor"></div>
 
@@ -29,60 +38,60 @@
         styles: ['https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css']
       },
       pageManager: {
-            pages: [
-            {
-                // without an explicit ID, a random one will be created
-                id: 'my-first-page',
-                // CSS or a JSON of styles
-                styles: '.my-el { color: red }',
-                // HTML string or a JSON of components
-                component: '<div class="my-el">Hello world!</div>',
-            },
-            {
-                // without an explicit ID, a random one will be created
-                id: 'my-second-page',
-                // CSS or a JSON of styles
-                styles: '.my-el { color: red }',
-                // HTML string or a JSON of components
-                component: '<div class="my-el">Hello world2</div>',
-            },
-            ],
-        },
-        styleManager: {
-            sectors: [{
-                name: 'General',
-                open: true,
-                buildProps: ['color', 'font-size', 'text-align', 'background-color'],
-                properties: [
-                    { property: 'color', type: 'color' },
-                    { property: 'font-size', type: 'select', options: ['12px', '14px', '16px', '18px'] },
-                    { property: 'text-align', type: 'radio', options: ['left', 'center', 'right'] },
-                    { property: 'background-color', type: 'color' }
-                ]
-            }]
-        },
-        blockManager: {
-            blocks: [
-                {
-                    id: 'section',
-                    label: 'Section',
-                    content: '<section class="my-section"><h2>Section</h2></section>',
-                    category: 'Layout'
-                },
-                {
-                    id: 'text',
-                    label: 'Texte',
-                    content: '<p class="my-text">Ceci est un paragraphe.</p>',
-                    category: 'Text'
-                },
-                {
-                    id: 'image',
-                    label: 'Image',
-                    content: '<img src="https://via.placeholder.com/150" alt="Placeholder Image">',
-                    category: 'Media'
-                }
-            ]
-        }
+        pages: [
+          {
+            // without an explicit ID, a random one will be created
+            id: 'my-first-page',
+            // CSS or a JSON of styles
+            styles: '.my-el { color: red }',
+            // HTML string or a JSON of components
+            component: '<div class="my-el">Hello world!</div>',
+          },
+          {
+            // without an explicit ID, a random one will be created
+            id: 'my-second-page',
+            // CSS or a JSON of styles
+            styles: '.my-el { color: red }',
+            // HTML string or a JSON of components
+            component: '<div class="my-el">Hello world2</div>',
+          },
+        ],
+      },
+      styleManager: {
+        sectors: [{
+          name: 'General',
+          open: true,
+          buildProps: ['color', 'font-size', 'text-align', 'background-color'],
+          properties: [
+            { property: 'color', type: 'color' },
+            { property: 'font-size', type: 'select', options: ['12px', '14px', '16px', '18px'] },
+            { property: 'text-align', type: 'radio', options: ['left', 'center', 'right'] },
+            { property: 'background-color', type: 'color' }
+          ]
+        }]
+      },
+      blockManager: {
+        blocks: [
+          {
+            id: 'section',
+            label: 'Section',
+            content: '<section class="my-section"><h2>Section</h2></section>',
+            category: 'Layout'
+          },
+          {
+            id: 'text',
+            label: 'Texte',
+            content: '<p class="my-text">Ceci est un paragraphe.</p>',
+            category: 'Text'
+          },
+          {
+            id: 'image',
+            label: 'Image',
+            content: '<img src="https://via.placeholder.com/150" alt="Placeholder Image">',
+            category: 'Media'
+          }
+        ]
+      }
     });
 
     // Charger une page existante depuis l’API
@@ -124,15 +133,16 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         })
-        .then(res => res.json())
-        .then(data => {
-          alert("Page enregistrée avec succès !");
-          if (!pageId && data.id) {
-            window.location.search = `?id=${data.id}`;
-          }
-        });
+          .then(res => res.json())
+          .then(data => {
+            alert("Page enregistrée avec succès !");
+            if (!pageId && data.id) {
+              window.location.search = `?id=${data.id}`;
+            }
+          });
       }
     });
   </script>
 </body>
+
 </html>
