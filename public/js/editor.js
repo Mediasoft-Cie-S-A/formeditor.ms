@@ -638,6 +638,9 @@ function copyHTMLElement() {
 
   console.log("CopyHTMLElementNewId", editorElementSelected);
 
+  console.log("CopyHTMLElementNewId outer html", editorElementSelected.outerHTML);
+
+
   // set the html element to the clipboard
   navigator.clipboard.writeText(editorElementSelected.outerHTML);
 }
@@ -662,6 +665,7 @@ function cloneElementWithNewId(originalElement) {
   // Recursively update all child IDs and any attributes referencing the old ID
   const allElements = clone.querySelectorAll('*');
   allElements.forEach(el => {
+
     // Update element id
     if (el.id && el.id.includes(oldId)) {
       el.id = el.id.replace(oldId, updatedId);
@@ -751,7 +755,7 @@ function pasteHTMLElement() {
     // set the html content to the new element
     newElement.innerHTML = text;
     // reduce the id of the new element to avoid conflict, 
-    newElement.firstChild.id = newElement.firstChild.id + "_c";
+    //newElement.firstChild.id = newElement.firstChild.id + "_c";
     // append the new element to the formContainer
     formContainer.appendChild(newElement.firstChild);
   });
