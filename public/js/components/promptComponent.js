@@ -175,13 +175,17 @@ function handleFill(event) {
 
     prompt = `
     From the following unstructured text:
+    === INPUT TEXT ===
     """
     ${promptText.value}
     """
 
     Try to fill in the following fields with values inferred from the text:
 
-    Fields: ${fieldNames}
+    === TARGET FIELDS ===
+    ${fieldNames}
+
+    === RESPONSE FORMAT ===
 
     Guidelines:
     - The text may be poorly formatted or missing labels — try your best to infer each value.
@@ -190,8 +194,11 @@ function handleFill(event) {
     - If no reliable value is found for a field, set it to null.
 
     Output Format:
-    - The response must begin with: response: {
-    - The response must end with: }
+    - The response must begin with exactly: response: {
+    - The response must end with exactly: }
+    - All field names must be quoted. All string values must be in double quotes.
+    - Do not add any comments, extra text, or explanations outside the JSON.
+    - Ensure the JSON is valid and machine-readable.
     - The output must be a valid JSON object.
     - Include all requested fields, even if null.
     - Do not include any explanation or text outside the JSON.
@@ -233,7 +240,7 @@ function handleFill(event) {
     `;
 
     console.log(prompt);
-    fetchAIResponse(prompt).then(responseText => {
+    askLmStudio(prompt).then(responseText => {
         // handle the response from the AI service
 
 
@@ -265,136 +272,132 @@ function handleFill(event) {
 }
 
 async function fetchAIResponse(promptText) {
-    askLmStudio(promptText).then(responseText => {
-        console.log("new AI response :", responseText);
 
-    });
-    /*
-        const loader = document.getElementById('loader');
-        // show the loader
-        loader.style.display = 'block';
-        // call ollama API or any AI service with the prompt text with full URL
-        // return  fetch('http://demo01:5001/api/v1/generate', {
-        return fetch('http://localhost:5001/api/v1/generate', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            /*
-            body: JSON.stringify({            
-                "max_context_length": 2048,
-                "max_length": 100,
-                "prompt": promptText,
-                "quiet": false,
-                "rep_pen": 1.1,
-                "rep_pen_range": 256,
-                "rep_pen_slope": 1,
-                "temperature": 0.5,
-                "tfs": 1,
-                "top_a": 0,
-                "top_k": 100,
-                "top_p": 0.9,
-                "typical": 1,
-    
-            }),
-            body: JSON.stringify({
-                "n": 1,
-                "max_context_length": 4096,
-                "max_length": 512,
-                "rep_pen": 1.07,
-                "temperature": 0.75,
-                "top_p": 0.92,
-                "top_k": 100,
-                "top_a": 0,
-                "typical": 1,
-                "tfs": 1,
-                "rep_pen_range": 360,
-                "rep_pen_slope": 0.7,
-                "sampler_order": [6, 0, 1, 3, 4, 2, 5],
-                "memory": "",
-                "trim_stop": true,
-                "genkey": "KCPP9485",
-                "min_p": 0,
-                "dynatemp_range": 0,
-                "dynatemp_exponent": 1,
-                "smoothing_factor": 0,
-                "nsigma": 0,
-                "banned_tokens": [],
-                "render_special": false,
-                "logprobs": false,
-                "replace_instruct_placeholders": true,
-                "presence_penalty": 0,
-                "logit_bias": {},
-                "quiet": true,
-                "use_default_badwordsids": false,
-                "bypass_eos": false,
-    
-                "prompt": promptText
-            })
-            */
-    /*
-     body: JSON.stringify({
-         "n": 1,
-         "max_context_length": 4096,
-         "max_length": 512,
-         "rep_pen": 1.1,
-         "rep_pen_range": 512,
-         "rep_pen_slope": 0.9,
+    const loader = document.getElementById('loader');
+    // show the loader
+    loader.style.display = 'block';
+    // call ollama API or any AI service with the prompt text with full URL
+    // return  fetch('http://demo01:5001/api/v1/generate', {
+    return fetch('http://localhost:5001/api/v1/generate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        /*
+        body: JSON.stringify({            
+        "max_context_length": 2048,
+        "max_length": 100,
+        "prompt": promptText,
+        "quiet": false,
+        "rep_pen": 1.1,
+        "rep_pen_range": 256,
+        "rep_pen_slope": 1,
+        "temperature": 0.5,
+        "tfs": 1,
+        "top_a": 0,
+        "top_k": 100,
+        "top_p": 0.9,
+        "typical": 1,
+        
+        }),
+        body: JSON.stringify({
+            "n": 1,
+            "max_context_length": 4096,
+            "max_length": 512,
+            "rep_pen": 1.07,
+            "temperature": 0.75,
+            "top_p": 0.92,
+            "top_k": 100,
+            "top_a": 0,
+            "typical": 1,
+            "tfs": 1,
+        "rep_pen_range": 360,
+        "rep_pen_slope": 0.7,
+        "sampler_order": [6, 0, 1, 3, 4, 2, 5],
+        "memory": "",
+        "trim_stop": true,
+        "genkey": "KCPP9485",
+        "min_p": 0,
+        "dynatemp_range": 0,
+        "dynatemp_exponent": 1,
+        "smoothing_factor": 0,
+        "nsigma": 0,
+        "banned_tokens": [],
+        "render_special": false,
+        "logprobs": false,
+        "replace_instruct_placeholders": true,
+        "presence_penalty": 0,
+        "logit_bias": {},
+        "quiet": true,
+        "use_default_badwordsids": false,
+        "bypass_eos": false,
+        
+        "prompt": promptText
+        })
+        */
 
-         "temperature": 0.4,
-         "top_p": 0.9,
-         "top_k": 40,
-         "typical": 0.95,
-         "tfs": 1.0,
-         "top_a": 0,  // disable adaptive sampling (less needed here)
+        body: JSON.stringify({
+            "n": 1,
+            "max_context_length": 4096,
+            "max_length": 512,
+            "rep_pen": 1.1,
+            "rep_pen_range": 512,
+            "rep_pen_slope": 0.9,
 
-         "min_p": 0.1,         // filters very unlikely tokens
-         "dynatemp_range": 0,  // disable dynamic temperature
-         "dynatemp_exponent": 1,
+            "temperature": 0.4,
+            "top_p": 0.9,
+            "top_k": 40,
+            "typical": 0.95,
+            "tfs": 1.0,
+            "top_a": 0,  // disable adaptive sampling (less needed here)
 
-         "sampler_order": [6, 0, 1, 3, 4, 2, 5],  // default, fine to keep
+            "min_p": 0.1,         // filters very unlikely tokens
+            "dynatemp_range": 0,  // disable dynamic temperature
+            "dynatemp_exponent": 1,
 
-         "presence_penalty": 0.3,  // slight novelty boost
-         "frequency_penalty": 0.0, // keep frequency neutral
+            "sampler_order": [6, 0, 1, 3, 4, 2, 5],  // default, fine to keep
 
-         "banned_tokens": [],
-         "logprobs": false,
-         "logit_bias": {},
+            "presence_penalty": 0.3,  // slight novelty boost
+            "frequency_penalty": 0.0, // keep frequency neutral
 
-         "trim_stop": true,
-         "render_special": false,
-         "replace_instruct_placeholders": true,
-         "use_default_badwordsids": false,
-         "bypass_eos": false,
-         "quiet": true,
+            "banned_tokens": [],
+            "logprobs": false,
+            "logit_bias": {},
 
-         "prompt": promptText,
-     })
- })
-     .then(response => response.json())
-     .then(data => {
-         // handle the response from the AI service
-         const responseText = data.results[0].text || "No response from AI service";
-         // hide the loader
-         loader.style.display = 'none';
-         return responseText;
-     })
-     .catch(error => {
-         console.error('Error:', error);
-         // hide the loader
-         loader.style.display = 'none';
+            "trim_stop": true,
+            "render_special": false,
+            "replace_instruct_placeholders": true,
+            "use_default_badwordsids": false,
+            "bypass_eos": false,
+            "quiet": true,
 
-         const errorElement = document.createElement('div');
-         errorElement.innerHTML = `<strong>Error:</strong> ${error.message}`;
-         //event.target.parentElement.appendChild(errorElement);
-         document.body.appendChild(errorElement);
-         return "No response from AI service";
-     });
-     */
+            "prompt": promptText,
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            // handle the response from the AI service
+            const responseText = data.results[0].text || "No response from AI service";
+            // hide the loader
+            loader.style.display = 'none';
+            return responseText;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // hide the loader
+            loader.style.display = 'none';
+
+            const errorElement = document.createElement('div');
+            errorElement.innerHTML = `<strong>Error:</strong> ${error.message}`;
+            //event.target.parentElement.appendChild(errorElement);
+            document.body.appendChild(errorElement);
+            return "No response from AI service";
+        });
+
 }
 
 function extractJsonAfterResponse(text) {
-    const keyword = 'response: {';
+    const keyword = '{';
     const startIndex = text.toLowerCase().indexOf(keyword);
 
 
@@ -431,13 +434,41 @@ function extractJsonAfterResponse(text) {
 
 
 async function askLmStudio(promptText) {
-    const response = await fetch('/api/lm', {
+    const loader = document.getElementById('loader');
+    // show the loader
+    loader.style.display = 'block';
+    return fetch('/api/lm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: promptText })
-    });
+        body: JSON.stringify({
 
-    const data = await response.json();
-    console.log(data.choices[0].message.content);
+            temperature: 0.1,      // low creativity
+            top_p: 0.9,
+            max_tokens: 512,       // or more if your responses are longer
+            stop: ["}"],            // optional, helps terminate JSON
 
+            prompt: promptText
+
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log('AI Response data:', data);
+            // handle the response from the AI service
+            const responseText = data.results[0].text || "No response from AI service";
+            // hide the loader
+            loader.style.display = 'none';
+            return responseText;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // hide the loader
+            loader.style.display = 'none';
+
+            const errorElement = document.createElement('div');
+            errorElement.innerHTML = `<strong>Error:</strong> ${error.message}`;
+            //event.target.parentElement.appendChild(errorElement);
+            document.body.appendChild(errorElement);
+            return "No response from AI service";
+        })
 }
