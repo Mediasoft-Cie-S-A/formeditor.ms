@@ -28,7 +28,7 @@ function createInputField(type) {
 
 function editInputField(type, element, content) {
 
-
+  console.log("editInputField", type, element, content);
   const tableName = element.getAttribute('dataset-table-name') || "";
   const tablePrefix = tableName.substring(0, 5); // Prend maximum 5 lettres
   const columnName = element.getAttribute('dataset-field-name') || "";

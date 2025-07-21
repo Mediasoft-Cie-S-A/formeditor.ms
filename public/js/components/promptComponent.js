@@ -105,14 +105,28 @@ function handleshowFileUpload() {
 }
 
 function handleFill(event) {
+
     event.preventDefault();
     // Implement the fill functionality here
     const promptText = document.getElementById('PromptText');
     // search all the fileds in the form and fill the prompt text with their values
     const formFields = document.querySelectorAll('[dataset-field-name]');
-    // get all the nams of the fields
-    const fieldNames = Array.from(formFields).map(field => field.getAttribute('dataset-field-name')).join(', ');
-    // get the prompt text and set it to the promptText
+
+    const fieldInfo = Array.from(formFields).map(field => {
+        const name = field.getAttribute('dataset-field-name');
+        const desc = field.getAttribute('dataset-description') || '';
+        return { name, desc };
+    });
+
+    const fieldNames = fieldInfo.map(f => f.name).join(', ');
+
+    const fieldDescriptions = fieldInfo
+        .map(f => `- ${f.name}: ${f.desc || '(no description provided)'}`)
+        .join('\n');
+
+    console.log("Field Names:", fieldNames);
+    console.log("Field Descriptions:", fieldDescriptions);
+    console.log("Field Infos : ", fieldInfo);
     let prompt = `
     From the following text: 
     "${promptText.value}"
@@ -182,8 +196,8 @@ function handleFill(event) {
 
     Try to fill in the following fields with values inferred from the text:
 
-    === TARGET FIELDS ===
-    ${fieldNames}
+    === FIELD DESCRIPTIONS ===
+    ${fieldDescriptions}
 
     === RESPONSE FORMAT ===
 
@@ -239,7 +253,7 @@ function handleFill(event) {
     response:
     `;
 
-    console.log(prompt);
+
     askLmStudio(prompt).then(responseText => {
         // handle the response from the AI service
 
@@ -247,7 +261,7 @@ function handleFill(event) {
         console.log("AI response : ", responseText);
         displayAnswer(event, `<strong>AI Response:</strong> ${responseText}`);
 
-        const jsonResponse = extractJsonAfterResponse(responseText);
+        const jsonResponse = extractCleanJson(responseText);
         console.log('JSON Response:', jsonResponse);
 
         if (jsonResponse) {
@@ -269,6 +283,7 @@ function handleFill(event) {
         event.target.parentElement.appendChild(errorElement);
     }
     );
+
 }
 
 async function fetchAIResponse(promptText) {
@@ -397,6 +412,8 @@ async function fetchAIResponse(promptText) {
 }
 
 function extractJsonAfterResponse(text) {
+
+    jsonrepair(text)
     const keyword = '{';
     const startIndex = text.toLowerCase().indexOf(keyword);
 
@@ -432,6 +449,65 @@ function extractJsonAfterResponse(text) {
     }
 }
 
+function extractCleanJson(text) {
+    console.log("Extracting clean JSON from text:", text);
+
+    // Try to isolate the part after "response:"
+    const responseStart = text.toLowerCase().indexOf("{");
+    let raw = responseStart !== -1 ? text.slice(responseStart).trim() : text.trim();
+
+    // Add missing braces if necessary
+    if (!raw.startsWith('{')) raw = '{' + raw;
+    if (!raw.endsWith('}')) raw = raw + '}';
+
+    console.log("Raw JSON string to parse:", raw);
+
+    // Try to fix common formatting issues
+    let cleaned = raw
+        .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":') // wrap keys in double quotes
+        .replace(/'/g, '"'); // replace single quotes with double quotes
+
+    try {
+        const deduped = removeDuplicateKeys(cleaned);
+        console.log("Deduplicated JSON string:", deduped);
+        //const parsed = JSON.parse(deduped);
+
+        //console.log("Successfully parsed JSON:", parsed);
+        return deduped;
+    } catch (err) {
+        console.error("Still failed to parse cleaned JSON:", err.message);
+        return null;
+    }
+}
+
+function removeDuplicateKeys(rawText) {
+    const deduped = {};
+    const keyValuePattern = /["']?([\w]+)["']?\s*:\s*(null|"(.*?)"|'(.*?)'|[^,{}]+)/g;
+
+    let match;
+    while ((match = keyValuePattern.exec(rawText)) !== null) {
+        const key = match[1];
+        let value = match[2];
+
+        // Normalize value
+        if (value === 'null') {
+            value = null;
+        } else {
+            value = value.replace(/^['"]|['"]$/g, ''); // remove quotes
+        }
+
+        // Keep first non-null or first if all are null
+        if (!(key in deduped) || (deduped[key] === null && value !== null)) {
+            deduped[key] = value;
+        }
+    }
+
+    return deduped;
+}
+
+
+
+
 
 async function askLmStudio(promptText) {
     const loader = document.getElementById('loader');
@@ -440,22 +516,12 @@ async function askLmStudio(promptText) {
     return fetch('/api/lm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-
-            temperature: 0.1,      // low creativity
-            top_p: 0.9,
-            max_tokens: 512,       // or more if your responses are longer
-            stop: ["}"],            // optional, helps terminate JSON
-
-            prompt: promptText
-
-        })
+        body: JSON.stringify({ prompt: promptText })
     })
         .then(response => response.json())
         .then(data => {
-            console.log('AI Response data:', data);
             // handle the response from the AI service
-            const responseText = data.results[0].text || "No response from AI service";
+            const responseText = data.choices?.[0]?.message?.content || "No response from AI service";
             // hide the loader
             loader.style.display = 'none';
             return responseText;
@@ -470,5 +536,5 @@ async function askLmStudio(promptText) {
             //event.target.parentElement.appendChild(errorElement);
             document.body.appendChild(errorElement);
             return "No response from AI service";
-        })
+        });
 }
