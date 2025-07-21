@@ -696,7 +696,6 @@ function cloneElementWithNewId(originalElement) {
 
 
 function showHTMLCodeEditor() {
-  text1752569897432
   console.log("showHTMLCodeEditor");
   const inputElementSelected = document.getElementById("editorElementSelected");
   var editorElementSelected = document.getElementById(
