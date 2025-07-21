@@ -16,7 +16,6 @@
 
 
 
-
 function createPromptComponent(type) {
     var main = document.createElement('div');
     main.className = 'form-container';
@@ -254,7 +253,7 @@ function handleFill(event) {
     `;
 
 
-    askLmStudio(prompt).then(responseText => {
+    askGroq(prompt).then(responseText => {
         // handle the response from the AI service
 
 
@@ -507,8 +506,6 @@ function removeDuplicateKeys(rawText) {
 
 
 
-
-
 async function askLmStudio(promptText) {
     const loader = document.getElementById('loader');
     // show the loader
@@ -538,3 +535,28 @@ async function askLmStudio(promptText) {
             return "No response from AI service";
         });
 }
+
+async function askGroq(promptText) {
+    const response = await fetch("/api/ask-groq", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            messages: [
+                {
+                    role: "system",
+                    content: "You are a helpful assistant. Return clean JSON only if asked."
+                },
+                {
+                    role: "user",
+                    content: promptText
+                }
+            ]
+        })
+    });
+
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || "No response";
+}
+

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+require('dotenv').config();
 
 const express = require("express");
 //Import the main Passport and Express-Session library
@@ -251,6 +252,23 @@ app.post("/api/lm", async (req, res) => {
   }
 });
 
+app.post('/api/ask-groq', async (req, res) => {
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: 'llama3-8b-8192',
+      messages: req.body.messages
+    })
+  });
+
+  const result = await response.json();
+  res.json(result);
+});
+
 
 try {
   app.listen(port, () => {
@@ -259,3 +277,5 @@ try {
 } catch (e) {
   console.error("Server failed to start:", e);
 }
+
+
