@@ -441,7 +441,11 @@ function navbar_CancelEdit() {
       org.appendChild(parentDiv);
     }
   }
-  load_data(true)
+  //Reset the edit, probably overkill but it works 
+  navbar_moveNext();
+  navbar_movePrev();
+  load_data(true);
+
 
 }
 
@@ -550,85 +554,6 @@ async function navbar_DeleteRecord() {
   }
 }
 
-
-function CreateUpdated(DBName, tableName, divLine) {
-
-  const inputs = divLine.querySelectorAll(
-    `#DataSet_${tableName} input[dataset-field-name]`
-  );
-
-
-  let fields = [];
-  let values = [];
-  let fieldGroups = {};
-
-  inputs.forEach((input) => {
-    const field = input.getAttribute("dataset-field-name");
-    const value = input.value;
-    if (field === "rowid") {
-      return; // Skip rowid field
-    }
-    // Extract the prefix and index
-    const match = field.match(/^([a-zA-Z]+)__(\d+)$/);
-    if (match) {
-      const prefix = match[1]; // Extract the base prefix (e.g., 'droit')
-      const index = parseInt(match[2], 10); // Extract and convert the index
-      if (!fieldGroups[prefix]) {
-        fieldGroups[prefix] = [];
-      }
-      // Ensure the array is large enough to hold the value at the given index
-      if (fieldGroups[prefix].length <= index) {
-        fieldGroups[prefix].length = index + 1;
-      }
-
-      fieldGroups[prefix][index] = value; // Store the value at the correct index
-    } else {
-      // Handle fields without a detectable prefix
-      if (value) {
-        // Only add fields with non-empty values
-        fields.push(field);
-        values.push(value);
-
-      }
-    }
-
-    input.readOnly = true;
-  });
-
-  // Format grouped values and ensure only the last non-empty value is kept
-  for (const prefix in fieldGroups) {
-    const valuesArray = fieldGroups[prefix];
-    const valuesString = valuesArray
-      .filter((v) => v !== undefined && v !== "")
-      .join(";");
-
-    // Add to updateFields only if valuesString is not empty
-    if (valuesString) {
-      fields.push(prefix); // Add the prefix as a field
-      values.push(valuesString); // Add the concatenated values
-
-    }
-  }
-
-  // Return the final formatted string
-  return { fields: fields, values: values };
-}
-
-function addIdToData(data, id, value) {
-  let fieldsArray = data.fields.replace(/"/g, "").split(",");
-  let valuesArray = data.values.replace(/'/g, "").split(",");
-  const idIndex = fieldsArray.indexOf("id");
-  if (idIndex !== -1) {
-    const valueIndex = idIndex;
-    valuesArray[valueIndex] = value;
-  } else {
-    fieldsArray.push("id");
-    valuesArray.push(value);
-  }
-  data.fields = fieldsArray.map((f) => `"${f}"`).join(",");
-  data.values = valuesArray.map((v) => `'${v}'`).join(",");
-  return data;
-}
 
 /*
 async function navbar_SaveRecord() {
@@ -752,13 +677,17 @@ async function navbar_SaveRecord() {
       const result = await prepareAndSaveRecord(rowIdElement);
       if (!result) {
         // Save failed or validation failed
+        console.error("Save failed for rowId:", rowIdElement.value);
         enableSaveButton(); // re-enable if error
         return;
       }
+
+
     }
 
     navbar_CancelEdit();
     loadFormData(activeForm.objectId, document.getElementById('renderContainer'), true);
+
 
   } catch (error) {
     handleSaveError(error);
@@ -766,6 +695,87 @@ async function navbar_SaveRecord() {
   }
 }
 
+
+function CreateUpdated(DBName, tableName, divLine) {
+
+  const inputs = divLine.querySelectorAll(
+    `#DataSet_${tableName} input[dataset-field-name]`
+  );
+
+
+  let fields = [];
+  let values = [];
+  let fieldGroups = {};
+
+  inputs.forEach((input) => {
+    const field = input.getAttribute("dataset-field-name");
+    const value = input.value;
+    if (field === "rowid") {
+      return; // Skip rowid field
+    }
+    // Extract the prefix and index
+    const match = field.match(/^([a-zA-Z]+)__(\d+)$/);
+    if (match) {
+      const prefix = match[1]; // Extract the base prefix (e.g., 'droit')
+      const index = parseInt(match[2], 10); // Extract and convert the index
+      if (!fieldGroups[prefix]) {
+        fieldGroups[prefix] = [];
+      }
+      // Ensure the array is large enough to hold the value at the given index
+      if (fieldGroups[prefix].length <= index) {
+        fieldGroups[prefix].length = index + 1;
+      }
+
+      fieldGroups[prefix][index] = value; // Store the value at the correct index
+    } else {
+      // Handle fields without a detectable prefix
+      if (value) {
+        // Only add fields with non-empty values
+        fields.push(field);
+        values.push(value);
+
+      }
+    }
+  });
+
+  // Format grouped values and ensure only the last non-empty value is kept
+  for (const prefix in fieldGroups) {
+    const valuesArray = fieldGroups[prefix];
+    const valuesString = valuesArray
+      .filter((v) => v !== undefined && v !== "")
+      .join(";");
+
+    // Add to updateFields only if valuesString is not empty
+    if (valuesString) {
+      fields.push(prefix); // Add the prefix as a field
+      values.push(valuesString); // Add the concatenated values
+
+    }
+  }
+
+  // Return the final formatted string
+  return { fields: fields, values: values };
+}
+
+function addIdToData(data, id, value) {
+  let fieldsArray = data.fields.replace(/"/g, "").split(",");
+  let valuesArray = data.values.replace(/'/g, "").split(",");
+  const idIndex = fieldsArray.indexOf("id");
+  if (idIndex !== -1) {
+    const valueIndex = idIndex;
+    valuesArray[valueIndex] = value;
+  } else {
+    fieldsArray.push("id");
+    valuesArray.push(value);
+  }
+  data.fields = fieldsArray.map((f) => `"${f}"`).join(",");
+  data.values = valuesArray.map((v) => `'${v}'`).join(",");
+  return data;
+}
+
+
+
+/* Helper functions for Save Button state management */
 function isSaveButtonDisabled() {
   const btn = document.querySelector("[name=SaveDSBtn]");
   return btn.disabled;
@@ -839,6 +849,7 @@ async function prepareAndSaveRecord(rowIdElement) {
   } else {
     const data = CreateUpdated(dbName, tableName, divLine);
     return await updateRecordDB(dbName, tableName, rowIdValue, JSON.stringify(data), actions);
+
   }
 }
 
@@ -846,6 +857,7 @@ function handleSaveError(error) {
   console.error("Error during save:", error);
   showToast("An error occurred while saving.");
 }
+/* End of Helper functions for Save Button state management */
 
 // create insert data structure
 async function CreateInsert(DBName, tableName, divLine) {
@@ -889,7 +901,7 @@ async function CreateInsert(DBName, tableName, divLine) {
         break;
     } // end switch
 
-    inputs[i].readOnly = true;
+    //inputs[i].readOnly = true;
   } // end for
 
 
@@ -928,6 +940,7 @@ async function updateRecordDB(DBName, tableName, nextRowId, data, actions) {
 
     if (!response.ok) {
       showToast(`HTTP error! status: ${response.status}`);
+      return false; // Return null if the response is not OK
     }
     const updateResult = await response.json();
 
@@ -966,6 +979,7 @@ async function insertRecordDB(DBName, tableName, data, actions) {
 
     if (!response.ok) {
       showToast(`HTTP error! Status: ${response.status}`);
+      return false;
     }
 
     const result = await response.json();
