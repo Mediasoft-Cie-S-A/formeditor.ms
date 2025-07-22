@@ -432,7 +432,7 @@ function navbar_EditRecord() {
 function navbar_CancelEdit() {
   console.log("Cancel")
   const modal = document.getElementById("editModal");
-  if (modal) {
+  if (modal && modal.style.display !== "none") {
     modal.style.display = "none";
     const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
     const parentDiv = dataSetNavigator.parentElement;
@@ -440,10 +440,11 @@ function navbar_CancelEdit() {
       org = originalParentDiv;
       org.appendChild(parentDiv);
     }
+    //Reset the edit, probably overkill but it works 
+    navbar_moveNext();
+    navbar_movePrev();
   }
-  //Reset the edit, probably overkill but it works 
-  navbar_moveNext();
-  navbar_movePrev();
+
   load_data(true);
 
 
