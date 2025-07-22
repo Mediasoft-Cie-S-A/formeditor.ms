@@ -133,13 +133,16 @@ class OdbcDatabase {
     }
   }
 
-  async deleteRecord(deleteQuery) {
+  async deleteRecord(deleteQuery, data) {
     try {
       // Execute the delete query
 
+      console.log("deleteQuery : ", deleteQuery);
+      console.log("params : ", data);
+
       const connection = await odbc.connect(this.connectionString);
       await connection.setIsolationLevel(odbc.SQL_TXN_READ_COMMITTED);
-      const result = await connection.query(deleteQuery);
+      const result = await connection.query(deleteQuery, data);
       await connection.close();
       return result;
     } catch (err) {

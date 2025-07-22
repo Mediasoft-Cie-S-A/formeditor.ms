@@ -266,9 +266,11 @@ function handleFill(event) {
         if (jsonResponse) {
             // Update the form fields with the values from the JSON response
             for (const [key, value] of Object.entries(jsonResponse)) {
-                const field = document.querySelector(`[dataset-field-name="${key}"]`);
-                if (field) {
-                    field.value = value !== null ? value : '';
+                if (key !== "rowid") { // Skip rowid as it is handled by the system
+                    const field = document.querySelector(`[dataset-field-name="${key}"]`);
+                    if (field) {
+                        field.value = value !== null ? value : '';
+                    }
                 }
             }
         } else {

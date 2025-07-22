@@ -659,6 +659,8 @@ async function navbar_SaveRecord() {
         const divLine = nextRowId.closest("[tagname='dataSet']");
         const rowIdValue = nextRowId.value;
 
+        console.log("RowIdValue: ", rowIdValue);
+
         // Select all fields in the current record with a data-field-type attribute
         const fields = divLine.querySelectorAll("input,select");
         console.log("fields where are you: ", fields);
@@ -702,10 +704,13 @@ async function navbar_SaveRecord() {
         let result;
         console.log("before verifiying rowIsValue if new");
         const actions = dataSetNavigator.getAttribute("actions");
+        console.log("RowIdValue: ", rowIdValue);
         if (rowIdValue === "new") {
+          console.log("RowIdValue is new, creating insert data structure");
           let data = await CreateInsert(dbName, tableName, divLine);
           result = await insertRecordDB(dbName, tableName, JSON.stringify(data), actions);
         } else {
+          console.log("RowIdValue is not new, creating update data structure");
           const data = CreateUpdated(dbName, tableName, divLine);
 
           result = await updateRecordDB(dbName, tableName, rowIdValue, JSON.stringify(data), actions);
