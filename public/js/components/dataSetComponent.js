@@ -235,6 +235,8 @@ function renderDataSet(main) {
   // Retrieve dataset JSON from the main element
   var jsonData = JSON.parse(main.getAttribute("dataSet"));
 
+  console.log("jsonData:", jsonData);
+
   // Generate the dataset container
   var dataset = document.createElement("div");
   dataset.id = "DataSet_" + (jsonData[0]?.tableName || "");
@@ -322,6 +324,8 @@ function renderDataSet(main) {
     dataset.appendChild(emptyMsg);
   }
 
+  console.log("datasetFields:", datasetFields);
+  console.log("dataset:", dataset);
   // Update attributes of the main element
   dataset.setAttribute("DataSet-Fields-List", datasetFields);
   main.setAttribute("DataSet-Fields-List", datasetFields);
@@ -544,6 +548,9 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum, dataset, link,
   console.log("link", link);
   console.log("rows", rows);
   */
+
+  //There might be a better place for this but it works here
+  await addFieldDescription(DBName, tableName);
   const saveBtn = document.querySelector("[name=SaveDSBtn]");
   // if (saveBtn) saveBtn.disabled = true;
 
@@ -580,6 +587,7 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum, dataset, link,
         .then((response) => response.json())
         .then((data) => {
           if (data.length > 0) {
+            console.log("Data received:", data);
             updateInputs(data[0], dataset[0].DBName, dataset[0].tableName, datasetDiv);
           }
           deactivateLoaders();
@@ -918,6 +926,104 @@ async function updateInputs(data, DBName, tableName, dataset) {
 
 
 }
+
+async function addFieldDescription(DBName, tableName) {
+  try {
+
+    var datasetsDiv = document.querySelectorAll("[tagname='dataSet']");
+
+    // check if the datasetDiv exists
+    if (datasetsDiv.length === 0) {
+      showToast("No dataset found", 5000);
+      return;
+    }
+    // get the datasetDiv
+    const datasetDiv = datasetsDiv[0];
+
+    // get the fields from the dataset
+    const datasetFields = datasetDiv.getAttribute("dataset-fields-list");
+
+
+    // Construct the request URL to get field metadata (labels)
+    const url = `/get-field-labels/${DBName}/${tableName}?fields=${datasetFields}`;
+
+    // Fetch metadata (this should return array of { NAME, LABEL })
+    fetch(url)
+      .then((response) => response.json())
+      .then((metadata) => {
+        console.log("Field metadata received:", metadata);
+        if (!Array.isArray(metadata) || metadata.length === 0) {
+          console.warn("No field metadata returned from server");
+          return;
+        }
+
+        // Find all dataset divs
+        const datasetDivs = document.querySelectorAll("[tagname='dataSet']");
+        if (datasetDivs.length === 0) {
+          console.warn("No dataset elements found in DOM");
+          return;
+        }
+
+        // Loop through each dataset and update matching fields
+        datasetDivs.forEach((datasetDiv) => {
+          const fieldElements = datasetDiv.querySelectorAll("input, select, textarea");
+
+          fieldElements.forEach((fieldEl) => {
+            const fieldName = fieldEl.getAttribute("dataset-field-name");
+            if (!fieldName) return;
+
+            // Match metadata by field name
+            const match = metadata.find(f => f.fieldName == fieldName);
+
+
+
+            if (match && match.label) {
+              fieldEl.setAttribute("dataset-description", match.label);
+            }
+          });
+        });
+      })
+
+    /*
+    const metadata = await response.json();
+        if (!Array.isArray(metadata) || metadata.length === 0) {
+          console.warn("No field metadata returned from server");
+          return;
+        }
+    
+        // Find all dataset divs
+        const datasetDivs = document.querySelectorAll("[tagname='dataSet']");
+        if (datasetDivs.length === 0) {
+          console.warn("No dataset elements found in DOM");
+          return;
+        }
+        
+            // Loop through each dataset and update matching fields
+            datasetDivs.forEach((datasetDiv) => {
+              const fieldElements = datasetDiv.querySelectorAll("input, select, textarea");
+        
+              fieldElements.forEach((fieldEl) => {
+                const fieldName = fieldEl.getAttribute("dataset-field-name");
+                if (!fieldName) return;
+        
+                // Match metadata by field name
+                const match = metadata.find(f => f.NAME === fieldName);
+        
+                if (match && match.LABEL) {
+                  fieldEl.setAttribute("dataset-description", match.LABEL);
+                }
+              });
+            });
+            */
+
+    console.log("Descriptions added to fields");
+
+  } catch (error) {
+    console.error("Error in addFieldDescription:", error);
+  }
+}
+
+
 
 // Helper function to handle select fields
 // Helper function to handle select fields and sync with input field

@@ -105,45 +105,47 @@ function renderElements(parent) {
   // load the config in the element.json
   loadJson("/elementsConfig")
     .then((data) => {
+      console.log("elementsConfig loaded");
       console.log(data);
 
 
       // Loop through each element in the data
       for (const elementId in data) {
-        {
-          const element = data[elementId];
 
+        const element = data[elementId];
 
-          // Check if the element has a tagname attribute
-          if (element.type) {
-            // Find all elements with the specified tagname
-            var elements = parent.querySelectorAll('div[tagname="' + element.type + '"]');
-            // Loop through each found element and apply the configuration
-            for (var j = 0; j < elements.length; j++) {
-              var el = elements[j];
-              console.log("el:" + el);
-              // Apply the configuration to the element
-              // get the render function from the config
-              var renderFunction = element.renderFunction;
-              if (renderFunction) {
-                console.log("renderFunction:", renderFunction);
+        // Check if the element has a tagname attribute
+        if (element.type) {
+          // Find all elements with the specified tagname
+          var elements = parent.querySelectorAll('div[tagname="' + element.type + '"]');
+          // Loop through each found element and apply the configuration
+          for (var j = 0; j < elements.length; j++) {
+            var el = elements[j];
+            console.log("el:" + el);
+            // Apply the configuration to the element
+            // get the render function from the config
+            var renderFunction = element.renderFunction;
+            if (renderFunction) {
+              console.log("renderFunction:", renderFunction);
 
-                // ⚠️ Sécurité spécifique pour renderMenuComponentHorizontal
-                if (
-                  renderFunction === "renderMenuComponentHorizontal" &&
-                  (!el.getAttribute("items") || el.getAttribute("items") === "null")
-                ) {
-                  console.warn("⛔ Menu ignoré temporairement car 'items' est vide.");
-                  continue; // Skip this element
-                }
+              // ⚠️ Sécurité spécifique pour renderMenuComponentHorizontal
+              if (
+                renderFunction === "renderMenuComponentHorizontal" &&
+                (!el.getAttribute("items") || el.getAttribute("items") === "null")
+              ) {
+                console.warn("⛔ Menu ignoré temporairement car 'items' est vide.");
+                continue; // Skip this element
+              }
 
-                window[renderFunction](el);
-              } else {
-                console.log("No render function found for tagname: " + element.type);
-              } // end if renderFunction
-            } // end for (var j = 0; j < elements.length; j++)
-          } // end  
-        } // end if (element.tagname)  
+              window[renderFunction](el);
+            } else {
+              console.log("No render function found for tagname: " + element.type);
+              /*
+              */
+            }
+
+          }
+        }
       }
     })
     .catch((err) => {

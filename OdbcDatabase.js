@@ -442,6 +442,53 @@ class OdbcDatabase {
       console.log(fieldList);
       const query = `SELECT ${fieldList} FROM PUB.${tableName} WHERE ROWID = '${rowID}'`;
       console.log(query);
+      const queryLabels = `
+        SELECT "_Field-Name" AS Name, "_Label" AS Label
+        FROM PUB."_Field"
+        WHERE PUB."_Field"."_File-Recid" = (
+          SELECT ROWID FROM PUB."_File" WHERE "_File-Name" = '${tableName}'
+        )
+      `;
+
+      this.queryData(queryLabels)
+        .then(labelResult => {
+          for (const row of labelResult) {
+            // Skip metadata rows
+            if (!row["NAME"]) continue;
+
+            const fieldName = row["NAME"].replace(/'/g, ''); // remove single quotes
+            const label = row["LABEL"] ? row["LABEL"].replace(/'/g, '') : "(no description)";
+
+            console.log(`${fieldName} – ${label}`);
+          }
+        })
+      return this.queryData(query);
+    }
+    return null;
+  }
+
+  async getFieldLabels(tableName, fields, rowID) {
+    // Assuming 'rowID' is the ROWID of the record to move to
+    if (fields && fields.length > 0) {
+      const filteredFields = fields
+        .filter(f => f.toLowerCase() !== 'rowid')
+        .map(f => `'${f}'`) // single quotes only
+        .join(", ");
+      console.log(filteredFields);
+
+
+
+      const query = `
+        SELECT "_Field-Name" AS NAME, "_Label" AS LABEL
+        FROM PUB."_Field"
+        WHERE "_File-Recid" = (
+          SELECT ROWID FROM PUB."_File" WHERE "_File-Name" = '${tableName}'
+        )
+        ${filteredFields ? `AND "_Field-Name" IN (${filteredFields})` : ''}
+      `;
+
+
+      console.log(query);
       return this.queryData(query);
     }
     return null;

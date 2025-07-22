@@ -272,6 +272,7 @@ function loadFormData(objectId, renderContainer, renderElem) {
             if (renderElem) {
                 renderElements(renderContainer);
             }
+
             rebuildComponents(renderContainer);
 
             // set the header
@@ -293,6 +294,7 @@ function loadFormData(objectId, renderContainer, renderElem) {
             objectName.value = form.objectName;
             objectSlug.value = form.objectSlug;
             userCreated.value = form.userCreated;
+
 
         })
         .catch(error => {
