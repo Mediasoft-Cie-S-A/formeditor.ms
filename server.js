@@ -232,7 +232,6 @@ app.post("/api/lm", async (req, res) => {
     const response = await axios.post("http://localhost:1234/v1/chat/completions", {
       model: "google/gemma-3-12b",  // or whichever model you're using
       messages: [{ role: "user", content: prompt }],
-      max_tokens: 1024,
       temperature: 0.1,      // low creativity
       top_p: 0.9,
       max_tokens: 512,       // or more if your responses are longer
