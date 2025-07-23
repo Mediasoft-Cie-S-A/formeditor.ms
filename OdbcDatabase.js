@@ -140,7 +140,7 @@ class OdbcDatabase {
       // Execute the delete query
 
       console.log("deleteQuery : ", deleteQuery);
-      console.log("params : ", data);
+      console.log("params : ", params);
 
       const connection = await odbc.connect(this.connectionString);
       await connection.setIsolationLevel(odbc.SQL_TXN_READ_COMMITTED);
