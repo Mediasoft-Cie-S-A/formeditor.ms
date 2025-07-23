@@ -486,6 +486,45 @@ class dblayer {
       }
     );
 
+    // Get field descriptions
+    app.get(
+      "/get-field-labels/:database/:tableName",
+      dbs.checkAuthenticated,
+      async (req, res) => {
+        try {
+          const { database, tableName } = req.params;
+          const db = dbs.databases[database];
+
+
+          const rowID = req.params.rowID;
+          // Get the fields from the query string. It's a comma-separated string.
+          const fields = req.query.fields ? req.query.fields.split(",") : "ROWID";
+
+          db.getFieldLabels(tableName, fields).then(data => {
+            // Convert BigInt to int or string
+
+            const convertedData = [];
+            for (const row of data) {
+              // Skip metadata rows
+              if (!row["NAME"]) continue;
+
+              const fieldName = row["NAME"].replace(/'/g, ''); // remove single quotes
+              const label = row["LABEL"] ? row["LABEL"].replace(/'/g, '') : "(no description)";
+              convertedData.push({
+                fieldName: fieldName,
+                label: label
+              });
+            }
+            res.json(convertedData);
+          });
+
+        } catch (err) {
+          console.error("Error:", err);
+          res.status(500).send({ "Error moving to previous record": err });
+        }
+      }
+    );
+
     app.get(
       "/get-records-by-indexes/:database/:tableName",
       dbs.checkAuthenticated,
@@ -702,7 +741,7 @@ class dblayer {
     app.post('/delete-record/:dbName/:tableName/:rowId', async (req, res) => {
       const { dbName, tableName, rowId } = req.params;
       const { actions } = req.body;
-
+    
       try {
         const result = await deleteRecordFromDB(dbName, tableName, rowId, actions);
         if (result.success) {
@@ -724,7 +763,7 @@ class dblayer {
         const db = dbs.databases[dbName];
         console.log("db object methods:", Object.keys(db));
         const { actions } = req.body;
-
+    
         console.log('DELETE request handler called');
         console.log({ dbName, tableName, actions });
         

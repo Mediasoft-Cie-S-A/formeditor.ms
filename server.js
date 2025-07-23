@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+require('dotenv').config();
+
 const express = require("express");
 //Import the main Passport and Express-Session library
 const passport = require("passport");
@@ -25,6 +27,7 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerJSDoc = require("swagger-jsdoc");
 const fs = require("fs");
 const router = express.Router();
+
 
 const app = express();
 
@@ -220,6 +223,62 @@ process.on('rejectionHandled', (promise) => {
   console.warn('🔁 Rejection Handled:', promise);
 });
 
+const axios = require("axios");
+
+app.post("/api/lm", async (req, res) => {
+  const { prompt } = req.body;
+
+  try {
+    const response = await axios.post("http://localhost:1234/v1/chat/completions", {
+      model: "google/gemma-3-12b",  // or whichever model you're using
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.1,      // low creativity
+      top_p: 0.9,
+      max_tokens: 512,       // or more if your responses are longer
+      stop: ["}"],            // optional, helps terminate JSON
+    }, {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer lm-studio"
+      },
+      timeout: 15 * 60 * 1000  // ✅ 15 minutes
+    });
+
+    res.json(response.data);
+  } catch (err) {
+    console.error("❌ LM Studio fetch failed:", err.message);
+    res.status(500).json({ error: "LM Studio timed out or failed." });
+  }
+});
+
+app.post('/api/ask-groq', async (req, res) => {
+  try {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'llama3-8b-8192',
+        messages: req.body.messages
+      })
+    });
+
+    if (!response.ok) {
+      console.error("❌ Groq API fetch failed with status:", response.status);
+      return res.status(response.status).json({ error: `Groq API error: ${response.statusText}` });
+    }
+
+    const result = await response.json();
+    res.json(result);
+  } catch (err) {
+    console.error("❌ Groq API fetch failed:", err.message);
+    res.status(500).json({ error: "Failed to fetch from Groq API." });
+  }
+});
+
+
 try {
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);
@@ -227,3 +286,5 @@ try {
 } catch (e) {
   console.error("Server failed to start:", e);
 }
+
+

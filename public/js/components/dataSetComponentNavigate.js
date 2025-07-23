@@ -432,7 +432,7 @@ function navbar_EditRecord() {
 function navbar_CancelEdit() {
   console.log("Cancel")
   const modal = document.getElementById("editModal");
-  if (modal) {
+  if (modal && modal.style.display !== "none") {
     modal.style.display = "none";
     const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
     const parentDiv = dataSetNavigator.parentElement;
@@ -440,8 +440,13 @@ function navbar_CancelEdit() {
       org = originalParentDiv;
       org.appendChild(parentDiv);
     }
+    //Reset the edit, probably overkill but it works 
+    navbar_moveNext();
+    navbar_movePrev();
   }
-  load_data(true)
+
+  load_data(true);
+
 
 }
 
@@ -551,6 +556,47 @@ async function navbar_DeleteRecord() {
 }
 
 
+async function navbar_SaveRecord() {
+  const modal = document.getElementById("editModal");
+  if (!modal || modal.style.display === "none") return;
+
+  try {
+    if (isSaveButtonDisabled()) {
+      showToast("Save button is disabled");
+      return;
+    }
+
+    disableSaveButton();
+
+    const rowIds = getActiveModalRowIds();
+    if (rowIds.length === 0) {
+      showToast("No dataset found to save");
+      return;
+    }
+
+    for (const rowIdElement of rowIds) {
+      const result = await prepareAndSaveRecord(rowIdElement);
+      if (!result) {
+        // Save failed or validation failed
+        console.error("Save failed for rowId:", rowIdElement.value);
+        enableSaveButton(); // re-enable if error
+        return;
+      }
+
+
+    }
+
+    navbar_CancelEdit();
+    loadFormData(activeForm.objectId, document.getElementById('renderContainer'), true);
+
+
+  } catch (error) {
+    handleSaveError(error);
+    enableSaveButton();
+  }
+}
+
+
 function CreateUpdated(DBName, tableName, divLine) {
 
   const inputs = divLine.querySelectorAll(
@@ -591,8 +637,6 @@ function CreateUpdated(DBName, tableName, divLine) {
 
       }
     }
-
-    input.readOnly = true;
   });
 
   // Format grouped values and ensure only the last non-empty value is kept
@@ -631,96 +675,90 @@ function addIdToData(data, id, value) {
 }
 
 
-async function navbar_SaveRecord() {
-  modal = document.getElementById("editModal");
-  if (modal && modal.style.display !== "none") {
-    try {
-      if (document.querySelector("[name=SaveDSBtn]").disabled) {
-        showToast("Save button is disabled");
-        return;
-      }
-      console.log("SaveRecord");
-      // get the dataset navigator
-      const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
-      // get the dataset div
-      const datasetDiv = document.querySelector("[tagname='dataSet']");
-      if (!datasetDiv) {
-        showToast("No dataset found to save");
-        return;
-      }
-      // Select all row ID elements (one per dataset record)
-      const nextRowIds = datasetDiv.querySelectorAll("[dataset-field-type='rowid']");
-      console.log("nextRowIds: ", nextRowIds);
-      for (const nextRowId of nextRowIds) {
-        console.log("Row being processed:", nextRowId);
 
-        const tableName = nextRowId.getAttribute("dataset-table-name");
-        const dbName = nextRowId.getAttribute("dbname");
-        const divLine = nextRowId.closest("[tagname='dataSet']");
-        const rowIdValue = nextRowId.value;
+/* Helper functions for Save Button state management */
+function isSaveButtonDisabled() {
+  const btn = document.querySelector("[name=SaveDSBtn]");
+  return btn.disabled;
+}
 
-        // Select all fields in the current record with a data-field-type attribute
-        const fields = divLine.querySelectorAll("input,select");
-        console.log("fields where are you: ", fields);
+function disableSaveButton() {
+  const btn = document.querySelector("[name=SaveDSBtn]");
+  if (btn) btn.disabled = true;
+}
 
+function enableSaveButton() {
+  const btn = document.querySelector("[name=SaveDSBtn]");
+  if (btn) btn.disabled = false;
+}
 
-        let validationFailed = true;
+function getActiveModalRowIds() {
+  const datasetDiv = document.querySelector("[tagname='dataSet']");
+  if (!datasetDiv) return [];
+  return datasetDiv.querySelectorAll("[dataset-field-type='rowid']:not([disabled])");
+}
 
-        console.log("Before Loop")
-        for (const fieldElement of fields) {
+function collectFieldElements(rowElement) {
+  const divLine = rowElement.closest("[tagname='dataSet']");
+  return divLine ? divLine.querySelectorAll("input,select") : [];
+}
 
+function validateFields(fields) {
+  let hasError = false;
+  for (const field of fields) {
+    const fieldName = field.getAttribute("dataset-field-name");
+    const regexRule = field.getAttribute("validation");
+    const value = field.value?.trim();
 
-          const dataFieldContainer = fieldElement.getAttribute('validation');
-          const datasetTableName = fieldElement.getAttribute("dataset-table-name");
-          const datasetChampName = fieldElement.getAttribute("dataset-field-name");
-          if (fieldElement.value == null || fieldElement.value == "") continue;
-          console.log(dataFieldContainer);
-          if (dataFieldContainer == undefined || dataFieldContainer == "undefined" || dataFieldContainer == null || dataFieldContainer == "") continue;
-          const regexValidation = new RegExp(dataFieldContainer);
+    if (!fieldName || !value) continue;
+    if (!regexRule || regexRule === "undefined") continue;
 
-          console.log(regexValidation.test(fieldElement.value));
-          console.log("Valeur field: ", fieldElement.value);
-          if (!regexValidation.test(fieldElement.value)) {
-            validationFailed = false;
-            fieldElement.style.border = "2px solid red";
-            console.log("in condition")
+    const regex = new RegExp(regexRule);
+    const isValid = regex.test(value);
 
-            continue;
-          } else {
-            fieldElement.style.border = ""; // champ valide, on enlève la bordure rouge
-          }
-
-
-        }
-
-
-        if (validationFailed === false) {
-          showToast("validation error, please fixes");
-          return;
-        }
-
-        let result;
-        console.log("before verifiying rowIsValue if new");
-        const actions = dataSetNavigator.getAttribute("actions");
-        if (rowIdValue === "new") {
-          let data = await CreateInsert(dbName, tableName, divLine);
-          result = await insertRecordDB(dbName, tableName, JSON.stringify(data), actions);
-        } else {
-          const data = CreateUpdated(dbName, tableName, divLine);
-
-          result = await updateRecordDB(dbName, tableName, rowIdValue, JSON.stringify(data), actions);
-        }
-
-        document.querySelector("[name=SaveDSBtn]").disabled = true;
-        navbar_CancelEdit();
-        loadFormData(activeForm.objectId, document.getElementById('renderContainer'), true);
-
-      }
-    } catch (error) {
-      console.error("Error:", error);
+    if (!isValid) {
+      console.log(`Value: ${value}, Regex: ${regexRule}`);
+      console.log(`Validation failed for field: ${field.getAttribute("dataset-field-name")}`);
+      hasError = true;
+      field.style.border = "2px solid red";
+    } else {
+      field.style.border = "";
     }
   }
+
+  return !hasError;
 }
+
+async function prepareAndSaveRecord(rowIdElement) {
+  const tableName = rowIdElement.getAttribute("dataset-table-name");
+  const dbName = rowIdElement.getAttribute("dbname");
+  const rowIdValue = rowIdElement.value;
+  const divLine = rowIdElement.closest("[tagname='dataSet']");
+  const fields = collectFieldElements(rowIdElement);
+
+  const isValid = validateFields(fields);
+  if (!isValid) {
+    showToast("Validation error, please fix the highlighted fields.");
+    return false;
+  }
+
+  const actions = document.querySelector("[tagname='dataSetNavigation']").getAttribute("actions");
+
+  if (rowIdValue === "new") {
+    const data = await CreateInsert(dbName, tableName, divLine);
+    return await insertRecordDB(dbName, tableName, JSON.stringify(data), actions);
+  } else {
+    const data = CreateUpdated(dbName, tableName, divLine);
+    return await updateRecordDB(dbName, tableName, rowIdValue, JSON.stringify(data), actions);
+
+  }
+}
+
+function handleSaveError(error) {
+  console.error("Error during save:", error);
+  showToast("An error occurred while saving.");
+}
+/* End of Helper functions for Save Button state management */
 
 // create insert data structure
 async function CreateInsert(DBName, tableName, divLine) {
@@ -764,7 +802,7 @@ async function CreateInsert(DBName, tableName, divLine) {
         break;
     } // end switch
 
-    inputs[i].readOnly = true;
+    //inputs[i].readOnly = true;
   } // end for
 
 
@@ -803,6 +841,7 @@ async function updateRecordDB(DBName, tableName, nextRowId, data, actions) {
 
     if (!response.ok) {
       showToast(`HTTP error! status: ${response.status}`);
+      return false; // Return null if the response is not OK
     }
     const updateResult = await response.json();
 
@@ -841,6 +880,7 @@ async function insertRecordDB(DBName, tableName, data, actions) {
 
     if (!response.ok) {
       showToast(`HTTP error! Status: ${response.status}`);
+      return false;
     }
 
     const result = await response.json();

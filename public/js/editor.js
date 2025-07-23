@@ -642,9 +642,68 @@ function copyHTMLElement() {
   var editorElementSelected = document.getElementById(
     inputElementSelected.value
   );
+  console.log("copyHTMLElement", editorElementSelected);
+
+  var editorElementSelected = cloneElementWithNewId(editorElementSelected);
+
+  console.log("CopyHTMLElementNewId", editorElementSelected);
+
+  console.log("CopyHTMLElementNewId outer html", editorElementSelected.outerHTML);
+
+
   // set the html element to the clipboard
   navigator.clipboard.writeText(editorElementSelected.outerHTML);
 }
+
+function cloneElementWithNewId(originalElement) {
+  if (!originalElement) return null;
+
+  const newId = Date.now().toString();
+
+  // Clone the node deeply
+  const clone = originalElement.cloneNode(true);
+
+  // Get the old ID (e.g., "text1752569897432")
+  const oldId = originalElement.id;
+  if (!oldId) return null;
+
+  // Generate new ID based on pattern (e.g., "text" prefix)
+  const prefix = oldId.replace(/\d+$/, '');
+  const updatedId = prefix + newId;
+  clone.id = updatedId;
+
+  // Recursively update all child IDs and any attributes referencing the old ID
+  const allElements = clone.querySelectorAll('*');
+  allElements.forEach(el => {
+
+    // Update element id
+    if (el.id && el.id.includes(oldId)) {
+      el.id = el.id.replace(oldId, updatedId);
+    }
+
+    // Update 'for' attributes (e.g. label -> input)
+    if (el.hasAttribute('for') && el.getAttribute('for').includes(oldId)) {
+      el.setAttribute('for', el.getAttribute('for').replace(oldId, updatedId));
+    }
+
+    // Update label text or other attributes if needed
+    if (el.hasAttribute('id') && el.id.includes(oldId)) {
+      el.id = el.id.replace(oldId, updatedId);
+    }
+
+    // Update dataset attributes that may contain the oldId
+    for (const attr of el.getAttributeNames()) {
+      const val = el.getAttribute(attr);
+      if (typeof val === 'string' && val.includes(oldId)) {
+        el.setAttribute(attr, val.replace(oldId, updatedId));
+      }
+    }
+  });
+
+  return clone;
+}
+
+
 
 function showHTMLCodeEditor() {
   console.log("showHTMLCodeEditor");
@@ -705,7 +764,7 @@ function pasteHTMLElement() {
     // set the html content to the new element
     newElement.innerHTML = text;
     // reduce the id of the new element to avoid conflict, 
-    newElement.firstChild.id = newElement.firstChild.id + "_c";
+    //newElement.firstChild.id = newElement.firstChild.id + "_c";
     // append the new element to the formContainer
     formContainer.appendChild(newElement.firstChild);
   });

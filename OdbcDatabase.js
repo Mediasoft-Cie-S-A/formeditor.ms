@@ -133,9 +133,14 @@ class OdbcDatabase {
     }
   }
 
+
   async deleteRecord(deleteQuery, params) {
+
     try {
       // Execute the delete query
+
+      console.log("deleteQuery : ", deleteQuery);
+      console.log("params : ", params);
 
       const connection = await odbc.connect(this.connectionString);
       await connection.setIsolationLevel(odbc.SQL_TXN_READ_COMMITTED);
@@ -438,6 +443,32 @@ class OdbcDatabase {
         .replace('"rowid"', "rowid");
       console.log(fieldList);
       const query = `SELECT ${fieldList} FROM PUB.${tableName} WHERE ROWID = '${rowID}'`;
+      return this.queryData(query);
+    }
+    return null;
+  }
+
+  async getFieldLabels(tableName, fields, rowID) {
+    // Assuming 'rowID' is the ROWID of the record to move to
+    if (fields && fields.length > 0) {
+      const filteredFields = fields
+        .filter(f => f.toLowerCase() !== 'rowid')
+        .map(f => `'${f}'`) // single quotes only
+        .join(", ");
+      console.log(filteredFields);
+
+
+
+      const query = `
+        SELECT "_Field-Name" AS NAME, "_Label" AS LABEL
+        FROM PUB."_Field"
+        WHERE "_File-Recid" = (
+          SELECT ROWID FROM PUB."_File" WHERE "_File-Name" = '${tableName}'
+        )
+        ${filteredFields ? `AND "_Field-Name" IN (${filteredFields})` : ''}
+      `;
+
+
       console.log(query);
       return this.queryData(query);
     }
