@@ -252,20 +252,30 @@ app.post("/api/lm", async (req, res) => {
 });
 
 app.post('/api/ask-groq', async (req, res) => {
-  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: 'llama3-8b-8192',
-      messages: req.body.messages
-    })
-  });
+  try {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'llama3-8b-8192',
+        messages: req.body.messages
+      })
+    });
 
-  const result = await response.json();
-  res.json(result);
+    if (!response.ok) {
+      console.error("❌ Groq API fetch failed with status:", response.status);
+      return res.status(response.status).json({ error: `Groq API error: ${response.statusText}` });
+    }
+
+    const result = await response.json();
+    res.json(result);
+  } catch (err) {
+    console.error("❌ Groq API fetch failed:", err.message);
+    res.status(500).json({ error: "Failed to fetch from Groq API." });
+  }
 });
 
 
