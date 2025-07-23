@@ -441,27 +441,6 @@ class OdbcDatabase {
         .replace('"rowid"', "rowid");
       console.log(fieldList);
       const query = `SELECT ${fieldList} FROM PUB.${tableName} WHERE ROWID = '${rowID}'`;
-      console.log(query);
-      const queryLabels = `
-        SELECT "_Field-Name" AS Name, "_Label" AS Label
-        FROM PUB."_Field"
-        WHERE PUB."_Field"."_File-Recid" = (
-          SELECT ROWID FROM PUB."_File" WHERE "_File-Name" = '${tableName}'
-        )
-      `;
-
-      this.queryData(queryLabels)
-        .then(labelResult => {
-          for (const row of labelResult) {
-            // Skip metadata rows
-            if (!row["NAME"]) continue;
-
-            const fieldName = row["NAME"].replace(/'/g, ''); // remove single quotes
-            const label = row["LABEL"] ? row["LABEL"].replace(/'/g, '') : "(no description)";
-
-            console.log(`${fieldName} – ${label}`);
-          }
-        })
       return this.queryData(query);
     }
     return null;
