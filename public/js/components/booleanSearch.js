@@ -39,9 +39,8 @@ function createBooleanSearch(type) {
 
 
     return element;
+
 }
-
-
 
 function editBooleanSearch(type, element, content) {
     // adding tableName property to the element
@@ -49,14 +48,25 @@ function editBooleanSearch(type, element, content) {
     button.textContent = 'update';
     button.onclick = function () {
         const propertiesBar = document.getElementById('propertiesBar');
-        if (!propertiesBar) {
-            console.warn("Element with ID 'propertiesBar' not found.");
-            return;
-        }
         const gridID = propertiesBar.getAttribute("data-element-id");
         const main = document.getElementById(gridID);
         updateBooleanData(main, content);
     };
+    content.appendChild(button);
+    // create the input for the label
+    content.appendChild(createInputItem("Label", "label", "label", element.getAttribute('label'), "text", true));
+    // create the checkbox for set the default value
+    content.appendChild(createInputItem("Default", "default", "default", element.getAttribute('default'), "checkbox", true));
+    content.appendChild(createMultiSelectItem("Data", "data", "data"));
+    content.appendChild(createMultiSelectItem("Link", "link", "link"));
+    if (!propertiesBar) {
+        console.warn("Element with ID 'propertiesBar' not found.");
+        return;
+    }
+    const gridID = propertiesBar.getAttribute("data-element-id");
+    const main = document.getElementById(gridID);
+    updateBooleanData(main, content);
+
     content.appendChild(button);
     // create the input for the label
     content.appendChild(createInputItem("Label", "label", "label", element.getAttribute('label'), "text", true));

@@ -244,6 +244,7 @@ function onTabSwitch(event) {
       break;
 
     case "#DatabaseForm":
+      console.log("DatabaseForm");
       const list = document.getElementById("ContentTableListBar");
       const detailsDiv = document.getElementById("mtableDetails");
       createEditableTableList(list, detailsDiv);
