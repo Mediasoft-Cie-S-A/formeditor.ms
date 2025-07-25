@@ -125,7 +125,7 @@ async function handlesFileUpload(event) {
 
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = 'application/pdf,image/png,image/jpeg,image/jpg';
+    input.accept = 'application/pdf,image/png,image/jpeg,image/jpg,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
     input.style.display = 'none';
 
     input.addEventListener('change', async (event2) => {
@@ -164,7 +164,15 @@ async function handlesFileUpload(event) {
             const imageURL = URL.createObjectURL(file);
 
             const result = await Tesseract.recognize(imageURL, 'eng', {
-                logger: m => console.log(m), // progress updates
+                logger: m => {
+                    console.log(m); // progress updates
+                    if (m.status === 'recognizing text') {
+                        const percent = Math.floor(m.progress * 100);
+                        displayAnswer(event, `<strong>OCR Progress:</strong> ${percent}%`);
+                    } else if (m.status) {
+                        displayAnswer(event, `<strong>OCR Status:</strong> ${m.status}`);
+                    }
+                }
             });
 
             const rawText = result.data.text;
@@ -172,6 +180,20 @@ async function handlesFileUpload(event) {
 
             console.log("Cleaned OCR Text:", cleanedText);
 
+        } else if (mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+            uploadedPDF = file; // still reusing the same variable
+
+            console.log(`Word document "${file.name}" uploaded. Extracting text...`);
+
+            const arrayBuffer = await file.arrayBuffer();
+            const result = await mammoth.extractRawText({ arrayBuffer });
+
+            const rawText = result.value;
+            cleanedText = cleanExtractedText(rawText);
+
+            console.log("Cleaned DOCX Text:", cleanedText);
+
+            uploadedPDF.cleanedText = cleanedText;
         } else {
             console.warn("Unsupported file type:", mime);
             return;
