@@ -143,8 +143,8 @@ async function handlesFileUpload(event) {
 
         if (mime === 'application/pdf') {
             console.log(`PDF "${file.name}" uploaded. Extracting text...`);
-
             const arrayBuffer = await file.arrayBuffer();
+            /*
             const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
             let fullText = '';
 
@@ -157,6 +157,49 @@ async function handlesFileUpload(event) {
 
             cleanedText = cleanExtractedText(fullText);
             console.log("Cleaned PDF Text:", cleanedText);
+            */
+
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            let fullText = '';
+
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const page = await pdf.getPage(pageNum);
+                const content = await page.getTextContent();
+                const text = content.items.map(item => item.str).join(' ');
+
+                if (text.trim().length > 30) {
+                    // Page has real text
+                    fullText += `\n\n--- Page ${pageNum} ---\n\n` + text;
+                } else {
+                    // Text too short — probably scanned. Run OCR instead.
+                    console.warn(`Page ${pageNum} has little/no text. Running OCR...`);
+                    const viewport = page.getViewport({ scale: 2 }); // scale for better OCR
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+
+                    const renderTask = page.render({ canvasContext: context, viewport });
+                    await renderTask.promise;
+
+                    const dataUrl = canvas.toDataURL(); // image for OCR
+
+                    const result = await Tesseract.recognize(dataUrl, 'eng', {
+                        logger: m => {
+                            if (m.status === 'recognizing text') {
+                                const percent = Math.floor(m.progress * 100);
+                                displayAnswer(event, `<strong>OCR Page ${pageNum}:</strong> ${percent}%`);
+                            }
+                        },
+                    });
+
+                    fullText += `\n\n--- OCR Page ${pageNum} ---\n\n` + result.data.text;
+                }
+            }
+
+            cleanedText = cleanExtractedText(fullText);
+            console.log("Final Extracted Text (OCR+PDF):", cleanedText);
+
 
         } else if (mime.startsWith('image/')) {
             console.log(`Image "${file.name}" uploaded. Running OCR...`);
