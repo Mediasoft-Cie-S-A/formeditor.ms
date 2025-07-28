@@ -84,7 +84,8 @@ function setupSpeechRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-        alert("Speech Recognition API not supported.");
+        //alert("Speech Recognition API not supported.");
+        showToast("Speech Recognition API not supported.");
         return null;
     }
 
