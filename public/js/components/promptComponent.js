@@ -70,6 +70,7 @@ function renderPromptComponent(element) {
                             onmouseleave="stopVoice()" 
                             title="Voice: Hold to Speak"
                         >🎤</button>
+                        <button onclick="handleBigDocument(event)" title="Handle Big Document">📚</button>
                         <button  onclick="callAIService(event)" title="Send to AI">🤖</button>
                         <img src="img/loader.gif" id="loader" style="display: none; width: 80px; height: 40px;" alt="Loading...">
                     </div>
@@ -606,6 +607,12 @@ function handleVoice(event) {
         console.error("Speech recognition error", event.error);
     };
     */
+}
+
+function handleBigDocument(event) {
+    event.preventDefault();
+    console.log("Handling big document...");
+
 }
 
 async function fetchAIResponse(promptText) {
