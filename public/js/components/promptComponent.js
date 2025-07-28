@@ -764,40 +764,37 @@ function handleVoice(event) {
 
 function handleBigDocument(event) {
     event.preventDefault();
-    console.log("Handling big document...");
-    {
-        event.preventDefault();
-        console.log("File upload button clicked");
+    console.log("File upload button clicked");
 
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'application/pdf,image/png,image/jpeg,image/jpg,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-        input.style.display = 'none';
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/pdf,image/png,image/jpeg,image/jpg,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    input.style.display = 'none';
 
-        input.addEventListener('change', async (event2) => {
-            const file = event2.target.files[0];
-            if (!file) return;
+    input.addEventListener('change', async (event2) => {
+        const file = event2.target.files[0];
+        if (!file) return;
 
-            uploadedPDF = file;
+        uploadedPDF = file;
 
-            const cleanedText = await extractTextFromFile(file, progress => {
-                displayAnswer(event, `<strong>Progress:</strong> ${progress}`);
-            });
+        const cleanedText = await extractTextFromFile(file, progress => {
+            displayAnswer(event, `<strong>Progress:</strong> ${progress}`);
+        });
 
-            uploadedPDF.cleanedText = cleanedText;
+        uploadedPDF.cleanedText = cleanedText;
 
-            // Collect field metadata
-            const formFields = document.querySelectorAll('[dataset-field-name]');
-            const fieldInfo = Array.from(formFields).map(field => ({
-                name: field.getAttribute('dataset-field-name'),
-                desc: field.getAttribute('dataset-description') || ''
-            }));
+        // Collect field metadata
+        const formFields = document.querySelectorAll('[dataset-field-name]');
+        const fieldInfo = Array.from(formFields).map(field => ({
+            name: field.getAttribute('dataset-field-name'),
+            desc: field.getAttribute('dataset-description') || ''
+        }));
 
-            const fieldDescriptions = fieldInfo
-                .map(f => `- ${f.name}: ${f.desc || '(no description provided)'}`)
-                .join('\n');
+        const fieldDescriptions = fieldInfo
+            .map(f => `- ${f.name}: ${f.desc || '(no description provided)'}`)
+            .join('\n');
 
-            const prompt = `
+        const prompt = `
                 From the following extracted document text (e.g., from a PDF or scanned file), extract **all identifiable bank entries**. Each bank may include fields such as name, address, SWIFT, clearing number, and other identifiers.
 
                 === INPUT TEXT ===
@@ -874,27 +871,29 @@ function handleBigDocument(event) {
                 `;
 
 
-            const responseText = await askGroq(prompt);
-            displayAnswer(event, `<strong>AI Response:</strong> ${responseText}`);
-            console.log(responseText);
+        const responseText = await askGroq(prompt);
+        displayAnswer(event, `<strong>AI Response:</strong> ${responseText}`);
+        console.log(responseText);
 
-            const jsonResponse = extractCleanJson(responseText);
-            /*
-            if (jsonResponse) {
-                for (const [key, value] of Object.entries(jsonResponse)) {
-                    if (key !== "rowid") {
-                        const field = document.querySelector(`[dataset-field-name="${key}"]`);
-                        if (field) field.value = value !== null ? value : '';
-                    }
+        const jsonResponse = extractCleanJson(responseText);
+
+        copyIntoBigModal();
+        /*
+        if (jsonResponse) {
+            for (const [key, value] of Object.entries(jsonResponse)) {
+                if (key !== "rowid") {
+                    const field = document.querySelector(`[dataset-field-name="${key}"]`);
+                    if (field) field.value = value !== null ? value : '';
                 }
-            } else {
-                console.error('No valid JSON response found.');
             }
-            */
-        });
+        } else {
+            console.error('No valid JSON response found.');
+        }
+        */
+    });
 
-        input.click();
-    }
+    input.click();
+
 }
 
 async function fetchAIResponse(promptText) {

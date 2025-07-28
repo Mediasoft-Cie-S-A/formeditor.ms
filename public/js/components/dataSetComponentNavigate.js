@@ -386,44 +386,109 @@ function load_data(readOnly) {
 }
 
 function copyIntoModal() {
+  // Always ensure modal exists
+  createEditModal();
+
   const modal = document.getElementById("editModal");
-  if (!modal || modal.style.display === "none") {
-    console.log("create modal");
-    // Always ensure modal exists
-    createEditModal();
+  const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
+  const parentDiv = dataSetNavigator.parentElement;
+  const modalContent = modal.querySelector(".modal-content");
+  modalContent.innerHTML = '';
+  // set in parentDiv the id of original parent and next sibling
 
-    const modal = document.getElementById("editModal");
-    const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
-    const parentDiv = dataSetNavigator.parentElement;
-    const modalContent = modal.querySelector(".modal-content");
-    modalContent.innerHTML = '';
-    // set in parentDiv the id of original parent and next sibling
+  originalParentDiv = parentDiv.parentElement;
 
-    originalParentDiv = parentDiv.parentElement;
+  modalContent.appendChild(parentDiv);
 
-    modalContent.appendChild(parentDiv);
+  load_data(false);
 
-    load_data(false);
+  modal.style.display = "flex";
 
-    modal.style.display = "flex";
+  //This part is needed otherwise the navigation is broken for some reason
+  const dataSetNavigator2 = document.querySelector("[tagname='dataSetNavigation']");
+  const parentDiv2 = dataSetNavigator2.parentElement;
+  modalContent.innerHTML = ''
+  modalContent.appendChild(parentDiv2);
+  //copy the datas from old to new
+  const originalInputs = parentDiv.querySelectorAll("input[dataset-field-name]");
+  const clonedInputs = parentDiv2.querySelectorAll("input[dataset-field-name]");
 
-    //This part is needed otherwise the navigation is broken for some reason
-    const dataSetNavigator2 = document.querySelector("[tagname='dataSetNavigation']");
-    const parentDiv2 = dataSetNavigator2.parentElement;
-    modalContent.innerHTML = ''
-    modalContent.appendChild(parentDiv2);
-    //copy the datas from old to new
-    const originalInputs = parentDiv.querySelectorAll("input[dataset-field-name]");
-    const clonedInputs = parentDiv2.querySelectorAll("input[dataset-field-name]");
-
-    originalInputs.forEach((input, i) => {
-      const cloned = clonedInputs[i];
-      if (cloned) {
-        cloned.value = input.value;
-      }
-    });
-  }
+  originalInputs.forEach((input, i) => {
+    const cloned = clonedInputs[i];
+    if (cloned) {
+      cloned.value = input.value;
+    }
+  });
 }
+
+function copyIntoBigModal() {
+  // Always ensure modal exists
+  createEditBigModal();
+
+  const modal = document.getElementById("editBigModal");
+  let dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
+  const parentDiv = dataSetNavigator.parentElement.cloneNode(true);
+  dataSetNavigator = parentDiv.querySelector("[tagname='dataSetNavigation']");
+
+  const previous = parentDiv.querySelector('[name="PreviousDSBtn"]');
+  const next = parentDiv.querySelector('[name="NextDSBtn"]');
+  const edit = parentDiv.querySelector('[name="EditDSBtn"]');
+  const insert = parentDiv.querySelector('[name="InsertDSBtn"]');
+  const copy = parentDiv.querySelector('[name="CopyDSBtn"]');
+  const deleteBtn = parentDiv.querySelector('[name="DeleteDSBtn"]');
+  previous.remove();
+  next.remove();
+  edit.remove();
+  insert.remove();
+  copy.remove();
+  deleteBtn.remove();
+
+  const modalContent = modal.querySelector(".modal-content");
+  modalContent.innerHTML = '';
+  // set in parentDiv the id of original parent and next sibling
+
+  //originalParentDiv = parentDiv.parentElement;
+
+  modalContent.appendChild(parentDiv);
+
+  modal.style.display = "flex";
+
+  //clear the inputs in the modal
+  const inputs = modal.querySelectorAll(`[data-table-name] input,select`);
+  inputs.forEach((input) => {
+    const field = input.getAttribute("dataset-field-name");
+    switch (input.type) {
+      case "hidden":
+        if (field === "rowid") {
+          input.value = "new";
+        }
+        break;
+      default:
+        input.value = "";
+        input.readOnly = false; // Make input editable
+        break;
+    }
+  });
+
+  /*
+  //This part is needed otherwise the navigation is broken for some reason
+  const dataSetNavigator2 = document.querySelector("[tagname='dataSetNavigation']");
+  const parentDiv2 = dataSetNavigator2.parentElement;
+  modalContent.innerHTML = ''
+  modalContent.appendChild(parentDiv2);
+  //copy the datas from old to new
+  const originalInputs = parentDiv.querySelectorAll("input[dataset-field-name]");
+  const clonedInputs = parentDiv2.querySelectorAll("input[dataset-field-name]");
+
+  originalInputs.forEach((input, i) => {
+    const cloned = clonedInputs[i];
+    if (cloned) {
+      cloned.value = input.value;
+    }
+  });
+  */
+}
+
 
 function navbar_EditRecord() {
   copyIntoModal();
