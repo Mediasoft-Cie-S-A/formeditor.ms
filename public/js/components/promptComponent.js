@@ -64,12 +64,68 @@ function renderPromptComponent(element) {
                         <button onclick="handleshowFileUpload()" title="Upload File">📎</button>
                         <button onclick="handleFill(event)" title="Fill">✨</button>
                         <button onclick="handleOCR(event)" title="OCR">📄</button>
-                        <button onclick="handleVoice(event)" title="Voice">🎤</button>
+                        <button 
+                            onmousedown="startVoice()" 
+                            onmouseup="stopVoice()" 
+                            onmouseleave="stopVoice()" 
+                            title="Voice: Hold to Speak"
+                        >🎤</button>
                         <button  onclick="callAIService(event)" title="Send to AI">🤖</button>
                         <img src="img/loader.gif" id="loader" style="display: none; width: 80px; height: 40px;" alt="Loading...">
                     </div>
                     </div> `;
 
+}
+
+let recognition;
+let isRecognizing = false;
+
+function setupSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+        alert("Speech Recognition API not supported.");
+        return null;
+    }
+
+    const recognizer = new SpeechRecognition();
+    recognizer.continuous = true;
+    recognizer.interimResults = true;
+    recognizer.lang = "en-US";
+
+    recognizer.onresult = function (event) {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            transcript += event.results[i][0].transcript;
+        }
+        document.getElementById("PromptText").value = transcript;
+        console.log("Recognized:", transcript);
+    };
+
+    recognizer.onerror = function (event) {
+        console.error("Speech error:", event.error);
+    };
+
+    return recognizer;
+}
+
+function startVoice() {
+    if (!recognition) {
+        recognition = setupSpeechRecognition();
+    }
+    if (recognition && !isRecognizing) {
+        recognition.start();
+        isRecognizing = true;
+        console.log("Speech recognition started");
+    }
+}
+
+function stopVoice() {
+    if (recognition && isRecognizing) {
+        recognition.stop();
+        isRecognizing = false;
+        console.log("Speech recognition stopped");
+    }
 }
 
 function displayAnswer(event, answer) {
