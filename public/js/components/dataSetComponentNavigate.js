@@ -303,10 +303,18 @@ function navbar_movePrev() {
 function navbar_moveNext() {
   console.log("next has been pressed");
   // Handle selected-panel logic
-  let allPanels = document.querySelectorAll("[tagname='dataTable'] > .grid-body > .grid-row");
+  //let allPanels = document.querySelectorAll("[tagname='dataTable'] > .grid-body > .grid-row");
+  let allPanels = Array.from(
+    document.querySelectorAll("[tagname='dataTable'] > .grid-body > .grid-row")
+  ).filter(el => {
+    const style = window.getComputedStyle(el);
+    return style.display !== 'none';
+  });
+
   let selectedPanel = document.querySelector(".selected-panel");
 
   if (!selectedPanel && allPanels.length > 0) {
+    console.log("No selected panel, selecting the first one");
     // If no panel is selected, consider the first panel as selected
     selectedPanel = allPanels[0];
     selectedPanel.classList.add("selected-panel");
@@ -399,6 +407,7 @@ function copyIntoModal() {
     modalContent.innerHTML = '';
     // set in parentDiv the id of original parent and next sibling
 
+
     originalParentDiv = parentDiv.parentElement;
 
     modalContent.appendChild(parentDiv);
@@ -407,13 +416,21 @@ function copyIntoModal() {
 
     modal.style.display = "flex";
 
+
+
+
     //This part is needed otherwise the navigation is broken for some reason
-    const dataSetNavigator2 = document.querySelector("[tagname='dataSetNavigation']");
-    const parentDiv2 = dataSetNavigator2.parentElement;
+    //const dataSetNavigator2 = document.querySelector("[tagname='dataSetNavigation']");
+    //console.log(dataSetNavigator2);
+    //const parentDiv2 = dataSetNavigator2.parentElement;
+    const parentDiv2 = parentDiv.cloneNode(true);
     modalContent.innerHTML = ''
     modalContent.appendChild(parentDiv2);
+
     //copy the datas from old to new
     const originalInputs = parentDiv.querySelectorAll("input[dataset-field-name]");
+    console.log(parentDiv);
+    console.log(parentDiv2);
     const clonedInputs = parentDiv2.querySelectorAll("input[dataset-field-name]");
 
     originalInputs.forEach((input, i) => {
@@ -422,6 +439,8 @@ function copyIntoModal() {
         cloned.value = input.value;
       }
     });
+    /*
+*/
   }
 }
 
