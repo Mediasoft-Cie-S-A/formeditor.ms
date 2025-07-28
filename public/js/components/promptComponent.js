@@ -1063,33 +1063,62 @@ function extractJsonAfterResponse(text) {
 function extractCleanJson(text) {
     console.log("Extracting clean JSON from text:", text);
 
-    // Try to isolate the part after "response:"
-    const responseStart = text.toLowerCase().indexOf("{");
-    let raw = responseStart !== -1 ? text.slice(responseStart).trim() : text.trim();
+    const responseMatch = text.match(/response\s*:\s*([\s\S]*)/i);
+    if (!responseMatch) {
+        console.warn("No 'response:' found in text.");
+        return null;
+    }
 
-    // Add missing braces if necessary
-    if (!raw.startsWith('{')) raw = '{' + raw;
-    if (!raw.endsWith('}')) raw = raw + '}';
+    let raw = responseMatch[1].trim();
 
-    console.log("Raw JSON string to parse:", raw);
+    // Try to detect if it's an object or array
+    const isArray = raw.startsWith('[');
+    const isObject = raw.startsWith('{');
 
-    // Try to fix common formatting issues
+    if (!isArray && !isObject) {
+        // Try to fix missing brackets
+        if (raw.includes('{') && raw.includes('}')) {
+            raw = '[' + raw + ']';
+        } else {
+            console.warn("Cannot determine if it's an object or array.");
+            return null;
+        }
+    }
+
+    // Clean up common issues
+    let fixed = escapeBrokenQuotes(raw);
     let cleaned = raw
-        .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":') // wrap keys in double quotes
-        .replace(/'/g, '"'); // replace single quotes with double quotes
+        .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":') // wrap keys
+        .replace(/'/g, '"') // replace single quotes
+        .replace(/,\s*}/g, '}') // remove trailing commas
+        .replace(/,\s*]/g, ']');
+
+    console.log("Cleaned JSON text:", fixed);
 
     try {
-        const deduped = removeDuplicateKeys(cleaned);
-        console.log("Deduplicated JSON string:", deduped);
-        //const parsed = JSON.parse(deduped);
-
-        //console.log("Successfully parsed JSON:", parsed);
-        return deduped;
+        //const deduped = removeDuplicateKeys(cleaned); // Optional: handle duplicate keys
+        //console.log("Deduplicated JSON text:", deduped);
+        const parsed = JSON.parse(fixed);
+        console.log("Parsed JSON successfully:", parsed);
+        return parsed;
     } catch (err) {
-        console.error("Still failed to parse cleaned JSON:", err.message);
+        console.error("JSON parse failed:", err.message);
         return null;
     }
 }
+
+function escapeBrokenQuotes(json) {
+    return json.replace(/"(.*?)":\s*"([^"]*?)"([^,}\]])/g, (match, key, value, tail) => {
+        // Check for inner unescaped quotes in value
+        if (value.includes('"')) {
+            const fixedValue = value.replace(/"/g, '\\"');
+            return `"${key}": "${fixedValue}"${tail}`;
+        }
+        return match;
+    });
+}
+
+
 
 function removeDuplicateKeys(rawText) {
     const deduped = {};
