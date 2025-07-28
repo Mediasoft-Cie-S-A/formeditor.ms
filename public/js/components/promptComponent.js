@@ -95,12 +95,18 @@ function setupSpeechRecognition() {
     recognizer.lang = "en-US";
 
     recognizer.onresult = function (event) {
-        let transcript = '';
+        let finalTranscript = '';
+        let interimTranscript = '';
         for (let i = event.resultIndex; i < event.results.length; ++i) {
-            transcript += event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+                finalTranscript += event.results[i][0].transcript;
+            } else {
+                interimTranscript += event.results[i][0].transcript;
+            }
         }
-        document.getElementById("PromptText").value = transcript;
-        console.log("Recognized:", transcript);
+        const promptTextArea = document.getElementById("PromptText");
+        promptTextArea.value = finalTranscript + interimTranscript;
+        console.log("Recognized:", finalTranscript + interimTranscript);
     };
 
     recognizer.onerror = function (event) {
