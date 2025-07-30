@@ -427,6 +427,19 @@ function copyIntoModal() {
 
 function loadBigModalWithJson(jsonResponse) {
   console.log("loadBigModalWithJson called");
+
+  actionPreviousButton(true);
+  actionNextButton(true);
+  actionEditButton(true);
+  actionInsertButton(true);
+  actionCopyButton(true);
+  actionDeleteButton(true);
+
+  actionSaveButton(false);
+  actionCancelButton(false);
+  actionSaveAllButton(false);
+
+
   // Always ensure modal exists
   createEditBigModal();
 
@@ -446,20 +459,15 @@ function loadBigModalWithJson(jsonResponse) {
   const saveAllButton = parentDiv.querySelector('[name="SaveAllDSBtn"]');
 
 
-  previousButton.remove();
-  nextButton.remove();
-  editButton.remove();
-  insertButton.remove();
-  copyButton.remove();
-  deleteButton.remove();
+
+
+  actionSaveButton(false);
+  actionCancelButton(false);
 
   let i = 0;
 
   cancelButton.onclick = function (event) {
-    event.preventDefault();
-    console.log('New cancel logic here');
-    modal.remove();
-    loadFormData(activeForm.objectId, document.getElementById('renderContainer'), true);
+    navbar_CancelEdit();
   };
 
   saveButton.onclick = async function (event) {
@@ -671,6 +679,14 @@ function navbar_EditRecord() {
 
 function navbar_CancelEdit() {
 
+
+
+
+  const modal = document.getElementById("editBigModal");
+  if (modal && modal.style.display !== "none") {
+    modal.remove();
+  }
+
   actionPreviousButton(false);
   actionNextButton(false);
   actionEditButton(false);
@@ -683,10 +699,6 @@ function navbar_CancelEdit() {
   actionCancelButton(true);
 
 
-  const modal = document.getElementById("editBigModal");
-  if (modal && modal.style.display !== "none") {
-    modal.remove();
-  }
 
   changeInputReadOnly(true);
 
@@ -1197,6 +1209,12 @@ function actionPreviousButton(disabled) {
   const previousButton = document.querySelector("[name=PreviousDSBtn]");
   if (previousButton) {
     previousButton.disabled = disabled;
+    //Grey out the button if disabled
+    if (disabled) {
+      previousButton.classList.add("disabled");
+    } else {
+      previousButton.classList.remove("disabled");
+    }
   }
 }
 
@@ -1206,12 +1224,22 @@ function actionNextButton(disabled) {
   if (nextButton) {
     nextButton.disabled = disabled;
   }
+  if (disabled) {
+    nextButton.classList.add("disabled");
+  } else {
+    nextButton.classList.remove("disabled");
+  }
 }
 
 function actionEditButton(disabled) {
   const editButton = document.querySelector("[name=EditDSBtn]");
   if (editButton) {
     editButton.disabled = disabled;
+  }
+  if (disabled) {
+    editButton.classList.add("disabled");
+  } else {
+    editButton.classList.remove("disabled");
   }
 }
 
@@ -1220,12 +1248,22 @@ function actionInsertButton(disabled) {
   if (insertButton) {
     insertButton.disabled = disabled;
   }
+  if (disabled) {
+    insertButton.classList.add("disabled");
+  } else {
+    insertButton.classList.remove("disabled");
+  }
 }
 
 function actionCopyButton(disabled) {
   const copyButton = document.querySelector("[name=CopyDSBtn]");
   if (copyButton) {
     copyButton.disabled = disabled;
+  }
+  if (disabled) {
+    copyButton.classList.add("disabled");
+  } else {
+    copyButton.classList.remove("disabled");
   }
 }
 
@@ -1234,12 +1272,22 @@ function actionSaveButton(disabled) {
   if (saveButton) {
     saveButton.disabled = disabled;
   }
+  if (disabled) {
+    saveButton.classList.add("disabled");
+  } else {
+    saveButton.classList.remove("disabled");
+  }
 }
 
 function actionCancelButton(disabled) {
   const cancelButton = document.querySelector("[name=CancelDSBtn]");
   if (cancelButton) {
     cancelButton.disabled = disabled;
+  }
+  if (disabled) {
+    cancelButton.classList.add("disabled");
+  } else {
+    cancelButton.classList.remove("disabled");
   }
 }
 
@@ -1248,12 +1296,22 @@ function actionDeleteButton(disabled) {
   if (deleteButton) {
     deleteButton.disabled = disabled;
   }
+  if (disabled) {
+    deleteButton.classList.add("disabled");
+  } else {
+    deleteButton.classList.remove("disabled");
+  }
 }
 
 function actionSaveAllButton(disabled) {
   const saveAllButton = document.querySelector("[name=SaveAllDSBtn]");
   if (saveAllButton) {
     saveAllButton.disabled = disabled;
+  }
+  if (disabled) {
+    saveAllButton.classList.add("disabled");
+  } else {
+    saveAllButton.classList.remove("disabled");
   }
 }
 
