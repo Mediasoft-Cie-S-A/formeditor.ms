@@ -31,7 +31,7 @@ function createDataSetComponentNavigate(type) {
 function editDataSetComponentNavigate(type, element, content) {
   // Logic to edit the menu, for example adding/removing items
   const actions = JSON.parse(element.getAttribute("actions"));
-  // generate input
+
   // Clear the content area to prevent duplicates
   const div = document.createElement("div");
   div.style.width = "100%";
@@ -235,14 +235,6 @@ function renderNavigationBar(main) {
   main.appendChild(navigationBar);
 }
 
-function updatePreviousButtonState(hasPrevious) {
-  const btn = document.getElementById("btnPrevious");
-  if (btn) {
-    btn.disabled = !hasPrevious;
-    btn.style.opacity = hasPrevious ? "1" : "0.5";
-    btn.style.pointerEvents = hasPrevious ? "auto" : "none";
-  }
-}
 
 function navbar_movePrev() {
   console.log("Moving prev");
@@ -375,8 +367,9 @@ function navbar_moveNext() {
       */
 }
 
-function load_data(readOnly) {
-  console.log("loading data read only : " + readOnly);
+
+function changeInputReadOnly(readOnly) {
+
   const inputs = document.querySelectorAll(
     `[data-table-name] input[dataset-field-name]`
   );
@@ -388,9 +381,9 @@ function load_data(readOnly) {
   });
 
   document.querySelector("[name=SaveDSBtn]").disabled = readOnly;
-  deactivateLoaders();
 }
 
+/*
 function copyIntoModal() {
   // Always ensure modal exists
   createEditModal();
@@ -406,7 +399,7 @@ function copyIntoModal() {
 
   modalContent.appendChild(parentDiv);
 
-  load_data(false);
+  changeInputReadOnly(false)
 
   modal.style.display = "flex";
 
@@ -426,9 +419,10 @@ function copyIntoModal() {
     }
   });
 }
+  */
 
-function copyIntoBigModal(jsonResponse) {
-  console.log("copyIntoBigModal called");
+function loadBigModalWithJson(jsonResponse) {
+  console.log("loadBigModalWithJson called");
   // Always ensure modal exists
   createEditBigModal();
 
@@ -534,10 +528,6 @@ function copyIntoBigModal(jsonResponse) {
   }
 
 
-
-
-
-
   const modalContent = modal.querySelector(".modal-content");
   modalContent.innerHTML = '';
   // set in parentDiv the id of original parent and next sibling
@@ -578,6 +568,27 @@ function copyIntoBigModal(jsonResponse) {
       }
     }
   }
+}
+
+function loadBigModalFromInputs() {
+  // Always ensure modal exists
+  createEditBigModal();
+
+  const modal = document.getElementById("editBigModal");
+  let dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
+  const parentDiv = dataSetNavigator.parentElement.cloneNode(true);
+  dataSetNavigator = parentDiv.querySelector("[tagname='dataSetNavigation']");
+
+  const modalContent = modal.querySelector(".modal-content");
+  modalContent.innerHTML = '';
+  // set in parentDiv the id of original parent and next sibling
+
+
+  modalContent.appendChild(parentDiv);
+
+  changeInputReadOnly(false)
+
+  modal.style.display = "flex";
 }
 
 function handleSaveAllAndExit(parentDiv = undefined, modal = undefined, jsonResponse = [], i = 0) {
@@ -641,26 +652,17 @@ function handleSaveAllAndExit(parentDiv = undefined, modal = undefined, jsonResp
 
 
 function navbar_EditRecord() {
-  copyIntoModal();
+  loadBigModalFromInputs();
 }
 
 function navbar_CancelEdit() {
   console.log("Cancel")
-  const modal = document.getElementById("editModal");
+  const modal = document.getElementById("editBigModal");
   if (modal && modal.style.display !== "none") {
-    modal.style.display = "none";
-    const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
-    const parentDiv = dataSetNavigator.parentElement;
-    if (originalParentDiv) {
-      org = originalParentDiv;
-      org.appendChild(parentDiv);
-    }
-    //Reset the edit, probably overkill but it works 
-    navbar_moveNext();
-    navbar_movePrev();
+    modal.remove();
   }
 
-  load_data(true);
+  changeInputReadOnly(true);
 
 
 }
@@ -668,8 +670,9 @@ function navbar_CancelEdit() {
 function navbar_InsertRecord() {
   //navbar_EditRecord(false);
 
-  copyIntoModal();
-  const inputs = document.querySelectorAll(`[data-table-name] input,select`);
+  loadBigModalFromInputs();
+  const modal = document.getElementById("editBigModal");
+  const inputs = modal.querySelectorAll(`[data-table-name] input,select`);
   inputs.forEach((input) => {
     const field = input.getAttribute("dataset-field-name");
     switch (input.type) {
@@ -772,7 +775,7 @@ async function navbar_DeleteRecord() {
 
 
 async function navbar_SaveRecord() {
-  const modal = document.getElementById("editModal");
+  const modal = document.getElementById("editBigModal");
   if (!modal || modal.style.display === "none") return;
 
   try {
@@ -783,7 +786,7 @@ async function navbar_SaveRecord() {
 
     disableSaveButton();
 
-    const rowIds = getActiveModalRowIds();
+    const rowIds = getActiveModalRowIds(modal);
     if (rowIds.length === 0) {
       showToast("No dataset found to save");
       return;
@@ -888,8 +891,6 @@ function addIdToData(data, id, value) {
   data.values = valuesArray.map((v) => `'${v}'`).join(",");
   return data;
 }
-
-
 
 /* Helper functions for Save Button state management */
 function isSaveButtonDisabled() {

@@ -877,7 +877,7 @@ function handleBigDocument(event) {
 
         const jsonResponse = extractCleanJson(responseText);
 
-        copyIntoBigModal(jsonResponse);
+        loadBigModalWithJson(jsonResponse);
         /*
         if (jsonResponse) {
             for (const [key, value] of Object.entries(jsonResponse)) {
