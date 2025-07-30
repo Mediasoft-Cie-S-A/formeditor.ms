@@ -216,6 +216,12 @@ function renderNavigationBar(main) {
       text: '<p>Delete</p><i class="fa fa-trash" style="color:#e74c3c; margin-left: -6px;"></i>',
       event: "navbar_DeleteRecord()",
     },
+    {
+      name: "SaveAllDSBtn",
+      title: "Save All and Exit",
+      text: '<p>Save All</p><i class="fa fa-check-circle" style="color:green; margin-left: -6px;"></i>',
+      event: "handleSaveAllAndExit()"
+    },
   ];
   var htm = "";
   //for the dom2json is mandatory to create a html for the events
@@ -439,7 +445,8 @@ function copyIntoBigModal(jsonResponse) {
   const deleteButton = parentDiv.querySelector('[name="DeleteDSBtn"]');
   const cancelButton = parentDiv.querySelector('[name="CancelDSBtn"]');
   const saveButton = parentDiv.querySelector('[name="SaveDSBtn"]');
-  addSaveAllButton(parentDiv, modal, jsonResponse);
+  const saveAllButton = parentDiv.querySelector('[name="SaveAllDSBtn"]');
+
 
   previousButton.remove();
   nextButton.remove();
@@ -520,6 +527,12 @@ function copyIntoBigModal(jsonResponse) {
     }
   };
 
+  saveAllButton.onclick = async function (event) {
+    event.preventDefault();
+    console.log('New save all logic here');
+    handleSaveAllAndExit(parentDiv, modal, jsonResponse, i);
+  }
+
 
 
 
@@ -567,33 +580,20 @@ function copyIntoBigModal(jsonResponse) {
   }
 }
 
-function addSaveAllButton(parentDiv, modal, jsonResponse = []) {
-  const actionsContainer = parentDiv.querySelector("#chat-container .actions");
-
-  if (!actionsContainer) {
-    console.error("Actions container not found.");
+function handleSaveAllAndExit(parentDiv = undefined, modal = undefined, jsonResponse = [], i = 0) {
+  if (typeof parentDiv === 'undefined' || typeof modal === 'undefined' || !Array.isArray(jsonResponse)) {
+    console.error("Missing parentDiv, modal, or jsonResponse");
     return;
   }
 
-  // Create the button
-  const saveAllBtn = document.createElement("button");
-  saveAllBtn.id = "saveAllBtn";
-  saveAllBtn.title = "Save All and Exit";
-  saveAllBtn.innerText = "💾 Save All";
+  disableSaveButton();
 
-  // Attach the click handler
-  saveAllBtn.onclick = async function (event) {
-    event.preventDefault();
-    console.log('Save All and Exit clicked');
-
+  (async function saveAll() {
     try {
-      disableSaveButton();
-
       const total = jsonResponse.length;
       for (let idx = i; idx < total; idx++) {
         const selected = jsonResponse[idx];
 
-        // Fill in fields for current selected JSON
         for (const [key, value] of Object.entries(selected)) {
           if (key !== "rowid") {
             const field = parentDiv.querySelector(`[dataset-field-name="${key}"]`);
@@ -603,11 +603,10 @@ function addSaveAllButton(parentDiv, modal, jsonResponse = []) {
           }
         }
 
-        // Save after filling
         const rowIds = getActiveModalRowIds(modal);
         if (rowIds.length === 0) {
           showToast(`No dataset found to save at index ${idx}`);
-          continue; // skip and continue to next
+          continue;
         }
 
         let allSuccessful = true;
@@ -623,7 +622,7 @@ function addSaveAllButton(parentDiv, modal, jsonResponse = []) {
 
         if (!allSuccessful) break;
 
-        i++; // move to next item
+        i++; // increment global index
       }
 
       showToast("All records processed. Closing modal.");
@@ -636,9 +635,7 @@ function addSaveAllButton(parentDiv, modal, jsonResponse = []) {
     } finally {
       enableSaveButton();
     }
-  };
-
-  actionsContainer.appendChild(saveAllBtn);
+  })();
 }
 
 
