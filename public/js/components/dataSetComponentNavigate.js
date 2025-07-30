@@ -170,6 +170,7 @@ function renderNavigationBar(main) {
       event:
         "navbar_movePrev()",
       id: "btnPrevious",
+      disabled: false,
 
     },
     {
@@ -178,12 +179,14 @@ function renderNavigationBar(main) {
       text: '<p>Next</p><i class="fa fa-chevron-right" style="color:#4d61fc;margin-left:-6px"></i>',
       event:
         "navbar_moveNext()",
+      disabled: false,
     },
     {
       name: "EditDSBtn",
       title: "Edit Record",
       text: '<p>Edit</p><i class="fa fa-pencil-square-o" style="color:#4d61fc;margin-left:-6px"></i>',
       event: "navbar_EditRecord( false)",
+      disabled: false,
     },
     {
       name: "InsertDSBtn",
@@ -191,6 +194,7 @@ function renderNavigationBar(main) {
       text: '<p>New Record</p><i class="fa fa-plus" style="color:green;margin-left:-6px"></i>',
       event:
         "navbar_InsertRecord()",
+      disabled: false,
     },
     {
       name: "CopyDSBtn",
@@ -198,38 +202,43 @@ function renderNavigationBar(main) {
       text: '<p>Copy</p><i class="fa fa-files-o" style="color:#4d61fc;margin-left:-6px"></i>',
       event:
         "navbar_CopyRecord()",
-    },
-    {
-      name: "SaveDSBtn",
-      title: "Save Record",
-      text: '<p>Save</p><i class="fa fa-floppy-o" style="color:red;margin-left:-6px"></i>',
-      event: "navbar_SaveRecord()",
-    },
-    {
-      name: "CancelDSBtn",
-      title: "Cancel",
-      text: '<p>Cancel</p><i class="fa fa-ban" style="color:#4d61fc;margin-left:-6px"></i>',
-      event: "navbar_CancelEdit()",
+      disabled: false,
     },
     {
       name: "DeleteDSBtn",
       title: "Delete",
       text: '<p>Delete</p><i class="fa fa-trash" style="color:#e74c3c; margin-left: -6px;"></i>',
       event: "navbar_DeleteRecord()",
+      disabled: false,
+    },
+    {
+      name: "SaveDSBtn",
+      title: "Save Record",
+      text: '<p>Save</p><i class="fa fa-floppy-o" style="color:red;margin-left:-6px"></i>',
+      event: "navbar_SaveRecord()",
+      disabled: true,
+    },
+    {
+      name: "CancelDSBtn",
+      title: "Cancel",
+      text: '<p>Cancel</p><i class="fa fa-ban" style="color:#4d61fc;margin-left:-6px"></i>',
+      event: "navbar_CancelEdit()",
+      disabled: true,
     },
     {
       name: "SaveAllDSBtn",
       title: "Save All and Exit",
       text: '<p>Save All</p><i class="fa fa-check-circle" style="color:green; margin-left: -6px;"></i>',
-      event: "handleSaveAllAndExit()"
+      event: "handleSaveAllAndExit()",
+      disabled: true,
     },
   ];
   var htm = "";
   //for the dom2json is mandatory to create a html for the events
   buttons.forEach((buttonInfo) => {
     htm += `<button id="${buttonInfo.id || ''}" name='${buttonInfo.name}' title="${buttonInfo.title
-      }" onclick="${buttonInfo.event.trim()}" style="width:150px;">${buttonInfo.text
-      }</button>`;
+      }" onclick="${buttonInfo.event.trim()}" style="width:150px;" ${buttonInfo.disabled ? 'disabled' : ''
+      } class=${buttonInfo.disabled ? 'disabled' : ''} >${buttonInfo.text}</button>`;
   });
   navigationBar.innerHTML += "<div >" + htm + "</div>";
 
@@ -426,22 +435,12 @@ function copyIntoModal() {
   */
 
 function loadBigModalWithJson(jsonResponse) {
-  console.log("loadBigModalWithJson called");
 
-  actionPreviousButton(true);
-  actionNextButton(true);
-  actionEditButton(true);
-  actionInsertButton(true);
-  actionCopyButton(true);
-  actionDeleteButton(true);
-
-  actionSaveButton(false);
-  actionCancelButton(false);
+  onCreateBigModal();
   actionSaveAllButton(false);
 
+  changeInputReadOnly(false)
 
-  // Always ensure modal exists
-  createEditBigModal();
 
   const modal = document.getElementById("editBigModal");
   let dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
@@ -459,10 +458,6 @@ function loadBigModalWithJson(jsonResponse) {
   const saveAllButton = parentDiv.querySelector('[name="SaveAllDSBtn"]');
 
 
-
-
-  actionSaveButton(false);
-  actionCancelButton(false);
 
   let i = 0;
 
@@ -524,8 +519,8 @@ function loadBigModalWithJson(jsonResponse) {
         deactivateLoaders();
         showToast("No more records to save, closing modal.");
         console.log("No more records to save, closing modal.");
-        modal.remove();
         loadFormData(activeForm.objectId, document.getElementById('renderContainer'), true);
+        onCloseBigModal();
       }
     } catch (error) {
       handleSaveError(error);
@@ -583,8 +578,7 @@ function loadBigModalWithJson(jsonResponse) {
 }
 
 function loadBigModalFromInputs() {
-  // Always ensure modal exists
-  createEditBigModal();
+  onCreateBigModal();
 
   const modal = document.getElementById("editBigModal");
   let dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
@@ -602,6 +596,42 @@ function loadBigModalFromInputs() {
 
   modal.style.display = "flex";
 }
+
+function onCreateBigModal() {
+  actionPreviousButton(true);
+  actionNextButton(true);
+  actionEditButton(true);
+  actionInsertButton(true);
+  actionCopyButton(true);
+  actionDeleteButton(true);
+
+  actionSaveButton(false);
+  actionCancelButton(false);
+
+  actionSaveAllButton(true);
+  createEditBigModal();
+}
+
+function onCloseBigModal() {
+  const modal = document.getElementById("editBigModal");
+  if (modal) {
+    modal.remove();
+  }
+
+  actionPreviousButton(false);
+  actionNextButton(false);
+  actionEditButton(false);
+  actionInsertButton(false);
+  actionCopyButton(false);
+  actionDeleteButton(false);
+
+  actionSaveButton(true);
+  actionCancelButton(true);
+  actionSaveAllButton(true);
+
+  changeInputReadOnly(true);
+}
+
 
 function handleSaveAllAndExit(parentDiv = undefined, modal = undefined, jsonResponse = [], i = 0) {
   if (typeof parentDiv === 'undefined' || typeof modal === 'undefined' || !Array.isArray(jsonResponse)) {
@@ -649,7 +679,7 @@ function handleSaveAllAndExit(parentDiv = undefined, modal = undefined, jsonResp
       }
 
       showToast("All records processed. Closing modal.");
-      modal.remove();
+      onCloseBigModal();
       loadFormData(activeForm.objectId, document.getElementById('renderContainer'), true);
 
     } catch (err) {
@@ -679,30 +709,7 @@ function navbar_EditRecord() {
 
 function navbar_CancelEdit() {
 
-
-
-
-  const modal = document.getElementById("editBigModal");
-  if (modal && modal.style.display !== "none") {
-    modal.remove();
-  }
-
-  actionPreviousButton(false);
-  actionNextButton(false);
-  actionEditButton(false);
-  actionInsertButton(false);
-  actionCopyButton(false);
-  actionDeleteButton(false);
-  actionSaveAllButton(false);
-
-  actionSaveButton(true);
-  actionCancelButton(true);
-
-
-
-  changeInputReadOnly(true);
-
-
+  onCloseBigModal();
 }
 
 function navbar_InsertRecord() {
