@@ -439,6 +439,7 @@ function copyIntoBigModal(jsonResponse) {
   const deleteButton = parentDiv.querySelector('[name="DeleteDSBtn"]');
   const cancelButton = parentDiv.querySelector('[name="CancelDSBtn"]');
   const saveButton = parentDiv.querySelector('[name="SaveDSBtn"]');
+  addSaveAllButton(parentDiv, modal, jsonResponse);
 
   previousButton.remove();
   nextButton.remove();
@@ -470,9 +471,11 @@ function copyIntoBigModal(jsonResponse) {
       }
 
       disableSaveButton();
+      activateLoaders();
 
       const rowIds = getActiveModalRowIds(modal);
       if (rowIds.length === 0) {
+        deactivateLoaders();
         enableSaveButton(); // re-enable if error
         showToast("No dataset found to save");
         return;
@@ -486,14 +489,13 @@ function copyIntoBigModal(jsonResponse) {
           // Save failed or validation failed
           console.error("Save failed for rowId:", rowIdElement.value);
           enableSaveButton(); // re-enable if error
+          deactivateLoaders();
           return;
         }
       }
 
       if (i < jsonResponse.length) {
         const selected = jsonResponse[i];
-
-
 
         for (const [key, value] of Object.entries(selected)) {
           if (key !== "rowid") { // Skip rowid as it is handled by the system
@@ -503,8 +505,10 @@ function copyIntoBigModal(jsonResponse) {
             }
           }
         }
+        deactivateLoaders();
         enableSaveButton();
       } else {
+        deactivateLoaders();
         showToast("No more records to save, closing modal.");
         console.log("No more records to save, closing modal.");
         modal.remove();
@@ -562,6 +566,81 @@ function copyIntoBigModal(jsonResponse) {
     }
   }
 }
+
+function addSaveAllButton(parentDiv, modal, jsonResponse = []) {
+  const actionsContainer = parentDiv.querySelector("#chat-container .actions");
+
+  if (!actionsContainer) {
+    console.error("Actions container not found.");
+    return;
+  }
+
+  // Create the button
+  const saveAllBtn = document.createElement("button");
+  saveAllBtn.id = "saveAllBtn";
+  saveAllBtn.title = "Save All and Exit";
+  saveAllBtn.innerText = "💾 Save All";
+
+  // Attach the click handler
+  saveAllBtn.onclick = async function (event) {
+    event.preventDefault();
+    console.log('Save All and Exit clicked');
+
+    try {
+      disableSaveButton();
+
+      const total = jsonResponse.length;
+      for (let idx = i; idx < total; idx++) {
+        const selected = jsonResponse[idx];
+
+        // Fill in fields for current selected JSON
+        for (const [key, value] of Object.entries(selected)) {
+          if (key !== "rowid") {
+            const field = parentDiv.querySelector(`[dataset-field-name="${key}"]`);
+            if (field) {
+              field.value = value !== null ? value : '';
+            }
+          }
+        }
+
+        // Save after filling
+        const rowIds = getActiveModalRowIds(modal);
+        if (rowIds.length === 0) {
+          showToast(`No dataset found to save at index ${idx}`);
+          continue; // skip and continue to next
+        }
+
+        let allSuccessful = true;
+        for (const rowIdElement of rowIds) {
+          const result = await prepareAndSaveRecord(rowIdElement);
+          if (!result) {
+            console.error(`Save failed for rowId at index ${idx}`);
+            showToast(`Save failed at index ${idx}`);
+            allSuccessful = false;
+            break;
+          }
+        }
+
+        if (!allSuccessful) break;
+
+        i++; // move to next item
+      }
+
+      showToast("All records processed. Closing modal.");
+      modal.remove();
+      loadFormData(activeForm.objectId, document.getElementById('renderContainer'), true);
+
+    } catch (err) {
+      console.error("Save All error:", err);
+      handleSaveError(err);
+    } finally {
+      enableSaveButton();
+    }
+  };
+
+  actionsContainer.appendChild(saveAllBtn);
+}
+
 
 
 function navbar_EditRecord() {
