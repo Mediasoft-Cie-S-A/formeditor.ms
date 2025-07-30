@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+
 let originalParentDiv = null;
 
 
@@ -300,6 +301,9 @@ function navbar_movePrev() {
 
 function navbar_moveNext() {
   console.log("next has been pressed");
+
+  const modal = document.getElementById("editBigModal");
+
   // Handle selected-panel logic
   let allPanels = document.querySelectorAll("[tagname='dataTable'] > .grid-body > .grid-row");
   let selectedPanel = document.querySelector(".selected-panel");
@@ -650,13 +654,35 @@ function handleSaveAllAndExit(parentDiv = undefined, modal = undefined, jsonResp
 }
 
 
-
 function navbar_EditRecord() {
+  actionPreviousButton(true);
+  actionNextButton(true);
+  actionEditButton(true);
+  actionInsertButton(true);
+  actionCopyButton(true);
+  actionDeleteButton(true);
+  actionSaveAllButton(true);
+
+  actionSaveButton(false);
+  actionCancelButton(false);
+
   loadBigModalFromInputs();
 }
 
 function navbar_CancelEdit() {
-  console.log("Cancel")
+
+  actionPreviousButton(false);
+  actionNextButton(false);
+  actionEditButton(false);
+  actionInsertButton(false);
+  actionCopyButton(false);
+  actionDeleteButton(false);
+  actionSaveAllButton(false);
+
+  actionSaveButton(true);
+  actionCancelButton(true);
+
+
   const modal = document.getElementById("editBigModal");
   if (modal && modal.style.display !== "none") {
     modal.remove();
@@ -669,6 +695,19 @@ function navbar_CancelEdit() {
 
 function navbar_InsertRecord() {
   //navbar_EditRecord(false);
+
+  actionPreviousButton(true);
+  actionNextButton(true);
+  actionEditButton(true);
+  actionInsertButton(true);
+  actionCopyButton(true);
+  actionDeleteButton(true);
+  actionSaveAllButton(true);
+
+  actionSaveButton(false);
+  actionCancelButton(false);
+
+
 
   loadBigModalFromInputs();
   const modal = document.getElementById("editBigModal");
@@ -1150,4 +1189,71 @@ async function deleteRecordDB(DBName, tableName, rowId, actions) {
   }
 }
 
+/*
+Deactivate and activate buttons
+*/
+
+function actionPreviousButton(disabled) {
+  const previousButton = document.querySelector("[name=PreviousDSBtn]");
+  if (previousButton) {
+    previousButton.disabled = disabled;
+  }
+}
+
+
+function actionNextButton(disabled) {
+  const nextButton = document.querySelector("[name=NextDSBtn]");
+  if (nextButton) {
+    nextButton.disabled = disabled;
+  }
+}
+
+function actionEditButton(disabled) {
+  const editButton = document.querySelector("[name=EditDSBtn]");
+  if (editButton) {
+    editButton.disabled = disabled;
+  }
+}
+
+function actionInsertButton(disabled) {
+  const insertButton = document.querySelector("[name=InsertDSBtn]");
+  if (insertButton) {
+    insertButton.disabled = disabled;
+  }
+}
+
+function actionCopyButton(disabled) {
+  const copyButton = document.querySelector("[name=CopyDSBtn]");
+  if (copyButton) {
+    copyButton.disabled = disabled;
+  }
+}
+
+function actionSaveButton(disabled) {
+  const saveButton = document.querySelector("[name=SaveDSBtn]");
+  if (saveButton) {
+    saveButton.disabled = disabled;
+  }
+}
+
+function actionCancelButton(disabled) {
+  const cancelButton = document.querySelector("[name=CancelDSBtn]");
+  if (cancelButton) {
+    cancelButton.disabled = disabled;
+  }
+}
+
+function actionDeleteButton(disabled) {
+  const deleteButton = document.querySelector("[name=DeleteDSBtn]");
+  if (deleteButton) {
+    deleteButton.disabled = disabled;
+  }
+}
+
+function actionSaveAllButton(disabled) {
+  const saveAllButton = document.querySelector("[name=SaveAllDSBtn]");
+  if (saveAllButton) {
+    saveAllButton.disabled = disabled;
+  }
+}
 
