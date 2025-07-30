@@ -421,7 +421,7 @@ function copyIntoModal() {
   });
 }
 
-function copyIntoBigModal() {
+function copyIntoBigModal(jsonResponse) {
   console.log("copyIntoBigModal called");
   // Always ensure modal exists
   createEditBigModal();
@@ -447,16 +447,73 @@ function copyIntoBigModal() {
   copyButton.remove();
   deleteButton.remove();
 
+  let i = 0;
+
   cancelButton.onclick = function (event) {
     event.preventDefault();
     console.log('New cancel logic here');
-    // Your new logic...
+    modal.remove();
+    loadFormData(activeForm.objectId, document.getElementById('renderContainer'), true);
   };
 
-  saveButton.onclick = function (event) {
+  saveButton.onclick = async function (event) {
     event.preventDefault();
     console.log('New save logic here');
-    // Your new logic...
+    i++;
+    // save the data and load the next
+
+
+    try {
+      if (isSaveButtonDisabled()) {
+        showToast("Save button is disabled");
+        return;
+      }
+
+      disableSaveButton();
+
+      const rowIds = getActiveModalRowIds(modal);
+      if (rowIds.length === 0) {
+        enableSaveButton(); // re-enable if error
+        showToast("No dataset found to save");
+        return;
+      }
+
+      console.log("Row IDs to save:");
+      console.log(rowIds);
+      for (const rowIdElement of rowIds) {
+        const result = await prepareAndSaveRecord(rowIdElement);
+        if (!result) {
+          // Save failed or validation failed
+          console.error("Save failed for rowId:", rowIdElement.value);
+          enableSaveButton(); // re-enable if error
+          return;
+        }
+      }
+
+      if (i < jsonResponse.length) {
+        const selected = jsonResponse[i];
+
+
+
+        for (const [key, value] of Object.entries(selected)) {
+          if (key !== "rowid") { // Skip rowid as it is handled by the system
+            const field = parentDiv.querySelector(`[dataset-field-name="${key}"]`);
+            if (field) {
+              field.value = value !== null ? value : '';
+            }
+          }
+        }
+        enableSaveButton();
+      } else {
+        showToast("No more records to save, closing modal.");
+        console.log("No more records to save, closing modal.");
+        modal.remove();
+        loadFormData(activeForm.objectId, document.getElementById('renderContainer'), true);
+      }
+    } catch (error) {
+      handleSaveError(error);
+      enableSaveButton();
+    }
   };
 
 
@@ -491,23 +548,19 @@ function copyIntoBigModal() {
     }
   });
 
-  /*
-  //This part is needed otherwise the navigation is broken for some reason
-  const dataSetNavigator2 = document.querySelector("[tagname='dataSetNavigation']");
-  const parentDiv2 = dataSetNavigator2.parentElement;
-  modalContent.innerHTML = ''
-  modalContent.appendChild(parentDiv2);
-  //copy the datas from old to new
-  const originalInputs = parentDiv.querySelectorAll("input[dataset-field-name]");
-  const clonedInputs = parentDiv2.querySelectorAll("input[dataset-field-name]");
 
-  originalInputs.forEach((input, i) => {
-    const cloned = clonedInputs[i];
-    if (cloned) {
-      cloned.value = input.value;
+  console.log("jsonResponse inside big modal: ", jsonResponse);
+  const selected = jsonResponse[i];
+
+
+  for (const [key, value] of Object.entries(selected)) {
+    if (key !== "rowid") { // Skip rowid as it is handled by the system
+      const field = parentDiv.querySelector(`[dataset-field-name="${key}"]`);
+      if (field) {
+        field.value = value !== null ? value : '';
+      }
     }
-  });
-  */
+  }
 }
 
 
@@ -778,8 +831,8 @@ function enableSaveButton() {
   if (btn) btn.disabled = false;
 }
 
-function getActiveModalRowIds() {
-  const datasetDiv = document.querySelector("[tagname='dataSet']");
+function getActiveModalRowIds(modal = document) {
+  const datasetDiv = modal.querySelector("[tagname='dataSet']");
   if (!datasetDiv) return [];
   return datasetDiv.querySelectorAll("[dataset-field-type='rowid']:not([disabled])");
 }

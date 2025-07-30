@@ -877,7 +877,7 @@ function handleBigDocument(event) {
 
         const jsonResponse = extractCleanJson(responseText);
 
-        copyIntoBigModal();
+        copyIntoBigModal(jsonResponse);
         /*
         if (jsonResponse) {
             for (const [key, value] of Object.entries(jsonResponse)) {
@@ -1068,7 +1068,9 @@ function extractCleanJson(text) {
         return null;
     }
 
+
     let raw = responseMatch[1].trim();
+    console.log("Raw JSON text found:", raw);
 
     // Try to detect if it's an object or array
     const isArray = raw.startsWith('[');
@@ -1084,19 +1086,22 @@ function extractCleanJson(text) {
         }
     }
 
+    const firstBracket = raw.indexOf('[');
+    const lastBracket = raw.lastIndexOf(']');
+
+    if (firstBracket === -1 || lastBracket === -1 || firstBracket >= lastBracket) {
+        console.warn("No valid JSON array found in text.");
+        return null;
+    }
+
+    const jsonArrayText = raw.slice(firstBracket, lastBracket + 1).trim();
+
     // Clean up common issues
-    let fixed = escapeBrokenQuotes(raw);
-    let cleaned = raw
-        .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":') // wrap keys
-        .replace(/'/g, '"') // replace single quotes
-        .replace(/,\s*}/g, '}') // remove trailing commas
-        .replace(/,\s*]/g, ']');
+    let fixed = escapeBrokenQuotes(jsonArrayText);
 
     console.log("Cleaned JSON text:", fixed);
 
     try {
-        //const deduped = removeDuplicateKeys(cleaned); // Optional: handle duplicate keys
-        //console.log("Deduplicated JSON text:", deduped);
         const parsed = JSON.parse(fixed);
         console.log("Parsed JSON successfully:", parsed);
         return parsed;
