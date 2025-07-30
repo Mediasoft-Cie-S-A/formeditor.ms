@@ -422,6 +422,7 @@ function copyIntoModal() {
 }
 
 function copyIntoBigModal() {
+  console.log("copyIntoBigModal called");
   // Always ensure modal exists
   createEditBigModal();
 
@@ -430,18 +431,38 @@ function copyIntoBigModal() {
   const parentDiv = dataSetNavigator.parentElement.cloneNode(true);
   dataSetNavigator = parentDiv.querySelector("[tagname='dataSetNavigation']");
 
-  const previous = parentDiv.querySelector('[name="PreviousDSBtn"]');
-  const next = parentDiv.querySelector('[name="NextDSBtn"]');
-  const edit = parentDiv.querySelector('[name="EditDSBtn"]');
-  const insert = parentDiv.querySelector('[name="InsertDSBtn"]');
-  const copy = parentDiv.querySelector('[name="CopyDSBtn"]');
-  const deleteBtn = parentDiv.querySelector('[name="DeleteDSBtn"]');
-  previous.remove();
-  next.remove();
-  edit.remove();
-  insert.remove();
-  copy.remove();
-  deleteBtn.remove();
+  const previousButton = parentDiv.querySelector('[name="PreviousDSBtn"]');
+  const nextButton = parentDiv.querySelector('[name="NextDSBtn"]');
+  const editButton = parentDiv.querySelector('[name="EditDSBtn"]');
+  const insertButton = parentDiv.querySelector('[name="InsertDSBtn"]');
+  const copyButton = parentDiv.querySelector('[name="CopyDSBtn"]');
+  const deleteButton = parentDiv.querySelector('[name="DeleteDSBtn"]');
+  const cancelButton = parentDiv.querySelector('[name="CancelDSBtn"]');
+  const saveButton = parentDiv.querySelector('[name="SaveDSBtn"]');
+
+  previousButton.remove();
+  nextButton.remove();
+  editButton.remove();
+  insertButton.remove();
+  copyButton.remove();
+  deleteButton.remove();
+
+  cancelButton.onclick = function (event) {
+    event.preventDefault();
+    console.log('New cancel logic here');
+    // Your new logic...
+  };
+
+  saveButton.onclick = function (event) {
+    event.preventDefault();
+    console.log('New save logic here');
+    // Your new logic...
+  };
+
+
+
+
+
 
   const modalContent = modal.querySelector(".modal-content");
   modalContent.innerHTML = '';
