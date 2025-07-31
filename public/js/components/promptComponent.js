@@ -523,34 +523,6 @@ function handleFill(event) {
 
 }
 
-function handleVoice(event) {
-    event.preventDefault();
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    if (!SpeechRecognition) {
-        alert('Speech Recognition API is not supported in this browser.');
-        return;
-    }
-
-    /*
-    const recognition = new SpeechRecognition();
-    recognition.continuous = false; // Stop automatically after one phrase
-    recognition.lang = 'en-US'; // You can change this as needed
-
-    recognition.start();
-
-
-    recognition.onresult = function (event) {
-        const spokenText = event.results[0][0].transcript;
-        document.getElementById("promptInput").value = spokenText;
-    };
-
-    recognition.onerror = function (event) {
-        console.error("Speech recognition error", event.error);
-    };
-    */
-}
-
 function handleBigDocument(event) {
     event.preventDefault();
     console.log("File upload button clicked");
