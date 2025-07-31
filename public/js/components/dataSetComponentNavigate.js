@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-let originalParentDiv = null;
 
 
 function createDataSetComponentNavigate(type) {
@@ -31,7 +30,7 @@ function createDataSetComponentNavigate(type) {
 function editDataSetComponentNavigate(type, element, content) {
   // Logic to edit the menu, for example adding/removing items
   const actions = JSON.parse(element.getAttribute("actions"));
-  // generate input
+
   // Clear the content area to prevent duplicates
   const div = document.createElement("div");
   div.style.width = "100%";
@@ -169,6 +168,7 @@ function renderNavigationBar(main) {
       event:
         "navbar_movePrev()",
       id: "btnPrevious",
+      disabled: false,
 
     },
     {
@@ -177,12 +177,14 @@ function renderNavigationBar(main) {
       text: '<p>Next</p><i class="fa fa-chevron-right" style="color:#4d61fc;margin-left:-6px"></i>',
       event:
         "navbar_moveNext()",
+      disabled: false,
     },
     {
       name: "EditDSBtn",
       title: "Edit Record",
       text: '<p>Edit</p><i class="fa fa-pencil-square-o" style="color:#4d61fc;margin-left:-6px"></i>',
       event: "navbar_EditRecord( false)",
+      disabled: false,
     },
     {
       name: "InsertDSBtn",
@@ -190,6 +192,7 @@ function renderNavigationBar(main) {
       text: '<p>New Record</p><i class="fa fa-plus" style="color:green;margin-left:-6px"></i>',
       event:
         "navbar_InsertRecord()",
+      disabled: false,
     },
     {
       name: "CopyDSBtn",
@@ -197,46 +200,49 @@ function renderNavigationBar(main) {
       text: '<p>Copy</p><i class="fa fa-files-o" style="color:#4d61fc;margin-left:-6px"></i>',
       event:
         "navbar_CopyRecord()",
-    },
-    {
-      name: "SaveDSBtn",
-      title: "Save Record",
-      text: '<p>Save</p><i class="fa fa-floppy-o" style="color:red;margin-left:-6px"></i>',
-      event: "navbar_SaveRecord()",
-    },
-    {
-      name: "CancelDSBtn",
-      title: "Cancel",
-      text: '<p>Cancel</p><i class="fa fa-ban" style="color:#4d61fc;margin-left:-6px"></i>',
-      event: "navbar_CancelEdit()",
+      disabled: false,
     },
     {
       name: "DeleteDSBtn",
       title: "Delete",
       text: '<p>Delete</p><i class="fa fa-trash" style="color:#e74c3c; margin-left: -6px;"></i>',
       event: "navbar_DeleteRecord()",
+      disabled: false,
+    },
+    {
+      name: "SaveDSBtn",
+      title: "Save Record",
+      text: '<p>Save</p><i class="fa fa-floppy-o" style="color:red;margin-left:-6px"></i>',
+      event: "navbar_SaveRecord()",
+      disabled: true,
+    },
+    {
+      name: "CancelDSBtn",
+      title: "Cancel",
+      text: '<p>Cancel</p><i class="fa fa-ban" style="color:#4d61fc;margin-left:-6px"></i>',
+      event: "navbar_CancelEdit()",
+      disabled: true,
+    },
+    {
+      name: "SaveAllDSBtn",
+      title: "Save All and Exit",
+      text: '<p>Save All</p><i class="fa fa-check-circle" style="color:green; margin-left: -6px;"></i>',
+      event: "handleSaveAllAndExit()",
+      disabled: true,
     },
   ];
   var htm = "";
   //for the dom2json is mandatory to create a html for the events
   buttons.forEach((buttonInfo) => {
     htm += `<button id="${buttonInfo.id || ''}" name='${buttonInfo.name}' title="${buttonInfo.title
-      }" onclick="${buttonInfo.event.trim()}" style="width:150px;">${buttonInfo.text
-      }</button>`;
+      }" onclick="${buttonInfo.event.trim()}" style="width:150px;" ${buttonInfo.disabled ? 'disabled' : ''
+      } class=${buttonInfo.disabled ? 'disabled' : ''} >${buttonInfo.text}</button>`;
   });
   navigationBar.innerHTML += "<div >" + htm + "</div>";
 
   main.appendChild(navigationBar);
 }
 
-function updatePreviousButtonState(hasPrevious) {
-  const btn = document.getElementById("btnPrevious");
-  if (btn) {
-    btn.disabled = !hasPrevious;
-    btn.style.opacity = hasPrevious ? "1" : "0.5";
-    btn.style.pointerEvents = hasPrevious ? "auto" : "none";
-  }
-}
 
 function navbar_movePrev() {
   console.log("Moving prev");
@@ -302,6 +308,9 @@ function navbar_movePrev() {
 
 function navbar_moveNext() {
   console.log("next has been pressed");
+
+  const modal = document.getElementById("editBigModal");
+
   // Handle selected-panel logic
   let allPanels = document.querySelectorAll("[tagname='dataTable'] > .grid-body > .grid-row");
   let selectedPanel = document.querySelector(".selected-panel");
@@ -369,8 +378,9 @@ function navbar_moveNext() {
       */
 }
 
-function load_data(readOnly) {
-  console.log("loading data read only : " + readOnly);
+
+function changeInputReadOnly(readOnly) {
+
   const inputs = document.querySelectorAll(
     `[data-table-name] input[dataset-field-name]`
   );
@@ -382,79 +392,304 @@ function load_data(readOnly) {
   });
 
   document.querySelector("[name=SaveDSBtn]").disabled = readOnly;
-  deactivateLoaders();
 }
 
-function copyIntoModal() {
-  const modal = document.getElementById("editModal");
-  if (!modal || modal.style.display === "none") {
-    console.log("create modal");
-    // Always ensure modal exists
-    createEditModal();
+function loadBigModalWithJson(jsonResponse) {
 
-    const modal = document.getElementById("editModal");
-    const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
-    const parentDiv = dataSetNavigator.parentElement;
-    const modalContent = modal.querySelector(".modal-content");
-    modalContent.innerHTML = '';
-    // set in parentDiv the id of original parent and next sibling
+  onCreateBigModal();
+  actionSaveAllButton(false);
 
-    originalParentDiv = parentDiv.parentElement;
+  changeInputReadOnly(false)
 
-    modalContent.appendChild(parentDiv);
 
-    load_data(false);
+  const modal = document.getElementById("editBigModal");
+  let dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
+  const parentDiv = dataSetNavigator.parentElement.cloneNode(true);
+  dataSetNavigator = parentDiv.querySelector("[tagname='dataSetNavigation']");
 
-    modal.style.display = "flex";
+  const previousButton = parentDiv.querySelector('[name="PreviousDSBtn"]');
+  const nextButton = parentDiv.querySelector('[name="NextDSBtn"]');
+  const editButton = parentDiv.querySelector('[name="EditDSBtn"]');
+  const insertButton = parentDiv.querySelector('[name="InsertDSBtn"]');
+  const copyButton = parentDiv.querySelector('[name="CopyDSBtn"]');
+  const deleteButton = parentDiv.querySelector('[name="DeleteDSBtn"]');
+  const cancelButton = parentDiv.querySelector('[name="CancelDSBtn"]');
+  const saveButton = parentDiv.querySelector('[name="SaveDSBtn"]');
+  const saveAllButton = parentDiv.querySelector('[name="SaveAllDSBtn"]');
 
-    //This part is needed otherwise the navigation is broken for some reason
-    const dataSetNavigator2 = document.querySelector("[tagname='dataSetNavigation']");
-    const parentDiv2 = dataSetNavigator2.parentElement;
-    modalContent.innerHTML = ''
-    modalContent.appendChild(parentDiv2);
-    //copy the datas from old to new
-    const originalInputs = parentDiv.querySelectorAll("input[dataset-field-name]");
-    const clonedInputs = parentDiv2.querySelectorAll("input[dataset-field-name]");
 
-    originalInputs.forEach((input, i) => {
-      const cloned = clonedInputs[i];
-      if (cloned) {
-        cloned.value = input.value;
+
+  let i = 0;
+
+  cancelButton.onclick = function (event) {
+    navbar_CancelEdit();
+  };
+
+  saveButton.onclick = async function (event) {
+    event.preventDefault();
+    console.log('New save logic here');
+    i++;
+    // save the data and load the next
+
+
+    try {
+      if (isSaveButtonDisabled()) {
+        showToast("Save button is disabled");
+        return;
       }
-    });
+
+      disableSaveButton();
+      activateLoaders();
+
+      const rowIds = getActiveModalRowIds(modal);
+      if (rowIds.length === 0) {
+        deactivateLoaders();
+        enableSaveButton(); // re-enable if error
+        showToast("No dataset found to save");
+        return;
+      }
+
+      console.log("Row IDs to save:");
+      console.log(rowIds);
+      for (const rowIdElement of rowIds) {
+        const result = await prepareAndSaveRecord(rowIdElement);
+        if (!result) {
+          // Save failed or validation failed
+          console.error("Save failed for rowId:", rowIdElement.value);
+          enableSaveButton(); // re-enable if error
+          deactivateLoaders();
+          return;
+        }
+      }
+
+      if (i < jsonResponse.length) {
+        const selected = jsonResponse[i];
+
+        for (const [key, value] of Object.entries(selected)) {
+          if (key !== "rowid") { // Skip rowid as it is handled by the system
+            const field = parentDiv.querySelector(`[dataset-field-name="${key}"]`);
+            if (field) {
+              field.value = value !== null ? value : '';
+            }
+          }
+        }
+        deactivateLoaders();
+        enableSaveButton();
+      } else {
+        deactivateLoaders();
+        showToast("No more records to save, closing modal.");
+        console.log("No more records to save, closing modal.");
+        loadFormData(activeForm.objectId, document.getElementById('renderContainer'), true);
+        onCloseBigModal();
+      }
+    } catch (error) {
+      handleSaveError(error);
+      enableSaveButton();
+    }
+  };
+
+  saveAllButton.onclick = async function (event) {
+    event.preventDefault();
+    console.log('New save all logic here');
+    handleSaveAllAndExit(parentDiv, modal, jsonResponse, i);
+  }
+
+
+  const modalContent = modal.querySelector(".modal-content");
+  modalContent.innerHTML = '';
+  // set in parentDiv the id of original parent and next sibling
+
+
+  modalContent.appendChild(parentDiv);
+
+  modal.style.display = "flex";
+
+  //clear the inputs in the modal
+  const inputs = modal.querySelectorAll(`[data-table-name] input,select`);
+  inputs.forEach((input) => {
+    const field = input.getAttribute("dataset-field-name");
+    switch (input.type) {
+      case "hidden":
+        if (field === "rowid") {
+          input.value = "new";
+        }
+        break;
+      default:
+        input.value = "";
+        input.readOnly = false; // Make input editable
+        break;
+    }
+  });
+
+
+  console.log("jsonResponse inside big modal: ", jsonResponse);
+  const selected = jsonResponse[i];
+
+
+  for (const [key, value] of Object.entries(selected)) {
+    if (key !== "rowid") { // Skip rowid as it is handled by the system
+      const field = parentDiv.querySelector(`[dataset-field-name="${key}"]`);
+      if (field) {
+        field.value = value !== null ? value : '';
+      }
+    }
   }
 }
 
+function loadBigModalFromInputs() {
+  onCreateBigModal();
+
+  const modal = document.getElementById("editBigModal");
+  let dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
+  const parentDiv = dataSetNavigator.parentElement.cloneNode(true);
+  dataSetNavigator = parentDiv.querySelector("[tagname='dataSetNavigation']");
+
+  const modalContent = modal.querySelector(".modal-content");
+  modalContent.innerHTML = '';
+  // set in parentDiv the id of original parent and next sibling
+
+
+  modalContent.appendChild(parentDiv);
+
+  changeInputReadOnly(false)
+
+  modal.style.display = "flex";
+}
+
+function onCreateBigModal() {
+  actionPreviousButton(true);
+  actionNextButton(true);
+  actionEditButton(true);
+  actionInsertButton(true);
+  actionCopyButton(true);
+  actionDeleteButton(true);
+
+  actionSaveButton(false);
+  actionCancelButton(false);
+
+  actionSaveAllButton(true);
+  createEditBigModal();
+}
+
+function onCloseBigModal() {
+  const modal = document.getElementById("editBigModal");
+  if (modal) {
+    modal.remove();
+  }
+
+  actionPreviousButton(false);
+  actionNextButton(false);
+  actionEditButton(false);
+  actionInsertButton(false);
+  actionCopyButton(false);
+  actionDeleteButton(false);
+
+  actionSaveButton(true);
+  actionCancelButton(true);
+  actionSaveAllButton(true);
+
+  changeInputReadOnly(true);
+}
+
+
+function handleSaveAllAndExit(parentDiv = undefined, modal = undefined, jsonResponse = [], i = 0) {
+  if (typeof parentDiv === 'undefined' || typeof modal === 'undefined' || !Array.isArray(jsonResponse)) {
+    console.error("Missing parentDiv, modal, or jsonResponse");
+    return;
+  }
+
+  disableSaveButton();
+
+  (async function saveAll() {
+    try {
+      const total = jsonResponse.length;
+      for (let idx = i; idx < total; idx++) {
+        const selected = jsonResponse[idx];
+
+        for (const [key, value] of Object.entries(selected)) {
+          if (key !== "rowid") {
+            const field = parentDiv.querySelector(`[dataset-field-name="${key}"]`);
+            if (field) {
+              field.value = value !== null ? value : '';
+            }
+          }
+        }
+
+        const rowIds = getActiveModalRowIds(modal);
+        if (rowIds.length === 0) {
+          showToast(`No dataset found to save at index ${idx}`);
+          continue;
+        }
+
+        let allSuccessful = true;
+        for (const rowIdElement of rowIds) {
+          const result = await prepareAndSaveRecord(rowIdElement);
+          if (!result) {
+            console.error(`Save failed for rowId at index ${idx}`);
+            showToast(`Save failed at index ${idx}`);
+            allSuccessful = false;
+            break;
+          }
+        }
+
+        if (!allSuccessful) break;
+
+        i++; // increment global index
+      }
+
+      showToast("All records processed. Closing modal.");
+      onCloseBigModal();
+      loadFormData(activeForm.objectId, document.getElementById('renderContainer'), true);
+
+    } catch (err) {
+      console.error("Save All error:", err);
+      handleSaveError(err);
+    } finally {
+      enableSaveButton();
+    }
+  })();
+}
+
+
 function navbar_EditRecord() {
-  copyIntoModal();
+  actionPreviousButton(true);
+  actionNextButton(true);
+  actionEditButton(true);
+  actionInsertButton(true);
+  actionCopyButton(true);
+  actionDeleteButton(true);
+  actionSaveAllButton(true);
+
+  actionSaveButton(false);
+  actionCancelButton(false);
+
+  loadBigModalFromInputs();
 }
 
 function navbar_CancelEdit() {
-  console.log("Cancel")
-  const modal = document.getElementById("editModal");
-  if (modal && modal.style.display !== "none") {
-    modal.style.display = "none";
-    const dataSetNavigator = document.querySelector("[tagname='dataSetNavigation']");
-    const parentDiv = dataSetNavigator.parentElement;
-    if (originalParentDiv) {
-      org = originalParentDiv;
-      org.appendChild(parentDiv);
-    }
-    //Reset the edit, probably overkill but it works 
-    navbar_moveNext();
-    navbar_movePrev();
-  }
 
-  load_data(true);
-
-
+  onCloseBigModal();
 }
 
 function navbar_InsertRecord() {
   //navbar_EditRecord(false);
 
-  copyIntoModal();
-  const inputs = document.querySelectorAll(`[data-table-name] input,select`);
+  actionPreviousButton(true);
+  actionNextButton(true);
+  actionEditButton(true);
+  actionInsertButton(true);
+  actionCopyButton(true);
+  actionDeleteButton(true);
+  actionSaveAllButton(true);
+
+  actionSaveButton(false);
+  actionCancelButton(false);
+
+
+
+  loadBigModalFromInputs();
+  const modal = document.getElementById("editBigModal");
+  const inputs = modal.querySelectorAll(`[data-table-name] input,select`);
   inputs.forEach((input) => {
     const field = input.getAttribute("dataset-field-name");
     switch (input.type) {
@@ -557,7 +792,7 @@ async function navbar_DeleteRecord() {
 
 
 async function navbar_SaveRecord() {
-  const modal = document.getElementById("editModal");
+  const modal = document.getElementById("editBigModal");
   if (!modal || modal.style.display === "none") return;
 
   try {
@@ -568,7 +803,7 @@ async function navbar_SaveRecord() {
 
     disableSaveButton();
 
-    const rowIds = getActiveModalRowIds();
+    const rowIds = getActiveModalRowIds(modal);
     if (rowIds.length === 0) {
       showToast("No dataset found to save");
       return;
@@ -674,8 +909,6 @@ function addIdToData(data, id, value) {
   return data;
 }
 
-
-
 /* Helper functions for Save Button state management */
 function isSaveButtonDisabled() {
   const btn = document.querySelector("[name=SaveDSBtn]");
@@ -692,8 +925,8 @@ function enableSaveButton() {
   if (btn) btn.disabled = false;
 }
 
-function getActiveModalRowIds() {
-  const datasetDiv = document.querySelector("[tagname='dataSet']");
+function getActiveModalRowIds(modal = document) {
+  const datasetDiv = modal.querySelector("[tagname='dataSet']");
   if (!datasetDiv) return [];
   return datasetDiv.querySelectorAll("[dataset-field-type='rowid']:not([disabled])");
 }
@@ -934,4 +1167,73 @@ async function deleteRecordDB(DBName, tableName, rowId, actions) {
   }
 }
 
+/*
+Deactivate and activate buttons
+*/
+
+function actionPreviousButton(disabled) {
+  const previousButton = document.querySelector("[name=PreviousDSBtn]");
+  if (previousButton) {
+    previousButton.disabled = disabled;
+    //Grey out the button if disabled
+    if (disabled) {
+      previousButton.classList.add("disabled");
+    } else {
+      previousButton.classList.remove("disabled");
+    }
+  }
+}
+
+
+function actionNextButton(disabled) {
+  const nextButton = document.querySelector("[name=NextDSBtn]");
+  helperAction(disabled, nextButton);
+}
+
+function actionEditButton(disabled) {
+  const editButton = document.querySelector("[name=EditDSBtn]");
+  helperAction(disabled, editButton);
+}
+
+function actionInsertButton(disabled) {
+  const insertButton = document.querySelector("[name=InsertDSBtn]");
+  helperAction(disabled, insertButton);
+}
+
+function actionCopyButton(disabled) {
+  const copyButton = document.querySelector("[name=CopyDSBtn]");
+  helperAction(disabled, copyButton);
+}
+
+function actionSaveButton(disabled) {
+  const saveButton = document.querySelector("[name=SaveDSBtn]");
+  helperAction(disabled, saveButton);
+
+}
+
+function actionCancelButton(disabled) {
+  const cancelButton = document.querySelector("[name=CancelDSBtn]");
+  helperAction(disabled, cancelButton);
+}
+
+function actionDeleteButton(disabled) {
+  const deleteButton = document.querySelector("[name=DeleteDSBtn]");
+  helperAction(disabled, deleteButton);
+}
+
+function actionSaveAllButton(disabled) {
+  const saveAllButton = document.querySelector("[name=SaveAllDSBtn]");
+  helperAction(disabled, saveAllButton);
+}
+
+function helperAction(disabled, button) {
+  if (button) {
+    button.disabled = disabled;
+    if (disabled) {
+      button.classList.add("disabled");
+    } else {
+      button.classList.remove("disabled");
+    }
+  }
+}
 

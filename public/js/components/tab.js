@@ -196,6 +196,42 @@ function createEditModal() {
     document.body.appendChild(modal);
 }
 
+function createEditBigModal() {
+    if (document.getElementById("editBigModal")) return;
+
+    const modal = document.createElement("div");
+    modal.id = "editBigModal";
+    modal.className = "modal";
+    modal.style.display = "none";
+    modal.style.position = "fixed";
+    modal.style.top = "0";
+    modal.style.left = "0";
+    modal.style.width = "100%";
+    modal.style.height = "100%";
+    modal.style.backgroundColor = "rgba(0,0,0,0.5)";
+    modal.style.zIndex = "999";
+    modal.style.justifyContent = "center";
+    modal.style.alignItems = "center";
+
+    const modalContent = document.createElement("div");
+    modalContent.className = "modal-content";
+    modalContent.style.backgroundColor = "white";
+    modalContent.style.padding = "20px";
+    modalContent.style.borderRadius = "6px";
+    modalContent.style.minWidth = "300px";
+    modalContent.style.minHeight = "200px";
+    modalContent.style.position = "relative";
+
+    const modalContentContainer = document.createElement("div");
+    modalContentContainer.id = "editModalContent";
+
+    modalContent.appendChild(modalContentContainer);
+    modal.appendChild(modalContent);
+
+    document.body.appendChild(modal);
+
+}
+
 function activateTab(event, tabHeader, tabContent) {
     console.log("Activate tab")
     if (event) {

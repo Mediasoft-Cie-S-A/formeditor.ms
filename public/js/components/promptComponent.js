@@ -61,16 +61,15 @@ function renderPromptComponent(element) {
                         <input type="file" id="file-upload" />
                         </label>
                     </div>
-                        <button onclick="handleshowFileUpload()" title="Upload File">📎</button>
+                        <button onclick="handleBigDocument(event)" title="Upload File">📎</button>
                         <button onclick="handleFill(event)" title="Fill">✨</button>
-                        <button onclick="handleOCR(event)" title="OCR">📄</button>
                         <button 
                             onmousedown="startVoice()" 
                             onmouseup="stopVoice()" 
                             onmouseleave="stopVoice()" 
                             title="Voice: Hold to Speak"
                         >🎤</button>
-                        <button  onclick="callAIService(event)" title="Send to AI">🤖</button>
+                        <button  onclick="handleAiButton(event)" title="Send to AI">🤖</button>
                         <img src="img/loader.gif" id="loader" style="display: none; width: 80px; height: 40px;" alt="Loading...">
                     </div>
                     </div> `;
@@ -145,14 +144,15 @@ function displayAnswer(event, answer) {
     parent.appendChild(responseElement);
 }
 
-function callAIService(event) {
+function handleAiButton(event) {
     event.preventDefault();
     // get the prompt text and button text
     const promptText = document.getElementById('PromptText');
 
     // call the AI service with the prompt text
-    fetchAIResponse(promptText.value).then(responseText => {
+    askAi(promptText.value).then(responseText => {
         // handle the response from the AI service
+        console.log("AI response : ", responseText);
         displayAnswer(event, `<strong>AI Response:</strong> ${responseText}`);
     }).catch(error => {
         console.error('Error:', error);
@@ -161,10 +161,183 @@ function callAIService(event) {
 
 }
 
-function handleshowFileUpload() {
-    const fileUpload = document.getElementById('file-upload');
-    fileUpload.style.display = fileUpload.style.display === 'none' ? 'block' : 'none';
+
+
+async function handlesFileUpload(event) {
+    event.preventDefault();
+    console.log("File upload button clicked");
+
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/pdf,image/png,image/jpeg,image/jpg,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    input.style.display = 'none';
+
+    input.addEventListener('change', async (event2) => {
+        const file = event2.target.files[0];
+        if (!file) return;
+
+        uploadedPDF = file;
+
+        const cleanedText = await extractTextFromFile(file, progress => {
+            displayAnswer(event, `<strong>Progress:</strong> ${progress}`);
+        });
+
+        uploadedPDF.cleanedText = cleanedText;
+
+        // Collect field metadata
+        const formFields = document.querySelectorAll('[dataset-field-name]');
+        const fieldInfo = Array.from(formFields).map(field => ({
+            name: field.getAttribute('dataset-field-name'),
+            desc: field.getAttribute('dataset-description') || ''
+        }));
+
+        const fieldDescriptions = fieldInfo
+            .map(f => `- ${f.name}: ${f.desc || '(no description provided)'}`)
+            .join('\n');
+
+        const prompt = `
+            From the following extracted document text (from a PDF or scanned file):
+            === INPUT TEXT ===
+            """
+            ${cleanedText}
+            """
+
+            Try to fill in the following fields with values inferred from the text:
+
+            === FIELD DESCRIPTIONS ===
+            ${fieldDescriptions}
+
+            === RESPONSE FORMAT ===
+
+            Guidelines:
+            - The text may contain OCR errors, bad formatting, or missing labels — infer values where possible.
+            - Use known data formats (e.g., SWIFT codes, IBANs, addresses) to guide your matching.
+            - Do not guess blindly — only assign a value if it's reasonably clear.
+            - If no reliable value is found for a field, set it to null.
+
+            Output Format:
+            - The response must begin with exactly: response: {
+            - The response must end with exactly: }
+            - All field names must be quoted. All string values must be in double quotes.
+            - Do not add any comments, extra text, or explanations outside the JSON.
+            - Ensure the JSON is valid and machine-readable.
+            - Include all requested fields, even if null.
+            - Do not include any explanation or text outside the JSON.
+
+            Field Hints:
+            - cler: Clearing number, usually a short numeric code (e.g. 3-5 digits)
+            - des1: Small designation of the address , often a short label or acronym
+            - des2: NPA + location (short)
+            - ibswift: International SWIFT/BIC code, usually 8 or 11 uppercase letters (e.g. SNBZCHZZXXX)
+            - liba: Bank label or short bank name, e.g. "SNB", "UBS", etc.
+            - lieu: City or location name (e.g. "Zürich")
+            - nccp: Account type or code, usually numeric (e.g. "1", "2")
+            - noba: Bank number, often 3-6 digits or alphanumeric (e.g. "100", "X123")
+            - nom1 / nom2 / nom3: Name lines for a bank or company (e.g. legal name)
+            - rowid: Row ID in the system, you don't need to generate that, it will be generated by the system
+
+            Now complete the JSON response below.
+            response:
+            `;
+
+        const responseText = await asdkAI(prompt);
+        displayAnswer(event, `<strong>AI Response:</strong> ${responseText}`);
+
+        const jsonResponse = extractCleanJson(responseText);
+        if (jsonResponse) {
+            for (const [key, value] of Object.entries(jsonResponse)) {
+                if (key !== "rowid") {
+                    const field = document.querySelector(`[dataset-field-name="${key}"]`);
+                    if (field) field.value = value !== null ? value : '';
+                }
+            }
+        } else {
+            console.error('No valid JSON response found.');
+        }
+    });
+
+    input.click();
 }
+
+
+async function extractTextFromFile(file, onProgress = () => { }) {
+    const mime = file.type;
+    let cleanedText = '';
+
+    if (mime === 'application/pdf') {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let fullText = '';
+
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+            const page = await pdf.getPage(pageNum);
+            const content = await page.getTextContent();
+            const text = content.items.map(item => item.str).join(' ');
+
+            if (text.trim().length > 30) {
+                fullText += `\n\n--- Page ${pageNum} ---\n\n` + text;
+            } else {
+                const viewport = page.getViewport({ scale: 2 });
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+
+                const renderTask = page.render({ canvasContext: context, viewport });
+                await renderTask.promise;
+
+                const dataUrl = canvas.toDataURL();
+                const result = await Tesseract.recognize(dataUrl, 'eng', {
+                    logger: m => {
+                        if (m.status === 'recognizing text') {
+                            const percent = Math.floor(m.progress * 100);
+                            onProgress(`OCR Page ${pageNum}: ${percent}%`);
+                        }
+                    },
+                });
+
+                fullText += `\n\n--- OCR Page ${pageNum} ---\n\n` + result.data.text;
+            }
+        }
+
+        cleanedText = cleanExtractedText(fullText);
+
+    } else if (mime.startsWith('image/')) {
+        const imageURL = URL.createObjectURL(file);
+
+        const result = await Tesseract.recognize(imageURL, 'eng', {
+            logger: m => {
+                if (m.status === 'recognizing text') {
+                    const percent = Math.floor(m.progress * 100);
+                    onProgress(`OCR Progress: ${percent}%`);
+                }
+            }
+        });
+
+        cleanedText = cleanExtractedText(result.data.text);
+
+    } else if (mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        cleanedText = cleanExtractedText(result.value);
+
+    } else {
+        throw new Error("Unsupported file type: " + mime);
+    }
+
+    return cleanedText;
+}
+
+
+// Helper function to normalize whitespace, remove junk, etc.
+function cleanExtractedText(text) {
+    return text
+        .replace(/\s+/g, ' ')          // collapse multiple spaces/newlines
+        .replace(/–/g, '-')            // normalize dashes
+        .replace(/\u00a0/g, ' ')       // non-breaking space to regular space
+        .trim();
+}
+
 
 function handleFill(event) {
 
@@ -316,7 +489,7 @@ function handleFill(event) {
     `;
 
 
-    askGroq(prompt).then(responseText => {
+    askAi(prompt).then(responseText => {
         // handle the response from the AI service
 
 
@@ -347,6 +520,140 @@ function handleFill(event) {
         event.target.parentElement.appendChild(errorElement);
     }
     );
+
+}
+
+function handleBigDocument(event) {
+    event.preventDefault();
+    console.log("File upload button clicked");
+
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/pdf,image/png,image/jpeg,image/jpg,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    input.style.display = 'none';
+
+    input.addEventListener('change', async (event2) => {
+        const file = event2.target.files[0];
+        if (!file) return;
+
+        uploadedPDF = file;
+
+        const cleanedText = await extractTextFromFile(file, progress => {
+            displayAnswer(event, `<strong>Progress:</strong> ${progress}`);
+        });
+
+        uploadedPDF.cleanedText = cleanedText;
+
+        // Collect field metadata
+        const formFields = document.querySelectorAll('[dataset-field-name]');
+        const fieldInfo = Array.from(formFields).map(field => ({
+            name: field.getAttribute('dataset-field-name'),
+            desc: field.getAttribute('dataset-description') || ''
+        }));
+
+        const fieldDescriptions = fieldInfo
+            .map(f => `- ${f.name}: ${f.desc || '(no description provided)'}`)
+            .join('\n');
+
+        const prompt = `
+                From the following extracted document text (e.g., from a PDF or scanned file), extract **all identifiable bank entries**. Each bank may include fields such as name, address, SWIFT, clearing number, and other identifiers.
+
+                === INPUT TEXT ===
+                """
+                ${cleanedText}
+                """
+
+                Your task is to:
+
+                1. Identify **each unique bank or financial entity** mentioned in the text.
+                2. For each one, extract the following fields where reasonably available.
+                3. Include **multiple entries** if more than one bank appears.
+                4. If a field cannot be confidently filled, set it to **null**.
+
+                === FIELD DEFINITIONS ===
+                ${fieldDescriptions}
+
+                === EXTRACTION FORMAT ===
+
+                Output must begin with: **response: [**
+                Each item in the array must be a JSON object containing **all fields**.
+                Only output valid JSON. No explanations or comments.
+
+                Guidelines:
+                - Each object in the array should represent a **distinct bank**.
+                - Field values must be strings (double-quoted) or null.
+                - Do not omit any fields — always include all, even if null.
+                - If there’s uncertainty in a field, set it to null rather than guessing.
+
+                Field Hints:
+                - cler: Clearing number (numeric or short code, e.g. "766")
+                - des1: Address line short label (optional)
+                - des2: NPA + location (e.g. "1211 Genève 2")
+                - ibswift: SWIFT/BIC code (e.g. "BCGECHGGXXX")
+                - liba: Short bank label (e.g. "BCGE", "BCNN")
+                - lieu: Location or city name (e.g. "Genève")
+                - nccp: Account type code (e.g. "20-136-4")
+                - noba: Bank number or internal ID
+                - nom1 / nom2 / nom3: Name lines (e.g. "Banque Cantonale de Genève", etc.)
+                - rowid: Always null, this will be generated by the system
+
+                === OUTPUT ===
+
+                response: [
+                {
+                    "cler": "788",
+                    "des1": "Quai de l'Ile 17 - CP 2251",
+                    "des2": "1211 Genève 2",
+                    "ibswift": "BCGECHGGXXX",
+                    "liba": "BCGE",
+                    "lieu": "Genève",
+                    "nccp": null,
+                    "noba": null,
+                    "nom1": "Banque Cantonale de Genève",
+                    "nom2": null,
+                    "nom3": null,
+                    "rowid": null
+                },
+                {
+                    "cler": "766",
+                    "des1": "Place Pury 4",
+                    "des2": "CH-2001 Neuchâtel",
+                    "ibswift": "BCNNCH22XXX",
+                    "liba": "BCNN",
+                    "lieu": "Neuchâtel",
+                    "nccp": "20-136-4",
+                    "noba": null,
+                    "nom1": "Banque Cantonale Neuchâteloise",
+                    "nom2": null,
+                    "nom3": null,
+                    "rowid": null
+                }
+                ]
+                `;
+
+
+        const responseText = await askAi(prompt);
+        displayAnswer(event, `<strong>AI Response:</strong> ${responseText}`);
+        console.log(responseText);
+
+        const jsonResponse = extractCleanJson(responseText);
+
+        loadBigModalWithJson(jsonResponse);
+        /*
+        if (jsonResponse) {
+            for (const [key, value] of Object.entries(jsonResponse)) {
+                if (key !== "rowid") {
+                    const field = document.querySelector(`[dataset-field-name="${key}"]`);
+                    if (field) field.value = value !== null ? value : '';
+                }
+            }
+        } else {
+            console.error('No valid JSON response found.');
+        }
+        */
+    });
+
+    input.click();
 
 }
 
@@ -516,33 +823,67 @@ function extractJsonAfterResponse(text) {
 function extractCleanJson(text) {
     console.log("Extracting clean JSON from text:", text);
 
-    // Try to isolate the part after "response:"
-    const responseStart = text.toLowerCase().indexOf("{");
-    let raw = responseStart !== -1 ? text.slice(responseStart).trim() : text.trim();
+    const responseMatch = text.match(/response\s*:\s*([\s\S]*)/i);
+    if (!responseMatch) {
+        console.warn("No 'response:' found in text.");
+        return null;
+    }
 
-    // Add missing braces if necessary
-    if (!raw.startsWith('{')) raw = '{' + raw;
-    if (!raw.endsWith('}')) raw = raw + '}';
 
-    console.log("Raw JSON string to parse:", raw);
+    let raw = responseMatch[1].trim();
+    console.log("Raw JSON text found:", raw);
 
-    // Try to fix common formatting issues
-    let cleaned = raw
-        .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":') // wrap keys in double quotes
-        .replace(/'/g, '"'); // replace single quotes with double quotes
+    // Try to detect if it's an object or array
+    const isArray = raw.startsWith('[');
+    const isObject = raw.startsWith('{');
+
+    if (!isArray && !isObject) {
+        // Try to fix missing brackets
+        if (raw.includes('{') && raw.includes('}')) {
+            raw = '[' + raw + ']';
+        } else {
+            console.warn("Cannot determine if it's an object or array.");
+            return null;
+        }
+    }
+
+    const firstBracket = raw.indexOf('[');
+    const lastBracket = raw.lastIndexOf(']');
+
+    if (firstBracket === -1 || lastBracket === -1 || firstBracket >= lastBracket) {
+        console.warn("No valid JSON array found in text.");
+        return null;
+    }
+
+    const jsonArrayText = raw.slice(firstBracket, lastBracket + 1).trim();
+
+    // Clean up common issues
+    let fixed = escapeBrokenQuotes(jsonArrayText);
+
+    console.log("Cleaned JSON text:", fixed);
 
     try {
-        const deduped = removeDuplicateKeys(cleaned);
-        console.log("Deduplicated JSON string:", deduped);
-        //const parsed = JSON.parse(deduped);
-
-        //console.log("Successfully parsed JSON:", parsed);
-        return deduped;
+        const parsed = JSON.parse(fixed);
+        console.log("Parsed JSON successfully:", parsed);
+        return parsed;
     } catch (err) {
-        console.error("Still failed to parse cleaned JSON:", err.message);
+        console.error("JSON parse failed:", err.message);
         return null;
     }
 }
+
+function escapeBrokenQuotes(json) {
+    return json.replace(/"(.*?)":\s*"([^"]*?)"([^,}\]])/g, (match, key, value, tail) => {
+        // Check for inner unescaped quotes in value
+        if (value.includes('"')) {
+            const fixedValue = value.replace(/"/g, '\\"');
+            return `"${key}": "${fixedValue}"${tail}`;
+        }
+        return match;
+    });
+}
+
+
 
 function removeDuplicateKeys(rawText) {
     const deduped = {};
@@ -569,7 +910,12 @@ function removeDuplicateKeys(rawText) {
     return deduped;
 }
 
+async function askAi(promptText) {
 
+    //always use askAi so if we change the AI service we only need to change it here
+    return askGroq(promptText);
+
+}
 
 async function askLmStudio(promptText) {
     const loader = document.getElementById('loader');
@@ -602,6 +948,9 @@ async function askLmStudio(promptText) {
 }
 
 async function askGroq(promptText) {
+    const loader = document.getElementById('loader');
+    // show the loader
+    loader.style.display = 'block';
     const response = await fetch("/api/ask-groq", {
         method: "POST",
         headers: {
@@ -622,6 +971,7 @@ async function askGroq(promptText) {
     });
 
     const data = await response.json();
+    loader.style.display = 'none';
     return data.choices?.[0]?.message?.content || "No response";
 }
 
