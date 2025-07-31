@@ -1224,97 +1224,53 @@ function actionPreviousButton(disabled) {
 
 function actionNextButton(disabled) {
   const nextButton = document.querySelector("[name=NextDSBtn]");
-  if (nextButton) {
-    nextButton.disabled = disabled;
-  }
-  if (disabled) {
-    nextButton.classList.add("disabled");
-  } else {
-    nextButton.classList.remove("disabled");
-  }
+  helperAction(disabled, nextButton);
 }
 
 function actionEditButton(disabled) {
   const editButton = document.querySelector("[name=EditDSBtn]");
-  if (editButton) {
-    editButton.disabled = disabled;
-  }
-  if (disabled) {
-    editButton.classList.add("disabled");
-  } else {
-    editButton.classList.remove("disabled");
-  }
+  helperAction(disabled, editButton);
 }
 
 function actionInsertButton(disabled) {
   const insertButton = document.querySelector("[name=InsertDSBtn]");
-  if (insertButton) {
-    insertButton.disabled = disabled;
-  }
-  if (disabled) {
-    insertButton.classList.add("disabled");
-  } else {
-    insertButton.classList.remove("disabled");
-  }
+  helperAction(disabled, insertButton);
 }
 
 function actionCopyButton(disabled) {
   const copyButton = document.querySelector("[name=CopyDSBtn]");
-  if (copyButton) {
-    copyButton.disabled = disabled;
-  }
-  if (disabled) {
-    copyButton.classList.add("disabled");
-  } else {
-    copyButton.classList.remove("disabled");
-  }
+  helperAction(disabled, copyButton);
 }
 
 function actionSaveButton(disabled) {
   const saveButton = document.querySelector("[name=SaveDSBtn]");
-  if (saveButton) {
-    saveButton.disabled = disabled;
-  }
-  if (disabled) {
-    saveButton.classList.add("disabled");
-  } else {
-    saveButton.classList.remove("disabled");
-  }
+  helperAction(disabled, saveButton);
+
 }
 
 function actionCancelButton(disabled) {
   const cancelButton = document.querySelector("[name=CancelDSBtn]");
-  if (cancelButton) {
-    cancelButton.disabled = disabled;
-  }
-  if (disabled) {
-    cancelButton.classList.add("disabled");
-  } else {
-    cancelButton.classList.remove("disabled");
-  }
+  helperAction(disabled, cancelButton);
 }
 
 function actionDeleteButton(disabled) {
   const deleteButton = document.querySelector("[name=DeleteDSBtn]");
-  if (deleteButton) {
-    deleteButton.disabled = disabled;
-  }
-  if (disabled) {
-    deleteButton.classList.add("disabled");
-  } else {
-    deleteButton.classList.remove("disabled");
-  }
+  helperAction(disabled, deleteButton);
 }
 
 function actionSaveAllButton(disabled) {
   const saveAllButton = document.querySelector("[name=SaveAllDSBtn]");
-  if (saveAllButton) {
-    saveAllButton.disabled = disabled;
-  }
-  if (disabled) {
-    saveAllButton.classList.add("disabled");
-  } else {
-    saveAllButton.classList.remove("disabled");
+  helperAction(disabled, saveAllButton);
+}
+
+function helperAction(disabled, button) {
+  if (button) {
+    button.disabled = disabled;
+    if (disabled) {
+      button.classList.add("disabled");
+    } else {
+      button.classList.remove("disabled");
+    }
   }
 }
 
