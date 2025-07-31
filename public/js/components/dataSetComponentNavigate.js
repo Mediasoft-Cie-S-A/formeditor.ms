@@ -16,8 +16,6 @@
  */
 
 
-let originalParentDiv = null;
-
 
 function createDataSetComponentNavigate(type) {
   var main = document.createElement("div");
@@ -408,7 +406,6 @@ function copyIntoModal() {
   modalContent.innerHTML = '';
   // set in parentDiv the id of original parent and next sibling
 
-  originalParentDiv = parentDiv.parentElement;
 
   modalContent.appendChild(parentDiv);
 
@@ -539,7 +536,6 @@ function loadBigModalWithJson(jsonResponse) {
   modalContent.innerHTML = '';
   // set in parentDiv the id of original parent and next sibling
 
-  //originalParentDiv = parentDiv.parentElement;
 
   modalContent.appendChild(parentDiv);
 
