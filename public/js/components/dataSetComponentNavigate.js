@@ -817,8 +817,6 @@ async function navbar_SaveRecord() {
         enableSaveButton(); // re-enable if error
         return;
       }
-
-
     }
 
     navbar_CancelEdit();
@@ -916,13 +914,11 @@ function isSaveButtonDisabled() {
 }
 
 function disableSaveButton() {
-  const btn = document.querySelector("[name=SaveDSBtn]");
-  if (btn) btn.disabled = true;
+  actionSaveButton(true);
 }
 
 function enableSaveButton() {
-  const btn = document.querySelector("[name=SaveDSBtn]");
-  if (btn) btn.disabled = false;
+  actionSaveButton(false);
 }
 
 function getActiveModalRowIds(modal = document) {
@@ -937,11 +933,14 @@ function collectFieldElements(rowElement) {
 }
 
 function validateFields(fields) {
+  console.log("Validating fields:", fields);
   let hasError = false;
   for (const field of fields) {
     const fieldName = field.getAttribute("dataset-field-name");
     const regexRule = field.getAttribute("validation");
     const value = field.value?.trim();
+
+    console.log(`Validating field: ${fieldName}, Value: ${value}, Regex: ${regexRule}`);
 
     if (!fieldName || !value) continue;
     if (!regexRule || regexRule === "undefined") continue;

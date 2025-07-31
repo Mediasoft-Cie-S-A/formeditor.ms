@@ -475,6 +475,8 @@ class dblayer {
           db.getRecordByRowID(tableName, fields, rowID).then(data => {
             // Convert BigInt to int or string
             const convertedData = this.convertBigIntToInt(data);
+            console.log("get-record-by-rowid");
+            console.log(convertedData);
             res.json(convertedData);
           });
 
