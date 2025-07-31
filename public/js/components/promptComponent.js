@@ -61,16 +61,14 @@ function renderPromptComponent(element) {
                         <input type="file" id="file-upload" />
                         </label>
                     </div>
-                        <button onclick="handlesFileUpload(event)" title="Upload File">📎</button>
+                        <button onclick="handleBigDocument(event)" title="Upload File">📎</button>
                         <button onclick="handleFill(event)" title="Fill">✨</button>
-                        <button onclick="handleOCR(event)" title="OCR">📄</button>
                         <button 
                             onmousedown="startVoice()" 
                             onmouseup="stopVoice()" 
                             onmouseleave="stopVoice()" 
                             title="Voice: Hold to Speak"
                         >🎤</button>
-                        <button onclick="handleBigDocument(event)" title="Handle Big Document">📚</button>
                         <button  onclick="callAIService(event)" title="Send to AI">🤖</button>
                         <img src="img/loader.gif" id="loader" style="display: none; width: 80px; height: 40px;" alt="Loading...">
                     </div>
