@@ -69,7 +69,7 @@ function renderPromptComponent(element) {
                             onmouseleave="stopVoice()" 
                             title="Voice: Hold to Speak"
                         >🎤</button>
-                        <button  onclick="callAIService(event)" title="Send to AI">🤖</button>
+                        <button  onclick="handleAiButton(event)" title="Send to AI">🤖</button>
                         <img src="img/loader.gif" id="loader" style="display: none; width: 80px; height: 40px;" alt="Loading...">
                     </div>
                     </div> `;
@@ -144,13 +144,13 @@ function displayAnswer(event, answer) {
     parent.appendChild(responseElement);
 }
 
-function callAIService(event) {
+function handleAiButton(event) {
     event.preventDefault();
     // get the prompt text and button text
     const promptText = document.getElementById('PromptText');
 
     // call the AI service with the prompt text
-    askGroq(promptText.value).then(responseText => {
+    askAi(promptText.value).then(responseText => {
         // handle the response from the AI service
         console.log("AI response : ", responseText);
         displayAnswer(event, `<strong>AI Response:</strong> ${responseText}`);
@@ -161,217 +161,7 @@ function callAIService(event) {
 
 }
 
-/*
-let uploadedPDF = null;
-async function handlesFileUpload(event) {
-    event.preventDefault();
-    console.log("File upload button clicked");
 
-    const formFields = document.querySelectorAll('[dataset-field-name]');
-
-    const fieldInfo = Array.from(formFields).map(field => {
-        const name = field.getAttribute('dataset-field-name');
-        const desc = field.getAttribute('dataset-description') || '';
-        return { name, desc };
-    });
-
-    const fieldNames = fieldInfo.map(f => f.name).join(', ');
-
-    const fieldDescriptions = fieldInfo
-        .map(f => `- ${f.name}: ${f.desc || '(no description provided)'}`)
-        .join('\n');
-
-    console.log("Field Names:", fieldNames);
-    console.log("Field Descriptions:", fieldDescriptions);
-    console.log("Field Infos : ", fieldInfo);
-
-
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'application/pdf,image/png,image/jpeg,image/jpg,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-    input.style.display = 'none';
-
-    input.addEventListener('change', async (event2) => {
-        const file = event2.target.files[0];
-
-        if (!file) {
-            console.log('No file selected.');
-            return;
-        }
-
-        const mime = file.type;
-
-        let cleanedText = '';
-        uploadedPDF = file;
-
-        if (mime === 'application/pdf') {
-            console.log(`PDF "${file.name}" uploaded. Extracting text...`);
-            const arrayBuffer = await file.arrayBuffer();
-        
-            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-            let fullText = '';
-
-            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-                const page = await pdf.getPage(pageNum);
-                const content = await page.getTextContent();
-                const text = content.items.map(item => item.str).join(' ');
-
-                if (text.trim().length > 30) {
-                    // Page has real text
-                    fullText += `\n\n--- Page ${pageNum} ---\n\n` + text;
-                } else {
-                    // Text too short — probably scanned. Run OCR instead.
-                    console.warn(`Page ${pageNum} has little/no text. Running OCR...`);
-                    const viewport = page.getViewport({ scale: 2 }); // scale for better OCR
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    canvas.width = viewport.width;
-                    canvas.height = viewport.height;
-
-                    const renderTask = page.render({ canvasContext: context, viewport });
-                    await renderTask.promise;
-
-                    const dataUrl = canvas.toDataURL(); // image for OCR
-
-                    const result = await Tesseract.recognize(dataUrl, 'eng', {
-                        logger: m => {
-                            if (m.status === 'recognizing text') {
-                                const percent = Math.floor(m.progress * 100);
-                                displayAnswer(event, `<strong>OCR Page ${pageNum}:</strong> ${percent}%`);
-                            }
-                        },
-                    });
-
-                    fullText += `\n\n--- OCR Page ${pageNum} ---\n\n` + result.data.text;
-                }
-            }
-
-            cleanedText = cleanExtractedText(fullText);
-            console.log("Final Extracted Text (OCR+PDF):", cleanedText);
-
-
-        } else if (mime.startsWith('image/')) {
-            console.log(`Image "${file.name}" uploaded. Running OCR...`);
-
-            const imageURL = URL.createObjectURL(file);
-
-            const result = await Tesseract.recognize(imageURL, 'eng', {
-                logger: m => {
-                    console.log(m); // progress updates
-                    if (m.status === 'recognizing text') {
-                        const percent = Math.floor(m.progress * 100);
-                        displayAnswer(event, `<strong>OCR Progress:</strong> ${percent}%`);
-                    } else if (m.status) {
-                        displayAnswer(event, `<strong>OCR Status:</strong> ${m.status}`);
-                    }
-                }
-            });
-
-            const rawText = result.data.text;
-            cleanedText = cleanExtractedText(rawText);
-
-            console.log("Cleaned OCR Text:", cleanedText);
-
-        } else if (mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-            uploadedPDF = file; // still reusing the same variable
-
-            console.log(`Word document "${file.name}" uploaded. Extracting text...`);
-
-            const arrayBuffer = await file.arrayBuffer();
-            const result = await mammoth.extractRawText({ arrayBuffer });
-
-            const rawText = result.value;
-            cleanedText = cleanExtractedText(rawText);
-
-            console.log("Cleaned DOCX Text:", cleanedText);
-
-            uploadedPDF.cleanedText = cleanedText;
-        } else {
-            console.warn("Unsupported file type:", mime);
-            return;
-        }
-
-        uploadedPDF.cleanedText = cleanedText;
-
-        const prompt = `
-            From the following extracted document text (from a PDF or scanned file):
-            === INPUT TEXT ===
-            """
-            ${cleanedText}
-            """
-
-            Try to fill in the following fields with values inferred from the text:
-
-            === FIELD DESCRIPTIONS ===
-            ${fieldDescriptions}
-
-            === RESPONSE FORMAT ===
-
-            Guidelines:
-            - The text may contain OCR errors, bad formatting, or missing labels — infer values where possible.
-            - Use known data formats (e.g., SWIFT codes, IBANs, addresses) to guide your matching.
-            - Do not guess blindly — only assign a value if it's reasonably clear.
-            - If no reliable value is found for a field, set it to null.
-
-            Output Format:
-            - The response must begin with exactly: response: {
-            - The response must end with exactly: }
-            - All field names must be quoted. All string values must be in double quotes.
-            - Do not add any comments, extra text, or explanations outside the JSON.
-            - Ensure the JSON is valid and machine-readable.
-            - Include all requested fields, even if null.
-            - Do not include any explanation or text outside the JSON.
-
-            Field Hints:
-            - cler: Clearing number, usually a short numeric code (e.g. 3-5 digits)
-            - des1: Small designation of the address , often a short label or acronym
-            - des2: NPA + location (short)
-            - ibswift: International SWIFT/BIC code, usually 8 or 11 uppercase letters (e.g. SNBZCHZZXXX)
-            - liba: Bank label or short bank name, e.g. "SNB", "UBS", etc.
-            - lieu: City or location name (e.g. "Zürich")
-            - nccp: Account type or code, usually numeric (e.g. "1", "2")
-            - noba: Bank number, often 3-6 digits or alphanumeric (e.g. "100", "X123")
-            - nom1 / nom2 / nom3: Name lines for a bank or company (e.g. legal name)
-            - rowid: Row ID in the system, you don't need to generate that, it will be generated by the system
-
-            Now complete the JSON response below.
-            response:
-            `;
-
-        askGroq(prompt).then(responseText => {
-            // handle the response from the AI service
-            console.log("AI response : ", responseText);
-            displayAnswer(event, `<strong>AI Response:</strong> ${responseText}`);
-
-            const jsonResponse = extractCleanJson(responseText);
-            console.log('JSON Response:', jsonResponse);
-
-            if (jsonResponse) {
-                // Update the form fields with the values from the JSON response
-                for (const [key, value] of Object.entries(jsonResponse)) {
-                    if (key !== "rowid") { // Skip rowid as it is handled by the system
-                        const field = document.querySelector(`[dataset-field-name="${key}"]`);
-                        if (field) {
-                            field.value = value !== null ? value : '';
-                        }
-                    }
-                }
-            } else {
-                console.error('No valid JSON response found.');
-            }
-
-        }).catch(error => {
-            console.error('Error:', error);
-            const errorElement = document.createElement('div');
-            errorElement.innerHTML = `<strong>Error:</strong> ${error.message}`;
-            event.target.parentElement.appendChild(errorElement);
-        });
-
-    });
-
-    input.click();
-}
-*/
 
 async function handlesFileUpload(event) {
     event.preventDefault();
@@ -450,7 +240,7 @@ async function handlesFileUpload(event) {
             response:
             `;
 
-        const responseText = await askGroq(prompt);
+        const responseText = await asdkAI(prompt);
         displayAnswer(event, `<strong>AI Response:</strong> ${responseText}`);
 
         const jsonResponse = extractCleanJson(responseText);
@@ -699,7 +489,7 @@ function handleFill(event) {
     `;
 
 
-    askGroq(prompt).then(responseText => {
+    askAi(prompt).then(responseText => {
         // handle the response from the AI service
 
 
@@ -870,7 +660,7 @@ function handleBigDocument(event) {
                 `;
 
 
-        const responseText = await askGroq(prompt);
+        const responseText = await askAi(prompt);
         displayAnswer(event, `<strong>AI Response:</strong> ${responseText}`);
         console.log(responseText);
 
@@ -1148,6 +938,12 @@ function removeDuplicateKeys(rawText) {
     return deduped;
 }
 
+async function askAi(promptText) {
+
+    //always use askAi so if we change the AI service we only need to change it here
+    return askGroq(promptText);
+
+}
 
 
 async function askLmStudio(promptText) {
