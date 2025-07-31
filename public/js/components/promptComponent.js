@@ -150,8 +150,9 @@ function callAIService(event) {
     const promptText = document.getElementById('PromptText');
 
     // call the AI service with the prompt text
-    fetchAIResponse(promptText.value).then(responseText => {
+    askGroq(promptText.value).then(responseText => {
         // handle the response from the AI service
+        console.log("AI response : ", responseText);
         displayAnswer(event, `<strong>AI Response:</strong> ${responseText}`);
     }).catch(error => {
         console.error('Error:', error);
