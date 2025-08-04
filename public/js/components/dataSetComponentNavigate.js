@@ -950,13 +950,13 @@ async function validateFields(fields) {
     validation = "This field must contain 4 numbers a space and then only letters"
     validation = "The field must contain exactly 4 digits, followed by a single space, followed by one or more letters (city name). No punctuation or special characters are allowed."
     console.log(`Validating field: ${fieldName}, Value: ${value}, Regex: ${regexRule}  Validation: ${validation}`);
-
+    validation = "Format: 4 digits, 1 space, then letters only (city name). No punctuation or special characters.";
 
 
 
     if (!fieldName || !value) continue;
 
-    const prompt = `
+    let prompt = `
       You are a smart validation assistant.
 
       Here is a rule: "${validation}"
@@ -966,6 +966,51 @@ async function validateFields(fields) {
       If it is invalid, respond with a short and clear error message explaining why.
       Do not include any extra explanation.
     `.trim();
+
+    prompt = `
+      You are a precise and strict validation assistant.
+
+      Your task is to check whether a given input follows a specific validation rule.
+
+      Validation Rule:
+      "${validation}"
+
+      User Input:
+      "${value}"
+
+      Respond only with:
+      - VALID → if the input fully satisfies the rule.
+      - A short, clear error message → if the input violates the rule in any way.
+
+      Rules to follow:
+      - Do not assume or guess the user’s intent.
+      - Do not correct or interpret input.
+      - Be strict. If any part of the rule is not followed exactly, respond with an error message.
+      - Do not add explanations or extra output beyond VALID or the message.
+    `.trim();
+
+
+    prompt = `
+      You are a strict input validation assistant. 
+
+      Your task is to check whether a user input matches the validation format exactly.
+
+      Validation Format:
+      "${validation}"
+
+      User Input:
+      "${value}"
+
+      Respond ONLY with:
+      - VALID → if the input matches the format exactly.
+      - A short error message → if it does not match.
+
+      Guidelines:
+      - Be literal and strict.
+      - Do not infer or guess meaning.
+      - Do not suggest corrections.
+      - Do not explain. Only return "VALID" or the error message.
+  `.trim();
 
 
     console.log("Prompt for AI validation:", prompt);
