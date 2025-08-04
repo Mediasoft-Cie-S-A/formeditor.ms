@@ -948,6 +948,7 @@ async function validateFields(fields) {
 
 
     validation = "This field must contain 4 numbers a space and then only letters"
+    validation = "The field must contain exactly 4 digits, followed by a single space, followed by one or more letters (city name). No punctuation or special characters are allowed."
     console.log(`Validating field: ${fieldName}, Value: ${value}, Regex: ${regexRule}  Validation: ${validation}`);
 
 
