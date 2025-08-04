@@ -974,6 +974,7 @@ async function validateFields(fields) {
 
     if (response.trim().toUpperCase() === "VALID") {
       console.log("✅ Field is valid");
+      field.style.border = "";
     } else {
       console.log("❌ Validation error:", response);
       hasError = true;
