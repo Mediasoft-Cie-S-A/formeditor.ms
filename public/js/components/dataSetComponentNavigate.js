@@ -941,8 +941,13 @@ async function validateFields(fields) {
     const value = field.value?.trim();
     let validation = field.getAttribute("validation");
 
+    const existingError = field.parentElement.querySelector(".validation-error");
+    if (existingError) {
+      existingError.remove();
+    }
 
-    validation = "This field must contain 4 letters and then only letters"
+
+    validation = "This field must contain 4 numbers a space and then only letters"
     console.log(`Validating field: ${fieldName}, Value: ${value}, Regex: ${regexRule}  Validation: ${validation}`);
 
 
@@ -961,9 +966,30 @@ async function validateFields(fields) {
       Do not include any extra explanation.
     `.trim();
 
-    const response = await callAiService(prompt);
-    console.log("AI Validation Response:", response);
 
+    console.log("Prompt for AI validation:", prompt);
+
+    const response = await askAi(prompt);
+
+    if (response.trim().toUpperCase() === "VALID") {
+      console.log("✅ Field is valid");
+    } else {
+      console.log("❌ Validation error:", response);
+      hasError = true;
+      field.style.border = "2px solid red";
+
+
+      const errorDiv = document.createElement("div");
+      errorDiv.className = "validation-error";
+      errorDiv.style.color = "red";
+      errorDiv.style.fontSize = "0.8em";
+      errorDiv.style.marginTop = "4px";
+      errorDiv.textContent = response;
+
+      field.parentElement.appendChild(errorDiv);
+    }
+
+    /*
     if (!regexRule || regexRule === "undefined") continue;
 
     console.log(`Field: ${fieldName}, Value: ${value}, Regex: ${regexRule}`);
@@ -979,6 +1005,7 @@ async function validateFields(fields) {
       console.log(`Validation passed for field: ${field.getAttribute("dataset-field-name")}`);
       field.style.border = "";
     }
+      */
   }
 
   return !hasError;
@@ -991,7 +1018,7 @@ async function prepareAndSaveRecord(rowIdElement) {
   const divLine = rowIdElement.closest("[tagname='dataSet']");
   const fields = collectFieldElements(rowIdElement);
 
-  const isValid = validateFields(fields);
+  const isValid = await validateFields(fields);
   if (!isValid) {
     showToast("Validation error, please fix the highlighted fields.");
     return false;
