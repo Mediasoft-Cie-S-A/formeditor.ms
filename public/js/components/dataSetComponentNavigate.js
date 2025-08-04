@@ -932,19 +932,41 @@ function collectFieldElements(rowElement) {
   return divLine ? divLine.querySelectorAll("input,select") : [];
 }
 
-function validateFields(fields) {
+async function validateFields(fields) {
   console.log("Validating fields:", fields);
   let hasError = false;
   for (const field of fields) {
     const fieldName = field.getAttribute("dataset-field-name");
-    const regexRule = field.getAttribute("validation");
+    let regexRule = field.getAttribute("validation");
     const value = field.value?.trim();
+    let validation = field.getAttribute("validation");
 
-    console.log(`Validating field: ${fieldName}, Value: ${value}, Regex: ${regexRule}`);
+
+    validation = "This field must contain 4 letters and then only letters"
+    console.log(`Validating field: ${fieldName}, Value: ${value}, Regex: ${regexRule}  Validation: ${validation}`);
+
+
+
 
     if (!fieldName || !value) continue;
+
+    const prompt = `
+      You are a smart validation assistant.
+
+      Here is a rule: "${validation}"
+      And here is the user input: "${value}"
+
+      If the input is valid, respond with: VALID
+      If it is invalid, respond with a short and clear error message explaining why.
+      Do not include any extra explanation.
+    `.trim();
+
+    const response = await callAiService(prompt);
+    console.log("AI Validation Response:", response);
+
     if (!regexRule || regexRule === "undefined") continue;
 
+    console.log(`Field: ${fieldName}, Value: ${value}, Regex: ${regexRule}`);
     const regex = new RegExp(regexRule);
     const isValid = regex.test(value);
 
@@ -954,6 +976,7 @@ function validateFields(fields) {
       hasError = true;
       field.style.border = "2px solid red";
     } else {
+      console.log(`Validation passed for field: ${field.getAttribute("dataset-field-name")}`);
       field.style.border = "";
     }
   }
