@@ -1044,6 +1044,9 @@ async function validateFields(fields) {
     if (response.trim().toUpperCase() === "VALID") {
       console.log("✅ Field is valid");
 
+      // Passed AI and (if present) regex validation
+      field.style.border = "";
+
       // Run regex validation only if regexRule exists
       if (regexRule && regexRule !== "undefined") {
         const regex = new RegExp(regexRule);
@@ -1065,11 +1068,6 @@ async function validateFields(fields) {
         }
       }
 
-      // Passed AI and (if present) regex validation
-      field.style.border = "";
-
-
-      field.style.border = "";
     } else {
       console.log("❌ Validation error:", response);
       hasError = true;
