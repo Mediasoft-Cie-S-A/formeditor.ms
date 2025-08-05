@@ -953,6 +953,8 @@ async function validateFields(fields) {
     validation = "Format: 4 digits, 1 space, then letters only (city name). No punctuation or special characters.";
 
 
+    regexRule = "^\\d{4} [a-zA-Z]+$"; // Example regex for 4 digits, space, then letters only
+
 
     if (!fieldName) continue;
 
@@ -1041,6 +1043,32 @@ async function validateFields(fields) {
 
     if (response.trim().toUpperCase() === "VALID") {
       console.log("✅ Field is valid");
+
+      // Run regex validation only if regexRule exists
+      if (regexRule && regexRule !== "undefined") {
+        const regex = new RegExp(regexRule);
+        const isValid = regex.test(value);
+
+        if (!isValid) {
+          console.log(`❌ Regex validation failed for field: ${fieldName}`);
+          hasError = true;
+          field.style.border = "2px solid red";
+
+          const errorDiv = document.createElement("div");
+          errorDiv.className = "validation-error";
+          errorDiv.style.color = "red";
+          errorDiv.style.fontSize = "0.8em";
+          errorDiv.style.marginTop = "4px";
+          errorDiv.textContent = `Input does not match required format: ${regexRule}`;
+
+          field.parentElement.appendChild(errorDiv);
+        }
+      }
+
+      // Passed AI and (if present) regex validation
+      field.style.border = "";
+
+
       field.style.border = "";
     } else {
       console.log("❌ Validation error:", response);
