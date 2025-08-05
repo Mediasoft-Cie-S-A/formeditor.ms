@@ -954,7 +954,7 @@ async function validateFields(fields) {
 
 
 
-    if (!fieldName || !value) continue;
+    if (!fieldName) continue;
 
     let prompt = `
       You are a smart validation assistant.
