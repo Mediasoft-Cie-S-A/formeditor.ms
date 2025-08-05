@@ -1006,11 +1006,33 @@ async function validateFields(fields) {
       - A short error message → if it does not match.
 
       Guidelines:
-      - Be literal and strict.
       - Do not infer or guess meaning.
       - Do not suggest corrections.
       - Do not explain. Only return "VALID" or the error message.
-  `.trim();
+    `.trim();
+
+    prompt = `
+      You are an input format validation assistant.
+
+      Your task is to determine whether the user's input matches the specified validation format.
+
+      Validation Format:
+      "${validation}"
+
+      User Input:
+      "${value}"
+
+      Respond ONLY with:
+      - VALID → if the input conforms to the validation format.
+      - A short error message → if the input does not conform.
+
+      Rules:
+      - Do not assume typos or guess intent.
+      - Do not suggest corrections.
+      - Do not explain.
+      - Prioritize avoiding false positives: if unsure, return VALID.
+    `.trim();
+
 
 
     console.log("Prompt for AI validation:", prompt);
