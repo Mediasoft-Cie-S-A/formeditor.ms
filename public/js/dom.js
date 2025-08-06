@@ -211,6 +211,68 @@ function exportJson() {
   downloadAnchorNode.remove();
 }
 
+function promptCreateForm() {
+
+
+  loadJson("/elementsConfig")
+    .then(async (data) => {
+
+      const userInput = prompt("Describe the form you want to create:");
+
+      if (!userInput) {
+        return; // User cancelled or input is empty
+      }
+
+      let aiPrompt = `
+        You are a form generation assistant.
+
+        Based on the user's request, generate a form structure in JSON or HTML format.
+
+        Request:
+        "${userInput}"
+      `.trim();
+
+      aiPrompt = `
+        You are a form generation assistant.
+
+        You have access to a predefined list of UI components. Based on the user's request, generate the corresponding form element(s) using the JSON structure provided below.
+
+        Only use components from the following list, and match their properties:
+
+        === Component Definitions ===
+        ${JSON.stringify(data, null, 2)}
+        =============================
+
+        User Request:
+        "${userInput}"
+
+        Respond ONLY with valid JSON that matches the structure of one or more components from the list above.
+
+        Do not explain, comment, or include any other text — just return JSON.
+      `.trim();
+
+
+      console.log("AI Prompt:", aiPrompt);
+
+
+      try {
+        const response = await askAi(aiPrompt);
+        console.log("AI Response:", response);
+
+        // You can display or inject the result here
+        // alert("AI Response:\n" + response);
+      } catch (err) {
+        console.error("Error communicating with AI:", err);
+        alert("An error occurred while generating the form.");
+      }
+    })
+    .catch((err) => {
+      console.error("Error loading elementsConfig:", err);
+      alert("Failed to load form components.");
+    });
+}
+
+
 // Function to handle tab switch
 function onTabSwitch(event) {
   var target = event.target.getAttribute("href");
