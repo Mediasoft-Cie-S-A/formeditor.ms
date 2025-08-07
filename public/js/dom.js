@@ -217,6 +217,18 @@ function promptCreateForm() {
   loadJson("/elementsConfig")
     .then(async (data) => {
 
+
+      const minimalData = Object.entries(data).map(([key, comp]) => ({
+        name: key,
+        type: comp.type,
+        description: comp.description,
+        category: comp.category,
+        props: comp.props ? Object.keys(comp.props) : []
+      }));
+
+
+      console.log("Minimal Data:", minimalData);
+
       const userInput = prompt("Describe the form you want to create:");
 
       if (!userInput) {
@@ -240,7 +252,7 @@ function promptCreateForm() {
         Only use components from the following list, and match their properties:
 
         === Component Definitions ===
-        ${JSON.stringify(data, null, 2)}
+        ${JSON.stringify(minimalData, null, 2)}
         =============================
 
         User Request:
