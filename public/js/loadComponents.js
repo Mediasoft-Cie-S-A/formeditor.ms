@@ -234,6 +234,7 @@ function createSidebar(elementsData, components) {
       //   event.dataTransfer.setData("text", id); // Optionally, set the ID separately
       // });
       itemDiv.addEventListener("dragstart", function (event) {
+        console.log("Drag started for element:", elementData.type);
         const data = {
           id: this.id,
           type: this.id,
@@ -370,6 +371,8 @@ function drag(event) {
 function drop(event) {
   event.preventDefault();
 
+  console.log("Drop event triggered");
+
   const elementId = event.dataTransfer.getData("text");
   const formDataString = event.dataTransfer.getData("text/plain");
 
@@ -384,11 +387,15 @@ function drop(event) {
     console.error("Error parsing formData:", e);
   }
   if (!formData || formData?.data == "undefined") {
+    console.log("No formData found, creating element with ID:", elementId);
     createAndAppendElement(event);
   } else {
     try {
       parsedData = JSON.parse(formData.data);
       const parentContainer = document.getElementById("formContainer");
+
+      console.log("Parsed Data:", parsedData);
+      console.log("Parent Container:", parentContainer);
 
       if (parentContainer) {
         jsonToDom(parsedData, parentContainer);
@@ -403,8 +410,12 @@ function drop(event) {
 
 function createAndAppendElement(event) {
   var elementId = event.dataTransfer.getData("text");
+  console.log("Creating new element with ID:", elementId);
   let parsedObject = JSON.parse(elementId);
+  console.log("Parsed Object:", parsedObject);
   var newElement = createFormElement(parsedObject.id);
+
+
   if (event.target.childElementCount) {
     newElement.setAttribute("position", event.target.childElementCount);
   }
@@ -435,12 +446,15 @@ async function loadJson(url) {
 }
 
 function createFormElement(elementId) {
+  console.log("Creating form element for ID:", elementId);
   var element = null;
 
   // Check if the elementId exists in elementsData
   if (!elementsData[elementId]) {
+    console.error("Element ID not found in elementsData:", elementId);
     return null;
   }
+  console.log("Creating form element for ID:", elementId);
   // Execute the function
   var functionName = elementsData[elementId].createFunction;
   if (typeof window[functionName] === "function") {

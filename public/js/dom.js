@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 // Function to create json from DOM
 function domToJson(element) {
   // Create an array to hold the JSON representation of the children
@@ -155,6 +156,8 @@ function renderElements(parent) {
 }
 // Function to create DOM element from JSON
 function createDomElement(json, parent) {
+  console.log("Creating DOM element from JSON:", json);
+
   if (json.tag) {
     // Create element for tag
     var element = document.createElement(json.tag);
@@ -271,6 +274,31 @@ function promptCreateForm() {
         const response = await askAi(aiPrompt);
         console.log("AI Response:", response);
 
+        // Handle single or multiple components
+        const components = Array.isArray(response) ? response : [response];
+
+        // Load full component definitions
+        const fullComponentDefs = data; // this is your elementsConfig
+
+        const formContainer = document.getElementById("formContainer");
+
+        components.forEach((comp) => {
+          try {
+            const enriched = enrichComponent(JSON.parse(comp), fullComponentDefs);
+            console.log("Enriched Component:", enriched);
+            console.log("Form Container:", formContainer);
+            //createDomElement(enriched, formContainer);
+            const newElement = createFormElement(enriched.type);
+
+            if (newElement) {
+              formContainer.appendChild(newElement);
+            }
+
+          } catch (e) {
+            console.error("Component error:", e);
+          }
+        });
+
         // You can display or inject the result here
         // alert("AI Response:\n" + response);
       } catch (err) {
@@ -283,6 +311,38 @@ function promptCreateForm() {
       alert("Failed to load form components.");
     });
 }
+
+function enrichComponent(aiJson, fullComponentDefs) {
+  const type = aiJson.type;
+  const baseDef = fullComponentDefs[type] || Object.values(fullComponentDefs).find(def => def.type === type);
+
+  console.log("type:", type);
+  console.log("Base Definition:", baseDef);
+  console.log("AI JSON:", aiJson);
+  console.log("Available types:", Object.keys(fullComponentDefs)); // See if "inputField" is really there
+
+  if (!baseDef) {
+    throw new Error(`Unknown component type: ${type}`);
+  }
+
+  // Fix invalid props from AI
+  if (!aiJson.props || typeof aiJson.props !== "object" || Array.isArray(aiJson.props)) {
+    aiJson.props = {};
+  }
+
+  // Merge AI-provided properties with the defaults
+  const merged = {
+    ...baseDef,
+    props: {
+      ...baseDef.props,
+      ...aiJson.props // AI may provide overrides
+    }
+  };
+
+  return merged;
+}
+
+
 
 
 // Function to handle tab switch
