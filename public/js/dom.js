@@ -275,7 +275,8 @@ function promptCreateForm() {
         console.log("AI Response:", response);
 
         // Handle single or multiple components
-        const components = Array.isArray(response) ? response : [response];
+        let components = JSON.parse(response);
+        components = Array.isArray(components) ? components : [components];
 
         // Load full component definitions
         const fullComponentDefs = data; // this is your elementsConfig
@@ -284,7 +285,7 @@ function promptCreateForm() {
 
         components.forEach((comp) => {
           try {
-            const enriched = enrichComponent(JSON.parse(comp), fullComponentDefs);
+            const enriched = enrichComponent(comp, fullComponentDefs);
             console.log("Enriched Component:", enriched);
             console.log("Form Container:", formContainer);
             //createDomElement(enriched, formContainer);
