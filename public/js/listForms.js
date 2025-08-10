@@ -72,8 +72,9 @@ function loadForms() {
                 editButton.innerHTML = '<i class="fa fa-edit" style="margin-left:-5px"></i>'
                 editButton.className = 'portal-edit-button';
                 editButton.onclick = function (event) {
-                    helperLoadContainer(event, form.objectId);
+
                     document.getElementById('renderContainer').innerHTML = ''; // Clear the render container
+                    loadFormData(form.objectId, document.getElementById('formContainer'), false);
                     const showTab = document.querySelector('.nav-tabs a[href="#editForm"]');
                     activeForm = form;
                     if (showTab) {
@@ -86,8 +87,9 @@ function loadForms() {
                 showButton.innerHTML = '<i class="fa fa-eye" style="margin-left:-5px"></i>'
                 showButton.className = 'portal-show-button';
                 showButton.onclick = function (event) {
-                    helperLoadContainer(event, form.objectId);
+
                     document.getElementById('formContainer').innerHTML = ''; // Clear the form container
+                    loadFormData(form.objectId, document.getElementById('renderContainer'), true);
                     const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
                     activeForm = form;
                     if (showTab) {
@@ -102,8 +104,8 @@ function loadForms() {
                 itemActions.appendChild(editButton);
                 itemActions.appendChild(deleteButton);
                 container.addEventListener('dblclick', function (event) {
-                    helperLoadContainer(event, form.objectId);
                     document.getElementById('renderContainer').innerHTML = ''; // Clear the render container
+                    loadFormData(form.objectId, document.getElementById('formContainer'), false);
                     const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
                     activeForm = form;
                     if (showTab) {
