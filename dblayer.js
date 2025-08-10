@@ -843,16 +843,17 @@ class dblayer {
 
 
           // Convert page and pageSize to numbers
-          const pageNum = parseInt(page, 10);
-          const pageSizeNum = parseInt(pageSize, 10);
-
+          const pageNum = parseInt(page);
+          const pageSizeNum = parseInt(pageSize);
+          const offset = (pageNum - 1) * pageSizeNum;
           const filter = req.query.filter ? req.query.filter : null;
 
           // decode the json filter              
           const filterObj = filter ? JSON.parse(filter) : null;
           // add limit to the query
           const limit = req.query.limit ? req.query.limit : null;
-          sqlQuery += ` FETCH FIRST ${pageSizeNum} ROWS ONLY`;
+
+          sqlQuery += ` OFFSET ${offset} ROWS FETCH NEXT ${pageSizeNum} ROWS ONLY`;
 
           // get data from the query
           db.queryData(sqlQuery).then(data => {

@@ -664,6 +664,7 @@ function navbar_EditRecord() {
   actionCancelButton(false);
 
   loadBigModalFromInputs();
+
 }
 
 function navbar_CancelEdit() {

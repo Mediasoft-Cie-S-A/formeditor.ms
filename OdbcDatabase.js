@@ -29,7 +29,7 @@ class OdbcDatabase {
       // Construct the SQL statement
       // if filter is not empty, add it to the query
 
-      var sql = `SELECT DISTINCT "${columnName}" FROM PUB.${tableName} `;
+      var sql = `SELECT DISTINCT "${columnName}" FROM PUB."${tableName}" `;
       if (filter && filter.length > 0) {
         sql += ` WHERE ${filter} `;
       }
@@ -53,7 +53,7 @@ class OdbcDatabase {
       // Construct the SQL statement
       // if filter is not empty, add it to the query
 
-      var sql = `SELECT DISTINCT "${columnId}","${columnName}" FROM PUB.${tableName} `;
+      var sql = `SELECT DISTINCT "${columnId}","${columnName}" FROM PUB."${tableName}" `;
       if (filter && filter.length > 0) {
         sql += ` WHERE ${filter} `;
       }
@@ -82,7 +82,7 @@ class OdbcDatabase {
       // Construct the SQL statement
       // if filter is not empty, add it to the query
 
-      var sql = `SELECT COUNT(*) FROM PUB.${tableName} `;
+      var sql = `SELECT COUNT(*) FROM PUB."${tableName}" `;
       if (filter && filter.length > 0) {
         sql += ` WHERE ${filter} `;
       }
@@ -338,7 +338,7 @@ class OdbcDatabase {
       query += "* ";
     }
 
-    query += `FROM PUB.${tableName} `;
+    query += `FROM PUB."${tableName}" `;
 
     if (filter) {
       query += `WHERE "${filter.column}" ${filter.operator} '${filter.value}' `;
@@ -367,7 +367,7 @@ class OdbcDatabase {
         .join(", ")
         .replace('"rowid"', "rowid");
     }
-    let query = `SELECT ${fieldList} FROM PUB.${tableName} `;
+    let query = `SELECT ${fieldList} FROM PUB."${tableName}" `;
     let whereClause = "";
     if (filter) {
       whereClause += `WHERE "${filter.column}" ${filter.operator} '${filter.value}' `;
@@ -387,7 +387,7 @@ class OdbcDatabase {
         .join(", ")
         .replace('"rowid"', "rowid");
     }
-    let query = `SELECT ${fieldList} FROM PUB.${tableName} `;
+    let query = `SELECT ${fieldList} FROM PUB."${tableName}" `;
     let whereClause = "";
     if (filter) {
       whereClause += `WHERE "${filter.column}" ${filter.operator} '${filter.value}' `;
@@ -420,7 +420,7 @@ class OdbcDatabase {
         .join(", ")
         .replace('"rowid"', "rowid");
     }
-    let query = `SELECT ${fieldList} FROM PUB.${tableName} `;
+    let query = `SELECT ${fieldList} FROM PUB."${tableName}" `;
     let whereClause = "";
     if (filter) {
       whereClause += `WHERE "${filter.column}" ${filter.operator} '${filter.value}' `;
@@ -442,7 +442,7 @@ class OdbcDatabase {
         .join(", ")
         .replace('"rowid"', "rowid");
       console.log(fieldList);
-      const query = `SELECT ${fieldList} FROM PUB.${tableName} WHERE ROWID = '${rowID}'`;
+      const query = `SELECT ${fieldList} FROM PUB."${tableName}" WHERE ROWID = '${rowID}'`;
       return this.queryData(query);
     }
     return null;
@@ -655,7 +655,7 @@ class OdbcDatabase {
       // Construct the SQL statement
       // if filter is not empty, add it to the query
 
-      var sql = `SELECT DISTINCT ${columnName} FROM PUB.${tableName} `;
+      var sql = `SELECT DISTINCT ${columnName} FROM PUB."${tableName}" `;
       if (filter && filter.length > 0) {
         sql += ` WHERE ${filter} `;
       }
@@ -679,7 +679,7 @@ class OdbcDatabase {
     try {
       // Construct the SQL statement
       const fieldList = fields.join(", ");
-      const sql = `SELECT ${fieldList} FROM PUB.${tableName}`;
+      const sql = `SELECT ${fieldList} FROM PUB."${tableName}"`;
       console.log(sql);
       // Execute the query
       const connection = await odbc.connect(this.connectionString);
@@ -719,7 +719,7 @@ class OdbcDatabase {
       query += "* ";
     }
 
-    query += `FROM PUB.${tableName} `;
+    query += `FROM PUB."${tableName}" `;
 
     if (filter) {
       query += `WHERE "${filter.column}" ${filter.operator} '${filter.value}' `;
