@@ -73,6 +73,7 @@ function loadForms() {
                 editButton.className = 'portal-edit-button';
                 editButton.onclick = function (event) {
                     helperLoadContainer(event, form.objectId);
+                    document.getElementById('renderContainer').innerHTML = ''; // Clear the render container
                     const showTab = document.querySelector('.nav-tabs a[href="#editForm"]');
                     activeForm = form;
                     if (showTab) {
@@ -86,6 +87,7 @@ function loadForms() {
                 showButton.className = 'portal-show-button';
                 showButton.onclick = function (event) {
                     helperLoadContainer(event, form.objectId);
+                    document.getElementById('formContainer').innerHTML = ''; // Clear the form container
                     const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
                     activeForm = form;
                     if (showTab) {
@@ -101,6 +103,7 @@ function loadForms() {
                 itemActions.appendChild(deleteButton);
                 container.addEventListener('dblclick', function (event) {
                     helperLoadContainer(event, form.objectId);
+                    document.getElementById('renderContainer').innerHTML = ''; // Clear the render container
                     const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
                     activeForm = form;
                     if (showTab) {
