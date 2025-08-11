@@ -73,8 +73,11 @@ function loadForms() {
                 editButton.className = 'portal-edit-button';
                 editButton.onclick = function (event) {
 
-                    document.getElementById('renderContainer').innerHTML = ''; // Clear the render container
-                    loadFormData(form.objectId, document.getElementById('formContainer'), false);
+                    //document.getElementById('renderContainer').innerHTML = ''; // Clear the render container
+                    //loadFormData(form.objectId, document.getElementById('formContainer'), false, "edit");
+
+                    helperLoadContainer(event, form.objectId); // Load the form data into the form container
+
                     const showTab = document.querySelector('.nav-tabs a[href="#editForm"]');
                     activeForm = form;
                     if (showTab) {
@@ -88,8 +91,11 @@ function loadForms() {
                 showButton.className = 'portal-show-button';
                 showButton.onclick = function (event) {
 
-                    document.getElementById('formContainer').innerHTML = ''; // Clear the form container
-                    loadFormData(form.objectId, document.getElementById('renderContainer'), true);
+                    //document.getElementById('formContainer').innerHTML = ''; // Clear the form container
+                    //loadFormData(form.objectId, document.getElementById('renderContainer'), true, "render");
+
+                    helperLoadContainer(event, form.objectId); // Load the form data into the form container
+
                     const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
                     activeForm = form;
                     if (showTab) {
@@ -104,8 +110,12 @@ function loadForms() {
                 itemActions.appendChild(editButton);
                 itemActions.appendChild(deleteButton);
                 container.addEventListener('dblclick', function (event) {
-                    document.getElementById('renderContainer').innerHTML = ''; // Clear the render container
-                    loadFormData(form.objectId, document.getElementById('formContainer'), false);
+
+                    //document.getElementById('formContainer').innerHTML = ''; // Clear the render container
+                    //loadFormData(form.objectId, document.getElementById('renderContainer'), true, "render");
+
+                    helperLoadContainer(event, form.objectId); // Load the form data into the form container
+
                     const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
                     activeForm = form;
                     if (showTab) {
@@ -164,8 +174,8 @@ function loadForms() {
 
 function helperLoadContainer(event, objectId) {
     event.preventDefault();
-    loadFormData(objectId, document.getElementById('renderContainer'), true);
-    loadFormData(objectId, document.getElementById('formContainer'), false);
+    loadFormData(objectId, document.getElementById('renderContainer'), true, "render");
+    loadFormData(objectId, document.getElementById('formContainer'), false, "edit");
 }
 
 function deleteForm(objectId, listItem) {
@@ -257,7 +267,41 @@ function searchFormbySlug(event) {
     console.log('Search completed.');
 }
 
-function loadFormData(objectId, renderContainer, renderElem) {
+function updateAllIdsInJson(jsonObj, prefix) {
+    if (Array.isArray(jsonObj)) {
+        return jsonObj.map(item => updateAllIdsInJson(item, prefix));
+    } else if (jsonObj && typeof jsonObj === "object") {
+        const updatedObj = {};
+
+        for (let key in jsonObj) {
+            let value = jsonObj[key];
+            if (value === "DataSet_bank") {
+                console.log(`Found DataSet_bank for key: ${key}`);
+                console.log(jsonObj);
+            }
+
+            // If this is an "id" key, update it
+            if (key === "id" && typeof value === "string" && value.trim() !== "") {
+                updatedObj[key] = `${prefix}_${value}`;
+            }
+            // If this is a label's "for" attribute
+            else if (key === "for" && typeof value === "string" && value.trim() !== "") {
+                updatedObj[key] = `${prefix}_${value}`;
+            }
+            else {
+                updatedObj[key] = updateAllIdsInJson(value, prefix);
+            }
+        }
+
+        return updatedObj;
+    }
+
+    return jsonObj; // Primitive value, return as is
+}
+
+
+
+function loadFormData(objectId, renderContainer, renderElem, prefix) {
     console.log("Load form data : " + objectId);
     fetch(`/get-form/${objectId}`)
         .then(response => {
@@ -271,9 +315,12 @@ function loadFormData(objectId, renderContainer, renderElem) {
 
             renderContainer.innerHTML = '';
 
+            const updatedFormData = updateAllIdsInJson(form.formData, prefix);
+
+            console.log('Updated Form Data:', updatedFormData);
 
             // Convert JSON back to DOM and append
-            var domContent = jsonToDom(form.formData, renderContainer);
+            var domContent = jsonToDom(updatedFormData, renderContainer);
             if (renderElem) {
                 renderElements(renderContainer);
             }
