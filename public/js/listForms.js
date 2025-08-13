@@ -73,10 +73,10 @@ function loadForms() {
                 editButton.className = 'portal-edit-button';
                 editButton.onclick = function (event) {
 
-                    //document.getElementById('renderContainer').innerHTML = ''; // Clear the render container
-                    //loadFormData(form.objectId, document.getElementById('formContainer'), false, "edit");
+                    document.getElementById('renderContainer').innerHTML = ''; // Clear the render container
+                    loadFormData(form.objectId, document.getElementById('formContainer'), false, "edit");
 
-                    helperLoadContainer(event, form.objectId); // Load the form data into the form container
+                    //helperLoadContainer(event, form.objectId); // Load the form data into the form container
 
                     const showTab = document.querySelector('.nav-tabs a[href="#editForm"]');
                     activeForm = form;
@@ -91,10 +91,10 @@ function loadForms() {
                 showButton.className = 'portal-show-button';
                 showButton.onclick = function (event) {
 
-                    //document.getElementById('formContainer').innerHTML = ''; // Clear the form container
-                    //loadFormData(form.objectId, document.getElementById('renderContainer'), true, "render");
+                    document.getElementById('formContainer').innerHTML = ''; // Clear the form container
+                    loadFormData(form.objectId, document.getElementById('renderContainer'), true, "render");
 
-                    helperLoadContainer(event, form.objectId); // Load the form data into the form container
+                    //helperLoadContainer(event, form.objectId); // Load the form data into the form container
 
                     const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
                     activeForm = form;
@@ -111,10 +111,10 @@ function loadForms() {
                 itemActions.appendChild(deleteButton);
                 container.addEventListener('dblclick', function (event) {
 
-                    //document.getElementById('formContainer').innerHTML = ''; // Clear the render container
-                    //loadFormData(form.objectId, document.getElementById('renderContainer'), true, "render");
+                    document.getElementById('formContainer').innerHTML = ''; // Clear the render container
+                    loadFormData(form.objectId, document.getElementById('renderContainer'), true, "render");
 
-                    helperLoadContainer(event, form.objectId); // Load the form data into the form container
+                    //helperLoadContainer(event, form.objectId);
 
                     const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
                     activeForm = form;
@@ -174,6 +174,8 @@ function loadForms() {
 
 function helperLoadContainer(event, objectId) {
     event.preventDefault();
+    //document.getElementById('renderContainer').innerHTML = '';
+    //document.getElementById('formContainer').innerHTML = '';
     loadFormData(objectId, document.getElementById('renderContainer'), true, "render");
     loadFormData(objectId, document.getElementById('formContainer'), false, "edit");
 }
@@ -292,13 +294,12 @@ function updateAllIdsInJson(jsonObj, prefix) {
                 updatedObj[key] = updateAllIdsInJson(value, prefix);
             }
         }
-
+        console.log('Updated Object:', updatedObj);
         return updatedObj;
     }
 
     return jsonObj; // Primitive value, return as is
 }
-
 
 
 function loadFormData(objectId, renderContainer, renderElem, prefix) {
@@ -315,7 +316,7 @@ function loadFormData(objectId, renderContainer, renderElem, prefix) {
 
             renderContainer.innerHTML = '';
 
-            const updatedFormData = updateAllIdsInJson(form.formData, prefix);
+            const updatedFormData = form.formData; // updateAllIdsInJson(form.formData, prefix);
 
             console.log('Updated Form Data:', updatedFormData);
 
@@ -354,6 +355,7 @@ function loadFormData(objectId, renderContainer, renderElem, prefix) {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
+
 function rebuildComponents(container) {
     const elements = container.querySelectorAll("[tagName]");
     elements.forEach(el => {

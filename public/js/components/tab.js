@@ -122,6 +122,8 @@ function createTabContent(tabsHeader, tabsContent) {
     // Activate the new tab
     // fire tabHeader click event
 
+    console.log("tabId : " + tabId);
+
     tabHeader.setAttribute('onclick', 'activateTab(event,this, document.getElementById("' + tabId + '"))');
 
     activateTab(event, tabHeader, tabContent.id);
