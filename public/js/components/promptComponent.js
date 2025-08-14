@@ -341,6 +341,8 @@ function cleanExtractedText(text) {
 
 async function handleFill(event) {
 
+    console.log("Filling form fields...");
+
     event.preventDefault();
     // Implement the fill functionality here
     const promptText = document.getElementById('PromptText');

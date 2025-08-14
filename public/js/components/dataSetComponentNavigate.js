@@ -525,6 +525,8 @@ function loadBigModalWithJson(jsonResponse) {
   console.log("jsonResponse inside big modal: ", jsonResponse);
   const selected = jsonResponse[i];
 
+  console.log("selected : ", selected)
+
 
   for (const [key, value] of Object.entries(selected)) {
     if (key !== "rowid") { // Skip rowid as it is handled by the system

@@ -234,6 +234,9 @@ function renderGrid(main) {
   // get the data from the element
   console.log(main)
   console.log(main.getAttribute("dataset"))
+  const test = dataset = '[{"DBName":"msdb","tableName":"bank","fieldName":"nom1","fieldLabel":"Nom1","fieldType":"text","fieldDataType":"character","fieldMandatory":"0","fieldWidth":64,"copyType":"Data","fieldDefault":"","displayName":"ban_nom1"},{"DBName":"msdb","tableName":"bank","fieldName":"nom2","fieldLabel":"Nom2","fieldType":"text","fieldDataType":"character","fieldMandatory":"0","fieldWidth":64,"copyType":"Data","fieldDefault":"","displayName":"ban_nom2"},{"DBName":"msdb","tableName":"bank","fieldName":"nste","fieldLabel":"Numéro de société","fieldType":"text","fieldDataType":"integer","fieldMandatory":"0","fieldWidth":4,"copyType":"Data","fieldDefault":"0","displayName":"ban_nste"},{"DBName":"msdb","tableName":"bank","fieldName":"qriban","fieldLabel":"QR IBAN","fieldType":"text","fieldDataType":"character","fieldMandatory":"0","fieldWidth":68,"copyType":"Data","fieldDefault":"","displayName":"ban_qriban"}]'
+  var dbTest = JSON.parse(test);
+  console.log("test 2 : ", main.dataset.dataset)
   var dataset = JSON.parse(main.getAttribute("dataset"));
 
 
