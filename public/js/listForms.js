@@ -112,7 +112,7 @@ function loadForms() {
                 container.addEventListener('dblclick', function (event) {
 
                     //document.getElementById('formContainer').innerHTML = ''; // Clear the render container
-                    loadFormData(form.objectId, document.getElementById('renderContainer'), true, "render");
+                    //loadFormData(form.objectId, document.getElementById('renderContainer'), true, "render");
 
                     helperLoadContainer(event, form.objectId);
 
@@ -177,7 +177,7 @@ function helperLoadContainer(event, objectId) {
     //document.getElementById('renderContainer').innerHTML = '';
     //document.getElementById('formContainer').innerHTML = '';
     loadFormData(objectId, document.getElementById('renderContainer'), true, "ren");
-    loadFormData(objectId, document.getElementById('formContainer'), false, "");
+    loadFormData(objectId, document.getElementById('formContainer'), false, "test");
 }
 
 function deleteForm(objectId, listItem) {
@@ -280,10 +280,6 @@ function updateAllIdsInJson(jsonObj, prefix) {
 
         for (let key in jsonObj) {
             let value = jsonObj[key];
-            if (value === "DataSet_bank") {
-                console.log(`Found DataSet_bank for key: ${key}`);
-                console.log(jsonObj);
-            }
 
             // If this is an "id" key, update it
             if (key === "id" && typeof value === "string" && value.trim() !== "") {
@@ -294,7 +290,19 @@ function updateAllIdsInJson(jsonObj, prefix) {
                 updatedObj[key] = `${prefix}_${value}`;
             }
             else {
+                console.log("Call update All with value : ", value)
                 updatedObj[key] = updateAllIdsInJson(value, prefix);
+            }
+            if (value === "dataSet1755505239365") {
+                console.log(`Found dataSet1755505239365 for key: ${key}`);
+                console.log(jsonObj);
+                console.log(updatedObj);
+            }
+            if (value === "DataSet_bank") {
+                console.log(prefix);
+                console.log(`Found DataSet_bank for key: ${key}`);
+                console.log(jsonObj);
+                console.log(updatedObj);
             }
         }
         return updatedObj;
