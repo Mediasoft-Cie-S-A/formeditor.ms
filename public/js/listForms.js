@@ -73,10 +73,10 @@ function loadForms() {
                 editButton.className = 'portal-edit-button';
                 editButton.onclick = function (event) {
 
-                    document.getElementById('renderContainer').innerHTML = ''; // Clear the render container
-                    loadFormData(form.objectId, document.getElementById('formContainer'), false, "");
+                    //document.getElementById('renderContainer').innerHTML = ''; // Clear the render container
+                    //loadFormData(form.objectId, document.getElementById('formContainer'), false, "");
 
-                    //helperLoadContainer(event, form.objectId); // Load the form data into the form container
+                    helperLoadContainer(event, form.objectId); // Load the form data into the form container
 
                     const showTab = document.querySelector('.nav-tabs a[href="#editForm"]');
                     activeForm = form;
@@ -91,10 +91,10 @@ function loadForms() {
                 showButton.className = 'portal-show-button';
                 showButton.onclick = function (event) {
 
-                    document.getElementById('formContainer').innerHTML = ''; // Clear the form container
-                    loadFormData(form.objectId, document.getElementById('renderContainer'), true, "");
+                    //document.getElementById('formContainer').innerHTML = ''; // Clear the form container
+                    //loadFormData(form.objectId, document.getElementById('renderContainer'), true, "");
 
-                    //helperLoadContainer(event, form.objectId); // Load the form data into the form container
+                    helperLoadContainer(event, form.objectId); // Load the form data into the form container
 
                     const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
                     activeForm = form;
