@@ -321,8 +321,6 @@ function navbar_moveNext() {
     selectedPanel.classList.add("selected-panel");
   }
 
-
-
   if (selectedPanel) {
     console.log("There is a selected panel"); //Should always print
     selectedPanel.classList.remove("selected-panel");

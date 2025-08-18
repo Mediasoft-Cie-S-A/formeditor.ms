@@ -74,7 +74,7 @@ function loadForms() {
                 editButton.onclick = function (event) {
 
                     document.getElementById('renderContainer').innerHTML = ''; // Clear the render container
-                    loadFormData(form.objectId, document.getElementById('formContainer'), false, "edit");
+                    loadFormData(form.objectId, document.getElementById('formContainer'), false, "");
 
                     //helperLoadContainer(event, form.objectId); // Load the form data into the form container
 
@@ -92,7 +92,7 @@ function loadForms() {
                 showButton.onclick = function (event) {
 
                     document.getElementById('formContainer').innerHTML = ''; // Clear the form container
-                    loadFormData(form.objectId, document.getElementById('renderContainer'), true, "render");
+                    loadFormData(form.objectId, document.getElementById('renderContainer'), true, "");
 
                     //helperLoadContainer(event, form.objectId); // Load the form data into the form container
 
@@ -111,10 +111,10 @@ function loadForms() {
                 itemActions.appendChild(deleteButton);
                 container.addEventListener('dblclick', function (event) {
 
-                    document.getElementById('formContainer').innerHTML = ''; // Clear the render container
+                    //document.getElementById('formContainer').innerHTML = ''; // Clear the render container
                     loadFormData(form.objectId, document.getElementById('renderContainer'), true, "render");
 
-                    //helperLoadContainer(event, form.objectId);
+                    helperLoadContainer(event, form.objectId);
 
                     const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
                     activeForm = form;
@@ -176,8 +176,8 @@ function helperLoadContainer(event, objectId) {
     event.preventDefault();
     //document.getElementById('renderContainer').innerHTML = '';
     //document.getElementById('formContainer').innerHTML = '';
-    loadFormData(objectId, document.getElementById('renderContainer'), true, "render");
-    loadFormData(objectId, document.getElementById('formContainer'), false, "edit");
+    loadFormData(objectId, document.getElementById('renderContainer'), true, "ren");
+    loadFormData(objectId, document.getElementById('formContainer'), false, "");
 }
 
 function deleteForm(objectId, listItem) {
@@ -270,6 +270,9 @@ function searchFormbySlug(event) {
 }
 
 function updateAllIdsInJson(jsonObj, prefix) {
+    if (prefix === "") {
+        return jsonObj;
+    }
     if (Array.isArray(jsonObj)) {
         return jsonObj.map(item => updateAllIdsInJson(item, prefix));
     } else if (jsonObj && typeof jsonObj === "object") {
@@ -294,7 +297,6 @@ function updateAllIdsInJson(jsonObj, prefix) {
                 updatedObj[key] = updateAllIdsInJson(value, prefix);
             }
         }
-        console.log('Updated Object:', updatedObj);
         return updatedObj;
     }
 
@@ -316,7 +318,8 @@ function loadFormData(objectId, renderContainer, renderElem, prefix) {
 
             renderContainer.innerHTML = '';
 
-            const updatedFormData = form.formData; // updateAllIdsInJson(form.formData, prefix);
+            //const updatedFormData = form.formData; 
+            const updatedFormData = updateAllIdsInJson(form.formData, prefix);
 
             console.log('Updated Form Data:', updatedFormData);
 

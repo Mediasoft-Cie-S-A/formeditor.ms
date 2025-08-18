@@ -253,10 +253,10 @@ function activateTab(event, tabHeader, tabContent) {
     console.log("query selector : ", tabHeader.parentElement.parentElement);
     console.log("Container: ", container);
     for (let i = 0; i < container.length; i++) {
-        if (container[i].id != tabContent.id) {
-            container[i].style.display = 'none';
-        } else {
+        if (container[i].id.includes(tabContent.id)) {
             container[i].style.display = 'block';
+        } else {
+            container[i].style.display = 'none';
         }
     }
 
