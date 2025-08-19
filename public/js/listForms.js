@@ -176,8 +176,8 @@ function helperLoadContainer(event, objectId) {
     event.preventDefault();
     //document.getElementById('renderContainer').innerHTML = '';
     //document.getElementById('formContainer').innerHTML = '';
-    loadFormData(objectId, document.getElementById('renderContainer'), true, "ren");
-    loadFormData(objectId, document.getElementById('formContainer'), false, "test");
+    loadFormData(objectId, document.getElementById('renderContainer'), true, "render");
+    loadFormData(objectId, document.getElementById('formContainer'), false, "");
 }
 
 function deleteForm(objectId, listItem) {
@@ -290,10 +290,11 @@ function updateAllIdsInJson(jsonObj, prefix) {
                 updatedObj[key] = `${prefix}_${value}`;
             }
             else {
-                console.log("Call update All with value : ", value)
+                //console.log("Call update All with value : ", value)
                 updatedObj[key] = updateAllIdsInJson(value, prefix);
             }
             if (value === "dataSet1755505239365") {
+                console.log(prefix);
                 console.log(`Found dataSet1755505239365 for key: ${key}`);
                 console.log(jsonObj);
                 console.log(updatedObj);
@@ -326,13 +327,16 @@ function loadFormData(objectId, renderContainer, renderElem, prefix) {
 
             renderContainer.innerHTML = '';
 
-            //const updatedFormData = form.formData; 
+
+
+            //const updatedFormData = form.formData;
             const updatedFormData = updateAllIdsInJson(form.formData, prefix);
 
             console.log('Updated Form Data:', updatedFormData);
 
             // Convert JSON back to DOM and append
             var domContent = jsonToDom(updatedFormData, renderContainer);
+
             if (renderElem) {
                 renderElements(renderContainer);
             }
