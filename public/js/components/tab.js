@@ -122,8 +122,6 @@ function createTabContent(tabsHeader, tabsContent) {
     // Activate the new tab
     // fire tabHeader click event
 
-    console.log("tabId : " + tabId);
-
     tabHeader.setAttribute('onclick', 'activateTab(event,this, document.getElementById("' + tabId + '"))');
 
     activateTab(event, tabHeader, tabContent.id);
@@ -249,9 +247,6 @@ function activateTab(event, tabHeader, tabContent) {
     }
 
     const container = tabHeader.parentElement.parentElement.querySelectorAll('.ctab_ContentDiv');
-    console.log("Tab Header: ", tabHeader);
-    console.log("query selector : ", tabHeader.parentElement.parentElement);
-    console.log("Container: ", container);
     for (let i = 0; i < container.length; i++) {
         if (container[i].id.includes(tabContent.id)) {
             container[i].style.display = 'block';
