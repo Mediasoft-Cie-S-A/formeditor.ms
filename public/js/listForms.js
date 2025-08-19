@@ -72,12 +72,9 @@ function loadForms() {
                 editButton.innerHTML = '<i class="fa fa-edit" style="margin-left:-5px"></i>'
                 editButton.className = 'portal-edit-button';
                 editButton.onclick = function (event) {
-
                     //document.getElementById('renderContainer').innerHTML = ''; // Clear the render container
                     //loadFormData(form.objectId, document.getElementById('formContainer'), false, "");
-
                     helperLoadContainer(event, form.objectId); // Load the form data into the form container
-
                     const showTab = document.querySelector('.nav-tabs a[href="#editForm"]');
                     activeForm = form;
                     if (showTab) {
@@ -90,12 +87,9 @@ function loadForms() {
                 showButton.innerHTML = '<i class="fa fa-eye" style="margin-left:-5px"></i>'
                 showButton.className = 'portal-show-button';
                 showButton.onclick = function (event) {
-
                     //document.getElementById('formContainer').innerHTML = ''; // Clear the form container
                     //loadFormData(form.objectId, document.getElementById('renderContainer'), true, "");
-
                     helperLoadContainer(event, form.objectId); // Load the form data into the form container
-
                     const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
                     activeForm = form;
                     if (showTab) {
@@ -110,12 +104,9 @@ function loadForms() {
                 itemActions.appendChild(editButton);
                 itemActions.appendChild(deleteButton);
                 container.addEventListener('dblclick', function (event) {
-
                     //document.getElementById('formContainer').innerHTML = ''; // Clear the render container
                     //loadFormData(form.objectId, document.getElementById('renderContainer'), true, "render");
-
                     helperLoadContainer(event, form.objectId);
-
                     const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
                     activeForm = form;
                     if (showTab) {
@@ -293,18 +284,6 @@ function updateAllIdsInJson(jsonObj, prefix) {
                 //console.log("Call update All with value : ", value)
                 updatedObj[key] = updateAllIdsInJson(value, prefix);
             }
-            if (value === "dataSet1755505239365") {
-                console.log(prefix);
-                console.log(`Found dataSet1755505239365 for key: ${key}`);
-                console.log(jsonObj);
-                console.log(updatedObj);
-            }
-            if (value === "DataSet_bank") {
-                console.log(prefix);
-                console.log(`Found DataSet_bank for key: ${key}`);
-                console.log(jsonObj);
-                console.log(updatedObj);
-            }
         }
         return updatedObj;
     }
@@ -327,12 +306,8 @@ function loadFormData(objectId, renderContainer, renderElem, prefix) {
 
             renderContainer.innerHTML = '';
 
-
-
             //const updatedFormData = form.formData;
             const updatedFormData = updateAllIdsInJson(form.formData, prefix);
-
-            console.log('Updated Form Data:', updatedFormData);
 
             // Convert JSON back to DOM and append
             var domContent = jsonToDom(updatedFormData, renderContainer);
