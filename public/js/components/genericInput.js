@@ -25,6 +25,17 @@ function createElementInput(type) {
     label.innerHTML = type;
     label.id = main.id + "Label";
     label.tagName = "label";
+    // adding image for the input type 
+    var i = document.createElement('i');
+    i.className = getIconForInputType(type);
+
+    i.style.float = "left";
+    label.style.float = "left";
+    main.style.display = "flex";
+    main.style.alignItems = "left";
+    main.style.justifyContent = "flex-start";
+    main.style.flexDirection = "column";
+    main.appendChild(i);
     main.appendChild(label);
     if (type === 'textarea') {
         var input = document.createElement('textarea');
@@ -37,6 +48,7 @@ function createElementInput(type) {
     } else {
         var input = document.createElement('input');
         input.type = type;
+
         if (type === 'checkbox') {
             input.className = "apple-switch";
         } else {
@@ -58,6 +70,35 @@ function editElementInput(type, element, content) {
 
 }
 
+function getIconForInputType(type) {
+    // return the icon for the input type
+    switch (type) {
+        case 'text':
+            return 'fa fa-file-text';
+        case 'email':
+            return 'fa fa-envelope';
+        case 'password':
+            return 'fa fa-key';
+        case 'checkbox':
+            return 'fa fa-check-square';
+        case 'radio':
+            return 'fa fa-dot-circle';
+        case 'textarea':
+            return 'fa fa-comment-dots';
+        case 'number':
+            return 'fa fa-sort-numeric-up';
+        case 'date':
+            return 'fa fa-calendar-alt';
+        case 'time':
+            return 'fa fa-clock';
+        case 'file':
+            return 'fa fa-file';
+        case 'range':
+            return 'fa fa-sliders-h';
+        default:
+            return 'fa fa-question-circle';
+    }
+}
 // activate the loaders 
 function activateLoaders() {
     const loaders = document.querySelectorAll(".miniLoader");

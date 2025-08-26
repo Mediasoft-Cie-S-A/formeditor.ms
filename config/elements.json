@@ -87,6 +87,17 @@
     "icon": "fa fa-search",
     "renderFunction": ""
   },
+  "dataSearchHor": {
+    "type": "dataSearchHor",
+    "description": "Horizontal Search field",
+    "category": "Business Logic",
+    "scriptName": "databaseSearchH.js",
+    "createFunction": "createDatabaseSearchH",
+    "editFunction": "editDatabaseSearchH",
+    "styles": "dataSearchH.css",
+    "icon": "fa fa-search",
+    "renderFunction": "RenderDataSearchH"
+  },
   "inputField": {
     "type": "inputField",
     "description": "input field",

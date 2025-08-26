@@ -375,12 +375,12 @@ function createGrid(
 
 }
 
-function switchView(e, DBName, gridID, view) {
+function switchView(e, DBName, mainID, view) {
   e.preventDefault();
   // get the grid
-  const grid = document.getElementById(gridID);
+  const grid = document.getElementById(mainID);
   grid.setAttribute("view", view);
-  searchGrid(DBName, "", "", "", gridID); // refresh the grid
+  searchGrid(DBName, "", "", "", mainID); // refresh the grid
 }
 
 function generateHeaderRow(grid, dataset) {
@@ -534,16 +534,16 @@ function generateHeaderRow(grid, dataset) {
   grid.appendChild(body);
 }
 
-function grid_page_size(e, dataGridId) {
+function grid_page_size(e, mainID) {
   e.preventDefault();
   // get selected page size
-  const dataGrid = document.getElementById(dataGridId);
+  const dataGrid = document.getElementById(mainID);
   const dataTable = dataGrid.querySelector('[tagName="dataTable"]');
   const DBName = dataTable.getAttribute("DBName");
   var pageSize = e.target[e.target.selectedIndex].value;
   dataTable.setAttribute("page_size", pageSize);
   dataTable.setAttribute("current_page", 1);
-  searchGrid(DBName, "", "", "", dataGridId);
+  searchGrid(DBName, "", "", "", mainID);
 }
 
 function gridPrev(e, DBName, tableName) {
@@ -672,17 +672,7 @@ function fetchTableData(
   // Prepare the fields query parameter
   // create filter for search based on the input values, with field name and value separated by | and each filter separated by ,
   var filter = "";
-  var i = 0;
-  var filtervalue = grid.querySelectorAll('input[id^="searchValue"]');
-  var searchfields = grid.querySelectorAll('select[id^="searchfields"]');
-  var searchOperator = grid.querySelectorAll('select[id^="searchOperator"]');
-  if (filtervalue.length > 0) {
-    filter = filtervalue[0].value;
-    filter += "|";
-    filter += searchfields[0].value;
-    filter += "|";
-    filter += searchOperator[0].value;
-  }
+
 
   gridGetData(grid, DBName, tableName, page, pageSize, filter);
 
@@ -703,6 +693,8 @@ function getFilterType(fieldType) {
   }
 }
 
+
+/* filter format is <fieldName>|<operator>|<fieldValue> */
 async function gridGetData(
   grid,
   DBName,
