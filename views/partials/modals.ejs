@@ -1,0 +1,91 @@
+<!-- Toolbar flottante -->
+<div class="gjs-toolbar" id="editorFloatMenu" style="pointer-events: all; top: 200px; left: 545.438px">
+    <input id="editorElementSelected" type="hidden" value="">
+    <div class="gjs-toolbar-items">
+        <div class="gjs-toolbar-item" onclick="setParent()" title="select parent"><i class="bi bi-arrow-up"></i></div>
+        <div class="gjs-no-touch-actions gjs-toolbar-item" draggable="true" onclick="moveElement()"
+            ondrag="moveElementEvent=true" title="Move Element"><i class="bi bi-arrows-move"></i></div>
+        <div class="gjs-toolbar-item" onclick="showProperties()" title="Show Properties"><i class="bi bi-gear"></i>
+        </div>
+        <div class="gjs-toolbar-item" onclick="showHTMLCodeEditor()" title="Show HTML Editor"><i
+                class="bi bi-code-slash"></i></div>
+        <div class="gjs-toolbar-item" onclick="copyHTMLElement()" title="Copy Component"><i class="bi bi-clipboard"></i>
+        </div>
+        <div class="gjs-toolbar-item" onclick="pasteHTMLElement()" title="Paste Component"><i
+                class="bi bi-clipboard-plus"></i></div>
+        <div class="gjs-toolbar-item" onclick="deleteElement()" title="Delete Element"><i class="bi bi-trash"></i></div>
+        <div class="gjs-toolbar-item" onclick="EditorUndo()" title="Undo"><i class="bi bi-arrow-counterclockwise"></i>
+        </div>
+        <div class="gjs-toolbar-item" onclick="EditorRedo()" title="Redo"><i class="bi bi-arrow-clockwise"></i></div>
+    </div>
+</div>
+
+<!-- Database modal -->
+<div class="modal" id="DatabaseDetailsModal">
+    <div class="modal-content" style="padding: 10px">
+        <h6>Tables:</h6>
+        <button class="close" onclick="closeDBModalEdit(this)">X</button>
+        <button class="close" onclick="applyDBModal(this)">Apply</button>
+        <div id="TablesListContent" style="display: flex;">
+            <div class="tab-div" style="width: 10%;">
+                <div>
+                    <input name="searchtable" onchange="searchtable(this.value,'modalTableListPanel')"
+                        placeholder="filter.. table" type="text">
+                </div>
+                <div id="modalTableListPanel" style="overflow: auto"></div>
+            </div>
+            <div id="modaltableDetails" style="width: 90%;"></div>
+        </div>
+    </div>
+</div>
+
+<div id="toast-container"></div>
+<div id="hint-container"></div>
+
+<!-- Dialogs -->
+<dialog id="jsCodeDialog">
+    <div>JSCODE Editor</div>
+    <div style="border: 1px solid black">
+        <textarea id="jsCodeEditor" name="jsCodeEditor" style="width: 100%; height: 100%"></textarea>
+    </div>
+    <button class="button" onclick="executejsCodeCode()">Run Code</button>
+    <button class="button" onclick="savejsCodeCode()">Save Code</button>
+    <button class="button" onclick="hidejsCodeEditor()">Close Editor</button>
+</dialog>
+
+<dialog id="HTMLCodeDialog" style="width: 90%; height: 90%; ">
+    <div>
+        <button class="button" onclick="saveHTMLCode()" style="display: inline-block;"><i
+                class="fa fa-floppy-o"></i></button>
+        <button class="button" onclick="document.getElementById('HTMLCodeDialog').style.display='none';"
+            style="display: inline-block;">
+            <i class="fa fa-close"></i>
+        </button>
+    </div>
+    <div style="border: 1px solid black">
+        <textarea id="HTMLCodeEditorArea" name="HTMLCodeEditorArea" style="width: 100%; height: 100%"></textarea>
+    </div>
+</dialog>
+
+<div id="userModal">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="user-main">
+                <button onclick="signOut()">Logout</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="overlay" id="overlayModal" onclick="closeModalEdit()"></div>
+
+<!-- Confirm clear modal -->
+<div class="modal-overlay" id="confirmClearModal" style="display: none;">
+    <div class="modal-box">
+        <p>Are you sure you want to clear the form?</p>
+        <div class="modal-actions">
+            <button id="confirmClearYes">Yes</button>
+            <button id="confirmClearCancel">Cancel</button>
+        </div>
+    </div>
+</div>

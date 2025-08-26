@@ -1,0 +1,126 @@
+<div class="tab-pane fade" id="editForm">
+    <div class="row display-flex" id="formProperties" style="width: 100%; padding: 10px; ">
+        <!-- Form properties will be added here -->
+        <form class="container-fluid" id="formDataForm">
+            <div class="row table-hover editor-fields"
+                style="display: flex;align-items: flex-start;justify-content: center;">
+                <div class="col" style="display: inline-block;">
+                    <label for="objectId">ID:</label><br>
+                    <input class="input-element" id="objectId" name="objectId" placeholder="ID" required="" type="text"
+                        value=""><br>
+                </div>
+                <div class="col" style="display: inline-block">
+                    <label for="objectName">Name:</label><br>
+                    <input class="input-element" id="objectName" name="objectName" placeholder="Insert Name" required=""
+                        type="text" value="" style="width: 150px;"><br>
+                </div>
+                <div class="col" style="display: inline-block">
+                    <label for="objectSlug">Slug:</label><br>
+                    <input class="input-element" id="objectSlug" name="objectSlug" placeholder="Insert Slug" required=""
+                        type="text" value="" style="width: 150px;"><br>
+                </div>
+                <div class="col" style="display: inline-block">
+                    <label for="userCreated">User Created:</label><br>
+                    <input class="input-element" id="userCreated" name="userCreated" placeholder="User Created"
+                        required="" type="text" value="<%= userName %>"><br>
+                </div>
+                <div class="col" style="display: inline-block">
+                    <label for="userModified">User Modified:</label><br>
+                    <input class="input-element" id="userModified" name="userModified" placeholder="User Modified"
+                        required="" type="text" value="<%= userName %>"><br>
+                </div>
+                <div class="col" style="display: inline-block">
+                    <label for="objectType">Type:</label><br>
+                    <select class="input-element" id="objectType" name="type" required="">
+                        <option value="" disabled selected>Select Type</option>
+                        <option value="page">Page</option>
+                        <option value="form">Form</option>
+                        <option value="business_component">Business Component </option>
+                    </select>
+                    <input id="objectTypeHidden" name="pageHeader" type="hidden" value="">
+                </div>
+                <div class="col" style="display: inline-block">
+                    <label for="objectDescription">Description:</label><br>
+                    <textarea class="input-element" id="objectDescription" name="objectDescription"
+                        placeholder="Insert Description" required="" rows="3"></textarea>
+                </div>
+                <div class="col" style="display: inline-block;padding:10px">
+                    <button class="button form-edit-button success" id="registerObjectBtn"
+                        onclick="registerObject(event)" title="Register Object" type="button" style="float: left;">
+                        <i class="bi bi-check-lg"></i>
+                    </button>
+
+                    <button class="button form-edit-button" id="clearObjectBtn" onclick="showClearConfirmation()"
+                        title="Clear" type="button" style="float: left;">
+                        <i class="bi bi-trash"></i>
+                    </button>
+
+                    <button class="button form-edit-button" id="undoDeleteBtn" onclick="undoDelete()"
+                        title="Undo Delete" type="button" style="float: left;">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </button>
+
+                    <button class="button form-edit-button" onclick="exportJson()" title="Export JSON" type="button"
+                        style="float: left;">
+                        <i class="bi bi-filetype-json"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <table id="formEditorContainer" style="width: 100%; height: 100%; padding: 10px; ">
+        <tr>
+            <!-- Sidebar -->
+            <td style="width: 100px;max-height: 1024px;padding: 10px; overflow: auto;vertical-align: top;">
+                <div id="componentsSidebar" style="width: 100%;"></div>
+            </td>
+            <td style="width: 100%;vertical-align: top; text-align: left">
+                <div id="formContainer" ondragover="allowDrop(event)" ondrop="drop(event)"
+                    style="width: 100%; height: 100%; vertical-align: top; ">
+                    <!-- Form elements will be added here -->
+                </div>
+            </td>
+            <td style="vertical-align: top;text-align: left; border: 1px dashed silver;">
+                <div id="editorPropertyInfos"
+                    style="width: 250px;max-height: 1024px;padding: 10px; overflow: auto; vertical-align: top;">
+                    <div id="propertiesBar">
+                        <div><!-- Edit --></div>
+                    </div>
+                </div>
+            </td>
+            <td style="vertical-align: top;text-align: left;border: 1px dashed silver;">
+                <div id="editorDataInfos"
+                    style="width: 250px;max-height: 1024px;padding: 10px; overflow: auto;vertical-align: top;">
+                    <div id="dataBar" style="vertical-align: top;">
+                        <div>
+                            <button onclick="showDiv('webserviceDiv',this)" title="Web Server"><i
+                                    class="fa fa-server"></i></button>
+                            <button onclick="showDiv('databaseDiv',this)" title="Database"><i
+                                    class="fa fa-database"></i></button>
+                        </div>
+
+                        <div class="tab-div" id="webserviceDiv" style="display: none;">
+                            <div>
+                                <input name="searchApi" onchange="searchApi(this.value,'dragDropApiList')"
+                                    placeholder="filter.. API" type="text">
+                            </div>
+                            <div id="dragDropApiList" style="overflow: auto"></div>
+                            <!-- Web Server will be listed here -->
+                        </div>
+
+                        <div class="tab-div" id="databaseDiv">
+                            <div>
+                                <input name="searchtable" onchange="searchtable(this.value,'drageDroptablesList')"
+                                    placeholder="filter.. table" type="text">
+                            </div>
+                            <div id="drageDroptablesList" style="overflow: auto"></div>
+                            <!-- Tables will be listed here -->
+                        </div>
+
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
