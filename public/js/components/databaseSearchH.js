@@ -381,11 +381,10 @@ function getOperatorsForTypeH(t) {
         return [{ value: "=", label: "=" }];
     }
     return [
-        { value: "like", label: "contient" },
-        { value: "starts", label: "commence" },
-        { value: "ends", label: "finit" },
+
         { value: "=", label: "=" },
         { value: "<>", label: "≠" },
+
     ];
 }
 

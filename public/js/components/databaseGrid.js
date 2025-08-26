@@ -589,6 +589,7 @@ function gridNext(e, DBName, tableName) {
 
 function searchGrid(DBName, filterName, FilterOp, filterValue, gridID) {
   const grid = document.getElementById(gridID);
+
   // get the dataset from the main in json format
   const dataset = JSON.parse(grid.getAttribute("dataset"));
 
@@ -600,6 +601,7 @@ function searchGrid(DBName, filterName, FilterOp, filterValue, gridID) {
   }
   var tableName = tableGrid.getAttribute("Table-Name");
 
+  tableGrid.innerHTML = ""; // clear the grid
 
 
   var page = parseInt(tableGrid.getAttribute("current_page")) || 1;
