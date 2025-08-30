@@ -114,7 +114,6 @@ function createSidebar(elementsData, components) {
   const sidebar = document.getElementById("componentsSidebar");
   if (sidebar === null || sidebar === undefined) return;
   sidebar.innerHTML = ""; // Clear existing content
-  sidebar.style.display = "flex";
   sidebar.style.flexDirection = "column";
   // genereate the searcher
   const searcher = document.createElement("input");
