@@ -1,0 +1,149 @@
+/**********************************************************************************/
+/************************************ FLOAT MENU **********************************/
+/**********************************************************************************/
+
+.gjs-selection {
+    border: 2px dashed #3b97e3 !important;
+}
+
+
+.gjs-toolbar {
+    position: absolute;
+    background-color: #3b97e3;
+    white-space: nowrap;
+    color: #fff;
+    z-index: 1000;
+    top: 0px;
+    left: 0px;
+    display: none;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.gjs-toolbar-item {
+    width: 26px;
+    padding: 5px;
+    cursor: pointer;
+    display: inline-block
+}
+
+.gjs-toolbar-item:hover {
+    border: 2px solid #fff;
+    color: #fff;
+    transition: 0.5s;
+}
+
+.gjs-toolbar-item:active {
+    background-color: #4d61fc;
+    color: #fff;
+    border-radius: 5px;
+    transition: 0.5s;
+}
+
+.gjs-toolbar-item svg {
+    fill: currentColor;
+    vertical-align: middle
+}
+
+.gjs-resizer-c {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.modal-box {
+    background: white;
+    padding: 20px 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #333;
+    text-align: center;
+}
+
+.modal-actions button {
+    margin: 0 10px;
+    padding: 6px 16px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.modal-actions button:hover {
+    background-color: #0056b3;
+}
+
+#jsCodeDialog textarea {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 5px;
+    resize: vertical;
+}
+
+#jsCodeDialog button {
+    padding: 8px 12px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+#jsCodeDialog button:hover {
+    background-color: #45a049;
+}
+
+#HTMLCodeDialog {
+    display: none;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid #ccc;
+    background-color: white;
+    z-index: 1000;
+    width: 90%;
+
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    padding: 20px;
+    border-radius: 5px;
+    display: none;
+}
+
+#HTMLCodeDialog textarea {
+    width: 100%;
+    height: 100%;
+    margin-bottom: 10px;
+    padding: 5px;
+    resize: vertical;
+}
+
+#HTMLCodeDialog button {
+    padding: 8px 12px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+#HTMLCodeDialog button:hover {
+    background-color: #45a049;
+}
