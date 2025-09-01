@@ -346,8 +346,6 @@ function insertNavBar(
   gridContainer.innerHTML += html;
 }
 
-
-
 //Grid code
 function createGrid(
   grid,

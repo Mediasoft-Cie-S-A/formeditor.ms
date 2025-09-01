@@ -302,6 +302,7 @@ function loadFormData(objectId, renderContainer, renderElem) {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
+
 function rebuildComponents(container) {
     const elements = container.querySelectorAll("[tagName]");
     elements.forEach(el => {
