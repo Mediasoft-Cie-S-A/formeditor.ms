@@ -455,28 +455,51 @@ function showHint(message, duration = 1000, event) {
 }
 
 async function newForm() {
-    console.log("Create new form");
-
-    // Example formData (very minimal skeleton)
-    const formData = {
+    const defaultFormData = {
         tag: "div",
-        attributes: { class: "form-container" },
+        attributes: {
+            id: "Tab" + Date.now(), // unique ID
+            class: "form-element",
+            tagname: "Tab",
+            draggable: "true",
+        },
         children: [
             {
-                tag: "input",
-                attributes: {
-                    type: "text",
-                    placeholder: "Enter something...",
-                },
+                tag: "div",
+                attributes: { class: "ctab_tabs-header" },
+                children: [
+                    {
+                        tag: "div",
+                        attributes: {
+                            "data-tab": "ctab_tab-0",
+                            class: "ctab_HeaderButton active",
+                            onclick: `activateTab(event,this,document.getElementById("ctab_tab-0"))`,
+                            id: "element_" + Date.now(),
+                        },
+                        text: "Table",
+                    },
+                    {
+                        tag: "div",
+                        attributes: {
+                            "data-tab": "ctab_tab-1",
+                            class: "ctab_HeaderButton",
+                            onclick: `activateTab(event,this,document.getElementById("ctab_tab-1"))`,
+                            id: "element_" + (Date.now() + 1),
+                        },
+                        text: "Edit",
+                    },
+                ],
             },
         ],
     };
 
+    console.log("Create new form");
+
     const formPayload = {
-        objectId: "ad101", // You could generate this dynamically
-        objectName: "Gestion des Clients",
-        objectSlug: "Clients",
-        formData,
+        objectId: "ad_" + Date.now(), // dynamic unique id
+        objectName: "New Form with Tabs",
+        objectSlug: "new-form",
+        formData: defaultFormData,
         userCreated: "masspe",
     };
 

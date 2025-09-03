@@ -177,6 +177,10 @@ function createDomElement(json, parent) {
       }
     }
 
+    if (json.text || json.innerText || json.textContent) {
+      element.textContent = json.text || json.innerText || json.textContent;
+    }
+
     element.classList.remove("gjs-selection");
     // onlyEditor is used to hide the element in the render view
     if (element.getAttribute("onlyEditor") === "true") {
