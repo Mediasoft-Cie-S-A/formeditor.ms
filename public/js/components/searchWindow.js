@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+var currentPage = 1;
+const pageSize = 5; // Rows per page
+var allData = []; // To hold all fetched data
+var filteredData = []; // To hold filtered data
+var selectedRowValue = null;
+var modal = null;
+var parentid = null;
 function createQueryResultModal() {
   const modalId = "queryResultModal";
 
@@ -28,6 +35,7 @@ function createQueryResultModal() {
   modal.id = modalId;
   modal.className = "modal";
   modal.style.display = "none"; // Hidden by default
+  modal.style.zIndex = 2147483647; // Set a high z-index
   document.body.appendChild(modal);
 
   // Modal Content
@@ -85,30 +93,73 @@ function createQueryResultModal() {
 
   // Close Button Logic (Header Close)
   const closeModalBtn = modalHeader.querySelector("#closeQueryModalBtn");
-  closeModalBtn.addEventListener("click", () => {
+  closeModalBtn.addEventListener("click", (e) => {
+    e.preventDefault();
     modal.style.display = "none";
   });
 
   // Close Button Logic (Footer Close)
   const modalCloseBtn = modalFooter.querySelector("#modalCloseBtn");
-  modalCloseBtn.addEventListener("click", () => {
+  modalCloseBtn.addEventListener("click", (e) => {
+    e.preventDefault();
     modal.style.display = "none";
   });
 
   return modal;
+}  // createQueryResultModal
+
+// Fetch Data Once and Paginate on the Client
+async function fetchAndRenderData(DBName, datasetJson, query) {
+  // Fetch all data from the backend (no filtering yet)
+  allData = await fetchQueryData(DBName, query);
+
+  // Initially, all data is unfiltered
+  filteredData = [...allData];
+
+  // Render the first page of data
+  renderPaginatedGrid(filteredData, datasetJson.map((d) => d.fieldName));
+  updatePaginationControls(datasetJson);
 }
 
-function showQueryResultModal(DBName, datasetJson, query, parentid) {
+// Apply Filter Logic
+function applyFilter() {
+  // Get filter values from inputs
+  const filters = Array.from(queryFiltersContainer.querySelectorAll("input"))
+    .filter((input) => input.value.trim() !== "")
+    .map((input) => ({
+      field: input.name,
+      value: input.value.trim().toLowerCase(),
+    }));
+
+  // Filter data
+  filteredData = allData.filter((row) => {
+    return filters.every((filter) => {
+      const cellValue = row[filter.field]?.toString().toLowerCase() || "";
+      return cellValue.includes(filter.value);
+    });
+  });
+
+  // Reset to page 1 and render filtered data
+  currentPage = 1;
+  renderPaginatedGrid(filteredData, datasetJson.map((d) => d.fieldName));
+  updatePaginationControls(datasetJson);
+}
+
+function showQueryResultModal(DBName, datasetJson, query, pid) {
   // Pagination State
-  let currentPage = 1;
-  const pageSize = 5; // Rows per page
-  let allData = []; // To hold all fetched data
-  let filteredData = []; // To hold filtered data
-  let selectedRowValue = null;
+  parentid = pid;
+  console.log("DBName:", DBName, "datasetJson:", datasetJson, "query:", query, "parentid:", parentid);
 
   // Ensure modal is created
-  const modal = createQueryResultModal();
+  modal = createQueryResultModal();
+
+  console.log("Modal created:", modal);
+  modal.style.zIndex = 2147483647; // Set a high z-index
   modal.style.display = "block";
+  modal.style.position = "fixed";
+  modal.style.top = "50%";
+  modal.style.left = "50%";
+  modal.style.transform = "translate(-50%, -50%)";
 
   // Parse datasetJson and build filters dynamically
   const queryFiltersContainer = document.getElementById("queryFilters");
@@ -122,116 +173,86 @@ function showQueryResultModal(DBName, datasetJson, query, parentid) {
       `;
     queryFiltersContainer.appendChild(filterDiv);
   });
+  fetchAndRenderData(DBName, datasetJson, query);
+} // showQueryResultModal
 
-  // Fetch Data Once and Paginate on the Client
-  async function fetchAndRenderData() {
-    // Fetch all data from the backend (no filtering yet)
-    allData = await fetchQueryData(DBName, query);
 
-    // Initially, all data is unfiltered
-    filteredData = [...allData];
 
-    // Render the first page of data
-    renderPaginatedGrid(filteredData, datasetJson.map((d) => d.fieldName));
-    updatePaginationControls();
-  }
+// Render the paginated grid
+function renderPaginatedGrid(data, fields) {
+  const grid = document.getElementById("queryResultGrid");
+  grid.innerHTML = ""; // Clear previous grid content
 
-  // Apply Filter Logic
-  function applyFilter() {
-    // Get filter values from inputs
-    const filters = Array.from(queryFiltersContainer.querySelectorAll("input"))
-      .filter((input) => input.value.trim() !== "")
-      .map((input) => ({
-        field: input.name,
-        value: input.value.trim().toLowerCase(),
-      }));
+  // Calculate start and end indices for the current page
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, data.length);
 
-    // Filter data
-    filteredData = allData.filter((row) => {
-      return filters.every((filter) => {
-        const cellValue = row[filter.field]?.toString().toLowerCase() || "";
-        return cellValue.includes(filter.value);
+  // Apply styling for grid size and scroll behavior
+  grid.style.maxHeight = "80vh";
+  grid.style.overflowY = "auto";
+
+  // Create Header Row
+  const headerRow = document.createElement("div");
+  headerRow.className = "grid-row header-row";
+  fields.forEach((field) => {
+    const cell = document.createElement("div");
+    cell.className = "grid-cell header-cell";
+    cell.textContent = field;
+    headerRow.appendChild(cell);
+  });
+  grid.appendChild(headerRow);
+
+  // Create Data Rows for Current Page
+  for (let i = startIndex; i < endIndex; i++) {
+    const row = data[i];
+    const dataRow = document.createElement("div");
+    dataRow.className = `grid-row ${i % 2 === 0 ? "even-row" : "odd-row"}`; // Alternate row color
+    dataRow.addEventListener("click", (e) => {
+      e.preventDefault();
+      selectedRowValue = row[fields[0]]; // Set the first column value as selected
+      // Highlight selected row
+      Array.from(grid.querySelectorAll(".grid-row")).forEach((r) => {
+        r.classList.remove("selected-row");
       });
+      dataRow.classList.add("selected-row");
     });
 
-    // Reset to page 1 and render filtered data
-    currentPage = 1;
-    renderPaginatedGrid(filteredData, datasetJson.map((d) => d.fieldName));
-    updatePaginationControls();
-  }
-
-  // Render the paginated grid
-  function renderPaginatedGrid(data, fields) {
-    const grid = document.getElementById("queryResultGrid");
-    grid.innerHTML = ""; // Clear previous grid content
-
-    // Calculate start and end indices for the current page
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = Math.min(startIndex + pageSize, data.length);
-
-    // Apply styling for grid size and scroll behavior
-    grid.style.maxHeight = "80vh";
-    grid.style.overflowY = "auto";
-
-    // Create Header Row
-    const headerRow = document.createElement("div");
-    headerRow.className = "grid-row header-row";
     fields.forEach((field) => {
       const cell = document.createElement("div");
-      cell.className = "grid-cell header-cell";
-      cell.textContent = field;
-      headerRow.appendChild(cell);
+      cell.className = "grid-cell";
+      cell.textContent = row[field] || ""; // Display data or empty string if null
+      dataRow.appendChild(cell);
     });
-    grid.appendChild(headerRow);
 
-    // Create Data Rows for Current Page
-    for (let i = startIndex; i < endIndex; i++) {
-      const row = data[i];
-      const dataRow = document.createElement("div");
-      dataRow.className = `grid-row ${i % 2 === 0 ? "even-row" : "odd-row"}`; // Alternate row color
-      dataRow.addEventListener("click", () => {
-        selectedRowValue = row[fields[0]]; // Set the first column value as selected
-        // Highlight selected row
-        Array.from(grid.querySelectorAll(".grid-row")).forEach((r) => {
-          r.classList.remove("selected-row");
-        });
-        dataRow.classList.add("selected-row");
-      });
-
-      fields.forEach((field) => {
-        const cell = document.createElement("div");
-        cell.className = "grid-cell";
-        cell.textContent = row[field] || ""; // Display data or empty string if null
-        dataRow.appendChild(cell);
-      });
-
-      grid.appendChild(dataRow);
-    }
+    grid.appendChild(dataRow);
   }
+}  // renderPaginatedGrid
 
-  // Update Pagination Controls
-  function updatePaginationControls() {
-    const currentPageSpan = document.getElementById("currentPage");
-    currentPageSpan.textContent = `Page: ${currentPage}`;
-  }
+// Update Pagination Controls
+function updatePaginationControls(datasetJson) {
+  const currentPageSpan = document.getElementById("currentPage");
+  currentPageSpan.textContent = `Page: ${currentPage}`;
+
 
   // Add Pagination Button Event Listeners
   const prevPageBtn = document.getElementById("prevPageBtn");
   const nextPageBtn = document.getElementById("nextPageBtn");
 
-  prevPageBtn.addEventListener("click", () => {
+  prevPageBtn.addEventListener("click", (e) => {
+    e.preventDefault();
     if (currentPage > 1) {
       currentPage--;
       renderPaginatedGrid(filteredData, datasetJson.map((d) => d.fieldName));
-      updatePaginationControls();
+      updatePaginationControls(datasetJson);
     }
   });
 
-  nextPageBtn.addEventListener("click", () => {
+  nextPageBtn.addEventListener("click", (e) => {
+    e.preventDefault();
     if (currentPage < Math.ceil(filteredData.length / pageSize)) {
       currentPage++;
       renderPaginatedGrid(filteredData, datasetJson.map((d) => d.fieldName));
-      updatePaginationControls();
+      updatePaginationControls(datasetJson);
     }
   });
 
@@ -241,11 +262,13 @@ function showQueryResultModal(DBName, datasetJson, query, parentid) {
 
   // OK Button Logic
   const modalOkBtn = document.getElementById("modalOkBtn");
-  modalOkBtn.onclick = () => {
+  modalOkBtn.onclick = (e) => {
+    e.preventDefault();
     console.log("Selected Row Value:", selectedRowValue);
     modal.style.display = "none"; // Close the modal
     // get input element
     var inputElement = document.getElementById(parentid);
+
     // if the input is not found, return
     if (!inputElement) {
       return;
@@ -256,14 +279,15 @@ function showQueryResultModal(DBName, datasetJson, query, parentid) {
       return;
     } else {
       // set the value of the input element
+
       inputElement.value = selectedRowValue;
+      console.log("Input Element Value Set:", inputElement.value);
     };
 
   };
 
-  // Initial Data Fetch
-  fetchAndRenderData();
-}
+
+}  // updatePaginationControls
 
 async function fetchQueryData(DBName, query) {
   try {

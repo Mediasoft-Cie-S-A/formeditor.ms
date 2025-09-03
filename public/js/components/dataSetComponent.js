@@ -33,7 +33,8 @@ function editElementDataSet(type, element, content) {
   button.style.width = "100%";
   button.onclick = function () {
     const propertiesBar = document.getElementById("propertiesBar");
-    const gridID = propertiesBar.querySelector("label").textContent;
+    const gridID = propertiesBar.getAttribute("data-element-id");
+    console.log("gridID", gridID);
     const main = document.getElementById(gridID);
     updateDataSet(main, content);
   };
@@ -128,6 +129,7 @@ function editElementDataSet(type, element, content) {
 
 async function updateDataSet(main, content) {
   console.log("updateDataSet");
+
   var jsonData = [];
   var linkData = [];
   var exceptionData = [];
@@ -138,15 +140,15 @@ async function updateDataSet(main, content) {
 
   if (data.length == 0) return;
 
+
+
   data.forEach((span) => {
     var json = JSON.parse(span.getAttribute("data-field"));
     // check if the field exists in the jsonData
-    console.log(json);
-    if (jsonData.find((field) => field.fieldName === json.fieldName) == null) {
-      jsonData.push(json);
-    }
+    jsonData.push(json);
 
   });
+
 
   // SQL
   var sqlJson = {}
@@ -194,7 +196,7 @@ async function updateDataSet(main, content) {
       const keys = Object.keys(response[0]);
       jsonData = [];
       keys.forEach((field) => {
-        jsonData.push({ DBName: sqlJson.DBName, fieldName: field, tabelName: "", fieldType: "string" });
+        jsonData.push({ DBName: sqlJson.DBName, fieldName: field, tabelName: "query", fieldType: "string" });
       });
       main.setAttribute("dataSet", JSON.stringify(jsonData));
     } // end if data is not empty
@@ -216,7 +218,9 @@ async function updateDataSet(main, content) {
     }
   });
 
+
   main.setAttribute("dataSet", JSON.stringify(jsonData));
+
   main.setAttribute("datalink", JSON.stringify(linkData));
   main.setAttribute("exceptionSet", JSON.stringify(exceptionData));
   renderDataSet(main);
@@ -224,7 +228,11 @@ async function updateDataSet(main, content) {
 
 function renderDataSet(main) {
   // Clear the main content
+  console.log("renderDataSet");
   main.innerHTML = "";
+  console.log("main content cleared");
+  console.log(main);
+
   main.style.display = "flex";
   main.style.flexDirection = "column";
   main.style.alignItems = "center";
@@ -233,7 +241,7 @@ function renderDataSet(main) {
   main.style.overflowX = "hidden"; // Prevent overflow
 
   // Retrieve dataset JSON from the main element
-  var jsonData = JSON.parse(main.getAttribute("dataSet"));
+  var jsonData = JSON.parse(main.getAttribute("dataset"));
 
   console.log("jsonData:", jsonData);
 
@@ -337,6 +345,8 @@ function renderDataSet(main) {
 
 
 function createFieldFromJson(fieldJson) {
+
+  console.log("Creating field from JSON:", fieldJson);
   var element = null;
   let einput = null;
   switch (fieldJson.fieldType) {
@@ -356,6 +366,7 @@ function createFieldFromJson(fieldJson) {
 
       break;
     case "search_win":
+      console.log("Creating search window:", fieldJson);
       element = createElementInput(fieldJson.fieldType);
       einput = element.querySelector("input"); // Adjust to your combobox selector
       // adding the search button
@@ -364,37 +375,16 @@ function createFieldFromJson(fieldJson) {
       searchButton.style.width = "20px";
       searchButton.style.height = "20px";
       searchButton.style.padding = "0px";
+      searchButton.name = "searchButtonWin";
       // icon for the search button
       var icon = document.createElement("i");
       icon.className = "fas fa-search";
       searchButton.appendChild(icon);
-      searchButton.onclick = function () {
-        var input = einput;
-        var filter = input.value.toUpperCase();
-        // generate the modalwindow for the search
-        // Example JSON dataset and query
-
-        query = einput.getAttribute("dataset-field-SQL");
-        console.log("query", query);
-        // split the query
-        var queryArray = query.split("|");
-        // get the database name
-        DBName = queryArray[0];
-        // get the query
-        query = queryArray[1];
-        // extract all fields from the query
-        var fields = query.match(/SELECT(.*?)FROM/)[1];
-        // get the dataset from the query in this format  { fieldName: "field", fieldType: "string" },
-        const datasetJson = fields.split(",").map((field) => {
-          return {
-            fieldName: field.trim(),
-            fieldType: "string",
-          };
-        });
-        // Show the modal with the query results
-        showQueryResultModal(DBName, datasetJson, queryArray[1], einput.id);
-      };
       element.appendChild(searchButton);
+      console.log("searchButton", element);
+      searchButton.setAttribute("onclick", "searchWinbuttonClick(event, '" + element.id + "')");
+
+
       break;
 
     case "text":
@@ -465,6 +455,7 @@ function createFieldFromJson(fieldJson) {
       break;
   }
   if (element !== undefined && element !== null) {
+    console.log(element);
     element.style.maxWidth = "500px";
 
     // get label from the element
@@ -499,6 +490,35 @@ function createFieldFromJson(fieldJson) {
   return element;
 }
 
+function searchWinbuttonClick(event, elementId) {
+  event.preventDefault();
+  const element = document.getElementById(elementId);
+  const einput = element.querySelector("input");
+  console.log("Search button clicked");
+
+  // generate the modalwindow for the search
+  // Example JSON dataset and query
+
+  query = einput.getAttribute("dataset-field-SQL");
+  console.log("query", query);
+  // split the query
+  var queryArray = query.split("|");
+  // get the database name
+  DBName = queryArray[0];
+  // get the query
+  query = queryArray[1];
+  // extract all fields from the query
+  var fields = query.match(/SELECT(.*?)FROM/)[1];
+  // get the dataset from the query in this format  { fieldName: "field", fieldType: "string" },
+  const datasetJson = fields.split(",").map((field) => {
+    return {
+      fieldName: field.trim(),
+      fieldType: "string",
+    };
+  });
+  // Show the modal with the query results
+  showQueryResultModal(DBName, datasetJson, queryArray[1], einput.id);
+};
 
 
 function insertTable() {
@@ -548,11 +568,14 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum, dataset, link,
   console.log("link", link);
   console.log("rows", rows);
   */
-
-  //There might be a better place for this but it works here
-  await addFieldDescription(DBName, tableName);
   const saveBtn = document.querySelector("[name=SaveDSBtn]");
   // if (saveBtn) saveBtn.disabled = true;
+  if (!saveBtn) {
+    console.log("Save button not found");
+    return;
+  }
+  //There might be a better place for this but it works here
+  await addFieldDescription(DBName, tableName);
 
   try {
     // activate all the loaders by class name miniLoader

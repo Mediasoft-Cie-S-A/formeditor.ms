@@ -122,9 +122,9 @@ function createTabContent(tabsHeader, tabsContent) {
     // Activate the new tab
     // fire tabHeader click event
 
-    tabHeader.setAttribute('onclick', 'activateTab(event,this,document.getElementById("' + tabId + '"))');
+    tabHeader.setAttribute('onclick', 'activateTab(event,this, document.getElementById("' + tabId + '"))');
 
-    activateTab(event, tabHeader, tabContent);
+    activateTab(event, tabHeader, tabContent.id);
 
 
 };
@@ -237,16 +237,28 @@ function activateTab(event, tabHeader, tabContent) {
     if (event) {
         event.preventDefault();
     }
-    // 🔁 Default behavior for regular tabs
-    // Hide all tab contents
-    tabContent.parentElement.querySelectorAll('.ctab_ContentDiv').forEach((el) => el.style.display = 'none');
-
+    console.log("Tab Header: ", tabHeader.parentElement);
+    console.log("Tab Content ID: ", tabContent.id);
+    // check if tabHeader is empty or undefine
     // Unset 'active' on all tab headers
-    tabHeader.parentElement.querySelectorAll('.ctab_HeaderButton').forEach((el) => el.classList.remove('active'));
+    const tabHeaderButtons = tabHeader.parentElement.querySelectorAll('.ctab_HeaderButton');
+    for (let i = 0; i < tabHeaderButtons.length; i++) {
+        tabHeaderButtons[i].classList.remove('active');
+    }
+
+    const container = tabHeader.parentElement.parentElement.querySelectorAll('.ctab_ContentDiv');
+    for (let i = 0; i < container.length; i++) {
+        if (container[i].id.includes(tabContent.id)) {
+            container[i].style.display = 'block';
+        } else {
+            container[i].style.display = 'none';
+        }
+    }
 
     // Activate current tab
     tabHeader.classList.add('active');
-    tabContent.style.display = 'block';
+
+
 
 }
 

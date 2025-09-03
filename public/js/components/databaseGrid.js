@@ -198,7 +198,7 @@ async function updateGridData(main, content) {
       const keys = Object.keys(response[0]);
       jsonData = [];
       keys.forEach((field) => {
-        jsonData.push({ DBName: sqlJson.DBName, fieldName: field, tabelName: "", fieldType: "string" });
+        jsonData.push({ DBName: sqlJson.DBName, fieldName: field, tableName: "query", fieldType: "string" });
       });
       main.setAttribute("dataSet", JSON.stringify(jsonData));
     } // end if data is not empty
@@ -232,7 +232,7 @@ async function updateGridData(main, content) {
 function renderGrid(main) {
   main.innerHTML = ""; // clear the main div
   // get the data from the element
-  var dataset = JSON.parse(main.getAttribute("dataSet"));
+  var dataset = JSON.parse(main.getAttribute("dataset"));
 
 
   main.style.padding = "10px";
@@ -373,12 +373,12 @@ function createGrid(
 
 }
 
-function switchView(e, DBName, gridID, view) {
+function switchView(e, DBName, mainID, view) {
   e.preventDefault();
   // get the grid
-  const grid = document.getElementById(gridID);
+  const grid = document.getElementById(mainID);
   grid.setAttribute("view", view);
-  searchGrid(DBName, "", "", "", gridID); // refresh the grid
+  searchGrid(DBName, "", "", "", mainID); // refresh the grid
 }
 
 function generateHeaderRow(grid, dataset) {
@@ -413,7 +413,14 @@ function generateHeaderRow(grid, dataset) {
         cell.innerHTML = fieldOrderBy.order === "asc" ? '<i class="fa fa-sort-up"></i>' : '<i class="fa fa-sort-down"></i>';
         cell.setAttribute("descending", fieldOrderBy.order);
       }
-      cell.innerHTML += field !== "rowid" ? field.fieldLabel.trim() : "";
+      if (field.fieldLabel) {
+        cell.innerHTML += field !== "rowid" ? field.fieldLabel.trim() : "";
+      }
+      else {
+        cell.innerHTML += field !== "rowid" ? field.fieldName.trim() : "";
+      }
+
+
       cell.setAttribute("field-name", field.fieldName);
       cell.setAttribute("DBName", field.DBName);
       // adding the draggable attribute to the cell
@@ -525,16 +532,16 @@ function generateHeaderRow(grid, dataset) {
   grid.appendChild(body);
 }
 
-function grid_page_size(e, dataGridId) {
+function grid_page_size(e, mainID) {
   e.preventDefault();
   // get selected page size
-  const dataGrid = document.getElementById(dataGridId);
+  const dataGrid = document.getElementById(mainID);
   const dataTable = dataGrid.querySelector('[tagName="dataTable"]');
   const DBName = dataTable.getAttribute("DBName");
   var pageSize = e.target[e.target.selectedIndex].value;
   dataTable.setAttribute("page_size", pageSize);
   dataTable.setAttribute("current_page", 1);
-  searchGrid(DBName, "", "", "", dataGridId);
+  searchGrid(DBName, "", "", "", mainID);
 }
 
 function gridPrev(e, DBName, tableName) {
@@ -580,6 +587,7 @@ function gridNext(e, DBName, tableName) {
 
 function searchGrid(DBName, filterName, FilterOp, filterValue, gridID) {
   const grid = document.getElementById(gridID);
+
   // get the dataset from the main in json format
   const dataset = JSON.parse(grid.getAttribute("dataset"));
 
@@ -591,6 +599,7 @@ function searchGrid(DBName, filterName, FilterOp, filterValue, gridID) {
   }
   var tableName = tableGrid.getAttribute("Table-Name");
 
+  tableGrid.innerHTML = ""; // clear the grid
 
 
   var page = parseInt(tableGrid.getAttribute("current_page")) || 1;
@@ -625,9 +634,9 @@ function searchGrid(DBName, filterName, FilterOp, filterValue, gridID) {
 }
 
 // export grid to csv
-function export2CSV(e, DBName, tabelName) {
+function export2CSV(e, DBName, tableName) {
   e.preventDefault();
-  const grid = document.getElementById("Data-Grid_" + tabelName);
+  const grid = document.getElementById("Data-Grid_" + tableName);
   var main = e.currentTarget.closest('[tagname="dataGrid"]');
   // get the dataset from the main in json format
   const dataset = JSON.parse(main.getAttribute("dataset"));
@@ -661,17 +670,7 @@ function fetchTableData(
   // Prepare the fields query parameter
   // create filter for search based on the input values, with field name and value separated by | and each filter separated by ,
   var filter = "";
-  var i = 0;
-  var filtervalue = grid.querySelectorAll('input[id^="searchValue"]');
-  var searchfields = grid.querySelectorAll('select[id^="searchfields"]');
-  var searchOperator = grid.querySelectorAll('select[id^="searchOperator"]');
-  if (filtervalue.length > 0) {
-    filter = filtervalue[0].value;
-    filter += "|";
-    filter += searchfields[0].value;
-    filter += "|";
-    filter += searchOperator[0].value;
-  }
+
 
   gridGetData(grid, DBName, tableName, page, pageSize, filter);
 
@@ -692,6 +691,8 @@ function getFilterType(fieldType) {
   }
 }
 
+
+/* filter format is <fieldName>|<operator>|<fieldValue> */
 async function gridGetData(
   grid,
   DBName,
@@ -783,103 +784,88 @@ async function gridGetData(
   var sqlJson = JSON.parse(main.getAttribute("sql"));
   if (sqlJson.DBName != "") {
     // get the db name
+    // generate where based on filter if are not empty
+    if (filterJSON && filterJSON.filters && filterJSON.filters.length > 0) {
+      const whereClauses = filterJSON.filters.map(filter => {
+        return `"${filter.field}" ${filter.operator} '${filter.value}'`;
+      });
+      sqlJson.select += ` WHERE ${whereClauses.join(" AND ")}`;
+    }
+
     url = `/table-data-sql/${sqlJson.DBName}/${page}/${pageSize}?sqlQuery=${sqlJson.select}`;
   }
   // Fetch the data from the web service
 
-  const request = new XMLHttpRequest();
-  request.open("GET", url, true);
-  request.setRequestHeader("Content-Type", "application/json");
-  request.setRequestHeader("Accept", "application/json");
-  request.setRequestHeader("Access-Control-Allow-Origin", "*");
-  request.setRequestHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  request.send();
-  request.onload = function () {
-    // Check if the request was successful (status code 200)
-    if (request.status >= 200 && request.status < 300) {
-      // Parse the response as JSON
+  fetch(url).then(async response => {
+    // Parse the response as JSON
+    console.log("Data fetched successfully");
 
-      const data = JSON.parse(request.responseText);
-      // The data is now available
-      for (var j = 0; j < data.length; j++) {
-        switch (gridType) {
-          default:
-          case 0:
-            drawGridRow(
-              mainID,
-              DBName,
-              tableName,
-              data,
-              datasetFields,
-              dataset,
-              datalink,
-              j,
-              body,
-              page,
-              pageSize
-            );
-            break;
-          case 1:
-            drawPanelRow(
-              mainID,
-              DBName,
-              tableName,
-              data,
-              datasetFields,
-              dataset,
-              datalink,
-              j,
-              body,
-              page,
-              pageSize
-            );
-            break;
-        }  // end switch (gridType)
-      } // end for (j = 0; j < data.length; j++)
-      let row = document.createElement("div");
-      row.style.height = "100%";
-      body.appendChild(row);
-      let newbutton = document.createElement("button");
-      newbutton.title = "Add New Record";
-      newbutton.innerHTML = '<i class="fa fa-plus" style="color:green;margin-left:-6px">';
-      newbutton.style.width = "40px";
-      newbutton.style.height = "40px";
-      newbutton.addEventListener("click", function (event) {
-        event.preventDefault();
-        // get the tab
-        const tab = document.querySelector('[tagname="Tab"]');
-        console.log(tab);
-        // the header by class ctab_tabs-header
-        const header = tab.querySelector(".ctab_tabs-header");
-        if (header.childNodes.length > 0) {
-          // second tab
-          activateTab(event, header.childNodes[1], document.getElementById(header.childNodes[1].getAttribute("data-tab")));
-          navbar_InsertRecord();
-        } // end if
-      });
-      body.appendChild(newbutton);
-    } else {
-      // Handle error response
-      console.error("Error fetching data:", request.statusText);
-      showToast("Error fetching data", 5000);
-    }
-  };
-  request.onerror = function () {
-    // Handle network error
-    console.error("Network error:", request.statusText);
-    showToast("Network error", 5000);
-  };
-  request.onabort = function () {
-    // Handle request abort
-    console.error("Request aborted:", request.statusText);
-    showToast("Request aborted", 5000);
-  };
-  request.ontimeout = function () {
-    // Handle request timeout
-    console.error("Request timed out:", request.statusText);
-    showToast("Request timed out", 5000);
-  };
-  // end fetch
+    const data = await response.json();
+    console.log("Data fetched successfully:", data);
+    // The data is now available
+    for (var j = 0; j < data.length; j++) {
+      switch (gridType) {
+        default:
+        case 0:
+          drawGridRow(
+            mainID,
+            DBName,
+            tableName,
+            data,
+            datasetFields,
+            dataset,
+            datalink,
+            j,
+            body,
+            page,
+            pageSize
+          );
+          break;
+        case 1:
+          drawPanelRow(
+            mainID,
+            DBName,
+            tableName,
+            data,
+            datasetFields,
+            dataset,
+            datalink,
+            j,
+            body,
+            page,
+            pageSize
+          );
+          break;
+      }  // end switch (gridType)
+    } // end for (j = 0; j < data.length; j++)
+    let row = document.createElement("div");
+    row.style.height = "100%";
+    body.appendChild(row);
+    let newbutton = document.createElement("button");
+    newbutton.title = "Add New Record";
+    newbutton.innerHTML = '<i class="fa fa-plus" style="color:green;margin-left:-6px">';
+    newbutton.style.width = "40px";
+    newbutton.style.height = "40px";
+    newbutton.addEventListener("click", function (event) {
+      event.preventDefault();
+      // get the tab
+      const tab = document.querySelector('[tagname="Tab"]');
+      console.log(tab);
+      // the header by class ctab_tabs-header
+      const header = tab.querySelector(".ctab_tabs-header");
+      if (header.childNodes.length > 0) {
+        // second tab
+        activateTab(event, header.childNodes[1], document.getElementById(header.childNodes[1].getAttribute("data-tab")));
+        navbar_InsertRecord();
+      } // end if
+    });
+    body.appendChild(newbutton);
+  }).catch(error => {
+    // Handle error response
+    console.error("Error fetching data:", error);
+    showToast("Error fetching data:" + error, 5000);
+  });
+
 
 }
 
@@ -1138,27 +1124,29 @@ function drawPanelRow(
       cell.textContent = field;
     } else {
       let subField = field?.toString().trim().split(";");
-      if (subField.length > 1) {
-        // Clear any previous content
-        cell.innerHTML = "";
+      if (subField) {
+        if (subField.length > 1) {
+          // Clear any previous content
+          cell.innerHTML = "";
 
-        // Create a container for the content
-        const contentDiv = document.createElement("div");
-        contentDiv.style.maxHeight = "200px"; // Adjust height as needed
-        contentDiv.style.overflowY = "auto";
-        contentDiv.style.whiteSpace = "pre-wrap"; // Preserve white spaces and line breaks
+          // Create a container for the content
+          const contentDiv = document.createElement("div");
+          contentDiv.style.maxHeight = "200px"; // Adjust height as needed
+          contentDiv.style.overflowY = "auto";
+          contentDiv.style.whiteSpace = "pre-wrap"; // Preserve white spaces and line breaks
 
-        subField.forEach((item, subIndex) => {
-          const line = document.createElement("div");
-          line.textContent = `${keys[index] == "gama"}: ${item}`;
-          contentDiv.appendChild(line);
-        });
+          subField.forEach((item, subIndex) => {
+            const line = document.createElement("div");
+            line.textContent = `${keys[index] == "gama"}: ${item}`;
+            contentDiv.appendChild(line);
+          });
 
-        cell.appendChild(contentDiv);
-      } else {
+          cell.appendChild(contentDiv);
+        } else {
 
-        cell.textContent = dataset[index - 1].fieldLabel + " : " + field;
-      } // end if (subField.length > 1)
+          cell.textContent = dataset[index - 1].fieldLabel + " : " + field;
+        } // end if (subField.length > 1)
+      } // end if (subField
     } // end if (i == 0)
     i++;
   }// end forEach
