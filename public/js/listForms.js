@@ -455,349 +455,184 @@ function showHint(message, duration = 1000, event) {
 }
 
 async function newForm() {
-    const defaultFormData = {
+    // -------- Tab Header Buttons --------
+    const tabHeaderButtonTable = {
         tag: "div",
         attributes: {
-            id: "Tab" + Date.now(), // unique ID
-            class: "form-element",
-            tagname: "Tab",
+            "data-tab": "ctab_tab-0",
+            class: "ctab_HeaderButton active",
+            onclick: `activateTab(event,this,document.getElementById("ctab_tab-0"))`,
+            id: "element_" + Date.now(),
+        },
+        text: "Table",
+    };
+
+    const tabHeaderButtonEdit = {
+        tag: "div",
+        attributes: {
+            "data-tab": "ctab_tab-1",
+            class: "ctab_HeaderButton",
+            onclick: `activateTab(event,this,document.getElementById("ctab_tab-1"))`,
+            id: "element_" + (Date.now() + 1),
+        },
+        text: "Edit",
+    };
+
+    // -------- Tab Header --------
+    const tabHeader = {
+        tag: "div",
+        attributes: { class: "ctab_tabs-header" },
+        children: [tabHeaderButtonTable, tabHeaderButtonEdit],
+    };
+
+    // -------- Data Grid --------
+    const dataGrid = {
+        tag: "div",
+        attributes: {
+            class: "form-element gjs-selection",
+            id: "dataGrid" + Date.now(),
             draggable: "true",
+            style: "min-height: 450px; display: flex;",
+            tagname: "dataGrid",
+        },
+        children: [],
+    };
+
+    // -------- Data Set --------
+    const dataSet = {
+        tag: "div",
+        attributes: {
+            class: "form-element gjs-selection",
+            id: "dataSet" + Date.now(),
+            draggable: "true",
+            tagname: "dataSet",
+        },
+        children: [],
+    };
+
+    // -------- Data Set Navigation Buttons --------
+    const createNavButton = (name, title, onclick, text, iconClass, iconStyle) => ({
+        tag: "button",
+        attributes: { name, title, onclick, style: "width:150px;", class: "" },
+        children: [
+            { tag: "p", text },
+            { tag: "i", attributes: { class: iconClass, style: iconStyle } }
+        ]
+    });
+
+    const dataSetNavigationButtons = [
+        createNavButton("PreviousDSBtn", "Previous", "navbar_movePrev()", "Previous", "fa fa-chevron-left", "color:#4d61fc;margin-left:-6px"),
+        createNavButton("NextDSBtn", "Next", "navbar_moveNext()", "Next", "fa fa-chevron-right", "color:#4d61fc;margin-left:-6px"),
+        createNavButton("EditDSBtn", "Edit Record", "navbar_EditRecord(false)", "Edit", "fa fa-pencil-square-o", "color:#4d61fc;margin-left:-6px"),
+        createNavButton("InsertDSBtn", "New Record", "navbar_InsertRecord()", "New Record", "fa fa-plus", "color:green;margin-left:-6px"),
+        createNavButton("CopyDSBtn", "Copy", "navbar_CopyRecord()", "Copy", "fa fa-files-o", "color:#4d61fc;margin-left:-6px"),
+        createNavButton("DeleteDSBtn", "Delete", "navbar_DeleteRecord()", "Delete", "fa fa-trash", "color:#e74c3c;margin-left:-6px"),
+        createNavButton("SaveDSBtn", "Save Record", "navbar_SaveRecord()", "Save", "fa fa-floppy-o", "color:red;margin-left:-6px"),
+        createNavButton("CancelDSBtn", "Cancel", "navbar_CancelEdit()", "Cancel", "fa fa-ban", "color:#4d61fc;margin-left:-6px"),
+        createNavButton("SaveAllDSBtn", "Save All and Exit", "handleSaveAllAndExit()", "Save All", "fa fa-check-circle", "color:green;margin-left:-6px")
+    ];
+
+    // -------- Data Set Navigation --------
+    const dataSetNavigation = {
+        tag: "div",
+        attributes: {
+            class: "form-element",
+            id: "dataSetNavigation" + Date.now(),
+            draggable: "true",
+            tagname: "dataSetNavigation",
+            position: "1"
         },
         children: [
             {
                 tag: "div",
-                attributes: { class: "ctab_tabs-header" },
+                attributes: { id: "navigationBar_" + Date.now(), style: "display: block;" },
                 children: [
-                    {
-                        tag: "div",
-                        attributes: {
-                            "data-tab": "ctab_tab-0",
-                            class: "ctab_HeaderButton active",
-                            onclick: `activateTab(event,this,document.getElementById("ctab_tab-0"))`,
-                            id: "element_" + Date.now(),
-                        },
-                        text: "Table",
-                    },
-                    {
-                        tag: "div",
-                        attributes: {
-                            "data-tab": "ctab_tab-1",
-                            class: "ctab_HeaderButton",
-                            onclick: `activateTab(event,this,document.getElementById("ctab_tab-1"))`,
-                            id: "element_" + (Date.now() + 1),
-                        },
-                        text: "Edit",
-                    },
-                ],
-            },
+                    { tag: "div", attributes: { class: "gjs-selection", id: "element_" + Date.now() }, children: dataSetNavigationButtons }
+                ]
+            }
+        ]
+    };
+
+    // -------- Prompt Element --------
+    const promptElement = {
+        tag: "div",
+        attributes: {
+            class: "form-element",
+            id: "prompt" + Date.now(),
+            draggable: "true",
+            prompttext: "Please enter your question",
+            promptplaceholder: "Type your question here...",
+            promptbuttontext: "Submit",
+            promptresponse: "",
+            tagname: "prompt",
+            position: "2"
+        },
+        children: [
             {
                 tag: "div",
-                attributes: { class: "ctab_tabs" },
+                attributes: { id: "chat-container" },
                 children: [
+                    { tag: "textarea", attributes: { id: "PromptText", placeholder: "Type your message...", class: "gjs-selection" } },
                     {
                         tag: "div",
-                        attributes: {
-                            id: "ctab_tab-0",
-                            class: "ctab_ContentDiv",
-                            style: "display: block;",
-                        },
+                        attributes: { class: "actions" },
                         children: [
                             {
                                 tag: "div",
-                                attributes: {
-                                    class: "form-element gjs-selection",
-                                    id: "dataGrid" + Date.now(),
-                                    draggable: "true",
-                                    style: "min-height: 450px; display: flex;",
-                                    tagname: "dataGrid"
-                                },
-                                children: []
-                            }
-                        ]
-                    },
-                    {
-                        tag: "div",
-                        attributes: {
-                            id: "ctab_tab-1",
-                            class: "ctab_ContentDiv",
-                            style: "display: none;",
-                        },
-                        children: [
-                            {
-                                tag: "div",
-                                attributes: {
-                                    class: "form-element gjs-selection",
-                                    id: "dataSet" + Date.now(),
-                                    draggable: "true",
-                                    tagname: "dataSet"
-                                },
-                                children: []
-                            },
-                            {
-                                tag: "div",
-                                attributes: {
-                                    class: "form-element",
-                                    id: "dataSetNavigation" + Date.now(),
-                                    draggable: "true",
-                                    tagname: "dataSetNavigation",
-                                    position: "1"
-                                },
+                                attributes: { style: "display: none; gap: 10px;" },
                                 children: [
                                     {
-                                        tag: "div",
-                                        attributes: {
-                                            id: "navigationBar_" + Date.now(),
-                                            style: "display: block;"
-                                        },
-                                        children: [
-                                            {
-                                                tag: "div",
-                                                attributes: {
-                                                    class: "gjs-selection",
-                                                    id: "element_" + Date.now()
-                                                },
-                                                children: [
-                                                    {
-                                                        tag: "button",
-                                                        attributes: {
-                                                            id: "btnPrevious",
-                                                            name: "PreviousDSBtn",
-                                                            title: "Previous",
-                                                            onclick: "navbar_movePrev()",
-                                                            style: "width:150px;",
-                                                            class: ""
-                                                        },
-                                                        children: [
-                                                            { tag: "p", text: "Previous" },
-                                                            { tag: "i", attributes: { class: "fa fa-chevron-left", style: "color:#4d61fc;margin-left:-6px" } }
-                                                        ]
-                                                    },
-                                                    {
-                                                        tag: "button",
-                                                        attributes: {
-                                                            name: "NextDSBtn",
-                                                            title: "Next",
-                                                            onclick: "navbar_moveNext()",
-                                                            style: "width:150px;",
-                                                            class: ""
-                                                        },
-                                                        children: [
-                                                            { tag: "p", text: "Next" },
-                                                            { tag: "i", attributes: { class: "fa fa-chevron-right", style: "color:#4d61fc;margin-left:-6px" } }
-                                                        ]
-                                                    },
-                                                    {
-                                                        tag: "button",
-                                                        attributes: {
-                                                            name: "EditDSBtn",
-                                                            title: "Edit Record",
-                                                            onclick: "navbar_EditRecord(false)",
-                                                            style: "width:150px;",
-                                                            class: ""
-                                                        },
-                                                        children: [
-                                                            { tag: "p", text: "Edit" },
-                                                            { tag: "i", attributes: { class: "fa fa-pencil-square-o", style: "color:#4d61fc;margin-left:-6px" } }
-                                                        ]
-                                                    },
-                                                    {
-                                                        tag: "button",
-                                                        attributes: {
-                                                            name: "InsertDSBtn",
-                                                            title: "New Record",
-                                                            onclick: "navbar_InsertRecord()",
-                                                            style: "width:150px;",
-                                                            class: ""
-                                                        },
-                                                        children: [
-                                                            { tag: "p", text: "New Record" },
-                                                            { tag: "i", attributes: { class: "fa fa-plus", style: "color:green;margin-left:-6px" } }
-                                                        ]
-                                                    },
-                                                    {
-                                                        tag: "button",
-                                                        attributes: {
-                                                            name: "CopyDSBtn",
-                                                            title: "Copy",
-                                                            onclick: "navbar_CopyRecord()",
-                                                            style: "width:150px;",
-                                                            class: ""
-                                                        },
-                                                        children: [
-                                                            { tag: "p", text: "Copy" },
-                                                            { tag: "i", attributes: { class: "fa fa-files-o", style: "color:#4d61fc;margin-left:-6px" } }
-                                                        ]
-                                                    },
-                                                    {
-                                                        tag: "button",
-                                                        attributes: {
-                                                            name: "DeleteDSBtn",
-                                                            title: "Delete",
-                                                            onclick: "navbar_DeleteRecord()",
-                                                            style: "width:150px;",
-                                                            class: ""
-                                                        },
-                                                        children: [
-                                                            { tag: "p", text: "Delete" },
-                                                            { tag: "i", attributes: { class: "fa fa-trash", style: "color:#e74c3c;margin-left:-6px" } }
-                                                        ]
-                                                    },
-                                                    {
-                                                        tag: "button",
-                                                        attributes: {
-                                                            name: "SaveDSBtn",
-                                                            title: "Save Record",
-                                                            onclick: "navbar_SaveRecord()",
-                                                            style: "width:150px;",
-                                                            disabled: "",
-                                                            class: "disabled"
-                                                        },
-                                                        children: [
-                                                            { tag: "p", text: "Save" },
-                                                            { tag: "i", attributes: { class: "fa fa-floppy-o", style: "color:red;margin-left:-6px" } }
-                                                        ]
-                                                    },
-                                                    {
-                                                        tag: "button",
-                                                        attributes: {
-                                                            name: "CancelDSBtn",
-                                                            title: "Cancel",
-                                                            onclick: "navbar_CancelEdit()",
-                                                            style: "width:150px;",
-                                                            disabled: "",
-                                                            class: "disabled"
-                                                        },
-                                                        children: [
-                                                            { tag: "p", text: "Cancel" },
-                                                            { tag: "i", attributes: { class: "fa fa-ban", style: "color:#4d61fc;margin-left:-6px" } }
-                                                        ]
-                                                    },
-                                                    {
-                                                        tag: "button",
-                                                        attributes: {
-                                                            name: "SaveAllDSBtn",
-                                                            title: "Save All and Exit",
-                                                            onclick: "handleSaveAllAndExit()",
-                                                            style: "width:150px;",
-                                                            disabled: "",
-                                                            class: "disabled"
-                                                        },
-                                                        children: [
-                                                            { tag: "p", text: "Save All" },
-                                                            { tag: "i", attributes: { class: "fa fa-check-circle", style: "color:green;margin-left:-6px" } }
-                                                        ]
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        tag: "div",
-                                        attributes: {
-                                            class: "form-element",
-                                            id: "prompt" + Date.now(),
-                                            draggable: "true",
-                                            prompttext: "Please enter your question",
-                                            promptplaceholder: "Type your question here...",
-                                            promptbuttontext: "Submit",
-                                            promptresponse: "",
-                                            tagname: "prompt",
-                                            position: "2"
-                                        },
-                                        children: [
-                                            {
-                                                tag: "div",
-                                                attributes: {
-                                                    id: "chat-container"
-                                                },
-                                                children: [
-                                                    {
-                                                        tag: "textarea",
-                                                        attributes: {
-                                                            id: "PromptText",
-                                                            placeholder: "Type your message...",
-                                                            class: "gjs-selection"
-                                                        }
-                                                    },
-                                                    {
-                                                        tag: "div",
-                                                        attributes: {
-                                                            class: "actions"
-                                                        },
-                                                        children: [
-                                                            {
-                                                                tag: "div",
-                                                                attributes: {
-                                                                    style: "display: none; gap: 10px;"
-                                                                },
-                                                                children: [
-                                                                    {
-                                                                        tag: "label",
-                                                                        attributes: { for: "file-upload" },
-                                                                        children: [
-                                                                            { tag: "text", text: "📎 Upload" },
-                                                                            { tag: "input", attributes: { type: "file", id: "file-upload" } }
-                                                                        ]
-                                                                    }
-                                                                ]
-                                                            },
-                                                            {
-                                                                tag: "button",
-                                                                attributes: {
-                                                                    onclick: "handleBigDocument(event)",
-                                                                    title: "Upload File"
-                                                                },
-                                                                text: "📎"
-                                                            },
-                                                            {
-                                                                tag: "button",
-                                                                attributes: {
-                                                                    onclick: "handleFill(event)",
-                                                                    title: "Fill"
-                                                                },
-                                                                text: "✨"
-                                                            },
-                                                            {
-                                                                tag: "button",
-                                                                attributes: {
-                                                                    onmousedown: "startVoice()",
-                                                                    onmouseup: "stopVoice()",
-                                                                    onmouseleave: "stopVoice()",
-                                                                    title: "Voice: Hold to Speak"
-                                                                },
-                                                                text: "🎤"
-                                                            },
-                                                            {
-                                                                tag: "button",
-                                                                attributes: {
-                                                                    onclick: "handleAiButton(event)",
-                                                                    title: "Send to AI"
-                                                                },
-                                                                text: "🤖"
-                                                            },
-                                                            {
-                                                                tag: "img",
-                                                                attributes: {
-                                                                    src: "img/loader.gif",
-                                                                    id: "loader",
-                                                                    style: "display: none; width: 80px; height: 40px;",
-                                                                    alt: "Loading..."
-                                                                }
-                                                            }
-                                                        ]
-                                                    }
-                                                ]
-                                            }
+                                        tag: "label", attributes: { for: "file-upload" }, children: [
+                                            { tag: "text", text: "📎 Upload" },
+                                            { tag: "input", attributes: { type: "file", id: "file-upload" } }
                                         ]
                                     }
                                 ]
-                            }
+                            },
+                            { tag: "button", attributes: { onclick: "handleBigDocument(event)", title: "Upload File" }, text: "📎" },
+                            { tag: "button", attributes: { onclick: "handleFill(event)", title: "Fill" }, text: "✨" },
+                            { tag: "button", attributes: { onmousedown: "startVoice()", onmouseup: "stopVoice()", onmouseleave: "stopVoice()", title: "Voice: Hold to Speak" }, text: "🎤" },
+                            { tag: "button", attributes: { onclick: "handleAiButton(event)", title: "Send to AI" }, text: "🤖" },
+                            { tag: "img", attributes: { src: "img/loader.gif", id: "loader", style: "display: none; width: 80px; height: 40px;", alt: "Loading..." } }
                         ]
                     }
                 ]
             }
-        ],
+        ]
     };
+
+    // -------- Tab Content Divs --------
+    const tab0Content = {
+        tag: "div",
+        attributes: { id: "ctab_tab-0", class: "ctab_ContentDiv", style: "display: block;" },
+        children: [dataGrid]
+    };
+
+    const tab1Content = {
+        tag: "div",
+        attributes: { id: "ctab_tab-1", class: "ctab_ContentDiv", style: "display: none;" },
+        children: [dataSet, dataSetNavigation, promptElement]
+    };
+
+    // -------- Tabs Container --------
+    const tabsContainer = {
+        tag: "div",
+        attributes: { class: "ctab_tabs" },
+        children: [tab0Content, tab1Content]
+    };
+
+    // -------- Final Default Form Data --------
+    const defaultFormData = {
+        tag: "div",
+        attributes: {
+            id: "Tab" + Date.now(),
+            class: "form-element",
+            tagname: "Tab",
+            draggable: "true"
+        },
+        children: [tabHeader, tabsContainer]
+    };
+
 
     console.log("Create new form");
 
