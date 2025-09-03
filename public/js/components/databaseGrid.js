@@ -232,7 +232,7 @@ async function updateGridData(main, content) {
 function renderGrid(main) {
   main.innerHTML = ""; // clear the main div
   // get the data from the element
-  var dataset = JSON.parse(main.getAttribute("dataSet"));
+  var dataset = JSON.parse(main.getAttribute("dataset"));
 
 
   main.style.padding = "10px";

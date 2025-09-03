@@ -72,9 +72,9 @@ function loadForms() {
                 editButton.innerHTML = '<i class="fa fa-edit" style="margin-left:-5px"></i>'
                 editButton.className = 'portal-edit-button';
                 editButton.onclick = function (event) {
-
-                    document.getElementById('renderContainer').innerHTML = ''; // Clear the render container
-                    loadFormData(form.objectId, document.getElementById('formContainer'), false);
+                    //document.getElementById('renderContainer').innerHTML = ''; // Clear the render container
+                    //loadFormData(form.objectId, document.getElementById('formContainer'), false, "");
+                    helperLoadContainer(event, form.objectId); // Load the form data into the form container
                     const showTab = document.querySelector('.nav-tabs a[href="#editForm"]');
                     activeForm = form;
                     if (showTab) {
@@ -87,9 +87,9 @@ function loadForms() {
                 showButton.innerHTML = '<i class="fa fa-eye" style="margin-left:-5px"></i>'
                 showButton.className = 'portal-show-button';
                 showButton.onclick = function (event) {
-
-                    document.getElementById('formContainer').innerHTML = ''; // Clear the form container
-                    loadFormData(form.objectId, document.getElementById('renderContainer'), true);
+                    //document.getElementById('formContainer').innerHTML = ''; // Clear the form container
+                    //loadFormData(form.objectId, document.getElementById('renderContainer'), true, "");
+                    helperLoadContainer(event, form.objectId); // Load the form data into the form container
                     const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
                     activeForm = form;
                     if (showTab) {
@@ -104,8 +104,9 @@ function loadForms() {
                 itemActions.appendChild(editButton);
                 itemActions.appendChild(deleteButton);
                 container.addEventListener('dblclick', function (event) {
-                    document.getElementById('renderContainer').innerHTML = ''; // Clear the render container
-                    loadFormData(form.objectId, document.getElementById('formContainer'), false);
+                    //document.getElementById('formContainer').innerHTML = ''; // Clear the render container
+                    //loadFormData(form.objectId, document.getElementById('renderContainer'), true, "render");
+                    helperLoadContainer(event, form.objectId);
                     const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
                     activeForm = form;
                     if (showTab) {
@@ -164,8 +165,10 @@ function loadForms() {
 
 function helperLoadContainer(event, objectId) {
     event.preventDefault();
-    loadFormData(objectId, document.getElementById('renderContainer'), true);
-    loadFormData(objectId, document.getElementById('formContainer'), false);
+    //document.getElementById('renderContainer').innerHTML = '';
+    //document.getElementById('formContainer').innerHTML = '';
+    loadFormData(objectId, document.getElementById('renderContainer'), true, "render");
+    loadFormData(objectId, document.getElementById('formContainer'), false, "");
 }
 
 function deleteForm(objectId, listItem) {
@@ -257,7 +260,39 @@ function searchFormbySlug(event) {
     console.log('Search completed.');
 }
 
-function loadFormData(objectId, renderContainer, renderElem) {
+function updateAllIdsInJson(jsonObj, prefix) {
+    if (prefix === "") {
+        return jsonObj;
+    }
+    if (Array.isArray(jsonObj)) {
+        return jsonObj.map(item => updateAllIdsInJson(item, prefix));
+    } else if (jsonObj && typeof jsonObj === "object") {
+        const updatedObj = {};
+
+        for (let key in jsonObj) {
+            let value = jsonObj[key];
+
+            // If this is an "id" key, update it
+            if (key === "id" && typeof value === "string" && value.trim() !== "") {
+                updatedObj[key] = `${prefix}_${value}`;
+            }
+            // If this is a label's "for" attribute
+            else if (key === "for" && typeof value === "string" && value.trim() !== "") {
+                updatedObj[key] = `${prefix}_${value}`;
+            }
+            else {
+                //console.log("Call update All with value : ", value)
+                updatedObj[key] = updateAllIdsInJson(value, prefix);
+            }
+        }
+        return updatedObj;
+    }
+
+    return jsonObj; // Primitive value, return as is
+}
+
+
+function loadFormData(objectId, renderContainer, renderElem, prefix) {
     console.log("Load form data : " + objectId);
     fetch(`/get-form/${objectId}`)
         .then(response => {
@@ -271,9 +306,12 @@ function loadFormData(objectId, renderContainer, renderElem) {
 
             renderContainer.innerHTML = '';
 
+            //const updatedFormData = form.formData;
+            const updatedFormData = updateAllIdsInJson(form.formData, prefix);
 
             // Convert JSON back to DOM and append
-            var domContent = jsonToDom(form.formData, renderContainer);
+            var domContent = jsonToDom(updatedFormData, renderContainer);
+
             if (renderElem) {
                 renderElements(renderContainer);
             }
@@ -307,6 +345,7 @@ function loadFormData(objectId, renderContainer, renderElem) {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
+
 function rebuildComponents(container) {
     const elements = container.querySelectorAll("[tagName]");
     elements.forEach(el => {
