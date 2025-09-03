@@ -490,6 +490,312 @@ async function newForm() {
                     },
                 ],
             },
+            {
+                tag: "div",
+                attributes: { class: "ctab_tabs" },
+                children: [
+                    {
+                        tag: "div",
+                        attributes: {
+                            id: "ctab_tab-0",
+                            class: "ctab_ContentDiv",
+                            style: "display: block;",
+                        },
+                        children: [
+                            {
+                                tag: "div",
+                                attributes: {
+                                    class: "form-element gjs-selection",
+                                    id: "dataGrid" + Date.now(),
+                                    draggable: "true",
+                                    style: "min-height: 450px; display: flex;",
+                                    tagname: "dataGrid"
+                                },
+                                children: []
+                            }
+                        ]
+                    },
+                    {
+                        tag: "div",
+                        attributes: {
+                            id: "ctab_tab-1",
+                            class: "ctab_ContentDiv",
+                            style: "display: none;",
+                        },
+                        children: [
+                            {
+                                tag: "div",
+                                attributes: {
+                                    class: "form-element gjs-selection",
+                                    id: "dataSet" + Date.now(),
+                                    draggable: "true",
+                                    tagname: "dataSet"
+                                },
+                                children: []
+                            },
+                            {
+                                tag: "div",
+                                attributes: {
+                                    class: "form-element",
+                                    id: "dataSetNavigation" + Date.now(),
+                                    draggable: "true",
+                                    tagname: "dataSetNavigation",
+                                    position: "1"
+                                },
+                                children: [
+                                    {
+                                        tag: "div",
+                                        attributes: {
+                                            id: "navigationBar_" + Date.now(),
+                                            style: "display: block;"
+                                        },
+                                        children: [
+                                            {
+                                                tag: "div",
+                                                attributes: {
+                                                    class: "gjs-selection",
+                                                    id: "element_" + Date.now()
+                                                },
+                                                children: [
+                                                    {
+                                                        tag: "button",
+                                                        attributes: {
+                                                            id: "btnPrevious",
+                                                            name: "PreviousDSBtn",
+                                                            title: "Previous",
+                                                            onclick: "navbar_movePrev()",
+                                                            style: "width:150px;",
+                                                            class: ""
+                                                        },
+                                                        children: [
+                                                            { tag: "p", text: "Previous" },
+                                                            { tag: "i", attributes: { class: "fa fa-chevron-left", style: "color:#4d61fc;margin-left:-6px" } }
+                                                        ]
+                                                    },
+                                                    {
+                                                        tag: "button",
+                                                        attributes: {
+                                                            name: "NextDSBtn",
+                                                            title: "Next",
+                                                            onclick: "navbar_moveNext()",
+                                                            style: "width:150px;",
+                                                            class: ""
+                                                        },
+                                                        children: [
+                                                            { tag: "p", text: "Next" },
+                                                            { tag: "i", attributes: { class: "fa fa-chevron-right", style: "color:#4d61fc;margin-left:-6px" } }
+                                                        ]
+                                                    },
+                                                    {
+                                                        tag: "button",
+                                                        attributes: {
+                                                            name: "EditDSBtn",
+                                                            title: "Edit Record",
+                                                            onclick: "navbar_EditRecord(false)",
+                                                            style: "width:150px;",
+                                                            class: ""
+                                                        },
+                                                        children: [
+                                                            { tag: "p", text: "Edit" },
+                                                            { tag: "i", attributes: { class: "fa fa-pencil-square-o", style: "color:#4d61fc;margin-left:-6px" } }
+                                                        ]
+                                                    },
+                                                    {
+                                                        tag: "button",
+                                                        attributes: {
+                                                            name: "InsertDSBtn",
+                                                            title: "New Record",
+                                                            onclick: "navbar_InsertRecord()",
+                                                            style: "width:150px;",
+                                                            class: ""
+                                                        },
+                                                        children: [
+                                                            { tag: "p", text: "New Record" },
+                                                            { tag: "i", attributes: { class: "fa fa-plus", style: "color:green;margin-left:-6px" } }
+                                                        ]
+                                                    },
+                                                    {
+                                                        tag: "button",
+                                                        attributes: {
+                                                            name: "CopyDSBtn",
+                                                            title: "Copy",
+                                                            onclick: "navbar_CopyRecord()",
+                                                            style: "width:150px;",
+                                                            class: ""
+                                                        },
+                                                        children: [
+                                                            { tag: "p", text: "Copy" },
+                                                            { tag: "i", attributes: { class: "fa fa-files-o", style: "color:#4d61fc;margin-left:-6px" } }
+                                                        ]
+                                                    },
+                                                    {
+                                                        tag: "button",
+                                                        attributes: {
+                                                            name: "DeleteDSBtn",
+                                                            title: "Delete",
+                                                            onclick: "navbar_DeleteRecord()",
+                                                            style: "width:150px;",
+                                                            class: ""
+                                                        },
+                                                        children: [
+                                                            { tag: "p", text: "Delete" },
+                                                            { tag: "i", attributes: { class: "fa fa-trash", style: "color:#e74c3c;margin-left:-6px" } }
+                                                        ]
+                                                    },
+                                                    {
+                                                        tag: "button",
+                                                        attributes: {
+                                                            name: "SaveDSBtn",
+                                                            title: "Save Record",
+                                                            onclick: "navbar_SaveRecord()",
+                                                            style: "width:150px;",
+                                                            disabled: "",
+                                                            class: "disabled"
+                                                        },
+                                                        children: [
+                                                            { tag: "p", text: "Save" },
+                                                            { tag: "i", attributes: { class: "fa fa-floppy-o", style: "color:red;margin-left:-6px" } }
+                                                        ]
+                                                    },
+                                                    {
+                                                        tag: "button",
+                                                        attributes: {
+                                                            name: "CancelDSBtn",
+                                                            title: "Cancel",
+                                                            onclick: "navbar_CancelEdit()",
+                                                            style: "width:150px;",
+                                                            disabled: "",
+                                                            class: "disabled"
+                                                        },
+                                                        children: [
+                                                            { tag: "p", text: "Cancel" },
+                                                            { tag: "i", attributes: { class: "fa fa-ban", style: "color:#4d61fc;margin-left:-6px" } }
+                                                        ]
+                                                    },
+                                                    {
+                                                        tag: "button",
+                                                        attributes: {
+                                                            name: "SaveAllDSBtn",
+                                                            title: "Save All and Exit",
+                                                            onclick: "handleSaveAllAndExit()",
+                                                            style: "width:150px;",
+                                                            disabled: "",
+                                                            class: "disabled"
+                                                        },
+                                                        children: [
+                                                            { tag: "p", text: "Save All" },
+                                                            { tag: "i", attributes: { class: "fa fa-check-circle", style: "color:green;margin-left:-6px" } }
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        tag: "div",
+                                        attributes: {
+                                            class: "form-element",
+                                            id: "prompt" + Date.now(),
+                                            draggable: "true",
+                                            prompttext: "Please enter your question",
+                                            promptplaceholder: "Type your question here...",
+                                            promptbuttontext: "Submit",
+                                            promptresponse: "",
+                                            tagname: "prompt",
+                                            position: "2"
+                                        },
+                                        children: [
+                                            {
+                                                tag: "div",
+                                                attributes: {
+                                                    id: "chat-container"
+                                                },
+                                                children: [
+                                                    {
+                                                        tag: "textarea",
+                                                        attributes: {
+                                                            id: "PromptText",
+                                                            placeholder: "Type your message...",
+                                                            class: "gjs-selection"
+                                                        }
+                                                    },
+                                                    {
+                                                        tag: "div",
+                                                        attributes: {
+                                                            class: "actions"
+                                                        },
+                                                        children: [
+                                                            {
+                                                                tag: "div",
+                                                                attributes: {
+                                                                    style: "display: none; gap: 10px;"
+                                                                },
+                                                                children: [
+                                                                    {
+                                                                        tag: "label",
+                                                                        attributes: { for: "file-upload" },
+                                                                        children: [
+                                                                            { tag: "text", text: "📎 Upload" },
+                                                                            { tag: "input", attributes: { type: "file", id: "file-upload" } }
+                                                                        ]
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                tag: "button",
+                                                                attributes: {
+                                                                    onclick: "handleBigDocument(event)",
+                                                                    title: "Upload File"
+                                                                },
+                                                                text: "📎"
+                                                            },
+                                                            {
+                                                                tag: "button",
+                                                                attributes: {
+                                                                    onclick: "handleFill(event)",
+                                                                    title: "Fill"
+                                                                },
+                                                                text: "✨"
+                                                            },
+                                                            {
+                                                                tag: "button",
+                                                                attributes: {
+                                                                    onmousedown: "startVoice()",
+                                                                    onmouseup: "stopVoice()",
+                                                                    onmouseleave: "stopVoice()",
+                                                                    title: "Voice: Hold to Speak"
+                                                                },
+                                                                text: "🎤"
+                                                            },
+                                                            {
+                                                                tag: "button",
+                                                                attributes: {
+                                                                    onclick: "handleAiButton(event)",
+                                                                    title: "Send to AI"
+                                                                },
+                                                                text: "🤖"
+                                                            },
+                                                            {
+                                                                tag: "img",
+                                                                attributes: {
+                                                                    src: "img/loader.gif",
+                                                                    id: "loader",
+                                                                    style: "display: none; width: 80px; height: 40px;",
+                                                                    alt: "Loading..."
+                                                                }
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
         ],
     };
 
