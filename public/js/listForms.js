@@ -27,6 +27,7 @@ function loadForms() {
             return response.json();
         })
         .then(forms => {
+            console.log(forms);
             const list = document.getElementById('componentsListBody');
 
             list.innerHTML = ''; // Clear the list
@@ -64,7 +65,7 @@ function loadForms() {
                 deleteButton.className = 'portal-delete-button';
                 deleteButton.onclick = function (event) {
                     event.preventDefault();
-                    deleteForm(form.objectId, listItem);
+                    deleteForm(form.objectId, container);
                 }; // delete button functionality
 
                 // create edit button
@@ -408,4 +409,51 @@ function showHint(message, duration = 1000, event) {
         hint.style.opacity = 0;
         hint.addEventListener("transitionend", () => hint.remove());
     }, duration);
+}
+
+async function newForm() {
+    console.log("Create new form");
+
+    // Example formData (very minimal skeleton)
+    const formData = {
+        tag: "div",
+        attributes: { class: "form-container" },
+        children: [
+            {
+                tag: "input",
+                attributes: {
+                    type: "text",
+                    placeholder: "Enter something...",
+                },
+            },
+        ],
+    };
+
+    const formPayload = {
+        objectId: "ad101", // You could generate this dynamically
+        objectName: "Gestion des Clients",
+        objectSlug: "Clients",
+        formData,
+        userCreated: "masspe",
+    };
+
+    try {
+        const response = await fetch("/create-form", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formPayload),
+        });
+
+        if (!response.ok) {
+            throw new Error(await response.text());
+        }
+
+        const result = await response.json();
+        console.log("✅ Form created:", result);
+
+        alert(`Form "${result.form.objectName}" created successfully!`);
+    } catch (err) {
+        console.error("❌ Error creating form:", err);
+        alert("Failed to create form: " + err.message);
+    }
 }

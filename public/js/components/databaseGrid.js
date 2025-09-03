@@ -641,8 +641,6 @@ function export2CSV(e, DBName, tabelName) {
   window.open(url, "_blank");
 }
 
-
-
 function gridFetchData(grid, body) {
   var DBName = grid.getAttribute("DBName");
   var tableName = grid.getAttribute("Table-Name");
