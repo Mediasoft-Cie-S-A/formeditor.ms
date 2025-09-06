@@ -241,7 +241,7 @@ function renderDataSet(main) {
   main.style.overflowX = "hidden"; // Prevent overflow
 
   // Retrieve dataset JSON from the main element
-  var jsonData = JSON.parse(main.getAttribute("dataSet"));
+  var jsonData = JSON.parse(main.getAttribute("dataset"));
 
   console.log("jsonData:", jsonData);
 

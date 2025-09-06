@@ -174,6 +174,10 @@ function createDomElement(json, parent) {
       }
     }
 
+    if (json.text || json.innerText || json.textContent) {
+      element.textContent = json.text || json.innerText || json.textContent;
+    }
+
     element.classList.remove("gjs-selection");
     // onlyEditor is used to hide the element in the render view
     if (element.getAttribute("onlyEditor") === "true") {
@@ -210,6 +214,138 @@ function exportJson() {
   downloadAnchorNode.click();
   downloadAnchorNode.remove();
 }
+
+function promptCreateForm() {
+
+
+  loadJson("/elementsConfig")
+    .then(async (data) => {
+
+
+      const minimalData = Object.entries(data).map(([key, comp]) => ({
+        name: key,
+        type: comp.type,
+        description: comp.description,
+        category: comp.category,
+        props: comp.props ? Object.keys(comp.props) : []
+      }));
+
+
+      console.log("Minimal Data:", minimalData);
+
+      const userInput = prompt("Describe the form you want to create:");
+
+      if (!userInput) {
+        return; // User cancelled or input is empty
+      }
+
+      let aiPrompt = `
+        You are a form generation assistant.
+
+        Based on the user's request, generate a form structure in JSON or HTML format.
+
+        Request:
+        "${userInput}"
+      `.trim();
+
+      aiPrompt = `
+        You are a form generation assistant.
+
+        You have access to a predefined list of UI components. Based on the user's request, generate the corresponding form element(s) using the JSON structure provided below.
+
+        Only use components from the following list, and match their properties:
+
+        === Component Definitions ===
+        ${JSON.stringify(minimalData, null, 2)}
+        =============================
+
+        User Request:
+        "${userInput}"
+
+        Respond ONLY with valid JSON that matches the structure of one or more components from the list above.
+
+        Do not explain, comment, or include any other text — just return JSON.
+      `.trim();
+
+
+      console.log("AI Prompt:", aiPrompt);
+
+
+      try {
+        const response = await askAi(aiPrompt);
+        console.log("AI Response:", response);
+
+        // Handle single or multiple components
+        let components = JSON.parse(response);
+        components = Array.isArray(components) ? components : [components];
+
+        // Load full component definitions
+        const fullComponentDefs = data; // this is your elementsConfig
+
+        const formContainer = document.getElementById("formContainer");
+
+        components.forEach((comp) => {
+          try {
+            const enriched = enrichComponent(comp, fullComponentDefs);
+            console.log("Enriched Component:", enriched);
+            console.log("Form Container:", formContainer);
+            //createDomElement(enriched, formContainer);
+            const newElement = createFormElement(enriched.type);
+
+            if (newElement) {
+              formContainer.appendChild(newElement);
+            }
+
+          } catch (e) {
+            console.error("Component error:", e);
+          }
+        });
+
+        // You can display or inject the result here
+        // alert("AI Response:\n" + response);
+      } catch (err) {
+        console.error("Error communicating with AI:", err);
+        alert("An error occurred while generating the form.");
+      }
+    })
+    .catch((err) => {
+      console.error("Error loading elementsConfig:", err);
+      alert("Failed to load form components.");
+    });
+}
+
+function enrichComponent(aiJson, fullComponentDefs) {
+  const type = aiJson.type;
+  const baseDef = fullComponentDefs[type] || Object.values(fullComponentDefs).find(def => def.type === type);
+
+  console.log("type:", type);
+  console.log("Base Definition:", baseDef);
+  console.log("AI JSON:", aiJson);
+  console.log("Available types:", Object.keys(fullComponentDefs)); // See if "inputField" is really there
+
+  if (!baseDef) {
+    throw new Error(`Unknown component type: ${type}`);
+  }
+
+  // Fix invalid props from AI
+  if (!aiJson.props || typeof aiJson.props !== "object" || Array.isArray(aiJson.props)) {
+    aiJson.props = {};
+  }
+
+  // Merge AI-provided properties with the defaults
+  const merged = {
+    ...baseDef,
+    props: {
+      ...baseDef.props,
+      ...aiJson.props // AI may provide overrides
+    }
+  };
+
+  return merged;
+}
+
+
+
 
 // Function to handle tab switch
 function onTabSwitch(event) {

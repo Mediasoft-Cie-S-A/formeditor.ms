@@ -232,7 +232,7 @@ async function updateGridData(main, content) {
 function renderGrid(main) {
   main.innerHTML = ""; // clear the main div
   // get the data from the element
-  var dataset = JSON.parse(main.getAttribute("dataSet"));
+  var dataset = JSON.parse(main.getAttribute("dataset"));
 
 
   main.style.padding = "10px";
@@ -345,8 +345,6 @@ function insertNavBar(
   // get tagname="dataTable" from the gridContainer
   gridContainer.innerHTML += html;
 }
-
-
 
 //Grid code
 function createGrid(
@@ -651,8 +649,6 @@ function export2CSV(e, DBName, tableName) {
   const url = `/export-table/${DBName}/${tableName}?fields=${datasetFields}`;
   window.open(url, "_blank");
 }
-
-
 
 function gridFetchData(grid, body) {
   var DBName = grid.getAttribute("DBName");

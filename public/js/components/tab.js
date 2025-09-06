@@ -245,12 +245,13 @@ function activateTab(event, tabHeader, tabContent) {
     for (let i = 0; i < tabHeaderButtons.length; i++) {
         tabHeaderButtons[i].classList.remove('active');
     }
+
     const container = tabHeader.parentElement.parentElement.querySelectorAll('.ctab_ContentDiv');
     for (let i = 0; i < container.length; i++) {
-        if (container[i].id != tabContent.id) {
-            container[i].style.display = 'none';
-        } else {
+        if (container[i].id.includes(tabContent.id)) {
             container[i].style.display = 'block';
+        } else {
+            container[i].style.display = 'none';
         }
     }
 
