@@ -1,0 +1,206 @@
+<div class="tab-pane fade" id="editForm">
+    <div class="row display-flex" id="formProperties" style="width: 100%; padding: 10px;">
+        <!-- Form properties will be added here -->
+        <form class="container-fluid" id="formDataForm">
+            <div class="row table-hover editor-fields"
+                style="display:flex;align-items:flex-start;justify-content:center;">
+                <div class="col" style="display:inline-block;">
+                    <label for="objectId">ID:</label><br>
+                    <input class="input-element" id="objectId" name="objectId" placeholder="ID" required type="text"
+                        value=""><br>
+                </div>
+                <div class="col" style="display:inline-block">
+                    <label for="objectName">Name:</label><br>
+                    <input class="input-element" id="objectName" name="objectName" placeholder="Insert Name" required
+                        type="text" value="" style="width:150px;"><br>
+                </div>
+                <div class="col" style="display:inline-block">
+                    <label for="objectSlug">Slug:</label><br>
+                    <input class="input-element" id="objectSlug" name="objectSlug" placeholder="Insert Slug" required
+                        type="text" value="" style="width:150px;"><br>
+                </div>
+                <div class="col" style="display:inline-block">
+                    <label for="userCreated">User Created:</label><br>
+                    <input class="input-element" id="userCreated" name="userCreated" placeholder="User Created" required
+                        type="text" value="<%= userName %>"><br>
+                </div>
+                <div class="col" style="display:inline-block">
+                    <label for="userModified">User Modified:</label><br>
+                    <input class="input-element" id="userModified" name="userModified" placeholder="User Modified"
+                        required type="text" value="<%= userName %>"><br>
+                </div>
+                <div class="col" style="display:inline-block">
+                    <label for="objectType">Type:</label><br>
+                    <select class="input-element" id="objectType" name="type" required>
+                        <option value="" disabled selected>Select Type</option>
+                        <option value="page">Page</option>
+                        <option value="form">Form</option>
+                        <option value="business_component">Business Component</option>
+                    </select>
+                    <input id="objectTypeHidden" name="pageHeader" type="hidden" value="">
+                </div>
+                <div class="col" style="display:inline-block">
+                    <label for="objectDescription">Description:</label><br>
+                    <textarea class="input-element" id="objectDescription" name="objectDescription"
+                        placeholder="Insert Description" required rows="3"></textarea>
+                </div>
+                <div class="col" style="display:inline-block;padding:10px">
+                    <button class="button form-edit-button success" id="registerObjectBtn"
+                        onclick="registerObject(event)" title="Register Object" type="button" style="float:left;">
+                        <i class="bi bi-check-lg"></i>
+                    </button>
+                    <button class="button form-edit-button" id="clearObjectBtn" onclick="showClearConfirmation()"
+                        title="Clear" type="button" style="float:left;">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                    <button class="button form-edit-button" id="undoDeleteBtn" onclick="undoDelete()"
+                        title="Undo Delete" type="button" style="float:left;">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </button>
+                    <button class="button form-edit-button" onclick="exportJson()" title="Export JSON" type="button"
+                        style="float:left;">
+                        <i class="bi bi-filetype-json"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+
+
+
+
+    <div id="formContainer" ondragover="allowDrop(event)" ondrop="drop(event)">
+        <!-- Form elements will be added here -->
+    </div>
+
+    <div id="componentsSidebar">
+
+    </div>
+
+    <div id="editorPropertyInfos">
+        <div id="propertiesBar">
+            <div><!-- Edit --></div>
+        </div>
+    </div>
+
+
+
+    <div id="webserviceDiv">
+        <div><input name="searchApi" onchange="searchApi(this.value,'dragDropApiList')" placeholder="filter.. API"
+                type="text"></div>
+        <div id="dragDropApiList"></div>
+    </div>
+
+    <div id="databaseDiv">
+        <div><input name="searchtable" onchange="searchtable(this.value,'drageDroptablesList')"
+                placeholder="filter.. table" type="text"></div>
+        <div id="drageDroptablesList"></div>
+    </div>
+
+
+
+
+    <!-- Boutons flottants -->
+    <div class="fab-stack" aria-label="Panneaux latéraux">
+        <button type="button" class="fab" id="btnToggleComponents" title="Afficher/Masquer Components">
+            <i class="bi bi-ui-checks-grid"></i>
+        </button>
+        <button type="button" class="fab" id="btnToggleProps" title="Afficher/Masquer Properties">
+            <i class="bi bi-sliders"></i>
+        </button>
+        <button type="button" class="fab" id="btnToggleData" title="Afficher/Masquer Data">
+            <i class="bi bi-database"></i>
+        </button>
+        <button type="button" class="fab" id="btnToggleWebServices" title="Afficher/Masquer Web Services">
+            <i class="bi bi-cloud"></i>
+        </button>
+    </div>
+
+    <script src="editForm.js"></script>
+    <link rel="stylesheet" href="/css/editForm.css">
+</div>
+
+<script>
+    const root = document.getElementById('editForm');
+
+    // Panneaux
+    const sideComponents = document.getElementById('componentsSidebar');
+    const sideProps = document.getElementById('editorPropertyInfos');
+    const sideData = document.getElementById('databaseDiv');
+    const sideWebServices = document.getElementById('webserviceDiv');
+
+    // Boutons flottants
+    const btnComp = document.getElementById('btnToggleComponents');
+    const btnProp = document.getElementById('btnToggleProps');
+    const btnData = document.getElementById('btnToggleData');
+    const btnWebServices = document.getElementById('btnToggleWebServices');
+
+    function togglePanel(panelEl, btnEl) {
+        console.log(panelEl);
+        panelEl.style.display = panelEl.style.display !== 'flex' ? 'flex' : 'none';
+        btnEl.setAttribute('aria-pressed', panelEl.style.display !== 'flex' ? 'false' : 'true');
+        if (panelEl.style.display === 'flex') {
+            // adjust position, z-index, etc.
+            // check if exist div with class movebar
+            const moveBar = panelEl.querySelector('.movebar');
+            console.log(moveBar);
+            // if not exist create it on top of div
+            if (!moveBar) {
+                console.log('create movebar');
+                const newMoveBar = document.createElement('div');
+                newMoveBar.className = 'movebar';
+                newMoveBar.style.width = `${panelEl.getBoundingClientRect().width}px`;
+                newMoveBar.innerHTML = 'Drag to move panel';
+                panelEl.insertBefore(newMoveBar, panelEl.firstChild);
+                // adding code to move the panel
+                newMoveBar.addEventListener('mousedown', (e) => {
+                    const offsetY = e.clientY - panelEl.getBoundingClientRect().top;
+                    const onMouseMove = (e) => {
+                        panelEl.style.top = `${e.clientY - offsetY}px`;
+                        panelEl.style.left = `${e.clientX}px`;
+                    };
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.addEventListener('mouseup', () => {
+                        document.removeEventListener('mousemove', onMouseMove);
+                    }, { once: true });
+                });
+            }
+            panelEl.style.zIndex = 1000;
+            panelEl.style.position = 'fixed';
+            // calculate position based on the other panels
+            const otherPanels = [sideComponents, sideProps, sideData].filter(p => p !== panelEl);
+            const totalWidth = otherPanels.reduce((acc, p) => acc + p.getBoundingClientRect().width, 0);
+            panelEl.style.left = `${totalWidth + 50}px`;
+            panelEl.style.top = '80px'; // below header
+
+
+        }
+    }
+
+    // État initial: tout visible
+    [btnComp, btnProp, btnData].forEach(b => b.setAttribute('aria-pressed', 'true'));
+
+    btnComp.addEventListener('click', () => togglePanel(sideComponents, btnComp));
+    btnProp.addEventListener('click', () => togglePanel(sideProps, btnProp));
+    btnData.addEventListener('click', () => togglePanel(sideData, btnData));
+    btnWebServices.addEventListener('click', () => togglePanel(sideWebServices, btnWebServices));
+
+    // Ajuster la hauteur dispo en fonction du header
+    const adjustHeights = () => {
+        const header = document.getElementById('formProperties');
+        const headerH = header ? header.getBoundingClientRect().height : 230;
+        // +20px de marge pour le padding externe éventuel
+        root.style.setProperty('--headerH', `${Math.ceil(headerH) + 20}px`);
+    };
+
+    // Recalc au chargement + resize + mutations possibles du header
+    window.addEventListener('resize', adjustHeights);
+    // MutationObserver si le bandeau change de taille (aff/masque champs)
+    const mo = new MutationObserver(adjustHeights);
+    mo.observe(document.getElementById('formProperties'), { childList: true, subtree: true, attributes: true });
+
+    // Premier ajustement
+    adjustHeights();
+</script>

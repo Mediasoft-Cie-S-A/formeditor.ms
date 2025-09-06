@@ -1,0 +1,35 @@
+<div class="tab-pane fade" id="formsList" style="min-height: 500px">
+    <div id="formsListContainer">
+        <table class="table table-striped table-bordered" id="componentsList">
+            <thead>
+                <tr>
+                    <th>ID
+                        <input id="searchFormInput" onkeyup="searchFormbyID(event)" placeholder="Search by ID"
+                            style="width: 100px;  display: inline;" type="text">
+                    </th>
+                    <th>Name
+                        <input id="searchNameInput" onkeyup="searchFormbyName(event)" placeholder="Search by Name"
+                            style="width: 100px;  display: inline;" type="text">
+                    </th>
+                    <th>Slug
+                        <input id="searchSlugInput" onkeyup="searchFormbySlug(event)" placeholder="Search by Slug"
+                            style="width: 100px;  display: inline;" type="text">
+                    </th>
+                    <th>User Created</th>
+                    <th>User Modified</th>
+                    <th>Date</th>
+                    <th>Actions
+                        <button onclick="newForm()"
+                            style="width: 30px; height: 30px; padding: 0; display: inline; align-items: center;"
+                            title="New Form">
+                            <i class="bi bi-plus-lg" style="font-size: 20px;"></i>
+                        </button>
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="componentsListBody">
+                <!-- Components will be listed here -->
+            </tbody>
+        </table>
+    </div>
+</div>

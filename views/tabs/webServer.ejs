@@ -1,0 +1,20 @@
+<div class="tab-pane fade" id="WebServer">
+    <!-- Rendered form will be displayed here -->
+    <div class="container-fluid">
+        <div class="row">
+            <div class="title-element">
+                <h2>Web Server</h2>
+            </div>
+            <div>
+                <div style="display: inline-block; margin: 10px">
+                    <input class="input-element" id="apiUrlLink" name="apiUrlLink" placeholder="API URL" required=""
+                        type="link" value=""><br>
+                    <input accept=".yaml,.yml,.json" id="fileInput" name="fileInput" style="display: inline-block"
+                        type="file">
+                </div>
+            </div>
+            <button class="button database-header-button" onclick="loadWebServer()">Load Web Server</button>
+            <div id="web-api-container"></div>
+        </div>
+    </div>
+</div>

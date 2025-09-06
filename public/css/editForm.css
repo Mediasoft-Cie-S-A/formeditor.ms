@@ -1,0 +1,243 @@
+#formContainer {
+    border: 2px dashed #ccc;
+    width: 100%;
+    padding: 10px;
+    min-height: 1200px;
+    align-items: left;
+}
+
+
+.category {
+    cursor: pointer;
+    padding: 5px;
+    align-items: center;
+    width: 200px;
+}
+
+.category:hover {
+    background-color: #f0f0f0;
+}
+
+.category-button {
+    background-color: #eee;
+    color: black;
+    min-height: 50px;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    place-items: center;
+    font-size: 15px;
+    border-radius: 5px;
+    box-shadow: inset 0 0 0 1px #ccc;
+    /* Add a grey border */
+    transition: background-color 0.5s;
+    /* Smooth transition for background color change */
+    margin-bottom: 5px;
+}
+
+.draggable {
+    padding: 8px;
+    background-color: #e9e9e9;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    user-select: none;
+    align-items: center;
+    margin-top: 5px;
+    transition: background-color 0.5s;
+    /* Smooth transition for background color change */
+
+}
+
+.draggable:hover {
+    background-color: #d9d9d9;
+}
+
+
+/* Le tableau occupe tout l'espace restant sous #formProperties */
+#formEditorContainer {
+    width: 100%;
+    table-layout: fixed;
+    height: calc(100vh - 230px);
+}
+
+#formEditorContainer tr {
+    height: 100%;
+}
+
+#formEditorContainer td {
+    vertical-align: top;
+}
+
+
+/* Scroll propre */
+#componentsSidebar,
+#editorPropertyInfos,
+#webserviceDiv,
+#databaseDiv {
+    max-height: calc(100vh - 230px);
+    overflow: auto;
+    box-sizing: border-box;
+    display: none;
+    position: absolute;
+    z-index: 1000;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    text-align: center;
+    align-items: top;
+    flex-direction: column;
+}
+
+.movebar {
+
+    height: 25px;
+    background-color: #4d61fc;
+    color: white;
+    cursor: move;
+    text-align: center;
+    display: block;
+    position: fixed;
+    margin-top: -35px;
+    margin-left: -10px;
+    border: 2px solid gray;
+    border-radius: 5px;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+.is-hidden {
+    display: none !important;
+}
+
+/* Boutons flottants */
+.fab-stack {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 9999;
+}
+
+.fab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .18);
+    background: #0d6efd;
+    color: #fff;
+    font-size: 20px;
+}
+
+.fab[aria-pressed="true"] {
+    background: #198754;
+}
+
+.fab:focus {
+    outline: 2px solid rgba(13, 110, 253, .4);
+    outline-offset: 2px;
+}
+
+
+#jsCodeDialog {
+    display: none;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid #ccc;
+    background-color: white;
+    z-index: 1000;
+    min-width: 1000px;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    padding: 20px;
+    border-radius: 5px;
+    display: none;
+}
+
+
+
+.editorElement {
+    border: 2px dashed #333;
+    width: auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.portal-container {
+    vertical-align: top;
+
+    padding: 5px;
+    background-color: white;
+    width: 100%;
+    margin: 10px;
+}
+
+
+
+
+
+.portal-container tr:hover {
+    background-color: #f0f0f0;
+}
+
+
+.portal-delete-button {
+    background-color: #f44336;
+    color: white;
+    box-shadow: inset gray 0px 0px 60px -12px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 30px;
+    height: 30px;
+    align-items: center;
+    margin-left: 5px;
+}
+
+.portal-delete-button :hover {
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.portal-edit-button {
+
+    background-color: greenyellow;
+    color: white;
+    border: none;
+    cursor: hand;
+    box-shadow: inset gray 0px 0px 60px -12px;
+    width: 30px;
+    height: 30px;
+
+    align-items: center;
+    border-radius: 5px;
+    margin-left: 5px;
+}
+
+.portal-show-button {
+
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: hand;
+    width: 30px;
+    height: 30px;
+
+    align-items: center;
+    border-radius: 5px;
+    margin-left: 5px;
+    box-shadow: inset gray 0px 0px 60px -12px;
+
+    animation: alternate 1s infinite;
+
+}
