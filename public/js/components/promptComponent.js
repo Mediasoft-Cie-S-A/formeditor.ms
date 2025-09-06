@@ -1081,7 +1081,7 @@ async function askLmStudio(promptText) {
 async function askGroq(promptText) {
     const loader = document.getElementById('loader');
     // show the loader
-    loader.style.display = 'block';
+    if (loader) loader.style.display = 'block';
     const response = await fetch("/api/ask-groq", {
         method: "POST",
         headers: {
@@ -1102,7 +1102,7 @@ async function askGroq(promptText) {
     });
 
     const data = await response.json();
-    loader.style.display = 'none';
+    if (loader) loader.style.display = 'none';
     return data.choices?.[0]?.message?.content || "No response";
 }
 

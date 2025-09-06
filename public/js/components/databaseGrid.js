@@ -346,8 +346,6 @@ function insertNavBar(
   gridContainer.innerHTML += html;
 }
 
-
-
 //Grid code
 function createGrid(
   grid,
@@ -651,8 +649,6 @@ function export2CSV(e, DBName, tableName) {
   const url = `/export-table/${DBName}/${tableName}?fields=${datasetFields}`;
   window.open(url, "_blank");
 }
-
-
 
 function gridFetchData(grid, body) {
   var DBName = grid.getAttribute("DBName");

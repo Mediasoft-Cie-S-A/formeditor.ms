@@ -134,6 +134,54 @@ module.exports = function (app, mongoDbUrl, dbName) {
       }
     });
 
+
+  app.post("/create-form",
+    requireCheckpoint("0001100002"), // Adjust checkpoint if needed
+    async (req, res) => {
+      const client = new mongoClient(mongoDbUrl, {});
+      try {
+        await client.connect();
+        const db = client.db(dbName);
+        const col = db.collection("forms");
+
+        const { objectId, objectName, objectSlug, formData, userCreated } = req.body;
+
+        if (!objectId || !objectName || !objectSlug || !formData) {
+          return res.status(400).send("Missing required fields: objectId, objectName, objectSlug, and formData");
+        }
+
+        // Check if form already exists
+        const existing = await col.findOne({ objectId });
+        if (existing) {
+          return res.status(409).send("Form with this objectId already exists");
+        }
+
+        const now = new Date();
+
+        const newForm = {
+          objectId,
+          objectName,
+          objectSlug,
+          formData,
+          creationDate: now.toISOString(),
+          modificationDate: now.toISOString(),
+          userCreated: userCreated || "system",
+          userModified: userCreated || "system",
+        };
+
+        await col.insertOne(newForm);
+
+        res.status(201).send({ message: "Form created successfully", form: newForm });
+      } catch (err) {
+        console.error(err.stack);
+        res.status(500).send("Error creating form");
+      } finally {
+        await client.close();
+      }
+    });
+
+
+
   app.get("/get-form/:objectId",
     requireCheckpoint("0001100002"), // Require specific checkpoint 
     async (req, res) => {
@@ -208,7 +256,7 @@ module.exports = function (app, mongoDbUrl, dbName) {
 
   app.delete("/delete-form/:objectId", checkAuthenticated, async (req, res) => {
     // create a new MongoClient
-    const client = new MongoClient(mongoDbUrl, {});
+    const client = new mongoClient(mongoDbUrl, {});
     try {
 
       await client.connect();

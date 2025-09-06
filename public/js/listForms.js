@@ -64,7 +64,7 @@ function loadForms() {
                 deleteButton.className = 'portal-delete-button';
                 deleteButton.onclick = function (event) {
                     event.preventDefault();
-                    deleteForm(form.objectId, listItem);
+                    deleteForm(form.objectId, container);
                 }; // delete button functionality
 
                 // create edit button
@@ -451,4 +451,212 @@ function showHint(message, duration = 1000, event) {
         hint.style.opacity = 0;
         hint.addEventListener("transitionend", () => hint.remove());
     }, duration);
+}
+
+async function newForm() {
+    // -------- Tab Header Buttons --------
+    const tabHeaderButtonTable = {
+        tag: "div",
+        attributes: {
+            "data-tab": "ctab_tab-0",
+            class: "ctab_HeaderButton active",
+            onclick: `activateTab(event,this,document.getElementById("ctab_tab-0"))`,
+            id: "element_" + Date.now(),
+        },
+        text: "Table",
+    };
+
+    const tabHeaderButtonEdit = {
+        tag: "div",
+        attributes: {
+            "data-tab": "ctab_tab-1",
+            class: "ctab_HeaderButton",
+            onclick: `activateTab(event,this,document.getElementById("ctab_tab-1"))`,
+            id: "element_" + (Date.now() + 1),
+        },
+        text: "Edit",
+    };
+
+    // -------- Tab Header --------
+    const tabHeader = {
+        tag: "div",
+        attributes: { class: "ctab_tabs-header" },
+        children: [tabHeaderButtonTable, tabHeaderButtonEdit],
+    };
+
+    // -------- Data Grid --------
+    const dataGrid = {
+        tag: "div",
+        attributes: {
+            class: "form-element gjs-selection",
+            id: "dataGrid" + Date.now(),
+            draggable: "true",
+            style: "min-height: 450px; display: flex;",
+            tagname: "dataGrid",
+        },
+        children: [],
+    };
+
+    // -------- Data Set --------
+    const dataSet = {
+        tag: "div",
+        attributes: {
+            class: "form-element gjs-selection",
+            id: "dataSet" + Date.now(),
+            draggable: "true",
+            tagname: "dataSet",
+        },
+        children: [],
+    };
+
+    // -------- Data Set Navigation Buttons --------
+    const createNavButton = (name, title, onclick, text, iconClass, iconStyle) => ({
+        tag: "button",
+        attributes: { name, title, onclick, style: "width:150px;", class: "" },
+        children: [
+            { tag: "p", text },
+            { tag: "i", attributes: { class: iconClass, style: iconStyle } }
+        ]
+    });
+
+    const dataSetNavigationButtons = [
+        createNavButton("PreviousDSBtn", "Previous", "navbar_movePrev()", "Previous", "fa fa-chevron-left", "color:#4d61fc;margin-left:-6px"),
+        createNavButton("NextDSBtn", "Next", "navbar_moveNext()", "Next", "fa fa-chevron-right", "color:#4d61fc;margin-left:-6px"),
+        createNavButton("EditDSBtn", "Edit Record", "navbar_EditRecord(false)", "Edit", "fa fa-pencil-square-o", "color:#4d61fc;margin-left:-6px"),
+        createNavButton("InsertDSBtn", "New Record", "navbar_InsertRecord()", "New Record", "fa fa-plus", "color:green;margin-left:-6px"),
+        createNavButton("CopyDSBtn", "Copy", "navbar_CopyRecord()", "Copy", "fa fa-files-o", "color:#4d61fc;margin-left:-6px"),
+        createNavButton("DeleteDSBtn", "Delete", "navbar_DeleteRecord()", "Delete", "fa fa-trash", "color:#e74c3c;margin-left:-6px"),
+        createNavButton("SaveDSBtn", "Save Record", "navbar_SaveRecord()", "Save", "fa fa-floppy-o", "color:red;margin-left:-6px"),
+        createNavButton("CancelDSBtn", "Cancel", "navbar_CancelEdit()", "Cancel", "fa fa-ban", "color:#4d61fc;margin-left:-6px"),
+        createNavButton("SaveAllDSBtn", "Save All and Exit", "handleSaveAllAndExit()", "Save All", "fa fa-check-circle", "color:green;margin-left:-6px")
+    ];
+
+    // -------- Data Set Navigation --------
+    const dataSetNavigation = {
+        tag: "div",
+        attributes: {
+            class: "form-element",
+            id: "dataSetNavigation" + Date.now(),
+            draggable: "true",
+            tagname: "dataSetNavigation",
+            position: "1"
+        },
+        children: [
+            {
+                tag: "div",
+                attributes: { id: "navigationBar_" + Date.now(), style: "display: block;" },
+                children: [
+                    { tag: "div", attributes: { class: "gjs-selection", id: "element_" + Date.now() }, children: dataSetNavigationButtons }
+                ]
+            }
+        ]
+    };
+
+    // -------- Prompt Element --------
+    const promptElement = {
+        tag: "div",
+        attributes: {
+            class: "form-element",
+            id: "prompt" + Date.now(),
+            draggable: "true",
+            prompttext: "Please enter your question",
+            promptplaceholder: "Type your question here...",
+            promptbuttontext: "Submit",
+            promptresponse: "",
+            tagname: "prompt",
+            position: "2"
+        },
+        children: [
+            {
+                tag: "div",
+                attributes: { id: "chat-container" },
+                children: [
+                    { tag: "textarea", attributes: { id: "PromptText", placeholder: "Type your message...", class: "gjs-selection" } },
+                    {
+                        tag: "div",
+                        attributes: { class: "actions" },
+                        children: [
+                            {
+                                tag: "div",
+                                attributes: { style: "display: none; gap: 10px;" },
+                                children: [
+                                    {
+                                        tag: "label", attributes: { for: "file-upload" }, children: [
+                                            { tag: "text", text: "📎 Upload" },
+                                            { tag: "input", attributes: { type: "file", id: "file-upload" } }
+                                        ]
+                                    }
+                                ]
+                            },
+                            { tag: "button", attributes: { onclick: "handleBigDocument(event)", title: "Upload File" }, text: "📎" },
+                            { tag: "button", attributes: { onclick: "handleFill(event)", title: "Fill" }, text: "✨" },
+                            { tag: "button", attributes: { onmousedown: "startVoice()", onmouseup: "stopVoice()", onmouseleave: "stopVoice()", title: "Voice: Hold to Speak" }, text: "🎤" },
+                            { tag: "button", attributes: { onclick: "handleAiButton(event)", title: "Send to AI" }, text: "🤖" },
+                            { tag: "img", attributes: { src: "img/loader.gif", id: "loader", style: "display: none; width: 80px; height: 40px;", alt: "Loading..." } }
+                        ]
+                    }
+                ]
+            }
+        ]
+    };
+
+    // -------- Tab Content Divs --------
+    const tab0Content = {
+        tag: "div",
+        attributes: { id: "ctab_tab-0", class: "ctab_ContentDiv", style: "display: block;" },
+        children: [dataGrid]
+    };
+
+    const tab1Content = {
+        tag: "div",
+        attributes: { id: "ctab_tab-1", class: "ctab_ContentDiv", style: "display: none;" },
+        children: [dataSet, dataSetNavigation, promptElement]
+    };
+
+    // -------- Tabs Container --------
+    const tabsContainer = {
+        tag: "div",
+        attributes: { class: "ctab_tabs" },
+        children: [tab0Content, tab1Content]
+    };
+
+    // -------- Final Default Form Data --------
+    const defaultFormData = {
+        tag: "div",
+        attributes: {
+            id: "Tab" + Date.now(),
+            class: "form-element",
+            tagname: "Tab",
+            draggable: "true"
+        },
+        children: [tabHeader, tabsContainer]
+    };
+
+    const formPayload = {
+        objectId: "ad_" + Date.now(), // dynamic unique id
+        objectName: "New Form with Tabs",
+        objectSlug: "new-form",
+        formData: defaultFormData,
+        userCreated: "masspe",
+    };
+
+    try {
+        const response = await fetch("/create-form", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formPayload),
+        });
+
+        if (!response.ok) {
+            throw new Error(await response.text());
+        }
+
+        const result = await response.json();
+        console.log("✅ Form created:", result);
+
+        alert(`Form "${result.form.objectName}" created successfully!`);
+    } catch (err) {
+        console.error("❌ Error creating form:", err);
+        alert("Failed to create form: " + err.message);
+    }
 }

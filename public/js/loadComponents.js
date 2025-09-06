@@ -405,6 +405,8 @@ function createAndAppendElement(event) {
   var elementId = event.dataTransfer.getData("text");
   let parsedObject = JSON.parse(elementId);
   var newElement = createFormElement(parsedObject.id);
+
+
   if (event.target.childElementCount) {
     newElement.setAttribute("position", event.target.childElementCount);
   }
