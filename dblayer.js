@@ -63,7 +63,7 @@ class dblayer {
       var DatabaseClass = null;
       switch (this.dbtype) {
 
-        case "mysql2":
+        case "mysql":
           this.databases[key] = new MySqlDatabase(value);
           // await this.databases[key].connect();    
 

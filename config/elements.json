@@ -52,7 +52,7 @@
     "editFunction": "editDataSetComponentNavigate",
     "styles": "dataSetComponentNavigate.css",
     "icon": "fa fa-compass",
-    "renderFunction": ""
+    "renderFunction": "renderNavigationBar"
   },
   "dataSet": {
     "type": "dataSet",
@@ -272,7 +272,7 @@
     "editFunction": "editElementTab",
     "styles": "tab.css",
     "icon": "fa fa-folder",
-    "renderFunction": ""
+    "renderFunction": "renderTabComponent"
   },
   "grid": {
     "type": "grid",

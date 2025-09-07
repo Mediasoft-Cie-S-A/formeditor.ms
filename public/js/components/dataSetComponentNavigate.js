@@ -147,11 +147,15 @@ function saveActions(element, content) {
 function renderNavigationBar(main) {
 
   console.log("Rendering navigation Bar");
-
+  main.innerHTML = "";
+  main.style.width = "100%";
+  // align center
+  main.style.textAlign = "center";
   // Create the navigation bar div
   var navigationBar = document.createElement("div");
   navigationBar.id = "navigationBar_" + Date.now();
   navigationBar.type = "navigation-bar";
+  navigationBar.style.margin = "auto";
   //   navigationBar.className = "navigation-bar";
   navigationBar.style.display = "block";
 

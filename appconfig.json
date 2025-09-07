@@ -1,12 +1,9 @@
 {
-  "dbtype": "odbc",
+  "dbtype": "mysql",
   "port": 3000,
   "dblist": {
-    "msdb": {
-      "ConnectionString": "DSN=msdb;UID=sysprogress;PWD=sysprogress"
-    },
-    "msec": {
-      "ConnectionString": "DSN=msec;UID=sysprogress;PWD=sysprogress"
+    "ove_lt": {
+      "ConnectionString": "mysql://OVEUser:123456!@localhost:3306/OVE_ERP_LT"
     }
   },
   "SMTP": {

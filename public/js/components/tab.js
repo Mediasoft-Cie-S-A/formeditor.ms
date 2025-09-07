@@ -37,10 +37,8 @@ function createElementTab(type) {
 }
 
 function editElementTab(type, element, content) {
-
-    //get all the tabs
+    // get all the tabs
     const tabsHeader = element.querySelectorAll('.ctab_HeaderButton');
-
     const tabsContent = element.querySelectorAll('.ctab_ContentDiv');
 
     const div = document.createElement('div');
@@ -50,11 +48,59 @@ function editElementTab(type, element, content) {
     div.style.padding = '5px';
     div.style.minHeight = '100px';
     div.style.border = '1px solid #ccc';
-    // rounded corners
     div.style.borderRadius = '5px';
-
-    div.style.className = 'multi-select';
     div.style.overflow = 'auto';
+
+    /* === NEW: Tabs Type selector (orientation + floating) === */
+    const typeBlock = document.createElement('div');
+    typeBlock.style.display = 'flex';
+    typeBlock.style.alignItems = 'center';
+    typeBlock.style.gap = '8px';
+    typeBlock.style.marginBottom = '8px';
+
+    const typeLabel = document.createElement('label');
+    typeLabel.textContent = 'Tabs type:';
+
+    const typeSelect = document.createElement('select');
+    typeSelect.innerHTML = `
+    <option value="horizontal">Horizontal</option>
+    <option value="vertical">Vertical (left)</option>
+    <option value="float:tl">Floating — Top Left</option>
+    <option value="float:tr">Floating — Top Right</option>
+    <option value="float:bl">Floating — Bottom Left</option>
+    <option value="float:br">Floating — Bottom Right</option>
+  `;
+
+    // Init from element dataset / classes
+    const currentOrientation =
+        element.dataset.ctabOrientation ||
+        (element.classList.contains('ctab--vertical') ? 'vertical' : 'horizontal');
+
+    const currentFloat =
+        element.dataset.ctabFloat ||
+        (element.classList.contains('ctab--float-tl') ? 'tl' :
+            element.classList.contains('ctab--float-tr') ? 'tr' :
+                element.classList.contains('ctab--float-bl') ? 'bl' :
+                    element.classList.contains('ctab--float-br') ? 'br' : '');
+
+    typeSelect.value = currentFloat ? `float:${currentFloat}` : currentOrientation;
+
+    typeSelect.addEventListener('change', function () {
+        const v = typeSelect.value;
+        if (v.startsWith('float:')) {
+            const anchor = v.split(':')[1]; // tl|tr|bl|br
+            // default floating is horizontal header; keep currentOrientation if you prefer
+            setTabsLayout(element, { orientation: 'horizontal', float: anchor });
+        } else {
+            setTabsLayout(element, { orientation: v, float: null });
+        }
+    });
+
+    typeBlock.appendChild(typeLabel);
+    typeBlock.appendChild(typeSelect);
+    div.appendChild(typeBlock);
+    /* === /NEW === */
+
     // add the add button
     const addButton = document.createElement('button');
     addButton.id = 'addTab';
@@ -66,7 +112,6 @@ function editElementTab(type, element, content) {
         createTabContent(element.querySelector('.ctab_tabs-header'), element.querySelector('.ctab_tabs'));
     });
     div.appendChild(addButton);
-
 
     // add remove button in current div
     for (var i = 0; i < tabsHeader.length; i++) {
@@ -90,9 +135,10 @@ function editElementTab(type, element, content) {
         });
         editTab.appendChild(removeButton);
         div.appendChild(editTab);
-    };
+    }
     content.appendChild(div);
 }
+
 
 function createTabContent(tabsHeader, tabsContent) {
     let tabs = tabsHeader.querySelectorAll('.ctab_HeaderButton');
@@ -273,4 +319,88 @@ function activateEditTabIn(targetElement) {
             activateTab(null, editHeader, editContent);
         }
     }
+}
+
+
+/* === NEW: layout helpers (orientation + floating) === */
+function setTabsLayout(container, { orientation = 'horizontal', float = null } = {}) {
+    if (!container) return;
+
+    // Remove previous classes
+    container.classList.remove(
+        'ctab--horizontal', 'ctab--vertical', 'ctab--floating',
+        'ctab--float-tl', 'ctab--float-tr', 'ctab--float-bl', 'ctab--float-br'
+    );
+
+    // Orientation
+    if (orientation === 'vertical') {
+        container.classList.add('ctab--vertical');
+    } else {
+        container.classList.add('ctab--horizontal');
+    }
+
+    // Floating
+    if (float) {
+        container.classList.add('ctab--floating', `ctab--float-${float}`);
+        // compute padding to avoid overlap
+        requestAnimationFrame(() => updateFloatingPadding(container));
+        if (!container._ctabResizeHandler) {
+            container._ctabResizeHandler = () => updateFloatingPadding(container);
+            window.addEventListener('resize', container._ctabResizeHandler);
+        }
+    } else {
+        const content = container.querySelector('.ctab_tabs');
+        if (content) {
+            content.style.setProperty('--ctab-pad-top', '0px');
+            content.style.setProperty('--ctab-pad-bottom', '0px');
+            content.style.setProperty('--ctab-pad-left', '0px');
+            content.style.setProperty('--ctab-pad-right', '0px');
+        }
+        if (container._ctabResizeHandler) {
+            window.removeEventListener('resize', container._ctabResizeHandler);
+            delete container._ctabResizeHandler;
+        }
+    }
+
+    // Persist on element (so renderer can re-apply)
+    container.dataset.ctabOrientation = orientation;
+    container.dataset.ctabFloat = float ? String(float) : '';
+}
+
+/* === NEW: compute dynamic paddings for floating header === */
+function updateFloatingPadding(container) {
+    const header = container.querySelector('.ctab_tabs-header');
+    const content = container.querySelector('.ctab_tabs');
+    if (!header || !content) return;
+
+    // reset
+    content.style.setProperty('--ctab-pad-top', '0px');
+    content.style.setProperty('--ctab-pad-bottom', '0px');
+    content.style.setProperty('--ctab-pad-left', '0px');
+    content.style.setProperty('--ctab-pad-right', '0px');
+
+    const r = header.getBoundingClientRect();
+
+    if (container.classList.contains('ctab--float-tl') || container.classList.contains('ctab--float-tr')) {
+        content.style.setProperty('--ctab-pad-top', `${r.height + 12}px`);
+    }
+    if (container.classList.contains('ctab--float-bl') || container.classList.contains('ctab--float-br')) {
+        content.style.setProperty('--ctab-pad-bottom', `${r.height + 12}px`);
+    }
+    if (container.classList.contains('ctab--vertical')) {
+        if (container.classList.contains('ctab--float-tl') || container.classList.contains('ctab--float-bl')) {
+            content.style.setProperty('--ctab-pad-left', `${r.width + 12}px`);
+        }
+        if (container.classList.contains('ctab--float-tr') || container.classList.contains('ctab--float-br')) {
+            content.style.setProperty('--ctab-pad-right', `${r.width + 12}px`);
+        }
+    }
+}
+
+/* === NEW: rendering function (apply persisted type) === */
+function renderTabComponent(container) {
+    if (!container) return;
+    const orientation = container.dataset.ctabOrientation || 'horizontal';
+    const float = container.dataset.ctabFloat || ''; // '', 'tl','tr','bl','br'
+    setTabsLayout(container, { orientation, float: float || null });
 }
