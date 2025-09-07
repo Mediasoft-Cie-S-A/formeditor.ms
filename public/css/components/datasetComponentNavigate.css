@@ -16,3 +16,200 @@
   border-bottom: 1px solid silver;
   width: 100%;
 }
+
+
+/* ===== Base (per bar) ===== */
+.ms-nav {
+  --nav-gap: 8px;
+  --nav-pad: 8px;
+  --nav-bg: #fff;
+  --nav-border: #dcdcdc;
+  --nav-shadow: 0 2px 10px rgba(0, 0, 0, .06);
+  --btn-radius: 8px;
+  --btn-bg: #f6f7fb;
+  --btn-bg-active: #4d61fc;
+  --btn-fg: #222;
+  --btn-fg-active: #fff;
+  --btn-border: #d3d7e3;
+  --btn-height: 40px;
+
+  display: inline-flex;
+  /* no inline style overrides needed */
+  gap: var(--nav-gap);
+  background: var(--nav-bg);
+  border: 1px solid var(--nav-border);
+  border-radius: 10px;
+  padding: var(--nav-pad);
+  box-shadow: var(--nav-shadow);
+  align-items: center;
+  padding: 5px;
+}
+
+/* buttons inside a bar */
+.ms-nav button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 120px;
+  height: var(--btn-height);
+  padding: 0 12px;
+  border-radius: var(--btn-radius);
+  border: 1px solid var(--btn-border);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  cursor: pointer;
+  transition: transform .06s ease, background .15s ease, color .15s ease, box-shadow .15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+}
+
+.ms-nav button p {
+  margin: 0;
+  line-height: 1;
+}
+
+.ms-nav button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.ms-nav button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.ms-nav button.disabled,
+.ms-nav button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Action coloring (per button name, no JS changes) */
+.ms-nav button[name="SaveDSBtn"],
+.ms-nav button[name="SaveAllDSBtn"] {
+  background: #1a7f37;
+  color: #fff;
+  border-color: #157233;
+}
+
+.ms-nav button[name="CancelDSBtn"] {
+  background: #6b7280;
+  color: #fff;
+  border-color: #5f6574;
+}
+
+.ms-nav button[name="DeleteDSBtn"] {
+  background: #e74c3c;
+  color: #fff;
+  border-color: #d74435;
+}
+
+.ms-nav button[name="InsertDSBtn"] {
+  background: #16a34a;
+  color: #fff;
+  border-color: #138a3f;
+}
+
+.ms-nav button[name="EditDSBtn"],
+.ms-nav button[name="CopyDSBtn"] {
+  background: #4d61fc;
+  color: #fff;
+  border-color: #4255f0;
+}
+
+/* Variants (add one of these to the bar element) */
+.ms-nav.ms-nav--classic {}
+
+.ms-nav.ms-nav--pill {
+  --nav-bg: #f8f9ff;
+  --nav-border: #e6e8f2;
+  --btn-bg: #fff;
+  --btn-border: #e6e8f2;
+  --btn-radius: 999px;
+}
+
+.ms-nav.ms-nav--segmented {
+  --nav-bg: #fff;
+  --nav-border: #e6e6e6;
+  padding: 4px;
+  border-radius: 999px;
+}
+
+.ms-nav.ms-nav--segmented button {
+  min-width: auto;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+}
+
+.ms-nav.ms-nav--segmented button:hover:not(:disabled) {
+  background: rgba(77, 97, 252, .08);
+}
+
+.ms-nav.ms-nav--segmented button[name="SaveDSBtn"],
+.ms-nav.ms-nav--segmented button[name="SaveAllDSBtn"] {
+  background: #4d61fc;
+  color: #fff;
+}
+
+.ms-nav.ms-nav--ghost {
+  --nav-bg: transparent;
+  --nav-border: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.ms-nav.ms-nav--ghost button {
+  border: 1px solid transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.ms-nav.ms-nav--ghost button:hover:not(:disabled) {
+  background: rgba(0, 0, 0, .05);
+}
+
+.ms-nav.ms-nav--vertical {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.ms-nav.ms-nav--vertical button {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Floating + anchors (per bar) */
+.ms-nav.ms-nav--floating {
+  position: fixed;
+  z-index: 1000;
+  backdrop-filter: blur(6px);
+  background: rgba(255, 255, 255, .9);
+}
+
+.ms-nav.ms-nav--floating.ms-nav--at-tl {
+  top: 16px;
+  left: 16px;
+}
+
+.ms-nav.ms-nav--floating.ms-nav--at-tr {
+  top: 16px;
+  right: 16px;
+}
+
+.ms-nav.ms-nav--floating.ms-nav--at-bl {
+  bottom: 16px;
+  left: 16px;
+}
+
+.ms-nav.ms-nav--floating.ms-nav--at-br {
+  bottom: 16px;
+  right: 16px;
+}
+
+/* Compact modifier */
+.ms-nav.ms-nav--compact {
+  --btn-height: 34px;
+  --nav-gap: 6px;
+  --nav-pad: 6px;
+}

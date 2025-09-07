@@ -110,6 +110,27 @@ class MySqlDatabase {
     return this.query(sql, [this.dbName, tableName]);
   }
 
+  async getFieldLabels(tableName, fields, rowID) {
+    // Assuming 'rowID' is the ROWID of the record to move to
+    if (fields && fields.length > 0) {
+      const filteredFields = fields
+        .filter(f => f.toLowerCase() !== 'rowid')
+        .map(f => `'${f}'`) // single quotes only
+        .join(", ");
+      console.log(filteredFields);
+
+
+
+      const query = `
+        SELECT COLUMN_NAME AS NAME, COLUMN_COMMENT AS LABEL
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME IN (${filteredFields})
+      `;
+      return this.queryData(query, [tableName]);
+    }
+    return null;
+  }
+
   /* ---------- pagination/search ---------- */
   async queryDataWithPagination(tableName, page, pageSize, fields, filterJson, orderBy) {
     const tbl = ident(tableName);
