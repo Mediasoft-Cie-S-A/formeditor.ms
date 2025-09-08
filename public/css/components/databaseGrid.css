@@ -156,6 +156,9 @@
   cursor: pointer;
   line-height: 1;
   opacity: .6;
+  height: 5px;
+  width: 5px;
+  ;
 }
 
 .grid-th-btn:hover {

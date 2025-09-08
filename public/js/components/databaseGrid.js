@@ -425,6 +425,7 @@ function generateHeaderRow(grid, dataset) {
     btnAsc.title = "Trier ascendant";
     btnAsc.innerHTML = '<i class="fa fa-sort-up"></i>';
     btnAsc.className = "grid-th-btn";
+    btnAsc.style.marginTop = "-5px";
     if (currentOrder === "asc") btnAsc.classList.add("active");
     btnAsc.addEventListener("click", (ev) => {
       ev.stopPropagation(); // ne pas déclencher le tri toggle du clic cellule
@@ -437,6 +438,9 @@ function generateHeaderRow(grid, dataset) {
     btnDesc.title = "Trier descendant";
     btnDesc.innerHTML = '<i class="fa fa-sort-down"></i>';
     btnDesc.className = "grid-th-btn";
+    // btnDesc.style.marginLeft = "-11px";
+    //btnDesc.style.marginTop = "-5px";
+
     if (currentOrder === "desc") btnDesc.classList.add("active");
     btnDesc.addEventListener("click", (ev) => {
       ev.stopPropagation();
@@ -657,7 +661,7 @@ async function gridGetData(
 ) {
   // activate the loaders
   activateLoaders();
-  // console.log(grid);
+  console.log(grid);
   // get the filter from the dataset json
   var mainID = grid.getAttribute("main-id");
   var main = document.getElementById(mainID);
@@ -726,11 +730,23 @@ async function gridGetData(
 
   // console.log(filterJSON);
   //get body form the table
-  const body = grid.querySelector(".grid-body");
+  let body = null;
+  switch (gridType) {
+    case 0:
+      body = grid.querySelector(".grid-body");
+      break;
+    case 1:
+      body = grid;
+      break;
+  }
   const header = grid.querySelector(".grid-header");
   // if gridType is 1, clear the header, body
-
-  body.innerHTML = "";
+  if (body) {
+    body.innerHTML = "";
+  }
+  if (gridType == 1 && header) {
+    header.remove();
+  }
   // Prepare the URL
   var url = `/table-data/${DBName}/${tableName}/${page}/${pageSize}?fields=${datasetFields}&filter=${encodeURIComponent(JSON.stringify(filterJSON))}&orderBy=${JSON.stringify(orderBy)}`;
   // get the sqljson from the main
@@ -775,6 +791,7 @@ async function gridGetData(
           );
           break;
         case 1:
+          console.log("drawPanelRow");
           drawPanelRow(
             mainID,
             DBName,
