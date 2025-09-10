@@ -1260,13 +1260,15 @@ async function updateRecordDB(DBName, tableName, nextRowId, data, actions) {
   }
 }
 
-async function insertRecordDB(DBName, tableName, data, actions) {
+async function insertRecordDB(DBName, tableName, data, actions, apikey) {
   try {
     const response = await fetch(`/insert-record/${DBName}/${tableName}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "api_key": apikey || "", // Include API key if provided
         // Include other headers as needed, like authentication tokens
+
       },
       // Add the data and action to the body
       body: JSON.stringify({

@@ -1,0 +1,114 @@
+/* Container générique */
+.iwz-container {
+    display: flex;
+    gap: 12px;
+    font-size: xx-large;
+}
+
+/* Wizard plein écran = un champ par écran centré */
+.iwz-fullscreen {
+    min-height: 70vh;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+}
+
+.iwz-card {
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+    /* ⟵ centre horizontalement */
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, .08);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, .1);
+    animation: fadeIn .3s ease-in-out;
+    transition: transform .5s;
+    align-items: center;
+    /* (fix: unité manquante) */
+}
+
+/* Steps (petits chips indicateurs) */
+.iwz-steps {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+
+.iwz-step-chip {
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, .06);
+    font-size: 12px;
+}
+
+.iwz-step-chip.active {
+    background: #2563eb;
+    color: #fff;
+}
+
+/* Champs */
+.iwz-field {
+    display: grid;
+    gap: 6px;
+}
+
+.iwz-field label {
+    font-weight: 600;
+    font-size: xx-large
+}
+
+.iwz-field input,
+.iwz-field select,
+.iwz-field textarea {
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, .2);
+}
+
+/* Layout "tous les champs" */
+.iwz-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+/* Nav & boutons */
+.iwz-nav {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    margin-top: 8px;
+}
+
+.iwz-btn {
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, .1);
+    background: #fff;
+    cursor: pointer;
+}
+
+.iwz-btn.primary {
+    background: #2563eb;
+    color: #fff;
+    border-color: #2563eb;
+}
+
+.iwz-btn:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+/* Erreurs */
+.iwz-errors {
+    color: #b91c1c;
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    padding: 8px;
+    border-radius: 8px;
+    display: none;
+}

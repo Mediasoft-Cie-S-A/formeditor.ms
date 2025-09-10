@@ -117,9 +117,11 @@ function editElementDataSet(type, element, content) {
       del.value = jsonData.delete;
 
     }
+    // add the api
   } // end if sql
 
-
+  // add input api key 
+  content.appendChild(createInputItem("Api Key", "apikey", "apikey", element.getAttribute("apikey"), "text", false));
   // filter
   if (element.getAttribute("filter") != null) {
     var target = content.querySelector("#Filter");
