@@ -151,9 +151,11 @@ The built-in login component now supports additional options that can be configu
 - **Encrypt password** – when enabled, the password is hashed with SHA-256 before being sent.
 - **Google/Microsoft Endpoint** – optional URLs that render extra buttons for federated login with Google or Microsoft.
 
+
 The backend module `authStatic.js` also exposes a JSON web service at `POST /api/login` for programmatic authentication.
 The default login page now includes "Login with Google" and "Login with Microsoft" buttons that redirect to `/auth/google`
 and `/auth/openid`.
+
 
 ## Webserver
 
