@@ -609,6 +609,16 @@ a.brand-logo {
   margin: 0 0 0 10px;
 }
 
+.button.google {
+  background: #db4437;
+  color: #fff;
+}
+
+.button.microsoft {
+  background: #2f2f2f;
+  color: #fff;
+}
+
 .login {
   border-radius: 5px;
   box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);

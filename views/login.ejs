@@ -62,10 +62,11 @@
                          </div> -->
                             <a href="#url" class="forgot">Forgot password?</a>
                         </div>
-                        <div class="form-row button-login" style="display: inline-block;">
+                        <div class="form-row button-login" style="display: flex; gap: 10px;">
                             <button class="button button-login">Login <span class="fas fa-arrow-right"
                                     aria-hidden="true"></span></button>
-                            <button onclick="signIn()"> Login Azure AD</button>
+                            <a class="button google" href="/auth/google">Login with Google</a>
+                            <a class="button microsoft" href="/auth/openid">Login with Microsoft</a>
                         </div>
                     </div>
                 </fieldset>
