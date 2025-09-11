@@ -52,7 +52,18 @@
     "editFunction": "editDataSetComponentNavigate",
     "styles": "dataSetComponentNavigate.css",
     "icon": "fa fa-compass",
-    "renderFunction": ""
+    "renderFunction": "renderNavigationBar"
+  },
+  "insertOnlyWizard": {
+    "type": "insertOnlyWizard",
+    "description": "Insert Only Wizard",
+    "category": "Business Logic",
+    "scriptName": "insertOnlyWizardComponent.js",
+    "createFunction": "createElementInsertWizard",
+    "editFunction": "editElementInsertWizard",
+    "styles": "insertOnlyWizardComponent.css",
+    "icon": "fa fa-wizard",
+    "renderFunction": "renderInsertOnlyWizard"
   },
   "dataSet": {
     "type": "dataSet",
@@ -272,7 +283,7 @@
     "editFunction": "editElementTab",
     "styles": "tab.css",
     "icon": "fa fa-folder",
-    "renderFunction": ""
+    "renderFunction": "renderTabComponent"
   },
   "grid": {
     "type": "grid",

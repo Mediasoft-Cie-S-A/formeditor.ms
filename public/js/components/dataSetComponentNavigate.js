@@ -28,41 +28,202 @@ function createDataSetComponentNavigate(type) {
 }
 
 function editDataSetComponentNavigate(type, element, content) {
-  // Logic to edit the menu, for example adding/removing items
-  const actions = JSON.parse(element.getAttribute("actions"));
+  // Parse actions (defensive)
+  let actions = [];
+  try { actions = JSON.parse(element.getAttribute("actions") || "[]"); }
+  catch { actions = []; }
 
-  // Clear the content area to prevent duplicates
+  // Build editor panel
   const div = document.createElement("div");
   div.style.width = "100%";
-
   div.style.border = "1px solid #ccc";
   div.style.borderRadius = "5px";
   div.style.padding = "10px";
-  // Button to save all variables as cookies
+  div.style.overflow = "auto";
+
+  // ---- locate the navigation bar inside this component ----
+  let navBar =
+    element.querySelector(".ms-nav") ||
+    element.querySelector("div[id^='navigationBar_']");
+
+  // If it has no hook class yet, add it so CSS can target it
+  if (navBar && !navBar.classList.contains("ms-nav")) {
+    navBar.classList.add("ms-nav");
+  }
+
+  // ======== STYLE CONTROLS (new) ========
+  const styleBox = document.createElement("fieldset");
+  styleBox.style.marginBottom = "10px";
+  styleBox.style.border = "1px dashed #cfd3dc";
+  styleBox.style.borderRadius = "6px";
+  styleBox.style.padding = "8px 10px";
+
+  const legend = document.createElement("legend");
+  legend.textContent = "Navigation Bar Style";
+  legend.style.padding = "0 6px";
+  legend.style.color = "#394150";
+  styleBox.appendChild(legend);
+
+  const row = document.createElement("div");
+  row.style.display = "grid";
+  row.style.gridTemplateColumns = "1fr 1fr auto";
+  row.style.gap = "8px";
+  row.style.alignItems = "center";
+
+  // Variant select
+  const labelVariant = document.createElement("label");
+  labelVariant.textContent = "Variant";
+  const variantSelect = document.createElement("select");
+  variantSelect.innerHTML = `
+    <option value="classic">Classic</option>
+    <option value="pill">Pill</option>
+    <option value="segmented">Segmented</option>
+    <option value="ghost">Ghost</option>
+    <option value="vertical">Vertical</option>
+    <option value="floating">Floating</option>
+  `;
+  labelVariant.appendChild(variantSelect);
+
+  // Anchor select (for floating)
+  const labelAnchor = document.createElement("label");
+  labelAnchor.textContent = "Anchor";
+  const anchorSelect = document.createElement("select");
+  anchorSelect.innerHTML = `
+    <option value="tl">Top-Left</option>
+    <option value="tr">Top-Right</option>
+    <option value="bl">Bottom-Left</option>
+    <option value="br">Bottom-Right</option>
+  `;
+  labelAnchor.appendChild(anchorSelect);
+
+  // Compact toggle
+  const compactWrap = document.createElement("label");
+  const compactChk = document.createElement("input");
+  compactChk.type = "checkbox";
+  compactChk.style.marginRight = "6px";
+  compactWrap.appendChild(compactChk);
+  compactWrap.appendChild(document.createTextNode("Compact"));
+
+  row.appendChild(labelVariant);
+  row.appendChild(labelAnchor);
+  row.appendChild(compactWrap);
+  styleBox.appendChild(row);
+
+  // Read current state from dataset/classes
+  const readCurrentVariant = () => {
+    if (!navBar) return "classic";
+    if (navBar.dataset.navVariant) return navBar.dataset.navVariant;
+    if (navBar.classList.contains("ms-nav--pill")) return "pill";
+    if (navBar.classList.contains("ms-nav--segmented")) return "segmented";
+    if (navBar.classList.contains("ms-nav--ghost")) return "ghost";
+    if (navBar.classList.contains("ms-nav--vertical")) return "vertical";
+    if (navBar.classList.contains("ms-nav--floating")) return "floating";
+    return "classic";
+  };
+  const readCurrentAnchor = () => {
+    if (!navBar) return "tr";
+    if (navBar.dataset.navAnchor) return navBar.dataset.navAnchor;
+    if (navBar.classList.contains("ms-nav--at-tl")) return "tl";
+    if (navBar.classList.contains("ms-nav--at-tr")) return "tr";
+    if (navBar.classList.contains("ms-nav--at-bl")) return "bl";
+    if (navBar.classList.contains("ms-nav--at-br")) return "br";
+    return "tr";
+  };
+  const readCurrentCompact = () => {
+    if (!navBar) return false;
+    if (navBar.dataset.navCompact) return true;
+    return navBar.classList.contains("ms-nav--compact");
+  };
+
+  // Initialize controls
+  const currentVariant = readCurrentVariant();
+  const currentAnchor = readCurrentAnchor();
+  const currentCompact = readCurrentCompact();
+
+  variantSelect.value = currentVariant;
+  anchorSelect.value = currentAnchor;
+  anchorSelect.disabled = currentVariant !== "floating";
+  compactChk.checked = currentCompact;
+
+  // Apply function (uses helper if available, else inline)
+  const applyStyle = (variant, anchor, compact) => {
+    if (!navBar) return;
+
+    if (typeof setNavigationBarStyle === "function") {
+      setNavigationBarStyle(navBar, variant, anchor, compact);
+      return;
+    }
+
+    // Fallback: inline class management
+    const rm = [
+      "ms-nav--classic", "ms-nav--pill", "ms-nav--segmented", "ms-nav--ghost",
+      "ms-nav--vertical", "ms-nav--floating",
+      "ms-nav--at-tl", "ms-nav--at-tr", "ms-nav--at-bl", "ms-nav--at-br",
+      "ms-nav--compact"
+    ];
+    navBar.classList.remove(...rm);
+
+    switch (variant) {
+      case "pill": navBar.classList.add("ms-nav--pill"); break;
+      case "segmented": navBar.classList.add("ms-nav--segmented"); break;
+      case "ghost": navBar.classList.add("ms-nav--ghost"); break;
+      case "vertical": navBar.classList.add("ms-nav--vertical"); break;
+      case "floating":
+        navBar.classList.add("ms-nav--floating");
+        if (anchor) navBar.classList.add(`ms-nav--at-${anchor}`);
+        break;
+      default: navBar.classList.add("ms-nav--classic");
+    }
+    if (compact) navBar.classList.add("ms-nav--compact");
+
+    // Persist so re-render can restore
+    navBar.dataset.navVariant = variant;
+    navBar.dataset.navAnchor = anchor || "";
+    navBar.dataset.navCompact = compact ? "1" : "";
+  };
+
+  // Wire events
+  variantSelect.addEventListener("change", () => {
+    const v = variantSelect.value;
+    anchorSelect.disabled = v !== "floating";
+    applyStyle(v, anchorSelect.value, compactChk.checked);
+  });
+  anchorSelect.addEventListener("change", () => {
+    applyStyle(variantSelect.value, anchorSelect.value, compactChk.checked);
+  });
+  compactChk.addEventListener("change", () => {
+    applyStyle(variantSelect.value, anchorSelect.value, compactChk.checked);
+  });
+
+  // Apply once to normalize classes/dataset
+  applyStyle(currentVariant, currentAnchor, currentCompact);
+
+  // Add Style box to panel
+  div.appendChild(styleBox);
+
+  // ======== EXISTING UI (Update / Actions) ========
   const saveButton = document.createElement("button");
   saveButton.textContent = "Update";
   saveButton.onclick = () => saveActions(element, content);
   saveButton.style.width = "100%";
   div.appendChild(saveButton);
-  // Create a container div for the variables
+
   const itemdiv = document.createElement("div");
   itemdiv.id = "actions";
   itemdiv.draggable = true;
   div.appendChild(itemdiv);
 
-  // Button to add new variables
   const addButton = document.createElement("button");
   addButton.textContent = "Add Action";
   addButton.onclick = () => addAction(element, itemdiv, {});
   addButton.style.width = "100%";
-  // Append the Add and Save buttons to the property bar
   div.appendChild(addButton);
-  content.appendChild(div);
-  // set the actions
-  actions.forEach((action) => {
-    addAction(element, itemdiv, action);
-  });
 
+  // Render existing actions
+  actions.forEach((action) => addAction(element, itemdiv, action));
+
+  // Mount panel
+  content.appendChild(div);
 }
 
 function addAction(element, itemdiv, action) {
@@ -147,11 +308,15 @@ function saveActions(element, content) {
 function renderNavigationBar(main) {
 
   console.log("Rendering navigation Bar");
-
+  main.innerHTML = "";
+  main.style.width = "100%";
+  // align center
+  main.style.textAlign = "center";
   // Create the navigation bar div
   var navigationBar = document.createElement("div");
   navigationBar.id = "navigationBar_" + Date.now();
   navigationBar.type = "navigation-bar";
+  navigationBar.style.margin = "auto";
   //   navigationBar.className = "navigation-bar";
   navigationBar.style.display = "block";
 
@@ -1095,13 +1260,15 @@ async function updateRecordDB(DBName, tableName, nextRowId, data, actions) {
   }
 }
 
-async function insertRecordDB(DBName, tableName, data, actions) {
+async function insertRecordDB(DBName, tableName, data, actions, apikey) {
   try {
     const response = await fetch(`/insert-record/${DBName}/${tableName}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "api_key": apikey || "", // Include API key if provided
         // Include other headers as needed, like authentication tokens
+
       },
       // Add the data and action to the body
       body: JSON.stringify({
@@ -1234,5 +1401,40 @@ function helperAction(disabled, button) {
       button.classList.remove("disabled");
     }
   }
+}
+
+function setNavigationBarStyle(barEl, variant = 'classic', anchor /* tl|tr|bl|br */, compact /* bool */) {
+  if (!barEl) return;
+  const rm = ['ms-nav--classic', 'ms-nav--pill', 'ms-nav--segmented', 'ms-nav--ghost', 'ms-nav--vertical', 'ms-nav--floating',
+    'ms-nav--at-tl', 'ms-nav--at-tr', 'ms-nav--at-bl', 'ms-nav--at-br', 'ms-nav--compact'];
+  barEl.classList.remove(...rm);
+
+  switch (variant) {
+    case 'pill': barEl.classList.add('ms-nav--pill'); break;
+    case 'segmented': barEl.classList.add('ms-nav--segmented'); break;
+    case 'ghost': barEl.classList.add('ms-nav--ghost'); break;
+    case 'vertical': barEl.classList.add('ms-nav--vertical'); break;
+    case 'floating':
+      barEl.classList.add('ms-nav--floating');
+      if (anchor) barEl.classList.add(`ms-nav--at-${anchor}`); // tl|tr|bl|br
+      break;
+    default: barEl.classList.add('ms-nav--classic');
+  }
+  if (compact) barEl.classList.add('ms-nav--compact');
+
+  // persist per bar (for re-rendering)
+  barEl.dataset.navVariant = variant;
+  barEl.dataset.navAnchor = anchor || '';
+  barEl.dataset.navCompact = compact ? '1' : '';
+}
+
+function applyNavClassesFromDataset(barEl) {
+  if (!barEl) return;
+  setNavigationBarStyle(
+    barEl,
+    barEl.dataset.navVariant || 'classic',
+    barEl.dataset.navAnchor || '',
+    !!barEl.dataset.navCompact
+  );
 }
 

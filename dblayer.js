@@ -63,7 +63,7 @@ class dblayer {
       var DatabaseClass = null;
       switch (this.dbtype) {
 
-        case "mysql2":
+        case "mysql":
           this.databases[key] = new MySqlDatabase(value);
           // await this.databases[key].connect();    
 
@@ -686,9 +686,15 @@ class dblayer {
         const db = dbs.databases[database];
 
         const data = JSON.parse(req.body.data); // Assuming the updated data is sent in the request body
-        const actions = JSON.parse(req.body.actions); // Assuming the action is sent in the request body
 
-        console.log("db object methods:", Object.keys(db));
+        var actions = []; //JSON.parse(req.body.actions); // Assuming the action is sent in the request body
+        if (req.body.actions) {
+          try {
+            actions = JSON.parse(req.body.actions);
+          } catch (err) {
+            console.log("No actions to execute");
+          }
+        }
 
         try {
 
