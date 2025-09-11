@@ -153,6 +153,17 @@
     "icon": "fa fa-cookie",
     "renderFunction": "renderCookieStorage"
   },
+  "loginComponent": {
+    "type": "loginComponent",
+    "description": "Login form",
+    "category": "Business Logic",
+    "scriptName": "loginComponent.js",
+    "createFunction": "createElementLogin",
+    "editFunction": "editElementLogin",
+    "styles": "loginComponent.css",
+    "icon": "fa fa-sign-in",
+    "renderFunction": "renderLoginComponent"
+  },
   "SearchWindow": {
     "type": "SearchWindow",
     "description": "Search Window",
