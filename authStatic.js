@@ -71,6 +71,20 @@ module.exports = function (app, session, passport) {
         failureRedirect: "/login",
     }))
 
+    // Web service for programmatic authentication
+    app.post("/api/login", (req, res, next) => {
+        passport.authenticate('local', (err, user, info) => {
+            if (err) { return next(err); }
+            if (!user) {
+                return res.status(401).send({ authenticated: false, message: info && info.message });
+            }
+            req.logIn(user, err => {
+                if (err) { return next(err); }
+                res.send({ authenticated: true, username: user.username });
+            });
+        })(req, res, next);
+    });
+
 
 
 };
