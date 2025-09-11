@@ -74,7 +74,8 @@ Define the new component in the elements.json file located in the config directo
     "createFunction": "createNewComponent",
     "editFunction": "editNewComponent",
     "styles": "newComponent.css",
-    "icon": "fa fa-icon"
+    "icon": "fa fa-icon",
+    "renderFunction": "renderNewComponent"
 }
 ```
 
@@ -89,6 +90,10 @@ function createNewComponent(type) {
 
 function editNewComponent(type, element, content) {
     // Code to edit the component goes here
+}
+
+function renderNewComponent(main) {
+  // Code to render the compontent goes here
 }
 ```
 
