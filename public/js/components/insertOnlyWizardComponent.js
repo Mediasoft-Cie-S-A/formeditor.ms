@@ -147,15 +147,58 @@ function renderInsertOnlyWizard(element) {
         // steps navigation
         const nav = document.createElement("div");
         nav.className = "iwz-nav";
+        element.appendChild(nav);
+        const insertButton = document.createElement("button");
+        insertButton.textContent = "Insert";
+        insertButton.style.marginTop = "10px";
+        insertButton.name = "SaveDSBtn";
+        insertButton.className = "iwz-btn";
+        insertButton.style.display = "none";
+        // add icon to the button
+        const insertIcon = document.createElement("i");
+        insertIcon.className = "fa fa-save";
+        insertIcon.style.marginRight = "5px";
+        insertButton.prepend(insertIcon);
+        element.appendChild(insertButton);
+        insertButton.onclick = async function (event) {
+            console.log("insertButton clicked");
+            console.log(dataset);
+            if (dataset.length === 0) {
+                alert("Please select a valid dataset");
+                return;
+            }
+            const dbName = dataset[0].DBName || "";
+            const tableName = dataset[0].tableName || "";
+            console.log("dbName:", dbName, "tableName:", tableName);
+            if (dbName.length === 0 || tableName.length === 0) {
+                alert("Please select a valid dataset with database and table name");
+                return;
+            }
+
+            const actions = [];
+            const data = await CreateInsert(dbName, tableName, element);
+            console.log("data to insert:", data);
+            await insertRecordDB(dbName, tableName, JSON.stringify(data), actions, apikey);
+        }
         const prevButton = document.createElement("button");
         prevButton.textContent = "Previous";
         prevButton.className = "iwz-btn";
+        // add icon to the button
+        const prevIcon = document.createElement("i");
+        prevIcon.className = "fa fa-arrow-left";
+        prevIcon.style.marginRight = "5px";
+        prevButton.prepend(prevIcon);
         nav.appendChild(prevButton);
         const nextButton = document.createElement("button");
         nextButton.textContent = "Next";
         nextButton.className = "iwz-btn";
+        // add icon to the button
+        const nextIcon = document.createElement("i");
+        nextIcon.className = "fa fa-arrow-right";
+        nextIcon.style.marginRight = "5px";
+        nextButton.appendChild(nextIcon);
         nav.appendChild(nextButton);
-        element.appendChild(nav);
+
         prevButton.onclick = function () {
             const currentStep = parseInt(element.getAttribute("data-current-step")) || 0;
             if (currentStep > 0) {
@@ -168,6 +211,13 @@ function renderInsertOnlyWizard(element) {
                     chip.classList.toggle("active", index === currentStep - 1);
                 });
             }
+            //hide the insert button
+            const insertButton = element.querySelector("button[name='SaveDSBtn']");
+            if (insertButton) {
+                insertButton.style.display = "none";
+            }
+            // show the next button
+            nextButton.style.display = "inline-block";
         }
         nextButton.onclick = function () {
             const currentStep = parseInt(element.getAttribute("data-current-step")) || 1;
@@ -195,33 +245,10 @@ function renderInsertOnlyWizard(element) {
             } else {
                 // hide the next button
                 nextButton.style.display = "none";
+                // show the insert button
+                insertButton.style.display = "inline-block";
                 // add insert button
-                const insertButton = document.createElement("button");
-                insertButton.textContent = "Insert";
-                insertButton.style.marginTop = "10px";
-                insertButton.name = "SaveDSBtn";
-                insertButton.className = "iwz-btn";
-                element.appendChild(insertButton);
-                insertButton.onclick = async function (event) {
-                    console.log("insertButton clicked");
-                    console.log(dataset);
-                    if (dataset.length === 0) {
-                        alert("Please select a valid dataset");
-                        return;
-                    }
-                    const dbName = dataset[0].DBName || "";
-                    const tableName = dataset[0].tableName || "";
-                    console.log("dbName:", dbName, "tableName:", tableName);
-                    if (dbName.length === 0 || tableName.length === 0) {
-                        alert("Please select a valid dataset with database and table name");
-                        return;
-                    }
 
-                    const actions = [];
-                    const data = await CreateInsert(dbName, tableName, element);
-                    console.log("data to insert:", data);
-                    await insertRecordDB(dbName, tableName, JSON.stringify(data), actions, apikey);
-                }
             }
         }
     } // end else wizard
