@@ -44,6 +44,48 @@ http://localhost:3000/api-docs/
 user admin password admin
 The configuration can be found in appconfig.json
 
+### MySQL configuration
+
+Use `appconfig.json` to configure database and authentication settings. A minimal MySQL
+configuration looks like the following:
+
+```json
+{
+  "dbtype": "mysql",
+  "port": 3000,
+  "dblist": {
+    "sample": {
+      "ConnectionString": "mysql://user:password@localhost:3306/database"
+    }
+  },
+  "SMTP": {
+    "host": "smtp.office365.com",
+    "port": 587,
+    "secure": false,
+    "user": "send@example.com",
+    "pass": "password",
+    "from": "send@example.com"
+  },
+  "mongoDbUrl": "mongodb://0.0.0.0:27017",
+  "mongoDbName": "formeditmsapp",
+  "sessionSecret": "changeme",
+  "authentication": {
+    "type": "azure ad" | "static" | "ldap" | "database"
+  }
+}
+```
+
+Key parameters:
+
+- `dbtype`: Set to `mysql` to enable MySQL support.
+- `dblist`: Map of database names to MySQL connection strings.
+- `SMTP`: Outgoing mail server configuration used for notifications.
+- `mongoDbUrl` / `mongoDbName`: MongoDB connection for metadata storage.
+- `sessionSecret`: Secret string used to sign session cookies.
+- `authentication`: Choose the authentication method (`azure ad`, `static`, `ldap` or `database`).
+
+Adjust these values to match your environment before starting the server.
+
 
 The installation process will also ask if you would like to download an application. If selected, the application can be found at the following URL.
 
