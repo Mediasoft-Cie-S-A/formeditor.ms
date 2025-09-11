@@ -46,10 +46,64 @@ function editElementLogin(type, element, content) {
     endpointLabel.style.fontSize = "16px";
     endpointLabel.appendChild(endpointInput);
 
+    const encryptCheckbox = document.createElement("input");
+    encryptCheckbox.type = "checkbox";
+    encryptCheckbox.tagName = "encrypt";
+    encryptCheckbox.checked = element.getAttribute("encrypt") === "true";
+    encryptCheckbox.style.marginLeft = "10px";
+
+    const encryptLabel = document.createElement("label");
+    encryptLabel.textContent = "Encrypt password";
+    encryptLabel.style.fontWeight = "bold";
+    encryptLabel.style.fontSize = "16px";
+    encryptLabel.style.marginLeft = "10px";
+    encryptLabel.appendChild(encryptCheckbox);
+
+    const googleInput = document.createElement("input");
+    googleInput.type = "text";
+    googleInput.tagName = "google-endpoint";
+    googleInput.value = element.getAttribute("google-endpoint") || "";
+    googleInput.style.marginRight = "10px";
+    googleInput.style.width = "200px";
+
+    const googleLabel = document.createElement("label");
+    googleLabel.textContent = "Google Endpoint";
+    googleLabel.style.fontWeight = "bold";
+    googleLabel.style.fontSize = "16px";
+    googleLabel.appendChild(googleInput);
+
+    const microsoftInput = document.createElement("input");
+    microsoftInput.type = "text";
+    microsoftInput.tagName = "microsoft-endpoint";
+    microsoftInput.value = element.getAttribute("microsoft-endpoint") || "";
+    microsoftInput.style.marginRight = "10px";
+    microsoftInput.style.width = "200px";
+
+    const microsoftLabel = document.createElement("label");
+    microsoftLabel.textContent = "Microsoft Endpoint";
+    microsoftLabel.style.fontWeight = "bold";
+    microsoftLabel.style.fontSize = "16px";
+    microsoftLabel.appendChild(microsoftInput);
+
     propertiesBar.appendChild(endpointLabel);
+    propertiesBar.appendChild(encryptLabel);
+    propertiesBar.appendChild(googleLabel);
+    propertiesBar.appendChild(microsoftLabel);
 
     endpointInput.onchange = function () {
         element.setAttribute("endpoint", endpointInput.value);
+        renderLoginComponent(element);
+    };
+    encryptCheckbox.onchange = function () {
+        element.setAttribute("encrypt", encryptCheckbox.checked ? "true" : "false");
+        renderLoginComponent(element);
+    };
+    googleInput.onchange = function () {
+        element.setAttribute("google-endpoint", googleInput.value);
+        renderLoginComponent(element);
+    };
+    microsoftInput.onchange = function () {
+        element.setAttribute("microsoft-endpoint", microsoftInput.value);
         renderLoginComponent(element);
     };
 }
@@ -60,6 +114,10 @@ function editElementLogin(type, element, content) {
  */
 function renderLoginComponent(element) {
     const endpoint = element.getAttribute("endpoint") || "/login";
+    const encrypt = element.getAttribute("encrypt") === "true";
+    const googleEndpoint = element.getAttribute("google-endpoint");
+    const microsoftEndpoint = element.getAttribute("microsoft-endpoint");
+
     element.innerHTML = "";
 
     const form = document.createElement("form");
@@ -68,6 +126,14 @@ function renderLoginComponent(element) {
         e.preventDefault();
         const formData = new FormData(form);
         try {
+            if (encrypt) {
+                const password = formData.get("password");
+                const msgUint8 = new TextEncoder().encode(password);
+                const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+                formData.set("password", hashHex);
+            }
             await fetch(endpoint, { method: "POST", body: formData });
         } catch (err) {
             console.error("Login failed", err);
@@ -103,5 +169,22 @@ function renderLoginComponent(element) {
     form.appendChild(passField);
     form.appendChild(submitButton);
     element.appendChild(form);
+
+    if (googleEndpoint) {
+        const googleButton = document.createElement("button");
+        googleButton.type = "button";
+        googleButton.className = "login-btn google";
+        googleButton.textContent = "Login with Google";
+        googleButton.onclick = () => { window.location.href = googleEndpoint; };
+        element.appendChild(googleButton);
+    }
+    if (microsoftEndpoint) {
+        const msButton = document.createElement("button");
+        msButton.type = "button";
+        msButton.className = "login-btn microsoft";
+        msButton.textContent = "Login with Microsoft";
+        msButton.onclick = () => { window.location.href = microsoftEndpoint; };
+        element.appendChild(msButton);
+    }
 }
 
