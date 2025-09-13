@@ -1,3 +1,4 @@
+@import "../variables.css";
 /* Style for the Gantt chart table */
 .gantt-table {
     border-collapse: collapse;
@@ -8,57 +9,57 @@
 
 /* Style for the Gantt chart header */
 .gantt-header {
-    background-color: #f5f5f5;
-    color: #333;
+    background-color: var(--color-65);
+    color: var(--color-4);
 }
 
 /* Style for the Gantt chart header cells */
 .gantt-header-cell {
     padding: 10px;
     text-align: center;
-    border: 1px solid #ddd;
+    border: 1px solid var(--color-28);
 }
 
 /* style for the Gantt chart cells */
 .gantt-cell {
     padding: 10px;
     text-align: center;
-    border: 1px solid #ddd;
+    border: 1px solid var(--color-28);
 }
 
 /* Style for the Gantt chart week of the year cells */
 .gantt-week-of-year-cell {
-    background-color: #f5f5f5;
-    color: #333;
+    background-color: var(--color-65);
+    color: var(--color-4);
     text-align: center;
-    border: 1px solid #ddd;
+    border: 1px solid var(--color-28);
 }
 
 /* Style for the Gantt chart weekend days */
 .gantt-weekend {
-    background-color: #ff0010;
-    border: 1px solid #ddd;
+    background-color: var(--color-66);
+    border: 1px solid var(--color-28);
     padding: 10px;
     text-align: center;
 }
 
 /* Style for the Gantt chart holidays */
 .gantt-holiday {
-    background-color: #fa8072;
-    border: 1px solid #ddd;
+    background-color: var(--color-67);
+    border: 1px solid var(--color-28);
     padding: 10px;
     text-align: center;
 }
 
 /* Style for the Gantt chart company holidays */
 .gantt-company-holiday {
-    background-color: #ff8c00;
-    border: 1px solid #ddd;
+    background-color: var(--color-68);
+    border: 1px solid var(--color-28);
     padding: 10px;
     text-align: center;
 }
 
 .gantt-scheduled {
     text-align: center;
-    border: 1px solid #ddd;
+    border: 1px solid var(--color-28);
 }

@@ -1,3 +1,4 @@
+@import "../variables.css";
 .navigation-bar {
   float: right;
   width: 10%;
@@ -5,7 +6,7 @@
   align-items: right;
   vertical-align: top;
   border: none;
-  border-left: 1px solid silver;
+  border-left: 1px solid var(--color-153);
   inset: 2px 0px 0px 0px;
 }
 
@@ -13,6 +14,6 @@
   font-size: 8px;
   font-weight: bold;
   text-align: center;
-  border-bottom: 1px solid silver;
+  border-bottom: 1px solid var(--color-153);
   width: 100%;
 }
