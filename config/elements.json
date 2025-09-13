@@ -96,7 +96,7 @@
     "editFunction": "editDatabaseSearch",
     "styles": "dataSearch.css",
     "icon": "fa fa-search",
-    "renderFunction": ""
+    "renderFunction": "RenderDataSearch"
   },
   "dataSearchHor": {
     "type": "dataSearchHor",

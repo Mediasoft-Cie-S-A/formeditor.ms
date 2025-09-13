@@ -9,20 +9,25 @@
 .ctab_tabs-container {
     width: 100%;
     height: 100%;
-    margin: 20px auto;
+
     position: relative;
     /* needed for floating header */
     display: flex;
     flex-direction: column;
     /* default horizontal */
-    box-sizing: border-box;
+    border-top: none;
+    box-sizing: border-box !important;
+
 }
 
 .ctab_tabs-header {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+
     flex-wrap: wrap;
+    border: none;
+    background-color: #ccc;
+    top: +20px;
 }
 
 .ctab_tabs {
@@ -58,22 +63,20 @@
     display: inline-block;
     padding: 10px;
     cursor: pointer;
-    border: 1px solid #ccc;
     border-bottom: none;
-    background-color: #f1f1f1;
     margin-right: 5px;
     position: relative;
-    border-radius: 5px 5px 0 0;
-    box-sizing: border-box !important;
-    box-shadow: 0 0 5px #ccc;
+    top: +20px;
+    left: +10px;
 }
 
 .ctab_HeaderButton.active,
 .ctab_tab.active {
-    background-color: #4d61fc;
-    border: 1px solid blue;
-    color: #fff;
-    border-bottom-color: #fff;
+
+    border: 1px solid #ccc;
+    ;
+    color: #4d61fc;
+    border-bottom: none
 }
 
 .ctab_tab input {
