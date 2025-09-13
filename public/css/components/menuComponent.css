@@ -1,11 +1,12 @@
+@import "../variables.css";
 /* General Menu Styling */
 .menu-component {
     list-style-type: none;
     padding: 0;
     margin: 0;
     position: relative;
-    background-color: white;
-    color: white;
+    background-color: var(--color-147);
+    color: var(--color-147);
     font-size: 16px;
     flex-direction: column;
     display: flex;
@@ -16,7 +17,7 @@
 .menu-component li {
     padding: 10px;
     cursor: pointer;
-    color: black;
+    color: var(--color-148);
     text-align: left;
 
     transition: background-color 0.3s;
@@ -26,9 +27,9 @@
 }
 
 .menu-component li:hover {
-    background-color: #eee;
-    border: 1px solid #555;
-    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+    background-color: var(--color-45);
+    border: 1px solid var(--color-61);
+    box-shadow: inset 0 0 10px var(--color-119);
 }
 
 
@@ -69,17 +70,17 @@
 
 .menu-component a {
     text-decoration: none;
-    color: black;
+    color: var(--color-148);
     cursor: hand;
 }
 
 .menu-component a:visited {
-    color: black;
+    color: var(--color-148);
 }
 
 
 .menu-component a:hover {
-    color: black;
+    color: var(--color-148);
     font-style: bold;
 }
 
@@ -87,8 +88,8 @@
     margin-right: 10px;
     border-radius: 5px;
     padding: 5px;
-    background-color: #eee;
-    color: black;
+    background-color: var(--color-45);
+    color: var(--color-148);
     font-size: 20px;
     width: 30px;
     height: 30px;
@@ -102,5 +103,5 @@
 .sub-menu {
     margin-left: 20px;
     padding-left: 20px;
-    border-left: 1px dashed #ccc;
+    border-left: 1px dashed var(--color-9);
 }

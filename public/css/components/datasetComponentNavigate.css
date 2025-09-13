@@ -1,3 +1,4 @@
+@import "../variables.css";
 .navigation-bar {
   float: right;
   width: 10%;
@@ -5,7 +6,7 @@
   align-items: right;
   vertical-align: top;
   border: none;
-  border-left: 1px solid silver;
+  border-left: 1px solid var(--color-153);
   inset: 2px 0px 0px 0px;
 }
 
@@ -13,7 +14,7 @@
   font-size: 8px;
   font-weight: bold;
   text-align: center;
-  border-bottom: 1px solid silver;
+  border-bottom: 1px solid var(--color-153);
   width: 100%;
 }
 
@@ -22,15 +23,15 @@
 .ms-nav {
   --nav-gap: 8px;
   --nav-pad: 8px;
-  --nav-bg: #fff;
-  --nav-border: #dcdcdc;
-  --nav-shadow: 0 2px 10px rgba(0, 0, 0, .06);
+  --nav-bg: var(--color-2);
+  --nav-border: var(--color-79);
+  --nav-shadow: 0 2px 10px var(--color-130);
   --btn-radius: 8px;
-  --btn-bg: #f6f7fb;
-  --btn-bg-active: #4d61fc;
-  --btn-fg: #222;
-  --btn-fg-active: #fff;
-  --btn-border: #d3d7e3;
+  --btn-bg: var(--color-80);
+  --btn-bg-active: var(--color-3);
+  --btn-fg: var(--color-81);
+  --btn-fg-active: var(--color-2);
+  --btn-border: var(--color-82);
   --btn-height: 40px;
 
   display: inline-flex;
@@ -60,7 +61,7 @@
   color: var(--btn-fg);
   cursor: pointer;
   transition: transform .06s ease, background .15s ease, color .15s ease, box-shadow .15s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+  box-shadow: 0 1px 2px var(--color-134);
 }
 
 .ms-nav button p {
@@ -86,50 +87,50 @@
 /* Action coloring (per button name, no JS changes) */
 .ms-nav button[name="SaveDSBtn"],
 .ms-nav button[name="SaveAllDSBtn"] {
-  background: #1a7f37;
-  color: #fff;
-  border-color: #157233;
+  background: var(--color-83);
+  color: var(--color-2);
+  border-color: var(--color-84);
 }
 
 .ms-nav button[name="CancelDSBtn"] {
-  background: #6b7280;
-  color: #fff;
-  border-color: #5f6574;
+  background: var(--color-85);
+  color: var(--color-2);
+  border-color: var(--color-86);
 }
 
 .ms-nav button[name="DeleteDSBtn"] {
-  background: #e74c3c;
-  color: #fff;
-  border-color: #d74435;
+  background: var(--color-87);
+  color: var(--color-2);
+  border-color: var(--color-88);
 }
 
 .ms-nav button[name="InsertDSBtn"] {
-  background: #16a34a;
-  color: #fff;
-  border-color: #138a3f;
+  background: var(--color-89);
+  color: var(--color-2);
+  border-color: var(--color-90);
 }
 
 .ms-nav button[name="EditDSBtn"],
 .ms-nav button[name="CopyDSBtn"] {
-  background: #4d61fc;
-  color: #fff;
-  border-color: #4255f0;
+  background: var(--color-3);
+  color: var(--color-2);
+  border-color: var(--color-91);
 }
 
 /* Variants (add one of these to the bar element) */
 .ms-nav.ms-nav--classic {}
 
 .ms-nav.ms-nav--pill {
-  --nav-bg: #f8f9ff;
-  --nav-border: #e6e8f2;
-  --btn-bg: #fff;
-  --btn-border: #e6e8f2;
+  --nav-bg: var(--color-92);
+  --nav-border: var(--color-93);
+  --btn-bg: var(--color-2);
+  --btn-border: var(--color-93);
   --btn-radius: 999px;
 }
 
 .ms-nav.ms-nav--segmented {
-  --nav-bg: #fff;
-  --nav-border: #e6e6e6;
+  --nav-bg: var(--color-2);
+  --nav-border: var(--color-94);
   padding: 4px;
   border-radius: 999px;
 }
@@ -139,34 +140,34 @@
   padding: 0 14px;
   border-radius: 999px;
   border: 0;
-  background: transparent;
+  background: var(--color-151);
 }
 
 .ms-nav.ms-nav--segmented button:hover:not(:disabled) {
-  background: rgba(77, 97, 252, .08);
+  background: var(--color-135);
 }
 
 .ms-nav.ms-nav--segmented button[name="SaveDSBtn"],
 .ms-nav.ms-nav--segmented button[name="SaveAllDSBtn"] {
-  background: #4d61fc;
-  color: #fff;
+  background: var(--color-3);
+  color: var(--color-2);
 }
 
 .ms-nav.ms-nav--ghost {
-  --nav-bg: transparent;
-  --nav-border: transparent;
+  --nav-bg: var(--color-151);
+  --nav-border: var(--color-151);
   box-shadow: none;
   padding: 0;
 }
 
 .ms-nav.ms-nav--ghost button {
-  border: 1px solid transparent;
-  background: transparent;
+  border: 1px solid var(--color-151);
+  background: var(--color-151);
   box-shadow: none;
 }
 
 .ms-nav.ms-nav--ghost button:hover:not(:disabled) {
-  background: rgba(0, 0, 0, .05);
+  background: var(--color-121);
 }
 
 .ms-nav.ms-nav--vertical {
@@ -184,7 +185,7 @@
   position: fixed;
   z-index: 1000;
   backdrop-filter: blur(6px);
-  background: rgba(255, 255, 255, .9);
+  background: var(--color-136);
 }
 
 .ms-nav.ms-nav--floating.ms-nav--at-tl {
