@@ -1,217 +1,59 @@
-@import "../variables.css";
-/*!
- * Tabs UI — horizontal / vertical / floating
- * Copyright (c) 2023 Mediasoft & Cie S.A.
- * Apache-2.0
- */
-
-/* ---------- Base ---------- */
-
-.ctab_tabs-container {
-    width: 100%;
-    height: 100%;
-
-    position: relative;
-    /* needed for floating header */
+/* Navbar */
+.navbar {
     display: flex;
-    flex-direction: column;
-    /* default horizontal */
-    border-top: none;
-    box-sizing: border-box !important;
-
-}
-
-.ctab_tabs-header {
-    display: inline-flex;
+    justify-content: space-between;
     align-items: center;
-
-    flex-wrap: wrap;
-    border: none;
-    background-color: var(--color-9);
-    top: +20px;
+    padding: 10px 0;
+    max-width: 960px;
+    margin: 0 auto;
 }
 
-.ctab_tabs {
-    position: relative;
-    width: 100%;
-    height: auto;
+.navbar-nav {
+    display: flex;
+    gap: 16px;
+    list-style: none;
 }
 
-.ctab_ContentDiv {
-    display: none;
-    padding: 10px;
-    border: 1px dotted var(--color-9);
-    background-color: var(--color-2);
-    margin-top: 10px;
-    box-sizing: border-box !important;
-    min-height: 100px;
+.navbar-nav .nav-link {
+    text-decoration: none;
+    color: var(--color-4);
+    font-size: 15px;
 }
 
-/* Old class kept for compatibility */
-.ctab_tab-content {
-    display: none;
-    padding: 10px;
-    border: 1px solid var(--color-9);
-    border-top: none;
-    background-color: var(--color-2);
+.nav-tabs {
+
+    align-items: center;
+    height: 40px;
 }
 
-/* ---------- Buttons (headers) ---------- */
 
-.ctab_HeaderButton,
-.ctab_tab {
-    /* keep legacy .ctab_tab styles */
+.nav-tabs>li {
     display: inline-block;
-    padding: 10px;
+
     cursor: pointer;
-    border-bottom: none;
-    margin-right: 5px;
-    position: relative;
-    top: +20px;
-    left: +10px;
+
 }
 
-.ctab_HeaderButton.active,
-.ctab_tab.active {
+.nav-tabs>li>a {
 
-    border: 1px solid var(--color-9);
-    ;
+    padding: 10px 15px;
+    height: 45px;
+}
+
+.nav-tabs>li>a.active {
+    background-color: var(--color-147);
     color: var(--color-3);
-    border-bottom: none
+    border-top: 2px solid var(--color-153);
+    border-left: 2px solid var(--color-153);
+    border-right: 2px solid var(--color-153);
+    border-bottom: 2px solid var(--color-147);
 }
 
-.ctab_tab input {
-    border: none;
-    background: none;
-    width: 80px;
+.nav-tabs>li>a {
+    color: var(--color-10);
 }
 
-.ctab_tab .ctab_close-btn {
-    position: absolute;
-    right: 5px;
-    top: 5px;
-    cursor: pointer;
-}
-
-/* Generic button look (if you keep standalone header buttons somewhere) */
-.ctab_HeaderButtonStandalone {
-    display: inline-block;
-    padding: 10px;
-    cursor: pointer;
-    border: 1px solid var(--color-9);
-    border-radius: 5px;
-    background-color: var(--color-39);
-    margin-right: 5px;
-    position: relative;
-    margin-top: 10px;
-    box-sizing: border-box !important;
-    box-shadow: 0 0 5px var(--color-9);
-}
-
-.ctab_HeaderButtonStandalone.active {
-    background-color: var(--color-3);
-    border: 1px solid blue;
-    color: var(--color-2);
-}
-
-/* ---------- Orientation: Horizontal (default) ---------- */
-
-.ctab--horizontal .ctab_tabs-header {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    border-bottom: 1px solid var(--color-9);
-    padding-bottom: 4px;
-    margin-bottom: 6px;
-}
-
-.ctab--horizontal .ctab_HeaderButton.active {
-    border-bottom-color: var(--color-2);
-}
-
-/* ---------- Orientation: Vertical (left rail) ---------- */
-
-.ctab--vertical {
-    flex-direction: row;
-}
-
-.ctab--vertical .ctab_tabs-header {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 6px;
-    min-width: 180px;
-    border-right: 1px solid var(--color-9);
-    padding-right: 8px;
-    margin-right: 8px;
-}
-
-.ctab--vertical .ctab_tabs {
-    flex: 1 1 auto;
-}
-
-.ctab--vertical .ctab_HeaderButton {
-    margin-right: 0;
-    border-bottom: 1px solid var(--color-9);
-    border-radius: 5px;
-}
-
-.ctab--vertical .ctab_HeaderButton.active {
-    background-color: var(--color-3);
-    border: 1px solid blue;
-    color: var(--color-2);
-}
-
-/* ---------- Floating header ---------- */
-/* Use together with .ctab--horizontal or .ctab--vertical */
-
-.ctab--floating .ctab_tabs-header {
-    position: absolute;
-    z-index: 20;
-    display: flex;
-    gap: 5px;
-    background: var(--color-132);
-    border: 1px solid var(--color-9);
-    border-radius: 6px;
-    box-shadow: 0 2px 10px var(--color-128);
-    padding: 6px;
-}
-
-/* Anchors */
-.ctab--float-tl .ctab_tabs-header {
-    top: 10px;
-    left: 10px;
-}
-
-.ctab--float-tr .ctab_tabs-header {
-    top: 10px;
-    right: 10px;
-}
-
-.ctab--float-bl .ctab_tabs-header {
-    bottom: 10px;
-    left: 10px;
-}
-
-.ctab--float-br .ctab_tabs-header {
-    bottom: 10px;
-    right: 10px;
-}
-
-/* Dynamic padding to avoid overlap; values set via JS */
-.ctab--floating .ctab_tabs {
-    --ctab-pad-top: 0px;
-    --ctab-pad-bottom: 0px;
-    --ctab-pad-left: 0px;
-    --ctab-pad-right: 0px;
-    padding-top: var(--ctab-pad-top);
-    padding-bottom: var(--ctab-pad-bottom);
-    padding-left: var(--ctab-pad-left);
-    padding-right: var(--ctab-pad-right);
-}
-
-/* ---------- Utilities ---------- */
-
-.ctab_hidden {
-    display: none !important;
+.tab-content {
+    box-shadow: 2px 9px 49px -17px var(--color-120);
+    background-color: var(--color-2);
 }

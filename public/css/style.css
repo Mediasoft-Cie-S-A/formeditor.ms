@@ -30,38 +30,6 @@
 
 
 
-.nav-tabs {
-
-  align-items: center;
-  height: 40px;
-}
-
-
-.nav-tabs>li {
-  display: inline-block;
-
-  cursor: pointer;
-
-}
-
-.nav-tabs>li>a {
-
-  padding: 10px 15px;
-  height: 45px;
-}
-
-.nav-tabs>li>a.active {
-  background-color: var(--color-147);
-  color: var(--color-3);
-  border-top: 2px solid var(--color-153);
-  border-left: 2px solid var(--color-153);
-  border-right: 2px solid var(--color-153);
-  border-bottom: 2px solid var(--color-147);
-}
-
-.nav-tabs>li>a {
-  color: var(--color-10);
-}
 
 .wrapper {
   display: flex;
@@ -112,10 +80,7 @@
 }
 
 
-.tab-content {
-  box-shadow: 2px 9px 49px -17px var(--color-120);
-  background-color: var(--color-2);
-}
+
 
 .opened-modal {
   display: block !important;
@@ -1037,27 +1002,7 @@ body {
   text-align: center;
 }
 
-/* Navbar */
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 0;
-  max-width: 960px;
-  margin: 0 auto;
-}
 
-.navbar-nav {
-  display: flex;
-  gap: 16px;
-  list-style: none;
-}
-
-.navbar-nav .nav-link {
-  text-decoration: none;
-  color: var(--color-4);
-  font-size: 15px;
-}
 
 .auth-buttons .btn {
   margin-left: 8px;
