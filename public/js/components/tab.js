@@ -23,11 +23,11 @@ function createElementTab(type) {
     element.classList.add('ctab_tabs-container');
     element.style.width = '100%';
     // generate tab html code with 3 tabs
-    const tabsHeader = document.createElement('div');
-    tabsHeader.classList.add('ctab_tabs-header');
+    const tabsHeader = document.createElement('ul');
+    tabsHeader.classList.add('ctab_tabs-header', 'nav-tabs');
     element.appendChild(tabsHeader);
     const tabsContent = document.createElement('div');
-    tabsContent.classList.add('ctab_tabs');
+    tabsContent.classList.add('ctab_tabs', 'tab-content');
     element.appendChild(tabsContent);
 
 
@@ -130,7 +130,11 @@ function editElementTab(type, element, content) {
         removeButton.id = 'removeTab';
         removeButton.innerText = '-';
         removeButton.addEventListener('click', function () {
-            tabH.remove();
+            if (tabH.parentElement) {
+                tabH.parentElement.remove();
+            } else {
+                tabH.remove();
+            }
             tabC.remove();
         });
         editTab.appendChild(removeButton);
@@ -149,29 +153,29 @@ function createTabContent(tabsHeader, tabsContent) {
 
     const tabId = `ctab_tab-${tabcount}`;
 
-    // Create tab header
-    const tabHeader = document.createElement('div');
-
+    // Create tab header using <li><a>
+    const li = document.createElement('li');
+    const tabHeader = document.createElement('a');
+    tabHeader.href = '#';
     tabHeader.dataset.tab = tabId;
     tabHeader.innerText = (tabcount === 1) ? "Edit" : `Tab-${tabcount}`;
     tabHeader.className = 'ctab_HeaderButton';
-    tabsHeader.appendChild(tabHeader);
+    li.appendChild(tabHeader);
+    tabsHeader.appendChild(li);
 
     // Create tab content
     const tabContent = document.createElement('div');
     tabContent.id = tabId;
-    // tabContent.textContent = `Content for ${title}`;
     tabsContent.appendChild(tabContent);
     tabContent.style.display = 'none';
     tabContent.className = 'ctab_ContentDiv';
 
     // Activate the new tab
-    // fire tabHeader click event
+    tabHeader.addEventListener('click', function (e) {
+        activateTab(e, tabHeader, tabContent);
+    });
 
-    tabHeader.setAttribute('onclick', 'activateTab(event,this, document.getElementById("' + tabId + '"))');
-
-    activateTab(event, tabHeader, tabContent.id);
-
+    activateTab(null, tabHeader, tabContent);
 
 };
 
@@ -279,33 +283,20 @@ function createEditBigModal() {
 }
 
 function activateTab(event, tabHeader, tabContent) {
-    console.log("Activate tab")
     if (event) {
         event.preventDefault();
     }
-    console.log("Tab Header: ", tabHeader.parentElement);
-    console.log("Tab Content ID: ", tabContent.id);
-    // check if tabHeader is empty or undefine
-    // Unset 'active' on all tab headers
-    const tabHeaderButtons = tabHeader.parentElement.querySelectorAll('.ctab_HeaderButton');
-    for (let i = 0; i < tabHeaderButtons.length; i++) {
-        tabHeaderButtons[i].classList.remove('active');
-    }
 
-    const container = tabHeader.parentElement.parentElement.querySelectorAll('.ctab_ContentDiv');
-    for (let i = 0; i < container.length; i++) {
-        if (container[i].id.includes(tabContent.id)) {
-            container[i].style.display = 'block';
-        } else {
-            container[i].style.display = 'none';
-        }
-    }
+    const headerContainer = tabHeader.closest('.ctab_tabs-header');
+    const tabHeaderButtons = headerContainer.querySelectorAll('.ctab_HeaderButton');
+    tabHeaderButtons.forEach(btn => btn.classList.remove('active'));
 
-    // Activate current tab
+    const contentContainer = headerContainer.parentElement.querySelectorAll('.ctab_ContentDiv');
+    contentContainer.forEach(c => {
+        c.style.display = (c === tabContent) ? 'block' : 'none';
+    });
+
     tabHeader.classList.add('active');
-
-
-
 }
 
 function activateEditTabIn(targetElement) {
