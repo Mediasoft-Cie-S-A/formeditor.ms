@@ -168,7 +168,7 @@ function createTabContent(tabsHeader, tabsContent) {
     tabContent.id = tabId;
     tabsContent.appendChild(tabContent);
     tabContent.style.display = 'none';
-    tabContent.className = 'ctab_ContentDiv';
+    tabContent.className = 'ctab_ContentDiv tab-pane fade';
 
     // Activate the new tab
     tabHeader.addEventListener('click', function (e) {
@@ -282,6 +282,8 @@ function createEditBigModal() {
 
 }
 
+
+
 function activateTab(event, tabHeader, tabContent) {
     if (event) {
         event.preventDefault();
@@ -311,6 +313,7 @@ function activateEditTabIn(targetElement) {
         }
     }
 }
+
 
 
 /* === NEW: layout helpers (orientation + floating) === */

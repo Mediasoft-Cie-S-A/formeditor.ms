@@ -57,3 +57,14 @@
     box-shadow: 2px 9px 49px -17px var(--color-120);
     background-color: var(--color-2);
 }
+
+.ctab_ContentDiv {
+    padding: 10px;
+    background-color: var(--color-2);
+    min-height: 300px;
+    width: 100%;
+    overflow: auto;
+    box-sizing: border-box;
+    border: 1px solid var(--color-9);
+    
+}
