@@ -157,7 +157,7 @@ function createTabContent(tabsHeader, tabsContent) {
     const li = document.createElement('li');
     const tabHeader = document.createElement('a');
     tabHeader.href = '#';
-    tabHeader.dataset.tab = tabId;
+    tabHeader.setAttribute('data-tab', tabId);
     tabHeader.innerText = (tabcount === 1) ? "Edit" : `Tab-${tabcount}`;
     tabHeader.className = 'ctab_HeaderButton';
     li.appendChild(tabHeader);
@@ -166,6 +166,7 @@ function createTabContent(tabsHeader, tabsContent) {
     // Create tab content
     const tabContent = document.createElement('div');
     tabContent.id = tabId;
+    tabContent.setAttribute('name', tabId);
     tabsContent.appendChild(tabContent);
     tabContent.className = 'ctab_ContentDiv tab-pane fade';
 
@@ -287,15 +288,19 @@ function activateTab(event, tabHeader, tabContent) {
     if (event) {
         event.preventDefault();
     }
-
-    const headerContainer = tabHeader.closest('.ctab_tabs-header');
-    const tabHeaderButtons = headerContainer.querySelectorAll('.ctab_HeaderButton');
+    console.log("activateTab", tabHeader, tabContent);
+    if (!tabHeader) return;
+    // find the parent container of the tabHeader
+    const headerContainer = tabHeader.closest('ul');
+    const tabHeaderButtons = headerContainer.querySelectorAll('li a');
     tabHeaderButtons.forEach(btn => btn.classList.remove('active'));
 
     const contentContainer = headerContainer.parentElement.querySelectorAll('.ctab_ContentDiv');
     contentContainer.forEach(c => c.classList.remove('active'));
 
     tabHeader.classList.add('active');
+    tabHeader.style.fontWeight = 'bold';
+    tabHeader.parentElement.style.marginTop = '10px';
     if (tabContent) {
         tabContent.classList.add('active');
     }
@@ -398,10 +403,13 @@ function renderTabComponent(container) {
     const float = container.dataset.ctabFloat || ''; // '', 'tl','tr','bl','br'
     setTabsLayout(container, { orientation, float: float || null });
 
-    const headers = container.querySelectorAll('.ctab_HeaderButton');
+    const headers = container.querySelectorAll('ul li a');
     headers.forEach(header => {
-        const tabId = header.dataset.tab;
-        const content = container.querySelector(`#${tabId}`);
+        console.log("renderTabComponent header", header);
+        const tabId = header.getAttribute('data-tab');
+        console.log("renderTabComponent tabId", tabId);
+        // get data-tab attibute from the li
+        const content = container.querySelector(`[name="${tabId}"]`);
         header.addEventListener('click', e => activateTab(e, header, content));
     });
 
@@ -410,7 +418,8 @@ function renderTabComponent(container) {
         activeHeader = headers[0];
     }
     if (activeHeader) {
-        const content = container.querySelector(`#${activeHeader.dataset.tab}`);
+        const tabId = activeHeader.getAttribute('data-tab');
+        const content = container.querySelector(`[name="${tabId}"]`);
         activateTab(null, activeHeader, content);
     }
 }
