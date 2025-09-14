@@ -508,13 +508,17 @@ function searchWinbuttonClick(event, elementId) {
   // get the database name
   DBName = queryArray[0];
   // get the query
-  query = queryArray[1];
+  query = queryArray[1].toUpperCase();
+  if (!query.startsWith("SELECT")) {
+    showToast("Only SELECT queries are allowed in search window", 5000);
+    return;
+  }
   // extract all fields from the query
   var fields = query.match(/SELECT(.*?)FROM/)[1];
   // get the dataset from the query in this format  { fieldName: "field", fieldType: "string" },
   const datasetJson = fields.split(",").map((field) => {
     return {
-      fieldName: field.trim(),
+      fieldName: field.trim().toLowerCase(),
       fieldType: "string",
     };
   });

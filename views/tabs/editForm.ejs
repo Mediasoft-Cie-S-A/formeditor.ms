@@ -151,8 +151,25 @@
                 console.log('create movebar');
                 const newMoveBar = document.createElement('div');
                 newMoveBar.className = 'movebar';
-                newMoveBar.style.width = `${panelEl.getBoundingClientRect().width}px`;
+                if (panelEl === sideComponents) {
+                    newMoveBar.style.backgroundColor = '#0d6efd';
+                } else if (panelEl === sideProps) {
+                    newMoveBar.style.backgroundColor = '#198754';
+                } else if (panelEl === sideData) {
+                    newMoveBar.style.backgroundColor = '#6f42c1';
+                } else if (panelEl === sideWebServices) {
+                    newMoveBar.style.backgroundColor = '#fd7e14';
+                } else {
+                    newMoveBar.style.backgroundColor = '#6c757d';
+                }
+                if (panelEl.getBoundingClientRect().width < 200) {
+                    panelEl.style.width = '300px';
+                } else {
+                    panelEl.style.width = `${panelEl.getBoundingClientRect().width}px`;
+                }
                 newMoveBar.innerHTML = 'Drag to move panel';
+                newMoveBar.setAttribute('name', panelEl.id);
+
                 panelEl.insertBefore(newMoveBar, panelEl.firstChild);
                 // adding code to move the panel
                 newMoveBar.addEventListener('mousedown', (e) => {

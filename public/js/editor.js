@@ -180,13 +180,6 @@ function editElement(element) {
   content.innerHTML = "";
   const closeIcon = document.createElement("i");
 
-  closeIcon.style.color = "red";
-  closeIcon.style.fontSize = "18px";
-  closeIcon.className = "fa fa-close remove-item";
-  // closeIcon.style.float = "right";
-  closeIcon.onclick = () => (dialog.style.display = "none");
-
-
   const label = document.createElement("label");
   label.style.fontSize = "7px";
   label.textContent = element.id;
@@ -620,6 +613,7 @@ function showProperties() {
     inputElementSelected.value
   );
 
+  togglePanel(sideProps, btnProp);
   editElement(editorElementSelected);
   // put all the input elements in the editorElementSelected in writing mode
   // get all the input elements in the editorElementSelected

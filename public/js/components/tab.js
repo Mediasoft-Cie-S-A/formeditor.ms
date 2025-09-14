@@ -168,12 +168,10 @@ function createTabContent(tabsHeader, tabsContent) {
     tabContent.id = tabId;
     tabContent.setAttribute('name', tabId);
     tabsContent.appendChild(tabContent);
-    tabContent.className = 'ctab_ContentDiv tab-pane fade';
+    tabContent.className = 'ctab_ContentDiv';
 
     // Activate the new tab
-    tabHeader.addEventListener('click', function (e) {
-        activateTab(e, tabHeader, tabContent);
-    });
+    tabHeader.setAttribute('onclick', 'activateTab(event, this, document.getElementById("' + tabId + '"))');
 
     activateTab(null, tabHeader, tabContent);
 
@@ -410,7 +408,7 @@ function renderTabComponent(container) {
         console.log("renderTabComponent tabId", tabId);
         // get data-tab attibute from the li
         const content = container.querySelector(`[name="${tabId}"]`);
-        header.addEventListener('click', e => activateTab(e, header, content));
+
     });
 
     let activeHeader = Array.from(headers).find(h => h.classList.contains('active'));

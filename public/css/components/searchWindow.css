@@ -1,4 +1,5 @@
 @import "../variables.css";
+
 .modal {
   display: none;
   position: fixed;
@@ -13,10 +14,10 @@
 
 .modal-content {
   background-color: var(--color-2);
-  margin: 10% auto;
+
   padding: 20px;
   border: 1px solid var(--color-50);
-  width: 80%;
+
   border-radius: 10px;
 }
 
@@ -39,11 +40,11 @@
 
 
 .even-row {
-  background-color: var(--color-153);
+  background-color: var(--color-28);
 }
 
 .odd-row {
-  background-color: var(--color-2)fff;
+  background-color: var(--color-2);
 }
 
 .selected-row {

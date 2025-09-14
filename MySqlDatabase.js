@@ -236,14 +236,30 @@ class MySqlDatabase {
   }
 
   /* ---------- CRUD by arrays (triggers fill rowid) ---------- */
+  /* ---------- CRUD by arrays (triggers fill rowid) ---------- */
   async insertRecord(tableName, data /* {fields:[], values:[]} */, pkField /* optional */) {
     if (!data || !Array.isArray(data.fields) || !Array.isArray(data.values) || data.fields.length !== data.values.length) {
       throw new Error("'fields' and 'values' arrays are required and must be same length.");
     }
     const tbl = ident(tableName);
-    const flds = data.fields.map(ident).join(', ');
-    const qs = data.values.map(() => '?').join(', ');
-    const r = await this.exec(`INSERT INTO ${tbl} (${flds}) VALUES (${qs})`, data.values);
+
+    // Gestion des valeurs null → remplace par SQL NULL
+    const flds = [];
+    const qs = [];
+    const params = [];
+
+    // for field in data.fields and corresponding value in data.values if the vaslue is null, remove the field from the insert statement
+    data.fields.forEach((f, i) => {
+      if (data.values[i] === "" || data.values[i] === undefined || data.values[i] === null) {
+        return;
+      }
+      flds.push(ident(f));
+      qs.push("?");
+      params.push(data.values[i]);
+    });
+
+    const sql = `INSERT INTO ${tbl} (${flds.join(", ")}) VALUES (${qs.join(", ")})`;
+    const r = await this.exec(sql, params);
 
     if (pkField && r.insertId) {
       const row = await this.query(`SELECT \`rowid\` FROM ${tbl} WHERE ${ident(pkField)} = ?`, [r.insertId]);
@@ -251,17 +267,29 @@ class MySqlDatabase {
     }
     return r;
   }
+
   async updateRecord(tableName, data, rowID) {
     if (!data || !Array.isArray(data.fields) || !Array.isArray(data.values) || data.fields.length !== data.values.length) {
       throw new Error("Invalid data format. 'fields' and 'values' must be arrays of the same length.");
     }
     const tbl = ident(tableName);
-    const setClause = data.fields.map(f => `${ident(f)} = ?`).join(', ');
-    return this.exec(`UPDATE ${tbl} SET ${setClause} WHERE \`rowid\` = ?`, [...data.values, rowID]);
-  }
-  async deleteRecordByRowId(tableName, rowID) {
-    const tbl = ident(tableName);
-    return this.exec(`DELETE FROM ${tbl} WHERE \`rowid\` = ?`, [rowID]);
+
+    const setParts = [];
+    const params = [];
+
+    // for field in data.fields and corresponding value in data.values if the vaslue is null, remove the field from the insert statement
+    data.fields.forEach((f, i) => {
+      if (data.values[i] === "" || data.values[i] === undefined || data.values[i] === null) {
+        return;
+      }
+      setParts.push(`${ident(f)} = ?`);
+      params.push(data.values[i]);
+    });
+
+    params.push(rowID);
+
+    const sql = `UPDATE ${tbl} SET ${setParts.join(", ")} WHERE \`rowid\` = ?`;
+    return this.exec(sql, params);
   }
 
   /* ---------- generic getAll ---------- */

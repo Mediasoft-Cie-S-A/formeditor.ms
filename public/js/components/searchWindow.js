@@ -40,15 +40,15 @@ function createQueryResultModal() {
 
   // Modal Content
   const modalContent = document.createElement("div");
-  modalContent.className = "modal-content";
+  modalContent.className = "";
   modal.appendChild(modalContent);
 
   // Modal Header
   const modalHeader = document.createElement("div");
   modalHeader.className = "modal-header";
   modalHeader.innerHTML = `
-      <h2>Query Result</h2>
-      <button id="closeQueryModalBtn" class="close-modal-btn">&times;</button>
+      <p>Select a Value</p>
+      <button id="closeQueryModalBtn" class="close-modal-btn" style=" cursor: pointer;color:red">&times;</button>
     `;
   modalContent.appendChild(modalHeader);
 
@@ -60,7 +60,6 @@ function createQueryResultModal() {
   const filterSection = document.createElement("div");
   filterSection.className = "filter-section";
   filterSection.innerHTML = `
-      <h4>Filters</h4>
       <div id="queryFilters" class="filters"></div>
       <button id="applyQueryFilterBtn" class="apply-filter-btn">Apply Filter</button>
     `;
@@ -70,7 +69,6 @@ function createQueryResultModal() {
   const gridSection = document.createElement("div");
   gridSection.className = "grid-section";
   gridSection.innerHTML = `
-      <h4>Query Result Grid</h4>
       <div id="queryResultGrid" class="table-container"></div>
       <div id="paginationControls" class="pagination-controls">
         <button id="prevPageBtn" class="pagination-btn">Previous</button>
@@ -85,10 +83,48 @@ function createQueryResultModal() {
   // Modal Footer for OK and Close Buttons
   const modalFooter = document.createElement("div");
   modalFooter.className = "modal-footer";
-  modalFooter.innerHTML = `
-      <button id="modalOkBtn" class="modal-ok-btn">OK</button>
-      <button id="modalCloseBtn" class="modal-close-btn">Close</button>
-    `;
+
+  const modalOkBtn = document.createElement("button");
+  modalOkBtn.id = "modalOkBtn";
+  modalOkBtn.className = "modal-ok-btn";
+  modalOkBtn.textContent = "OK";
+  modalFooter.appendChild(modalOkBtn);
+  modalOkBtn.onclick = (e) => {
+    e.preventDefault();
+    console.log("Selected Row Value:", selectedRowValue);
+    console.log("Parent ID:", parentid);
+    if (!selectedRowValue) {
+      showToast("Please select a row", 3000);
+      return;
+    }
+    modal.style.display = "none"; // Close the modal
+    // get input element
+    var inputElement = document.getElementById(parentid);
+
+    // if the input is not found, return
+    if (!inputElement) {
+      return;
+    }
+    // if the input is disabled, ou readonly, show toast maeessage and return
+    if (inputElement.disabled || inputElement.readOnly) {
+      showToast("Input is disabled or readonly");
+      return;
+    } else {
+      // set the value of the input element
+
+      inputElement.value = selectedRowValue;
+      console.log("Input Element Value Set:", inputElement.value);
+    };
+
+  }; // modalOkBtn.onclick
+
+
+  const modalCloseBtn = document.createElement("button");
+  modalCloseBtn.id = "modalCloseBtn";
+  modalCloseBtn.className = "modal-close-btn";
+  modalCloseBtn.textContent = "Close";
+  modalFooter.appendChild(modalCloseBtn);
+
   modalContent.appendChild(modalFooter);
 
   // Close Button Logic (Header Close)
@@ -99,7 +135,7 @@ function createQueryResultModal() {
   });
 
   // Close Button Logic (Footer Close)
-  const modalCloseBtn = modalFooter.querySelector("#modalCloseBtn");
+
   modalCloseBtn.addEventListener("click", (e) => {
     e.preventDefault();
     modal.style.display = "none";
@@ -123,6 +159,8 @@ async function fetchAndRenderData(DBName, datasetJson, query) {
 
 // Apply Filter Logic
 function applyFilter() {
+  const queryFiltersContainer = document.getElementById("queryFilters");
+  if (!queryFiltersContainer) return;
   // Get filter values from inputs
   const filters = Array.from(queryFiltersContainer.querySelectorAll("input"))
     .filter((input) => input.value.trim() !== "")
@@ -160,6 +198,13 @@ function showQueryResultModal(DBName, datasetJson, query, pid) {
   modal.style.top = "50%";
   modal.style.left = "50%";
   modal.style.transform = "translate(-50%, -50%)";
+  modal.style.width = "80%";
+  modal.style.height = "80%";
+  modal.style.backgroundColor = "#fff";
+  modal.style.boxShadow = "0 4px 8px rgba(0,0,0,0.2)";
+  modal.style.borderRadius = "8px";
+  modal.style.padding = "10px";
+  modal.style.overflow = "hidden"; // Prevent overflow
 
   // Parse datasetJson and build filters dynamically
   const queryFiltersContainer = document.getElementById("queryFilters");
@@ -193,10 +238,10 @@ function renderPaginatedGrid(data, fields) {
 
   // Create Header Row
   const headerRow = document.createElement("div");
-  headerRow.className = "grid-row header-row";
+  headerRow.className = "grid-header";
   fields.forEach((field) => {
     const cell = document.createElement("div");
-    cell.className = "grid-cell header-cell";
+    cell.className = "grid-cell-header";
     cell.textContent = field;
     headerRow.appendChild(cell);
   });
@@ -216,16 +261,16 @@ function renderPaginatedGrid(data, fields) {
       });
       dataRow.classList.add("selected-row");
     });
-
-    fields.forEach((field) => {
+    // get row value
+    values = Object.values(row);
+    fields.forEach((field, index) => {
       const cell = document.createElement("div");
       cell.className = "grid-cell";
-      cell.textContent = row[field] || ""; // Display data or empty string if null
+      cell.textContent = values[index] || ""; // Display data or empty string if null
       dataRow.appendChild(cell);
     });
-
     grid.appendChild(dataRow);
-  }
+  } // for rows
 }  // renderPaginatedGrid
 
 // Update Pagination Controls
@@ -260,31 +305,6 @@ function updatePaginationControls(datasetJson) {
   const applyFilterBtn = document.getElementById("applyQueryFilterBtn");
   applyFilterBtn.onclick = applyFilter;
 
-  // OK Button Logic
-  const modalOkBtn = document.getElementById("modalOkBtn");
-  modalOkBtn.onclick = (e) => {
-    e.preventDefault();
-    console.log("Selected Row Value:", selectedRowValue);
-    modal.style.display = "none"; // Close the modal
-    // get input element
-    var inputElement = document.getElementById(parentid);
-
-    // if the input is not found, return
-    if (!inputElement) {
-      return;
-    }
-    // if the input is disabled, ou readonly, show toast maeessage and return
-    if (inputElement.disabled || inputElement.readOnly) {
-      showToast("Input is disabled or readonly");
-      return;
-    } else {
-      // set the value of the input element
-
-      inputElement.value = selectedRowValue;
-      console.log("Input Element Value Set:", inputElement.value);
-    };
-
-  };
 
 
 }  // updatePaginationControls
