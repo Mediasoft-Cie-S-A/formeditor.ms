@@ -59,6 +59,7 @@
 }
 
 .ctab_ContentDiv {
+    display: none;
     padding: 10px;
     background-color: var(--color-2);
     min-height: 300px;
@@ -66,5 +67,8 @@
     overflow: auto;
     box-sizing: border-box;
     border: 1px solid var(--color-9);
-    
+}
+
+.ctab_ContentDiv.active {
+    display: block;
 }
