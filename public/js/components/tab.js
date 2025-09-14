@@ -167,7 +167,6 @@ function createTabContent(tabsHeader, tabsContent) {
     const tabContent = document.createElement('div');
     tabContent.id = tabId;
     tabsContent.appendChild(tabContent);
-    tabContent.style.display = 'none';
     tabContent.className = 'ctab_ContentDiv tab-pane fade';
 
     // Activate the new tab
@@ -294,11 +293,12 @@ function activateTab(event, tabHeader, tabContent) {
     tabHeaderButtons.forEach(btn => btn.classList.remove('active'));
 
     const contentContainer = headerContainer.parentElement.querySelectorAll('.ctab_ContentDiv');
-    contentContainer.forEach(c => {
-        c.style.display = (c === tabContent) ? 'block' : 'none';
-    });
+    contentContainer.forEach(c => c.classList.remove('active'));
 
     tabHeader.classList.add('active');
+    if (tabContent) {
+        tabContent.classList.add('active');
+    }
 }
 
 function activateEditTabIn(targetElement) {
@@ -397,4 +397,20 @@ function renderTabComponent(container) {
     const orientation = container.dataset.ctabOrientation || 'horizontal';
     const float = container.dataset.ctabFloat || ''; // '', 'tl','tr','bl','br'
     setTabsLayout(container, { orientation, float: float || null });
+
+    const headers = container.querySelectorAll('.ctab_HeaderButton');
+    headers.forEach(header => {
+        const tabId = header.dataset.tab;
+        const content = container.querySelector(`#${tabId}`);
+        header.addEventListener('click', e => activateTab(e, header, content));
+    });
+
+    let activeHeader = Array.from(headers).find(h => h.classList.contains('active'));
+    if (!activeHeader && headers.length > 0) {
+        activeHeader = headers[0];
+    }
+    if (activeHeader) {
+        const content = container.querySelector(`#${activeHeader.dataset.tab}`);
+        activateTab(null, activeHeader, content);
+    }
 }
