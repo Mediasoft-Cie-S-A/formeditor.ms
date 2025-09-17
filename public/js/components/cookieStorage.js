@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * Data storage
+ * - data-cookies: JSON array describing cookie-backed variables (name, type, value, description).
+ * - filter: JSON object injected on bound dataset elements to restore values from cookies.
+ * - var_* tags: plain strings attached to editor controls to identify variable fields.
+ */
+
 /*This function createElementButton creates a new HTML element of a given type,
 sets its text content to the type, adds two event listeners to it, and returns the created element. 
 The double-click event listener calls the editElement function with the element and its type as arguments,

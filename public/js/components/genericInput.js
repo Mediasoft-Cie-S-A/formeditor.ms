@@ -13,6 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * Data storage
+ * - This basic input wrapper does not persist configuration data; it only renders native elements.
+ */
 function createElementInput(type) {
     //    console.log("createElement:"+type);
     var main = document.createElement('div');

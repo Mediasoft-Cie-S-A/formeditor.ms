@@ -13,6 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * Data storage
+ * - planningData: JSON array describing planning events (date, duration, metadata).
+ */
 // This component is used to create a new planning
 const planningData = {
     year: 2024, // Selected year

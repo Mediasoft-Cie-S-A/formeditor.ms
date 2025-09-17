@@ -13,6 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * Data storage
+ * - dataset: JSON array describing the available dataset fields for the form control.
+ */
 function createInputField(type) {
   var main = document.createElement('div');
   main.classList.add('form-container');

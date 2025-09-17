@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * Data storage
+ * - wizard: boolean flag ("true"/"false") marking wizard-enabled panels.
+ * - apikey: plain string storing the API key associated with the wizard.
+ * - data-current-step: numeric string tracking the currently visible step.
+ */
+
 const e = require("express");
 
 // This function creates a new HTML element of a given type, sets its ID and tag name, and makes it draggable.

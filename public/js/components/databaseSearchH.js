@@ -6,6 +6,13 @@
  * License: Apache-2.0
  */
 
+/**
+ * Data storage
+ * - datasearch: JSON array of dataset fields exposed in the search helper.
+ * - datafilters: JSON object tracking advanced filter mode and selected items.
+ * - data-value* attributes: plain strings applied to options with DB/table/field/type metadata.
+ */
+
 // --------------------------
 // Public factory + editor (H)
 // --------------------------

@@ -15,6 +15,11 @@
  * limitations under the License.
  */
 
+/**
+ * Data storage
+ * - This explorer reads the filesystem dynamically and does not persist configuration data on the element.
+ */
+
 
 
 function createElementFileExplorer(type) {

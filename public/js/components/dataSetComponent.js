@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
+/**
+ * Data storage
+ * - sql: JSON array describing SQL statements bound to the dataset.
+ * - dataSet: JSON array of field descriptors (name, type, validation, etc.).
+ * - datalink: JSON array defining relations to other datasets or lookups.
+ * - exceptionSet: JSON array listing exception handling rules.
+ * - DataSet-Fields-List: serialized list of dataset field identifiers for quick lookup.
+ */
+
 // This function creates a new HTML element of a given type, sets its ID and tag name, and makes it draggable.
 function createElementDateSet(type) {
   var main = document.createElement("div");

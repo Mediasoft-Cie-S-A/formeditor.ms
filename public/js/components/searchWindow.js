@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * Data storage
+ * - currentPage / pageSize: numeric values managing pagination state.
+ * - allData / filteredData: in-memory arrays holding query results and filtered subsets.
+ * - selectedRowValue: object reference to the currently highlighted row.
+ * - modal / parentid: DOM references retained to reopen or close the modal context.
+ */
+
 var currentPage = 1;
 const pageSize = 5; // Rows per page
 var allData = []; // To hold all fetched data

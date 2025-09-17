@@ -15,6 +15,13 @@
  */
 
 /**
+ * Data storage
+ * - endpoint: plain string pointing to the authentication endpoint.
+ * - encrypt: boolean persisted as "true"/"false" enabling payload encryption.
+ * - google-endpoint / microsoft-endpoint: plain strings for OAuth provider URLs.
+ */
+
+/**
  * Creates a login component container.
  */
 function createElementLogin(type) {

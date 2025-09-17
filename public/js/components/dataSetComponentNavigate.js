@@ -15,6 +15,12 @@
  * limitations under the License.
  */
 
+/**
+ * Data storage
+ * - actions: JSON array describing navigation bar actions (type, event, label).
+ * - data-nav-*: dataset properties on the navigation bar capture orientation and layout.
+ */
+
 
 
 function createDataSetComponentNavigate(type) {

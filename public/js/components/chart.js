@@ -1,3 +1,15 @@
+/**
+ * Data storage
+ * - chartNumber: numeric index referencing the chart instance in the page store.
+ * - dataConfig: JSON array describing datasets/series and their mappings.
+ * - pivotConfig: JSON array capturing pivot table configuration applied to the chart.
+ * - filter: JSON object with view/filter parameters applied to the chart data.
+ * - labels-json: JSON array of legend labels generated at runtime.
+ * - tableName: plain string referencing the backing dataset/table.
+ * - sort: JSON object describing ordering (field, direction).
+ * - limit: JSON object capturing result size limits.
+ */
+
 class ChartManager {
     constructor() {
         this.chartList = [];
