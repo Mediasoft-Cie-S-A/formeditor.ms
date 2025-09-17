@@ -19,6 +19,11 @@ const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 const { deletedComponents } = require('./utils/deletedStore');
+const {
+  normalizeFormPayload,
+  validateFormPayload,
+  formatValidationErrors,
+} = require('./model/formSchema');
 
 
 
@@ -83,6 +88,16 @@ module.exports = function (app, mongoDbUrl, dbName) {
     // create a new MongoClient
     const client = new mongoClient(mongoDbUrl, {});
     try {
+      const normalizedPayload = normalizeFormPayload(req.body);
+      const validation = validateFormPayload(normalizedPayload, req.body);
+      if (!validation.valid) {
+        const formattedErrors = formatValidationErrors(validation.errors);
+        console.error('Form payload validation failed on /store-json', formattedErrors);
+        return res.status(400).json({
+          message: 'Invalid form payload',
+          errors: formattedErrors,
+        });
+      }
 
       await client.connect();
       const db = client.db(dbName);
@@ -90,14 +105,14 @@ module.exports = function (app, mongoDbUrl, dbName) {
 
       // Construct form data with metadata
       const formData = {
-        objectId: req.body.objectId,
-        objectName: req.body.objectName,
-        objectSlug: req.body.objectSlug,
-        userCreated: req.body.userCreated,
-        userModified: req.body.userModified,
+        objectId: normalizedPayload.objectId,
+        objectName: normalizedPayload.objectName,
+        objectSlug: normalizedPayload.objectSlug,
+        userCreated: normalizedPayload.userCreated,
+        userModified: normalizedPayload.userModified,
         modificationDate: new Date(),
         creationDate: new Date(),
-        formData: req.body.formData,
+        formData: normalizedPayload.formData,
       };
 
       // Insert the form data
@@ -105,6 +120,12 @@ module.exports = function (app, mongoDbUrl, dbName) {
 
       res.send({ message: "Form stored successfully", _id: result.insertedId });
     } catch (err) {
+      if (err instanceof SyntaxError && err.message.includes('formData')) {
+        console.error('Form payload parsing failed on /store-json', err);
+        return res.status(400).json({
+          message: 'Invalid JSON for formData',
+        });
+      }
       console.log(err.stack);
       res.status(500).send("Error storing form");
     } finally {
@@ -144,11 +165,18 @@ module.exports = function (app, mongoDbUrl, dbName) {
         const db = client.db(dbName);
         const col = db.collection("forms");
 
-        const { objectId, objectName, objectSlug, formData, userCreated } = req.body;
-
-        if (!objectId || !objectName || !objectSlug || !formData) {
-          return res.status(400).send("Missing required fields: objectId, objectName, objectSlug, and formData");
+        const normalizedPayload = normalizeFormPayload(req.body);
+        const validation = validateFormPayload(normalizedPayload, req.body);
+        if (!validation.valid) {
+          const formattedErrors = formatValidationErrors(validation.errors);
+          console.error('Form payload validation failed on /create-form', formattedErrors);
+          return res.status(400).json({
+            message: 'Invalid form payload',
+            errors: formattedErrors,
+          });
         }
+
+        const { objectId, objectName, objectSlug, formData, userCreated } = normalizedPayload;
 
         // Check if form already exists
         const existing = await col.findOne({ objectId });
@@ -173,6 +201,12 @@ module.exports = function (app, mongoDbUrl, dbName) {
 
         res.status(201).send({ message: "Form created successfully", form: newForm });
       } catch (err) {
+        if (err instanceof SyntaxError && err.message.includes('formData')) {
+          console.error('Form payload parsing failed on /create-form', err);
+          return res.status(400).json({
+            message: 'Invalid JSON for formData',
+          });
+        }
         console.error(err.stack);
         res.status(500).send("Error creating form");
       } finally {
@@ -223,17 +257,27 @@ module.exports = function (app, mongoDbUrl, dbName) {
     // create a new MongoClient
     const client = new mongoClient(mongoDbUrl, {});
     try {
+      const normalizedPayload = normalizeFormPayload(req.body, { objectId: req.params.objectId });
+      const validation = validateFormPayload(normalizedPayload, req.body);
+      if (!validation.valid) {
+        const formattedErrors = formatValidationErrors(validation.errors);
+        console.error('Form payload validation failed on /update-form', formattedErrors);
+        return res.status(400).json({
+          message: 'Invalid form payload',
+          errors: formattedErrors,
+        });
+      }
 
       await client.connect();
       const db = client.db(dbName);
       const col = db.collection("forms");
 
       const updateData = {
-        objectName: req.body.objectName,
-        objectSlug: req.body.objectSlug,
-        userModified: req.body.userModified,
+        objectName: normalizedPayload.objectName,
+        objectSlug: normalizedPayload.objectSlug,
+        userModified: normalizedPayload.userModified,
         modificationDate: new Date(),
-        formData: req.body.formData,
+        formData: normalizedPayload.formData,
       };
 
       const result = await col.updateOne(
@@ -247,6 +291,12 @@ module.exports = function (app, mongoDbUrl, dbName) {
         res.send({ message: "Form updated successfully" });
       }
     } catch (err) {
+      if (err instanceof SyntaxError && err.message.includes('formData')) {
+        console.error('Form payload parsing failed on /update-form', err);
+        return res.status(400).json({
+          message: 'Invalid JSON for formData',
+        });
+      }
       console.log(err.stack);
       res.status(500).send("Error updating form");
     } finally {
