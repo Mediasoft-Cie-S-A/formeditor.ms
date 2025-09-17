@@ -310,6 +310,7 @@ function activateTab(event, tabHeader, tabContent) {
     tabHeader.parentElement.style.marginTop = '10px';
     if (tabContent) {
         tabContent.classList.add('active');
+        tabContent.style.display = 'block';
     }
 }
 
