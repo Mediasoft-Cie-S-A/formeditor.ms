@@ -15,11 +15,57 @@
     #editor {
       height: 100vh;
     }
+
+    #versioning-doc {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      max-width: 22rem;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      background: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      font-size: 0.875rem;
+      line-height: 1.4;
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.35);
+      z-index: 999;
+    }
+
+    #versioning-doc h2 {
+      margin-top: 0;
+      font-size: 1rem;
+    }
+
+    #versioning-doc button {
+      display: inline-block;
+      margin-top: 0.5rem;
+      padding: 0.25rem 0.5rem;
+      border: none;
+      border-radius: 0.25rem;
+      background: #ffc107;
+      color: #000;
+      cursor: pointer;
+    }
   </style>
 </head>
 
 <body>
   <div id="editor"></div>
+  <aside id="versioning-doc">
+    <h2>Historique des versions</h2>
+    <p>
+      Chaque sauvegarde conserve automatiquement l'ancienne version du formulaire dans la collection
+      <code>formRevisions</code>. Les API <code>/create-form</code>, <code>/update-form/:objectId</code> et
+      <code>/list-forms</code> exposent désormais <strong>version</strong>, <strong>modifiedBy</strong> et
+      <strong>modificationDate</strong> pour vous aider à identifier la version active.
+    </p>
+    <p>
+      Pour consulter l'historique complet ou restaurer une version, appelez l'endpoint
+      <code>GET /form-history/:objectId</code>. Vous pouvez ensuite réappliquer une version antérieure en
+      renvoyant son contenu via <code>/update-form/:objectId</code> ou en la comparant à l'éditeur courant.
+    </p>
+    <button type="button" onclick="this.parentElement.remove()">J'ai compris</button>
+  </aside>
 
   <script src="https://unpkg.com/grapesjs"></script>
   <script>

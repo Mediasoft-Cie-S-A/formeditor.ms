@@ -80,6 +80,29 @@ module.exports = function (app, mongoDbUrl, dbName) {
   });
 
 
+  const formatFormResponse = (form = null) => {
+    if (!form) {
+      return form;
+    }
+
+    const formatted = { ...form };
+
+    if (formatted.modificationDate instanceof Date) {
+      formatted.modificationDate = formatted.modificationDate.toISOString();
+    }
+    if (formatted.creationDate instanceof Date) {
+      formatted.creationDate = formatted.creationDate.toISOString();
+    }
+
+    formatted.version = formatted.version ?? 1;
+    formatted.modifiedBy = formatted.modifiedBy
+      ?? formatted.userModified
+      ?? formatted.userCreated
+      ?? 'system';
+
+    return formatted;
+  };
+
   app.get("/dashboard", checkAuthenticated, (req, res) => {
     console.log(req.user.username);
     res.render("dashboard.ejs", { userName: req.user.username, checkPoints: req.user.checkPoints });
@@ -104,21 +127,30 @@ module.exports = function (app, mongoDbUrl, dbName) {
       const col = db.collection("forms");
 
       // Construct form data with metadata
+      const now = new Date();
+      const isoNow = now.toISOString();
+
       const formData = {
         objectId: normalizedPayload.objectId,
         objectName: normalizedPayload.objectName,
         objectSlug: normalizedPayload.objectSlug,
         userCreated: normalizedPayload.userCreated,
         userModified: normalizedPayload.userModified,
-        modificationDate: new Date(),
-        creationDate: new Date(),
+        modifiedBy: normalizedPayload.userModified || normalizedPayload.userCreated || 'system',
+        modificationDate: isoNow,
+        creationDate: isoNow,
+        version: 1,
         formData: normalizedPayload.formData,
       };
 
       // Insert the form data
       const result = await col.insertOne(formData);
 
-      res.send({ message: "Form stored successfully", _id: result.insertedId });
+      res.send({
+        message: "Form stored successfully",
+        _id: result.insertedId,
+        form: formatFormResponse({ ...formData, _id: result.insertedId })
+      });
     } catch (err) {
       if (err instanceof SyntaxError && err.message.includes('formData')) {
         console.error('Form payload parsing failed on /store-json', err);
@@ -146,7 +178,7 @@ module.exports = function (app, mongoDbUrl, dbName) {
         const col = db.collection("forms");
         const forms = await col.find({}).toArray();
 
-        res.send(forms);
+        res.send(forms.map(formatFormResponse));
       } catch (err) {
         console.log(err.stack);
         res.status(500).send("Error retrieving forms");
@@ -185,21 +217,24 @@ module.exports = function (app, mongoDbUrl, dbName) {
         }
 
         const now = new Date();
+        const isoNow = now.toISOString();
 
         const newForm = {
           objectId,
           objectName,
           objectSlug,
           formData,
-          creationDate: now.toISOString(),
-          modificationDate: now.toISOString(),
+          creationDate: isoNow,
+          modificationDate: isoNow,
           userCreated: userCreated || "system",
           userModified: userCreated || "system",
+          modifiedBy: userCreated || "system",
+          version: 1,
         };
 
         await col.insertOne(newForm);
 
-        res.status(201).send({ message: "Form created successfully", form: newForm });
+        res.status(201).send({ message: "Form created successfully", form: formatFormResponse(newForm) });
       } catch (err) {
         if (err instanceof SyntaxError && err.message.includes('formData')) {
           console.error('Form payload parsing failed on /create-form', err);
@@ -230,7 +265,7 @@ module.exports = function (app, mongoDbUrl, dbName) {
         const form = await col.findOne({ objectId: req.params.objectId });
 
         if (form) {
-          res.send(form);
+          res.send(formatFormResponse(form));
         } else {
           res.status(404).send("Form not found");
         }
@@ -272,24 +307,47 @@ module.exports = function (app, mongoDbUrl, dbName) {
       const db = client.db(dbName);
       const col = db.collection("forms");
 
+      const existingForm = await col.findOne({ objectId: req.params.objectId });
+
+      if (!existingForm) {
+        return res.status(404).send("Form not found");
+      }
+
+      const revisionsCollection = db.collection("formRevisions");
+      const { _id: existingId, ...snapshot } = existingForm;
+      const revisionPayload = {
+        objectId: existingForm.objectId,
+        version: existingForm.version ?? 1,
+        archivedAt: new Date(),
+        archivedBy: normalizedPayload.userModified || existingForm.modifiedBy || existingForm.userModified || 'system',
+        formId: existingId,
+        snapshot,
+      };
+      await revisionsCollection.insertOne(revisionPayload);
+
+      const nextVersion = (existingForm.version ?? 1) + 1;
+      const modificationDate = new Date().toISOString();
+      const updatedUser = normalizedPayload.userModified || existingForm.userModified || existingForm.modifiedBy || 'system';
+      const modifiedBy = normalizedPayload.userModified || existingForm.modifiedBy || existingForm.userModified || 'system';
+
       const updateData = {
         objectName: normalizedPayload.objectName,
         objectSlug: normalizedPayload.objectSlug,
-        userModified: normalizedPayload.userModified,
-        modificationDate: new Date(),
+        userModified: updatedUser,
+        modifiedBy,
+        modificationDate,
+        version: nextVersion,
         formData: normalizedPayload.formData,
       };
 
-      const result = await col.updateOne(
+      await col.updateOne(
         { objectId: req.params.objectId },
         { $set: updateData }
       );
 
-      if (result.matchedCount === 0) {
-        res.status(404).send("Form not found");
-      } else {
-        res.send({ message: "Form updated successfully" });
-      }
+      const updatedForm = await col.findOne({ objectId: req.params.objectId });
+
+      res.send({ message: "Form updated successfully", form: formatFormResponse(updatedForm) });
     } catch (err) {
       if (err instanceof SyntaxError && err.message.includes('formData')) {
         console.error('Form payload parsing failed on /update-form', err);
@@ -327,6 +385,42 @@ module.exports = function (app, mongoDbUrl, dbName) {
       await client.close();
     }
   });
+
+  app.get("/form-history/:objectId",
+    requireCheckpoint("0001100002"),
+    async (req, res) => {
+      const client = new mongoClient(mongoDbUrl, {});
+      try {
+        await client.connect();
+        const db = client.db(dbName);
+        const revisionsCollection = db.collection("formRevisions");
+
+        const history = await revisionsCollection
+          .find({ objectId: req.params.objectId })
+          .sort({ version: -1, archivedAt: -1 })
+          .toArray();
+
+        const formattedHistory = history.map((entry) => {
+          const formattedEntry = { ...entry };
+          if (formattedEntry.archivedAt instanceof Date) {
+            formattedEntry.archivedAt = formattedEntry.archivedAt.toISOString();
+          }
+          formattedEntry.version = formattedEntry.version ?? 1;
+          formattedEntry.archivedBy = formattedEntry.archivedBy || 'system';
+          if (formattedEntry.snapshot) {
+            formattedEntry.snapshot = formatFormResponse(formattedEntry.snapshot);
+          }
+          return formattedEntry;
+        });
+
+        res.send({ objectId: req.params.objectId, history: formattedHistory });
+      } catch (err) {
+        console.log(err.stack);
+        res.status(500).send("Error retrieving form history");
+      } finally {
+        await client.close();
+      }
+    });
 
   // Web service to return all images
   app.get('/media', checkAuthenticated, (req, res) => {
