@@ -287,7 +287,6 @@ function createEditBigModal() {
 }
 
 
-
 function activateTab(event, tabHeader, tabContent) {
     if (event) {
         event.preventDefault();
@@ -295,10 +294,9 @@ function activateTab(event, tabHeader, tabContent) {
     console.log("activateTab", tabHeader, tabContent);
     if (!tabHeader) return;
     // get tabContent by name
-    if (!tabContent) {
-        const tabId = tabHeader.getAttribute('data-tab');
-        tabContent = document.querySelector(`[name="${tabId}"]`);
-    }
+    const tabId = tabHeader.getAttribute('data-tab');
+    tabContent = document.querySelector(`[name="${tabId}"]`);
+
     // find the parent container of the tabHeader
     const headerContainer = tabHeader.closest('ul');
     const tabHeaderButtons = headerContainer.querySelectorAll('li a');
@@ -314,6 +312,8 @@ function activateTab(event, tabHeader, tabContent) {
         tabContent.classList.add('active');
     }
 }
+
+
 
 function activateEditTabIn(targetElement) {
     const editHeader = Array.from(targetElement.querySelectorAll('.ctab_HeaderButton'))
