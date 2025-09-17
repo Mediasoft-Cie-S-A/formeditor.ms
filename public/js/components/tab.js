@@ -295,15 +295,26 @@ function activateTab(event, tabHeader, tabContent) {
     if (!tabHeader) return;
     // get tabContent by name
     const tabId = tabHeader.getAttribute('data-tab');
-    tabContent = document.querySelector(`[name="${tabId}"]`);
+    // find tab parent container
+    const tabContainer = tabContent.parentElement;
+    tabContent = tabContainer.querySelector(`[name="${tabId}"]`);
+    console.log("activateTab tabId", tabId, tabContent);
+
+
+    // deactivate all tabs in the container with class active and display none
+    const allTabContents = tabContainer.querySelectorAll('.ctab_ContentDiv');
+    allTabContents.forEach(div => {
+        console.log("deactivate", div);
+        div.classList.remove('active');
+        div.style.display = 'none';
+    });
 
     // find the parent container of the tabHeader
     const headerContainer = tabHeader.closest('ul');
     const tabHeaderButtons = headerContainer.querySelectorAll('li a');
     tabHeaderButtons.forEach(btn => btn.classList.remove('active'));
 
-    const contentContainer = headerContainer.parentElement.querySelectorAll('.ctab_ContentDiv');
-    contentContainer.forEach(c => c.classList.remove('active'));
+
 
     tabHeader.classList.add('active');
     tabHeader.style.fontWeight = 'bold';
@@ -419,8 +430,6 @@ function renderTabComponent(container) {
         const tabId = header.getAttribute('data-tab');
         console.log("renderTabComponent tabId", tabId);
         // get data-tab attibute from the li
-        const content = container.querySelector(`[name="${tabId}"]`);
-
     });
 
     let activeHeader = Array.from(headers).find(h => h.classList.contains('active'));
@@ -429,7 +438,7 @@ function renderTabComponent(container) {
     }
     if (activeHeader) {
         const tabId = activeHeader.getAttribute('data-tab');
-        const content = container.querySelector(`[name="${tabId}"]`);
-        activateTab(null, activeHeader, content);
+        console.log("renderTabComponent active tabId", tabId);
+        activateTab(null, activeHeader, tabContainer.querySelector(`[name="${tabId}"]`));
     }
 }
