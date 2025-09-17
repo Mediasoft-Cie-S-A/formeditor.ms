@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * Data storage
+ * - data-main-id: plain string pointing to the grid element that opened the editor modal.
+ */
+
 // Define the IDs for the grid images with their dimensions
 const gridDataStruct = {
     "12": "1,11",

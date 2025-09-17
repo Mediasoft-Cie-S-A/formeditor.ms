@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
+/**
+ * Data storage
+ * - filter: JSON array string storing active filters.
+ * - dataSet: JSON array of field descriptors bound to the grid.
+ * - sql: JSON array describing SQL sources used to populate the grid.
+ * - datalink: JSON array for linked datasets/relations.
+ * - dataOrderByGrid: JSON array describing sort order configuration.
+ * - datasetFields: serialized field list cached on the grid element.
+ * - apiName / page / pageSize: plain strings tracking API source and pagination.
+ */
+
 
 function createDatabaseGrid(type) {
   var main = document.createElement("div");

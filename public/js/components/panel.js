@@ -13,6 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * Data storage
+ * - dataConfig: JSON array of dataset bindings rendered inside the panel.
+ * - pivotConfig: JSON array defining pivot transformations applied to the panel dataset.
+ * - filter / filters: JSON objects describing applied filters.
+ * - dataset: plain string referencing the linked dataset identifier.
+ */
 var dataset = [];
 var labels = [];
 var sortDirection = {};  // Object to keep track of sorting directions

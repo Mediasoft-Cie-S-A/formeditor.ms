@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * Data storage
+ * - items: JSON array describing horizontal menu entries with nested children.
+ * - tagName: plain string retained for serialization of the component type.
+ */
 function createMenuComponentHorizontal(type) {
     const wrapper = document.createElement('div');
     wrapper.id = 'menuGlobale';

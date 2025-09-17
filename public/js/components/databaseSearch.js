@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * Data storage
+ * - datasearch: JSON array describing searchable dataset fields.
+ * - data-value-* attributes: plain strings attached to suggestion items to carry metadata (DB/table/field/type).
+ */
 function createDatabaseSearch(type) {
   var main = document.createElement("div");
   main.className = "dataSetContainer";

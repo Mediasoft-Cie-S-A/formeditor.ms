@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * Data storage
+ * - config: JSON object persisted on each button describing label, url, target and UI state.
+ * - items: JSON array of menu item definitions (label, url, target, children).
+ * - data-fullstate: JSON object capturing the full menu builder state for reconstruction.
+ */
+
 /*This function createElementButton creates a new HTML element of a given type,
 sets its text content to the type, adds two event listeners to it, and returns the created element. 
 The double-click event listener calls the editElement function with the element and its type as arguments,

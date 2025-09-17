@@ -3,6 +3,11 @@
  * Drag-and-drop compatible, configuration minimale.
  * --------------------------------------------------------------- */
 
+/**
+ * Data storage
+ * - config: JSON object storing greeting message content and display options.
+ */
+
 /* Utilitaire — adapte cette partie à ton propre backend ------------- */
 function getCurrentUser() {
     if (window.currentUser) return normaliseUser(window.currentUser);

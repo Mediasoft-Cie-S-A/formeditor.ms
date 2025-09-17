@@ -15,6 +15,12 @@
  * limitations under the License.
  */
 
+/**
+ * Data storage
+ * - datasearch: JSON array describing selectable dataset fields.
+ * - datalink: JSON array containing linked dataset metadata for cascading behaviour.
+ */
+
 function createElementCombox(type) {
     element = document.createElement("div");
     element.textContent = type;

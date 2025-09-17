@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/**
+ * Data storage
+ * - data-tab: plain string linking headers to their content panels.
+ * - dataset.ctabOrientation / dataset.ctabFloat: DOM dataset fields storing layout preferences.
+ */
+
 
 
 function createElementTab(type) {

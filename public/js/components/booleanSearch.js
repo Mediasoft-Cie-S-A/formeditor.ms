@@ -15,6 +15,14 @@
  * limitations under the License.
  */
 
+/**
+ * Data storage
+ * - label: plain string describing the filter label.
+ * - defaultValue: boolean persisted as a string attribute.
+ * - datasearch: JSON array of dataset field descriptors used for filtering.
+ * - datalink: JSON array describing linked dataset fields.
+ */
+
 function createBooleanSearch(type) {
     element = document.createElement("div");
     element.textContent = "";

@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 // Translation Dictionary Example (Replace with Google Translate API generated data)
+/**
+ * Data storage
+ * - translationDictionary: in-memory JSON object mapping languages to text replacements.
+ * - tagName: plain string stored on the root element for serialization.
+ */
+
 const translationDictionary = {
 
     "fr": {
