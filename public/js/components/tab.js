@@ -447,6 +447,7 @@ function updateFloatingPadding(container) {
 /* === NEW: rendering function (apply persisted type) === */
 function renderTabComponent(container) {
     if (!container) return;
+    const tabContainer = container.querySelector('.ctab_tabs');
     const orientation = container.dataset.ctabOrientation || 'horizontal';
     const float = container.dataset.ctabFloat || ''; // '', 'tl','tr','bl','br'
     setTabsLayout(container, { orientation, float: float || null });
@@ -466,6 +467,7 @@ function renderTabComponent(container) {
     if (activeHeader) {
         const tabId = activeHeader.getAttribute('data-tab');
         console.log("renderTabComponent active tabId", tabId);
-        activateTab(null, activeHeader, tabContainer.querySelector(`[name="${tabId}"]`));
+        const activePanel = tabContainer ? tabContainer.querySelector(`[name="${tabId}"]`) : null;
+        activateTab(null, activeHeader, activePanel);
     }
 }
