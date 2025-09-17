@@ -294,6 +294,11 @@ function activateTab(event, tabHeader, tabContent) {
     }
     console.log("activateTab", tabHeader, tabContent);
     if (!tabHeader) return;
+    // get tabContent by name
+    if (!tabContent) {
+        const tabId = tabHeader.getAttribute('data-tab');
+        tabContent = document.querySelector(`[name="${tabId}"]`);
+    }
     // find the parent container of the tabHeader
     const headerContainer = tabHeader.closest('ul');
     const tabHeaderButtons = headerContainer.querySelectorAll('li a');
