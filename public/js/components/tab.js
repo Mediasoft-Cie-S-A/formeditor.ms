@@ -151,13 +151,37 @@ function editElementTab(type, element, content) {
 
 
 function createTabContent(tabsHeader, tabsContent) {
-    let tabs = tabsHeader.querySelectorAll('.ctab_HeaderButton');
+    const tabs = tabsHeader.querySelectorAll('.ctab_HeaderButton');
     let tabcount = 0;
     if (tabs != null || tabs != undefined) {
         tabcount = tabs.length;
     }
 
-    const tabId = `ctab_tab-${tabcount}`;
+    const container = tabsHeader.closest('.ctab_tabs-container') || tabsContent.closest('.ctab_tabs-container');
+
+    let tabId = `ctab_tab-${tabcount}`;
+    if (container) {
+        if (!container.dataset.ctabCounter) {
+            container.dataset.ctabCounter = '0';
+        }
+
+        const previousIndex = parseInt(container.dataset.ctabCounter, 10);
+        const nextIndex = Number.isNaN(previousIndex) ? 1 : previousIndex + 1;
+        container.dataset.ctabCounter = String(nextIndex);
+
+        let containerPrefix = '';
+        if (container.id && container.id.trim() !== '') {
+            containerPrefix = container.id.trim();
+        } else {
+            if (!container.dataset.ctabUid) {
+                container.dataset.ctabUid = `ctab-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+            }
+            containerPrefix = container.dataset.ctabUid;
+        }
+
+        containerPrefix = containerPrefix.replace(/\s+/g, '-');
+        tabId = `${containerPrefix}-ctab_tab-${nextIndex}`;
+    }
 
     // Create tab header using <li><a>
     const li = document.createElement('li');
@@ -177,7 +201,9 @@ function createTabContent(tabsHeader, tabsContent) {
     tabContent.className = 'ctab_ContentDiv';
 
     // Activate the new tab
-    tabHeader.setAttribute('onclick', 'activateTab(event, this, document.getElementById("' + tabId + '"))');
+    tabHeader.addEventListener('click', function (event) {
+        activateTab(event, tabHeader, tabContent);
+    });
 
     activateTab(null, tabHeader, tabContent);
 
@@ -293,35 +319,36 @@ function activateTab(event, tabHeader, tabContent) {
     }
     console.log("activateTab", tabHeader, tabContent);
     if (!tabHeader) return;
-    // get tabContent by name
+
     const tabId = tabHeader.getAttribute('data-tab');
-    // find tab parent container
-    const tabContainer = tabContent.parentElement;
-    tabContent = tabContainer.querySelector(`[name="${tabId}"]`);
-    console.log("activateTab tabId", tabId, tabContent);
+    const container = tabHeader.closest('.ctab_tabs-container') || (tabContent ? tabContent.closest('.ctab_tabs-container') : null);
+    if (!container) return;
 
+    const contentWrapper = tabContent ? tabContent.parentElement : container.querySelector('.ctab_tabs');
+    if (!contentWrapper) return;
 
-    // deactivate all tabs in the container with class active and display none
-    const allTabContents = tabContainer.querySelectorAll('.ctab_ContentDiv');
+    const targetContent = tabContent || contentWrapper.querySelector(`[name="${tabId}"]`);
+    console.log("activateTab tabId", tabId, targetContent);
+
+    const allTabContents = contentWrapper.querySelectorAll('.ctab_ContentDiv');
     allTabContents.forEach(div => {
         console.log("deactivate", div);
         div.classList.remove('active');
         div.style.display = 'none';
     });
 
-    // find the parent container of the tabHeader
     const headerContainer = tabHeader.closest('ul');
-    const tabHeaderButtons = headerContainer.querySelectorAll('li a');
+    const tabHeaderButtons = headerContainer ? headerContainer.querySelectorAll('li a') : [];
     tabHeaderButtons.forEach(btn => btn.classList.remove('active'));
-
-
 
     tabHeader.classList.add('active');
     tabHeader.style.fontWeight = 'bold';
-    tabHeader.parentElement.style.marginTop = '10px';
-    if (tabContent) {
-        tabContent.classList.add('active');
-        tabContent.style.display = 'block';
+    if (tabHeader.parentElement) {
+        tabHeader.parentElement.style.marginTop = '10px';
+    }
+    if (targetContent) {
+        targetContent.classList.add('active');
+        targetContent.style.display = 'block';
     }
 }
 
