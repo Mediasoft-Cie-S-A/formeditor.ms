@@ -51,13 +51,22 @@ class dblayer {
     this.generateRoutes = this.generateRoutes.bind(this);
     this.checkAuthenticated = this.checkAuthenticated.bind(this);
 
+    this.app = app;
     this.dbtype = app.config.dbtype;
     this.SMTP = app.config.SMTP;
     console.log(this.SMTP);
-    // get key value from dblist           
+    // get key value from dblist
+    this.initPromise = null;
   }
 
   async init() {
+    if (!this.initPromise) {
+      this.initPromise = this.initializeDatabases();
+    }
+    return this.initPromise;
+  }
+
+  async initializeDatabases() {
     for (const [key, value] of Object.entries(this.dbList)) {
       console.log(`${key}: ${value}`);
       var DatabaseClass = null;
@@ -82,6 +91,7 @@ class dblayer {
       }
       // store the db structure in the cache
     }
+    return this.databases;
   }
 
   // Function to get all table names from a given database cache
@@ -302,6 +312,128 @@ class dblayer {
       mergedData.push(...(dbResults.rows || []));
     }
     return mergedData;
+  }
+
+  sanitizeIdentifier(identifier) {
+    if (typeof identifier !== 'string' || !identifier.match(/^[A-Za-z0-9_.]+$/)) {
+      throw new Error(`Invalid identifier: ${identifier}`);
+    }
+    return identifier;
+  }
+
+  formatIdentifier(identifier) {
+    const safe = this.sanitizeIdentifier(identifier).split('.');
+    if (this.dbtype === 'mysql') {
+      return safe.map(part => `\`${part}\``).join('.');
+    }
+    if (this.dbtype === 'odbc') {
+      return safe.map(part => `"${part}"`).join('.');
+    }
+    return identifier;
+  }
+
+  extractFirstRow(result) {
+    if (!result) {
+      return null;
+    }
+    if (Array.isArray(result)) {
+      return result[0] || null;
+    }
+    if (Array.isArray(result.rows)) {
+      return result.rows[0] || null;
+    }
+    return result;
+  }
+
+  getColumnValue(record, columnName) {
+    if (!record || typeof record !== 'object' || !columnName) {
+      return undefined;
+    }
+    const direct = record[columnName];
+    if (direct !== undefined) {
+      return direct;
+    }
+    const lower = record[columnName.toLowerCase()];
+    if (lower !== undefined) {
+      return lower;
+    }
+    const upper = record[columnName.toUpperCase()];
+    if (upper !== undefined) {
+      return upper;
+    }
+    return undefined;
+  }
+
+  sanitizeUserRecord(record, passwordColumn) {
+    if (!record || typeof record !== 'object') {
+      return {};
+    }
+    const sanitized = { ...record };
+    delete sanitized[passwordColumn];
+    delete sanitized[passwordColumn && passwordColumn.toLowerCase()];
+    delete sanitized[passwordColumn && passwordColumn.toUpperCase()];
+    return sanitized;
+  }
+
+  async authenticateUser(username, password) {
+    const authConfig = this.app?.config?.authentication?.database;
+    if (!authConfig) {
+      throw new Error('Database authentication is not configured.');
+    }
+
+    await this.init();
+
+    const databaseKey = authConfig.database || Object.keys(this.databases)[0];
+    if (!databaseKey) {
+      throw new Error('No database configured for authentication.');
+    }
+
+    const database = this.databases[databaseKey];
+    if (!database) {
+      throw new Error(`Database connection "${databaseKey}" not found.`);
+    }
+
+    const table = this.formatIdentifier(authConfig.table);
+    const usernameColumn = this.formatIdentifier(authConfig.usernameColumn);
+    const passwordColumn = this.formatIdentifier(authConfig.passwordColumn);
+
+    let query = '';
+    let params = [username];
+
+    switch (this.dbtype) {
+      case 'mysql':
+        query = `SELECT * FROM ${table} WHERE ${usernameColumn} = ? LIMIT 1`;
+        break;
+      case 'odbc':
+        query = `SELECT * FROM ${table} WHERE ${usernameColumn} = ?`;
+        break;
+      default:
+        throw new Error(`Unsupported database type for authentication: ${this.dbtype}`);
+    }
+
+    const result = await database.queryData(query, params);
+    const record = this.extractFirstRow(result);
+
+    if (!record) {
+      return null;
+    }
+
+    const storedPassword = this.getColumnValue(record, authConfig.passwordColumn);
+    if (storedPassword === undefined) {
+      throw new Error(`Password column "${authConfig.passwordColumn}" not found in user record.`);
+    }
+
+    if (storedPassword !== password) {
+      return null;
+    }
+
+    const normalizedUsername = this.getColumnValue(record, authConfig.usernameColumn) ?? username;
+    const sanitizedRecord = this.sanitizeUserRecord(record, authConfig.passwordColumn);
+
+    return {
+      username: normalizedUsername,
+      record: sanitizedRecord,
+    };
   }
 
   generateRoutes(app, dbs) {
