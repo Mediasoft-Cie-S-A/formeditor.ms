@@ -737,7 +737,7 @@ function onCreateBigModal() {
   actionCancelButton(false);
 
   actionSaveAllButton(true);
-  createEditBigModal();
+  // createEditBigModal();
 }
 
 function onCloseBigModal() {
