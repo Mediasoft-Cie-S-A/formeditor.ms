@@ -832,11 +832,11 @@ async function gridGetData(
       // get the tab
       const tab = document.querySelector('[tagname="Tab"]');
       console.log(tab);
-      // the header by class ctab_tabs-header
-      const header = tab.querySelector(".ctab_tabs-header");
+      // the header by class ctab_HeaderButton 
+      const header = tab.querySelector("ul");
       if (header.childNodes.length > 0) {
         // second tab
-        activateTab(event, header.childNodes[1], document.getElementById(header.childNodes[1].getAttribute("data-tab")));
+        activateTab(event, header.childNodes[1].querySelector("a"), document.getElementById(header.childNodes[1].getAttribute("data-tab")));
         navbar_InsertRecord();
       } // end if
     });

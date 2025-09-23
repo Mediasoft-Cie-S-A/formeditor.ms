@@ -737,7 +737,48 @@ function onCreateBigModal() {
   actionCancelButton(false);
 
   actionSaveAllButton(true);
-  // createEditBigModal();
+  createEditBigModal();
+}
+
+function createEditBigModal() {
+  // Check if modal already exists
+  if (document.getElementById("editBigModal")) {
+    return; // Modal already exists, do nothing
+  }
+  // Create modal elements
+  const modal = document.createElement("div");
+  modal.id = "editBigModal";
+  modal.className = "modal";
+  modal.style.display = "none";
+  modal.style.position = "fixed";
+  modal.style.zIndex = "1000";
+  modal.style.left = "0";
+  modal.style.top = "0";
+  modal.style.width = "100%";
+  modal.style.height = "100%";
+  modal.style.overflow = "auto";
+  modal.style.backgroundColor = "rgba(0,0,0,0.4)";
+  modal.style.justifyContent = "center";
+  modal.style.alignItems = "center";
+  modal.style.padding = "20px";
+
+  const modalContent = document.createElement("div");
+  modalContent.className = "modal-content";
+  modalContent.style.backgroundColor = "#fefefe";
+  modalContent.style.padding = "20px";
+  modalContent.style.border = "1px solid #888";
+  modalContent.style.borderRadius = "8px";
+  modalContent.style.width = "90%";
+  modalContent.style.maxHeight = "80%";
+  modalContent.style.overflowY = "auto";
+  modalContent.style.boxShadow = "0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19)";
+  modalContent.style.display = "flex";
+  modalContent.style.flexDirection = "column";
+
+  // Append content to modal
+  modal.appendChild(modalContent);
+  document.body.appendChild(modal);
+  // Close modal when clicking outside content
 }
 
 function onCloseBigModal() {
@@ -842,7 +883,6 @@ function navbar_CancelEdit() {
 }
 
 function navbar_InsertRecord() {
-  //navbar_EditRecord(false);
 
   actionPreviousButton(true);
   actionNextButton(true);
@@ -870,6 +910,8 @@ function navbar_InsertRecord() {
         break;
       default:
         input.value = "";
+        input.readOnly = false; // Make input editable
+        input.disabled = false;
         break;
     }
   });
