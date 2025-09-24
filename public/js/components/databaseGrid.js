@@ -952,13 +952,14 @@ function drawGridRow(
 
     // Try switching to the second tab if it exists
     const tab = document.querySelector('[tagname="Tab"]');
-    if (tab) {
-      console.log("tab : " + tab);
-      const header = tab.querySelector(".ctab_tabs-header");
-      if (header.childNodes.length > 0) {
-        activateTab(event, header.childNodes[1], document.getElementById(header.childNodes[1].getAttribute("data-tab")));
-      }
-    }
+    console.log(tab);
+    // the header by class ctab_HeaderButton 
+    const header = tab.querySelector("ul");
+    if (header.childNodes.length > 0) {
+      // second tab
+      activateTab(event, header.childNodes[1].querySelector("a"), document.getElementById(header.childNodes[1].getAttribute("data-tab")));
+
+    } // end if
   });
 
   // Now create cells inside the row
@@ -1080,16 +1081,14 @@ function drawPanelRow(
 
     // get the tab
     const tab = document.querySelector('[tagname="Tab"]');
-    if (tab) {
+    console.log(tab);
+    // the header by class ctab_HeaderButton 
+    const header = tab.querySelector("ul");
+    if (header.childNodes.length > 0) {
+      // second tab
+      activateTab(event, header.childNodes[1].querySelector("a"), document.getElementById(header.childNodes[1].getAttribute("data-tab")));
 
-      // the header by class ctab_tabs-header
-      const header = tab.querySelector(".ctab_tabs-header");
-
-      if (header.childNodes.length > 0) {
-        // second tab
-        activateTab(event, header.childNodes[1], document.getElementById(header.childNodes[1].getAttribute("data-tab")));
-      } // end if
-    } // end if (tab)
+    } // end if
   } // end addEventListener
   );
   var i = 0;
