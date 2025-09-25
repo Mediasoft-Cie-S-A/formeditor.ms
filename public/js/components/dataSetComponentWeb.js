@@ -240,6 +240,7 @@ function createFieldFromJsonWeb(fieldJson, apiUrl) {
     einput.id = fieldJson.fieldId;
     einput.setAttribute("dataset-field-values", fieldJson.fieldValues);
     einput.setAttribute("dataset-field-name", fieldJson.fieldName);
+    einput.setAttribute("data-field-type", fieldJson.fieldDataType);
     einput.setAttribute("dataset-field-SQL", fieldJson.fieldSQL);
     einput.setAttribute("apiUrl", apiUrl);
     // currently no attribute is required separately

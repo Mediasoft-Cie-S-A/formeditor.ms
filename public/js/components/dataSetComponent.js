@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 /**
  * Data storage
  * - sql: JSON array describing SQL statements bound to the dataset.
@@ -74,9 +75,20 @@ function editElementDataSet(type, element, content) {
     var target = content.querySelector("#Data");
     var jsonData = JSON.parse(element.getAttribute("dataSet"));
     jsonData.forEach((fieldJson) => {
+      if (fieldJson.fieldType == "search_win") {
+        addFieldToPropertiesBar(target, fieldJson);
+
+        // get the select input with name=fieldType
+        var select = content.querySelector("select[name='fieldType']:last-child");
+        select.value = "search_win";
+        // execute the onchange event of the select
+        select.dispatchEvent(new Event('change'));
+
+      }
       if (fieldJson.fieldType !== "rowid")
         addFieldToPropertiesBar(target, fieldJson);
     });
+
   }
 
   if (element.getAttribute("datalink") != null) {
@@ -291,6 +303,7 @@ function renderDataSet(main) {
       fieldSize: "10",
       fieldMandatory: "0",
       fieldValues: "",
+      externalDBName: "",
       fieldSQL: ""
     });
   }
@@ -486,6 +499,7 @@ function createFieldFromJson(fieldJson) {
     einput.setAttribute("dataset-field-size", fieldJson.fieldSize);
     einput.setAttribute("dataset-field-mandatory", fieldJson.fieldMandatory);
     einput.setAttribute("dataset-field-values", fieldJson.fieldValues);
+    einput.setAttribute("dataset-field-externalDBName", fieldJson.externalDBName);
     einput.setAttribute("dataset-field-SQL", fieldJson.fieldSQL);
     einput.setAttribute("tagname", fieldJson.fieldType);
     einput.setAttribute("validation", fieldJson.validation);
@@ -509,15 +523,10 @@ function searchWinbuttonClick(event, elementId) {
 
   // generate the modalwindow for the search
   // Example JSON dataset and query
+  externalDBName = einput.getAttribute("dataset-field-externalDBName");
+  query = einput.getAttribute("dataset-field-SQL").toUpperCase();
 
-  query = einput.getAttribute("dataset-field-SQL");
-  console.log("query", query);
-  // split the query
-  var queryArray = query.split("|");
-  // get the database name
-  DBName = queryArray[0];
-  // get the query
-  query = queryArray[1].toUpperCase();
+
   if (!query.startsWith("SELECT")) {
     showToast("Only SELECT queries are allowed in search window", 5000);
     return;
@@ -532,7 +541,7 @@ function searchWinbuttonClick(event, elementId) {
     };
   });
   // Show the modal with the query results
-  showQueryResultModal(DBName, datasetJson, queryArray[1], einput.id);
+  showQueryResultModal(externalDBName, datasetJson, query, einput.id);
 };
 
 
@@ -930,11 +939,14 @@ async function updateInputs(data, DBName, tableName, dataset) {
         handleSelectField(input, fieldvalues, data[fieldLabel]);
         break;
       case "combo_sql":
-
+        let externalDBName = input.getAttribute("dataset-field-externalDBName");
+        if (!externalDBName) {
+          externalDBName = DBName;
+        }
         // get the values of the field
         let fieldSQL = input.getAttribute("dataset-field-SQL");
         handleSelectFieldSQL(
-          DBName,
+          externalDBName,
           input,
           fieldSQL,
           fieldLabel,

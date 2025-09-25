@@ -199,6 +199,7 @@ function editElement(element) {
   if (elementsData[type]) {
     if (elementsData[type].editFunction) {
       var functionName = elementsData[type].editFunction;
+      console.log("Executing function: " + functionName);
       window[functionName](type, element, content);
     }
   }
@@ -1613,6 +1614,7 @@ function addFieldToPropertiesBarWeb(target, fieldJson, isId) {
           }
 
           textarea.addEventListener("change", function () {
+
             fieldJson.fieldSQL = this.value;
             // get span element
             const span = div.querySelector("span[name='dataContainer']");
@@ -1752,6 +1754,7 @@ function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false) {
 
   // Create a select dropdown
   var select = document.createElement("select");
+  select.setAttribute("name", "fieldType");
   div.appendChild(select);
 
   // Populate select options based on field's data type
@@ -1776,7 +1779,7 @@ function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false) {
     const span = div.querySelector("span[name='dataContainer']");
     span.setAttribute("data-field", JSON.stringify(fieldJson));
 
-    switch (select.value) {
+    switch (fieldJson.fieldType) {
       case "combo_array":
       case "combo_sql":
       case "array":
@@ -1814,21 +1817,42 @@ function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false) {
           }); // end of textarea change event
         }
         if (select.value === "combo_sql" || select.value === "search_win") {
+          // generate the input for the dbname
+          var inputExDB = document.createElement("input");
+          inputExDB.type = "text";
+          inputExDB.id = "externalDBName";
+          inputExDB.setAttribute("placeholder", "DBName");
+          inputExDB.setAttribute("name", "externalDBName");
+          div.appendChild(inputExDB);
+          input.addEventListener("change", function () {
+            const span = div.querySelector("span[name='dataContainer']");
+            // get fieldJson from the span data-field
+            let fieldJson = JSON.parse(span.getAttribute("data-field"));
+            fieldJson.externalDBName = this.value;
+            span.setAttribute("data-field", JSON.stringify(fieldJson));
+          });
           if (select.value === "combo_sql") {
             textarea.setAttribute("placeholder", "Enter Sql Query, id, value");
           }
           if (select.value === "search_win") {
-            textarea.setAttribute("placeholder", "DBName|Enter Sql Query, id, value1, value2, value3 ..");
+
+            textarea.setAttribute("placeholder", "Enter Sql Query, id, value1, value2, value3 ..");
+
           }
           // set the textarea vaule from fieldSQL if exists
           if (fieldJson.fieldSQL) {
             textarea.value = fieldJson.fieldSQL;
           }
 
+
           textarea.addEventListener("change", function () {
+            const span = div.querySelector("span[name='dataContainer']");
+            // get fieldJson from the span data-field
+            let fieldJson = JSON.parse(span.getAttribute("data-field"));
+
             fieldJson.fieldSQL = this.value;
             // get span element
-            const span = div.querySelector("span[name='dataContainer']");
+
             span.setAttribute("data-field", JSON.stringify(fieldJson));
           }); // end of textarea change event
         }
