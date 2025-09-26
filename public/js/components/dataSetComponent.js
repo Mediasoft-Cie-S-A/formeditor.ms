@@ -398,47 +398,8 @@ function createFieldFromJson(fieldJson) {
       element = createElementInput(fieldJson.fieldType);
       einput = element.querySelector("input"); // Adjust to your combobox selector
       // einput.style.display = "none";
-      
-      einput.addEventListener("change", function () {
-        console.log("einput value:", einput.value);
-        // get the externalDBName and fieldSQL
-        var externalDBName = fieldJson.externalDBName;
-        var query = fieldJson.fieldSQL;
-        // execute the query and get the data
-        console.log("externalDBName", externalDBName);
-        console.log("query", query);
-        if (externalDBName == null || externalDBName == "" || query == null || query == "") {
-          showToast("Please set external database name and SQL query for search window", 5000);
-        }
-        fetch(`/table-data-sql/${externalDBName}/1/1000?sqlQuery=${query}`)
-          .then(response => response.json())
-          .then(data => {
-            // get the record of the fieldname = fieldvalue
-            console.log("Search window data:", data);
-            if (data.length > 0) {
-              // assuming the for each row has 'fieldname' and the second column is 'description'
-              // for each row in data check if the first column is equal to the einput value
-              console.log("einput value:", einput.value);
-              data.forEach(row => {
-                if (row[fieldJson.fieldName] == einput.value) {
-                  console.log("Found matching row:", row);
-                  const label = element.querySelector("label");
-                  label.textContent = record[descriptionField];
-                  label.style.display = "block";
-                  label.style.fontWeight = "bold";
-                  label.style.marginBottom = "8px";
-                  // adding the label to the parent of einput
-                  einput.parentNode.insertBefore(label, einput);
-                }
-              });
 
-            }
-
-          })
-          .catch(error => {
-            console.error("Error fetching search window data:", error);
-          });
-      });
+      einput.setAttribute("onclick", "loadValuesSearchWin(event)");
       // adding the search button
       var searchButton = document.createElement("button");
       searchButton.style.float = "right";
@@ -552,9 +513,9 @@ function createFieldFromJson(fieldJson) {
 
     // set einput disabled and readonly except for search windows, which must remain interactive
     console.log("dataSetComponent einput readonly");
-    const shouldLockInput = fieldJson.fieldType !== "search_win";
-    einput.disabled = shouldLockInput;
-    einput.readOnly = shouldLockInput;
+    // const shouldLockInput = fieldJson.fieldType !== "search_win";
+    einput.disabled = true;
+    einput.readOnly = true;
     if (fieldJson.fieldMandatory) {
       einput.required = true;
     }
@@ -621,6 +582,68 @@ function RefreshRecord(DBName, tableName) {
     );
   }
 }
+
+
+async function loadValuesSearchWin(event) {
+  // event.preventDefault();
+  const element = event.target;
+  const einput = element.closest("input");
+
+  if (!einput) {
+    console.error("Input element not found");
+    return;
+  }
+
+  //get filedJson from the einput
+
+  const externalDBName = einput.getAttribute("dataset-field-externalDBName");
+
+  const query = einput.getAttribute("dataset-field-SQL");
+  const fieldName = einput.getAttribute("dataset-field-name");
+  // execute the query and get the data
+
+  if (externalDBName == null || externalDBName == "" || query == null || query == "") {
+    showToast("Please set external database name and SQL query for search window", 5000);
+  }
+  fetch(`/table-data-sql/${externalDBName}/1/1000?sqlQuery=${query}`)
+    .then(response => response.json())
+    .then(data => {
+      // get the record of the fieldname = fieldvalue
+      if (data.length > 0) {
+        // get the keys of the first object in the data array
+        const keys = Object.keys(data[0]);
+        console.log("keys:", keys);
+        console.log("data:", data);
+        // check if the first column is equal to the einput value
+        // assuming the for each row has 'fieldname' and the second column is 'description'
+        // for each row in data check if the first column is equal to the einput value
+        for (var i = 0; i < data.length; i++) {
+          var row = data[i];
+
+          if (row[keys[0]] == einput.value) {
+
+            var label = element.parentElement.querySelector("label");
+            if (!label) {
+              label = document.createElement("label");
+            }
+            label.textContent = row[keys[1]]; // assuming the second column is 'description'
+            label.style.display = "block";
+            label.style.fontWeight = "bold";
+            label.style.marginBottom = "8px";
+            // adding the label to the parent of einput
+            einput.parentNode.insertBefore(label, einput);
+            break;
+          } // end if row[keys[0]] == einput.value
+        } // end for
+
+      }
+
+    })
+    .catch(error => {
+      console.error("Error fetching search window data:", error);
+    });
+
+} // end function loadValuesSearchWin
 
 
 
@@ -1004,6 +1027,11 @@ async function updateInputs(data, DBName, tableName, dataset) {
       default:
         // if (fieldType === "input") {
         input.value = data[fieldLabel]?.toString().trim() || "";
+        // exectue loadValuesSearchWin if the fieldType is search_win
+        if (input.getAttribute("tagname") === "search_win") {
+          await loadValuesSearchWin({ target: input });
+        }
+
         input.disabled = false;
         if (input.type === "checkbox") {
           input.checked = data[fieldLabel] == 1 ? true : false;
