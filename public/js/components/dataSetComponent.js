@@ -550,10 +550,11 @@ function createFieldFromJson(fieldJson) {
     einput.setAttribute("tagname", fieldJson.fieldType);
     einput.setAttribute("validation", fieldJson.validation);
 
-    // set einput disabled and readonly
+    // set einput disabled and readonly except for search windows, which must remain interactive
     console.log("dataSetComponent einput readonly");
-    einput.disabled = true;
-    einput.readOnly = true;
+    const shouldLockInput = fieldJson.fieldType !== "search_win";
+    einput.disabled = shouldLockInput;
+    einput.readOnly = shouldLockInput;
     if (fieldJson.fieldMandatory) {
       einput.required = true;
     }
