@@ -79,7 +79,11 @@ function editElementDataSet(type, element, content) {
         addFieldToPropertiesBar(target, fieldJson);
 
         // get the select input with name=fieldType
-        var select = content.querySelector("select[name='fieldType']:last-child");
+        var selects = content.querySelectorAll("select[name='fieldType']");
+        // select the last select
+        var select = selects[selects.length - 1];
+        console.log("select", select);
+        // select search_win in the select
         select.value = "search_win";
         // execute the onchange event of the select
         select.dispatchEvent(new Event('change'));
