@@ -397,6 +397,48 @@ function createFieldFromJson(fieldJson) {
       console.log("Creating search window:", fieldJson);
       element = createElementInput(fieldJson.fieldType);
       einput = element.querySelector("input"); // Adjust to your combobox selector
+      // einput.style.display = "none";
+      
+      einput.addEventListener("change", function () {
+        console.log("einput value:", einput.value);
+        // get the externalDBName and fieldSQL
+        var externalDBName = fieldJson.externalDBName;
+        var query = fieldJson.fieldSQL;
+        // execute the query and get the data
+        console.log("externalDBName", externalDBName);
+        console.log("query", query);
+        if (externalDBName == null || externalDBName == "" || query == null || query == "") {
+          showToast("Please set external database name and SQL query for search window", 5000);
+        }
+        fetch(`/table-data-sql/${externalDBName}/1/1000?sqlQuery=${query}`)
+          .then(response => response.json())
+          .then(data => {
+            // get the record of the fieldname = fieldvalue
+            console.log("Search window data:", data);
+            if (data.length > 0) {
+              // assuming the for each row has 'fieldname' and the second column is 'description'
+              // for each row in data check if the first column is equal to the einput value
+              console.log("einput value:", einput.value);
+              data.forEach(row => {
+                if (row[fieldJson.fieldName] == einput.value) {
+                  console.log("Found matching row:", row);
+                  const label = element.querySelector("label");
+                  label.textContent = record[descriptionField];
+                  label.style.display = "block";
+                  label.style.fontWeight = "bold";
+                  label.style.marginBottom = "8px";
+                  // adding the label to the parent of einput
+                  einput.parentNode.insertBefore(label, einput);
+                }
+              });
+
+            }
+
+          })
+          .catch(error => {
+            console.error("Error fetching search window data:", error);
+          });
+      });
       // adding the search button
       var searchButton = document.createElement("button");
       searchButton.style.float = "right";
