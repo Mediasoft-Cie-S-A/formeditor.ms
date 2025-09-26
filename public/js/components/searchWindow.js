@@ -113,16 +113,17 @@ function createQueryResultModal() {
     if (!inputElement) {
       return;
     }
-    // if the input is disabled, ou readonly, show toast maeessage and return
-    if (inputElement.disabled || inputElement.readOnly) {
+    // Allow updates for search window fields even if they are normally readonly/disabled
+    const isSearchWindowField =
+      inputElement.getAttribute("dataset-field-type") === "search_win";
+    if (!isSearchWindowField && (inputElement.disabled || inputElement.readOnly)) {
       showToast("Input is disabled or readonly");
       return;
-    } else {
-      // set the value of the input element
+    }
 
-      inputElement.value = selectedRowValue;
-      console.log("Input Element Value Set:", inputElement.value);
-    };
+    // set the value of the input element
+    inputElement.value = selectedRowValue;
+    console.log("Input Element Value Set:", inputElement.value);
 
   }; // modalOkBtn.onclick
 
