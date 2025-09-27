@@ -595,6 +595,7 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum, dataset, link,
     const dataset = JSON.parse(datasetDiv.getAttribute("dataSet"));
     //  console.log("dataset", dataset);
 
+
     // get the fields from the dataset
     const datasetFields = datasetDiv.getAttribute("dataset-fields-list");
 
