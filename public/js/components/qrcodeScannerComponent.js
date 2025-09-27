@@ -13,11 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/**
- * Data storage
- * - This scanner builds runtime elements only and does not persist configuration attributes.
- */
 function createQRCodeScanner(type) {
     var main = document.createElement('div');
     main.classList.add('form-container');

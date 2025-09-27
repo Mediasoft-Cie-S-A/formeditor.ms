@@ -13,11 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/**
- * Data storage
- * - Static elements rely solely on DOM content and do not persist additional configuration attributes.
- */
 function createElementStatic(type) {
     //    console.log("createElement:"+type);
     let tagType = "";

@@ -13,12 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/**
- * Data storage
- * - items: JSON array describing menu entries (label, url, target, children).
- * - tagName: plain string identifying the component when serialized.
- */
 const menuItems = [];
 menuItems.push({
     item: "Tableau de bord",

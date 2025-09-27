@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-/**
- * Data storage
- * - promptText / promptPlaceholder / promptButtonText: plain strings controlling the UI labels.
- * - promptResponse: plain string holding the latest generated response.
- */
-
 
 
 function createPromptComponent(type) {

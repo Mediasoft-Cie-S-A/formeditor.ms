@@ -13,11 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/**
- * Data storage
- * - options: newline separated string representing value,label pairs used to populate the select.
- */
 function createElementSelect(type) {
     var main = document.createElement('div');
     main.className = 'form-container';

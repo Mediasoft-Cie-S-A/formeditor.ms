@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-/**
- * Data storage
- * - elementDIV: plain string referencing the element ID that hosts the script editor.
- */
-
 
 function createJScode(type) {
   showjsCodeEditor();

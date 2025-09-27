@@ -14,17 +14,6 @@
  * limitations under the License.
  */
 
-/**
- * Data storage
- * - dataSetGrid: JSON array describing API field definitions rendered in the grid.
- * - data-api-method / data-api-id: plain strings referencing the remote endpoint metadata.
- * - Dataset-Fields-Names / Dataset-Fields-Types: serialized lists cached for quick lookup.
- * - filter: JSON string applied to the grid for search criteria.
- * - jsonData: JSON array of the rows currently loaded.
- * - api-name / apiUrl / apiMethod / apiId: plain strings locating the backing API.
- * - current_page / page / pageSize / page_size: numeric strings tracking pagination.
- */
-
 function createDatabaseGridWeb(type) {
   var main = document.createElement("div");
   main.className = "grid-container";

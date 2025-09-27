@@ -2,13 +2,6 @@
  * A button that links to a specific screen, with drag-and-drop support.
  */
 
-/**
- * Data storage
- * - config: JSON object capturing url, label, screen name and icon lock state.
- * - data-url: plain string shortcut to the configured url for runtime usage.
- * - data-icon-lock: boolean persisted as "true"/"false" to toggle the lock icon display.
- */
-
 function createButtonLink(type) {
     const btn = document.createElement("button");
     btn.setAttribute("tagName", type);

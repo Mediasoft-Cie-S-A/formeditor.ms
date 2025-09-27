@@ -1,9 +1,8 @@
-@import "../variables.css";
 #chat-container {
-  background: var(--color-147);
+  background: white;
   padding: 15px;
   border-radius: 12px;
-  box-shadow: 0 0 10px var(--color-120);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   width: 100%;
   margin: auto;
 }
@@ -13,7 +12,7 @@
   height: 80px;
   padding: 10px;
   border-radius: 8px;
-  border: 1px solid var(--color-9);
+  border: 1px solid #ccc;
   resize: vertical;
   font-size: 14px;
 }
@@ -27,7 +26,7 @@
 
 #chat-container .actions button {
   padding: 10px 15px;
-  background: var(--color-46);
+  background: #e0e0e0;
   border: none;
   border-radius: 12px;
   cursor: pointer;
@@ -35,7 +34,7 @@
 }
 
 #chat-container .actions button:hover {
-  background: var(--color-106);
+  background: #d0d0d0;
 }
 
 #chat-container input[type="file"] {

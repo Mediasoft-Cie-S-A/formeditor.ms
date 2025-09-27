@@ -27,6 +27,7 @@ function loadForms() {
             return response.json();
         })
         .then(forms => {
+            console.log(forms);
             const list = document.getElementById('componentsListBody');
 
             list.innerHTML = ''; // Clear the list
@@ -631,6 +632,9 @@ async function newForm() {
         },
         children: [tabHeader, tabsContainer]
     };
+
+
+    console.log("Create new form");
 
     const formPayload = {
         objectId: "ad_" + Date.now(), // dynamic unique id

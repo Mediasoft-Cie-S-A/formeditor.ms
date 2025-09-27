@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-/**
- * Data storage
- * - src / alt / height / width: plain string attributes applied to the <img> element for rendering.
- */
-
 function createElementImage(type) {
 
     element = document.createElement('img');
