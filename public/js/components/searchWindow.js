@@ -105,8 +105,8 @@ function createQueryResultModal() {
       showToast("Please select a row", 3000);
       return;
     }
+    // in relation at the modal the dom create multiple input with the same id, so we need to use querySelectorAll
     var inputElements = document.querySelectorAll('input[id^="' + parentid + '"]');
-    console.log("Input Elements Found:", inputElements);
     // if the input is not found, return
     if (!inputElements) {
       return;
@@ -130,10 +130,10 @@ function createQueryResultModal() {
         inputElement.onchange({ target: inputElement });
       }
       // loadValuesSearchWin({ target: inputElement });
-      console.log("Input Element Value Set:", inputElement.value);
-      modal.style.display = "none"; // Close the modal
       // get input element
     }); // forEach inputElements
+    modal.style.display = "none"; // Close the modal
+
   }; // modalOkBtn.onclick
 
 

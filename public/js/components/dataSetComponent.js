@@ -593,7 +593,7 @@ async function loadValuesSearchWin(event) {
     console.error("Input element not found");
     return;
   }
-
+  einput.style.display = "none";
   //get filedJson from the einput
 
   const externalDBName = einput.getAttribute("dataset-field-externalDBName");
