@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * Data storage
+ * - datasearch: JSON array describing searchable dataset fields.
+ * - data-value-* attributes: plain strings attached to suggestion items to carry metadata (DB/table/field/type).
+ */
 function createDatabaseSearch(type) {
   var main = document.createElement("div");
   main.className = "dataSetContainer";
@@ -69,57 +75,87 @@ function updateDataSearch(main, content) {
 
 function RenderDataSearch(main) {
   main.innerHTML = "";
-  var searchMainDiv = document.createElement("div");
+
+  const searchMainDiv = document.createElement("div");
   searchMainDiv.className = "search-container";
   searchMainDiv.id = "searchDiv";
-  searchMainDiv.style.display = "infline-block";
+  searchMainDiv.style.display = "inline-block"; // correction: "infline" -> "inline"
   main.appendChild(searchMainDiv);
-  var jsonData = JSON.parse(main.getAttribute("datasearch"));
 
-  var i = 0;
+  const jsonData = JSON.parse(main.getAttribute("datasearch") || "[]");
+
   jsonData.forEach((field) => {
-    // generate the search html
-    var html =
-      "<div class='searchMain' id='search_" +
-      field.tableName +
-      Date.now() +
-      "' >";
-    html +=
-      "<div class='search' id='search_" + field.tableName + "_searchDiv'>";
-    html +=
-      "<input type='text' id='search_" +
-      field.tableName + "_" + field.fieldName +
-      "_input' list='searchList' placeholder='" +
-      field.fieldLabel +
-      "'  autocomplete='off' ";
-    html += "oninput='searchAutoComplete(event,this)' ";
-    html += " data-value-DBName='" + field.DBName + "'";
-    html += " data-value-table-name='" + field.tableName + "'";
-    html += " data-value-field-name='" + field.fieldName + "'";
-    html += " data-value-field-type='" + field.fieldType + "'";
-    html +=
-      ' onclick=\'this.parentElement.querySelector(".autocomplete-results").style.display="none"\'>';
-    html += " <button type='button' onclick='gridSearch(event)' >";
+    const searchMain = document.createElement("div");
+    searchMain.className = "searchMain";
+    searchMain.id = `search_${field.tableName}_${Date.now()}`;
 
-    html += "<i class='fas fa-search'></i> </button>";
-    // button to clear the search
-    html +=
-      "<button type='button' onclick='document.getElementById(\"search_" +
-      field.tableName + "_" + field.fieldName +
-      "_input\").value=\"\";'  >";
-    html += "<i class='fas fa-times'></i> </button>";
-    html +=
-      "<div id='search_" +
-      field.tableName +
-      Date.now() +
-      "_autocomplete' class='autocomplete-results'>";
-    html += "</div></div></div>";
-    searchMainDiv.innerHTML += html;
-    i++;
+    const searchDiv = document.createElement("div");
+    searchDiv.className = "search";
+    searchDiv.id = `search_${field.tableName}_searchDiv`;
+
+    // input
+    const input = document.createElement("input");
+    input.type = "text";
+    input.id = `search_${field.tableName}_${field.fieldName}_input`;
+    input.setAttribute("list", "searchList");
+    input.placeholder = field.fieldLabel;
+    input.autocomplete = "off";
+    // set auotocomplete off
+    input.autocorrect = "off";
+    input.autocapitalize = "off";
+    input.spellcheck = false;
+    input.setAttribute("data-value-DBName", field.DBName);
+    input.setAttribute("data-value-table-name", field.tableName);
+    input.setAttribute("data-value-field-name", field.fieldName);
+    input.setAttribute("data-value-field-type", field.fieldType);
+    input.oninput = (event) => searchAutoComplete(event, input);
+    input.onclick = () => {
+      searchDiv.querySelector(".autocomplete-results").style.display = "none";
+    };
+
+    // search button
+    const btnSearch = document.createElement("button");
+    btnSearch.type = "button";
+    btnSearch.onclick = (event) => gridSearch(event);
+    const iconSearch = document.createElement("i");
+    iconSearch.className = "fas fa-search";
+    btnSearch.appendChild(iconSearch);
+
+
+
+    // autocomplete div
+    const autoDiv = document.createElement("div");
+    autoDiv.id = `search_${field.tableName}_${Date.now()}_autocomplete`;
+    autoDiv.className = "autocomplete-results";
+    autoDiv.style.display = "none";
+
+
+    // clear button
+    const btnClear = document.createElement("button");
+    btnClear.type = "button";
+    btnClear.onclick = (event) => {
+      console.log("clear");
+      event.preventDefault();
+      input.value = "";
+      autoDiv.style.display = "none";
+      gridSearch(event);
+    };
+    const iconClear = document.createElement("i");
+    iconClear.className = "fas fa-times";
+    btnClear.appendChild(iconClear);
+    // assemble
+    searchDiv.appendChild(input);
+    searchDiv.appendChild(btnSearch);
+    searchDiv.appendChild(btnClear);
+    searchDiv.appendChild(autoDiv);
+
+    searchMain.appendChild(searchDiv);
+    searchMainDiv.appendChild(searchMain);
   });
 
-  return element;
+  return searchMainDiv;
 }
+
 
 function gridSearch(event) {
   console.log("gridSearch");
@@ -224,16 +260,9 @@ function searchAutoComplete(event, element) {
       .then((response) => response.json())
       .then((data) => {
         autocomplete.innerHTML = "";
-        // current element position
-        var elementPosition = getAbsoluteOffset(element);
-        autocomplete.setAttribute(
-          "style",
-          "display:block;top:" +
-          (elementPosition.top - element.offsetTop - 15) +
-          "px;left:" +
-          (elementPosition.left - element.offsetLeft - element.offsetWidth / 3) +
-          "px;"
-        );
+        autocomplete.style.display = "block";
+
+
 
         data.forEach((row) => {
           var rowDiv = document.createElement("div");

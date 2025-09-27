@@ -1,0 +1,255 @@
+@import "variables.css";
+
+#formContainer {
+    border: 2px dashed var(--color-9);
+    width: 100%;
+    padding: 10px;
+    min-height: 1200px;
+    align-items: left;
+}
+
+
+.category {
+    cursor: pointer;
+    padding: 5px;
+    align-items: center;
+    width: 200px;
+}
+
+.category:hover {
+    background-color: var(--color-29);
+}
+
+.category-button {
+    background-color: var(--color-45);
+    color: var(--color-148);
+    min-height: 50px;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    place-items: center;
+    font-size: 15px;
+    border-radius: 5px;
+    box-shadow: inset 0 0 0 1px var(--color-9);
+    /* Add a grey border */
+    transition: background-color 0.5s;
+    /* Smooth transition for background color change */
+    margin-bottom: 5px;
+}
+
+.draggable {
+    padding: 8px;
+    background-color: var(--color-56);
+    border: 1px solid var(--color-9);
+    cursor: pointer;
+    user-select: none;
+    align-items: center;
+    margin-top: 5px;
+    transition: background-color 0.5s;
+    /* Smooth transition for background color change */
+
+}
+
+.draggable:hover {
+    background-color: var(--color-57);
+}
+
+
+/* Le tableau occupe tout l'espace restant sous #formProperties */
+#formEditorContainer {
+    width: 100%;
+    table-layout: fixed;
+    height: calc(100vh - 230px);
+}
+
+#formEditorContainer tr {
+    height: 100%;
+}
+
+#formEditorContainer td {
+    vertical-align: top;
+}
+
+
+/* Scroll propre */
+#componentsSidebar,
+#editorPropertyInfos,
+#webserviceDiv,
+#databaseDiv {
+    max-height: calc(100vh - 230px);
+    overflow: auto;
+    box-sizing: border-box;
+    display: none;
+    position: absolute;
+    z-index: 1000;
+    background-color: var(--color-147);
+    border: 1px solid var(--color-9);
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-top-right-radius: 5px;
+    border-top: none;
+    box-shadow: 0 8px 16px 0 var(--color-117), 0 6px 20px 0 var(--color-118);
+    padding: 10px;
+    text-align: center;
+    align-items: top;
+    flex-direction: column;
+}
+
+.movebar {
+
+    height: 25px;
+    background-color: var(--color-3);
+    color: var(--color-147);
+    cursor: move;
+    text-align: center;
+    display: block;
+    position: fixed;
+    margin-top: -35px;
+    margin-left: -10px;
+    border: 2px solid gray;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    box-shadow:
+        0 -8px 16px -4px var(--color-117),
+        /* top shadow */
+        -8px 0 16px -4px var(--color-118),
+        /* left shadow */
+        8px 0 16px -4px var(--color-118);
+    /* right shadow */
+}
+
+.is-hidden {
+    display: none !important;
+}
+
+/* Boutons flottants */
+.fab-stack {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 9999;
+}
+
+.fab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 14px var(--color-126);
+    background: var(--color-58);
+    color: var(--color-2);
+    font-size: 20px;
+}
+
+.fab[aria-pressed="true"] {
+    background: var(--color-59);
+}
+
+.fab:focus {
+    outline: 2px solid var(--color-127);
+    outline-offset: 2px;
+}
+
+
+#jsCodeDialog {
+    display: none;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid var(--color-9);
+    background-color: var(--color-147);
+    z-index: 1000;
+    min-width: 1000px;
+    box-shadow: 0 8px 16px 0 var(--color-117), 0 6px 20px 0 var(--color-118);
+    padding: 20px;
+    border-radius: 5px;
+    display: none;
+}
+
+
+
+.editorElement {
+    border: 2px dashed var(--color-4);
+    width: auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.portal-container {
+    vertical-align: top;
+
+    padding: 5px;
+    background-color: var(--color-147);
+    width: 100%;
+    margin: 10px;
+}
+
+
+
+
+
+.portal-container tr:hover {
+    background-color: var(--color-29);
+}
+
+
+.portal-delete-button {
+    background-color: var(--color-60);
+    color: var(--color-147);
+    box-shadow: inset gray 0px 0px 60px -12px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 30px;
+    height: 30px;
+    align-items: center;
+    margin-left: 5px;
+}
+
+.portal-delete-button :hover {
+    box-shadow: 0 8px 16px 0 var(--color-117), 0 6px 20px 0 var(--color-118);
+}
+
+.portal-edit-button {
+
+    background-color: var(--color-152);
+    color: var(--color-147);
+    border: none;
+    cursor: hand;
+    box-shadow: inset gray 0px 0px 60px -12px;
+    width: 30px;
+    height: 30px;
+
+    align-items: center;
+    border-radius: 5px;
+    margin-left: 5px;
+}
+
+.portal-show-button {
+
+    background-color: var(--color-7);
+    color: var(--color-147);
+    border: none;
+    cursor: hand;
+    width: 30px;
+    height: 30px;
+
+    align-items: center;
+    border-radius: 5px;
+    margin-left: 5px;
+    box-shadow: inset gray 0px 0px 60px -12px;
+
+    animation: alternate 1s infinite;
+
+}

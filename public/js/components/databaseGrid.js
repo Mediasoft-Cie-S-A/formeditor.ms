@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
+/**
+ * Data storage
+ * - filter: JSON array string storing active filters.
+ * - dataSet: JSON array of field descriptors bound to the grid.
+ * - sql: JSON array describing SQL sources used to populate the grid.
+ * - datalink: JSON array for linked datasets/relations.
+ * - dataOrderByGrid: JSON array describing sort order configuration.
+ * - datasetFields: serialized field list cached on the grid element.
+ * - apiName / page / pageSize: plain strings tracking API source and pagination.
+ */
+
 
 function createDatabaseGrid(type) {
   var main = document.createElement("div");
@@ -382,156 +393,138 @@ function switchView(e, DBName, mainID, view) {
 }
 
 function generateHeaderRow(grid, dataset) {
-  // table header
-  var header = null;
-  // check if grid has class grid-header
-  if (grid.querySelector(".grid-header") == null) {
+  // header container
+  var header = grid.querySelector(".grid-header");
+  if (!header) {
     header = document.createElement("div");
     header.className = "grid-header";
   } else {
-    header = grid.querySelector(".grid-header");
-    header.innerHTML = ""; // clear the header
+    header.innerHTML = "";
   }
 
-  // header
   var row = document.createElement("div");
   row.className = "grid-row";
 
   dataset.forEach((field) => {
-    if (field !== "rowid") {
-      const cell = document.createElement("div");
-      cell.className = "grid-cell-header";
-      const main = grid.closest('[tagname="dataGrid"]');
-      // check if field is in the orderbygrid json in grid
-      const orderByGrid = JSON.parse(main.getAttribute("dataorderbygrid"));
-      const fieldOrderBy = orderByGrid.find((item) => item.fieldName === field.fieldName);
-      // check if fieldOrderBy is null
-      if (fieldOrderBy == null) {
-        cell.setAttribute("descending", "asc");
-      } else {
-        // set the icon in the cell
-        cell.innerHTML = fieldOrderBy.order === "asc" ? '<i class="fa fa-sort-up"></i>' : '<i class="fa fa-sort-down"></i>';
-        cell.setAttribute("descending", fieldOrderBy.order);
-      }
-      if (field.fieldLabel) {
-        cell.innerHTML += field !== "rowid" ? field.fieldLabel.trim() : "";
-      }
-      else {
-        cell.innerHTML += field !== "rowid" ? field.fieldName.trim() : "";
-      }
+    if (field === "rowid") return;
 
+    const cell = document.createElement("div");
+    cell.className = "grid-cell-header";
 
-      cell.setAttribute("field-name", field.fieldName);
-      cell.setAttribute("DBName", field.DBName);
-      // adding the draggable attribute to the cell
-      cell.setAttribute("draggable", "true");
-      cell.setAttribute("drag-type", "header");
-      cell.setAttribute("drag-field", field.fieldName);
-      // adding the evnt drop to the cell
-      cell.setAttribute("ondragover", "event.preventDefault()");
-      cell.addEventListener("dragstart", function (e) {
-        e.dataTransfer.setData("text/plain", e.target.getAttribute("drag-field"));
-        e.dataTransfer.effectAllowed = "move";
-      }
-      );
-      cell.addEventListener("drop", function (e) {
-        console.log("dragend");
-        e.preventDefault();
-        // get the field name from the event
-        const fieldName = e.dataTransfer.getData("text/plain");
-        // get the grid id
-        const main = e.currentTarget.closest('[tagname="dataGrid"]');
-        // get the dataset from the main in json format
-        const dataset = JSON.parse(main.getAttribute("dataset"));
-        // the current field name in target
-        const targetFieldName = e.target.getAttribute("drag-field");
-        // invert the field name in the dataset json with the target field name
-        console.log("fieldName", fieldName);
-        console.log("targetFieldName", targetFieldName);
+    // Récupérer le main (porte les attributs dataset/dataorderbygrid)
+    const main = grid.closest('[tagname="dataGrid"]') || grid.parentElement;
 
-        // get the json field of fieldName
-        const field = dataset.find((item) => item.fieldName === fieldName);
-        const DBName = field.DBName;
-        // get the json field of targetFieldName
-        const targetField = dataset.find((item) => item.fieldName === targetFieldName);
-        // invert the field name in the dataset json with the target field name
-        // new dataset
-        const newDataset = dataset.map((item) => {
-          if (item.fieldName === fieldName) {
-            return targetField
-          } else if (item.fieldName === targetFieldName) {
-            return field;
-          } else {
-            return item;
-          }
-        });
-        console.log("newDataset", newDataset);
-        // set the dataset to the main
-        main.setAttribute("dataset", JSON.stringify(newDataset));
-        // refresh the grid
-        searchGrid(DBName, "", "", "", main.id);
+    // État de tri courant
+    const orderByGrid = safeJSON(main.getAttribute("dataorderbygrid"), []);
+    const current = orderByGrid.find((o) => o.fieldName === field.fieldName);
+    const currentOrder = current ? current.order : null;
 
+    // Label
+    const label = (field.fieldLabel ? field.fieldLabel.trim() : field.fieldName.trim());
+
+    // Contenu: label + boutons
+    const group = document.createElement("div");
+    group.style.display = "flex";
+    group.style.alignItems = "center";
+    group.style.gap = "6px";
+
+    const spanLabel = document.createElement("span");
+    spanLabel.textContent = label;
+
+    const btnAsc = document.createElement("button");
+    btnAsc.type = "button";
+    btnAsc.title = "Trier ascendant";
+    btnAsc.innerHTML = '<i class="fa fa-sort-up"></i>';
+    btnAsc.className = "grid-th-btn";
+    btnAsc.style.marginTop = "-5px";
+    if (currentOrder === "asc") btnAsc.classList.add("active");
+    btnAsc.addEventListener("click", (ev) => {
+      ev.stopPropagation(); // ne pas déclencher le tri toggle du clic cellule
+      const DBName = field.DBName || grid.getAttribute("DBName");
+      setOrderBy(main, DBName, field.fieldName, "asc");
+    });
+
+    const btnDesc = document.createElement("button");
+    btnDesc.type = "button";
+    btnDesc.title = "Trier descendant";
+    btnDesc.innerHTML = '<i class="fa fa-sort-down"></i>';
+    btnDesc.className = "grid-th-btn";
+    // btnDesc.style.marginLeft = "-11px";
+    //btnDesc.style.marginTop = "-5px";
+
+    if (currentOrder === "desc") btnDesc.classList.add("active");
+    btnDesc.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      const DBName = field.DBName || grid.getAttribute("DBName");
+      setOrderBy(main, DBName, field.fieldName, "desc");
+    });
+
+    group.appendChild(spanLabel);
+    group.appendChild(btnAsc);
+    group.appendChild(btnDesc);
+
+    // Attributs utiles pour DnD + clic toggle
+    cell.setAttribute("field-name", field.fieldName);
+    cell.setAttribute("DBName", field.DBName);
+    cell.setAttribute("descending", currentOrder || "asc");
+
+    // Drag & drop (réordonner les colonnes)
+    cell.setAttribute("draggable", "true");
+    cell.setAttribute("drag-type", "header");
+    cell.setAttribute("drag-field", field.fieldName);
+    cell.setAttribute("ondragover", "event.preventDefault()");
+    cell.addEventListener("dragstart", function (e) {
+      e.dataTransfer.setData("text/plain", e.currentTarget.getAttribute("drag-field"));
+      e.dataTransfer.effectAllowed = "move";
+    });
+    cell.addEventListener("drop", function (e) {
+      e.preventDefault();
+      const fieldName = e.dataTransfer.getData("text/plain");
+      const main = e.currentTarget.closest('[tagname="dataGrid"]') || grid.parentElement;
+      const ds = safeJSON(main.getAttribute("dataset"), []);
+      const targetFieldName = e.currentTarget.getAttribute("drag-field");
+
+      const A = ds.find((it) => it.fieldName === fieldName);
+      const B = ds.find((it) => it.fieldName === targetFieldName);
+      if (!A || !B) return;
+
+      const newDs = ds.map((it) => {
+        if (it.fieldName === fieldName) return B;
+        if (it.fieldName === targetFieldName) return A;
+        return it;
       });
-      row.appendChild(cell);
-      // adding click action in order to sort the data
-      cell.addEventListener("click", function (e) {
-        console.log("click on cell");
-        e.preventDefault();
-        // get the cell from the event
-        // get the grid id
-        const main = e.currentTarget.closest('[tagname="dataGrid"]');
-        // get the dataset from the main in json format
-        const dataset = JSON.parse(main.getAttribute("dataset"));
+      main.setAttribute("dataset", JSON.stringify(newDs));
+      const DBName = (A.DBName || B.DBName || grid.getAttribute("DBName"));
+      searchGrid(DBName, "", "", "", main.id);
+    });
 
-        const DBName = e.currentTarget.getAttribute("DBName");
-        // get the field name from the cell
-        const fieldName = cell.getAttribute("field-name");
-        // get the order direction from the cell by checking if the attribute descending is set
-        var descending = cell.getAttribute("descending");
-        // check if the descending is set to true or false
-        if (descending == null) {
-          descending = "desc";
-        }
-        // check if the field type is in the dataorderbygrid json in grid
-        let dataOrderByGrid = JSON.parse(main.getAttribute("dataorderbygrid"));
-        // empty the dataorderbygrid json
-        dataOrderByGrid = [];
-        // if fieldOrderBy is null, add it to the dataorderbygrid json
-        if (descending == "asc") {
+    // Clic cellule = toggle asc/desc (comportement existant conservé)
+    cell.addEventListener("click", function (e) {
+      e.preventDefault();
+      const main = e.currentTarget.closest('[tagname="dataGrid"]') || grid.parentElement;
+      const DBName = e.currentTarget.getAttribute("DBName") || grid.getAttribute("DBName");
+      const fieldName = e.currentTarget.getAttribute("field-name");
+      const curr = (e.currentTarget.getAttribute("descending") || "asc");
+      const next = (curr === "asc") ? "desc" : "asc";
+      setOrderBy(main, DBName, fieldName, next);
+    });
 
-          // add the field to the dataorderbygrid json
-          dataOrderByGrid.push({ fieldName: fieldName, order: "desc" });
-          // adding the ascending icon to the cell
-          // create i element for the ascending icon
-
-        } else {
-          // add the field to the dataorderbygrid json
-          dataOrderByGrid.push({ fieldName: fieldName, order: "asc" });
-
-        }
-
-        // set the dataorderbygrid json to the grid
-        main.setAttribute("dataorderbygrid", JSON.stringify(dataOrderByGrid));
-        // refresh the grid
-        searchGrid(DBName, "", "", "", main.id);
-      });
-
-    } else {
-      const cell = document.createElement("div");
-      cell.style.display = "none";
-      cell.className = "";
-      cell.textContent = "";
-      row.appendChild(cell);
-    }
+    cell.appendChild(group);
+    row.appendChild(cell);
   });
+
   header.appendChild(row);
-  const body = document.createElement("div");
-  body.className = "grid-body";
+
+  // Assurer la présence du body
+  let body = grid.querySelector(".grid-body");
+  if (!body) {
+    body = document.createElement("div");
+    body.className = "grid-body";
+    grid.appendChild(body);
+  }
 
   grid.appendChild(header);
-  grid.appendChild(body);
 }
-
 function grid_page_size(e, mainID) {
   e.preventDefault();
   // get selected page size
@@ -650,32 +643,7 @@ function export2CSV(e, DBName, tableName) {
   window.open(url, "_blank");
 }
 
-function gridFetchData(grid, body) {
-  var DBName = grid.getAttribute("DBName");
-  var tableName = grid.getAttribute("Table-Name");
-  var currentPage = parseInt(grid.getAttribute("current_page"));
-  var pageSize = parseInt(grid.getAttribute("page_size"));
 
-  var currentPage = parseInt(currentPage);
-  fetchTableData(grid, DBName, tableName, currentPage, pageSize);
-}
-
-function fetchTableData(
-  grid,
-  DBName,
-  tableName,
-  page,
-  pageSize
-) {
-  // Prepare the fields query parameter
-  // create filter for search based on the input values, with field name and value separated by | and each filter separated by ,
-  var filter = "";
-
-
-  gridGetData(grid, DBName, tableName, page, pageSize, filter);
-
-
-}
 
 // get the filter type based on the field type
 function getFilterType(fieldType) {
@@ -704,7 +672,7 @@ async function gridGetData(
 ) {
   // activate the loaders
   activateLoaders();
-  // console.log(grid);
+  console.log(grid);
   // get the filter from the dataset json
   var mainID = grid.getAttribute("main-id");
   var main = document.getElementById(mainID);
@@ -773,11 +741,23 @@ async function gridGetData(
 
   // console.log(filterJSON);
   //get body form the table
-  const body = grid.querySelector(".grid-body");
+  let body = null;
+  switch (gridType) {
+    case 0:
+      body = grid.querySelector(".grid-body");
+      break;
+    case 1:
+      body = grid;
+      break;
+  }
   const header = grid.querySelector(".grid-header");
   // if gridType is 1, clear the header, body
-
-  body.innerHTML = "";
+  if (body) {
+    body.innerHTML = "";
+  }
+  if (gridType == 1 && header) {
+    header.remove();
+  }
   // Prepare the URL
   var url = `/table-data/${DBName}/${tableName}/${page}/${pageSize}?fields=${datasetFields}&filter=${encodeURIComponent(JSON.stringify(filterJSON))}&orderBy=${JSON.stringify(orderBy)}`;
   // get the sqljson from the main
@@ -822,6 +802,7 @@ async function gridGetData(
           );
           break;
         case 1:
+          console.log("drawPanelRow");
           drawPanelRow(
             mainID,
             DBName,
@@ -851,11 +832,11 @@ async function gridGetData(
       // get the tab
       const tab = document.querySelector('[tagname="Tab"]');
       console.log(tab);
-      // the header by class ctab_tabs-header
-      const header = tab.querySelector(".ctab_tabs-header");
+      // the header by class ctab_HeaderButton 
+      const header = tab.querySelector("ul");
       if (header.childNodes.length > 0) {
         // second tab
-        activateTab(event, header.childNodes[1], document.getElementById(header.childNodes[1].getAttribute("data-tab")));
+        activateTab(event, header.childNodes[1].querySelector("a"), document.getElementById(header.childNodes[1].getAttribute("data-tab")));
         navbar_InsertRecord();
       } // end if
     });
@@ -971,13 +952,14 @@ function drawGridRow(
 
     // Try switching to the second tab if it exists
     const tab = document.querySelector('[tagname="Tab"]');
-    if (tab) {
-      console.log("tab : " + tab);
-      const header = tab.querySelector(".ctab_tabs-header");
-      if (header.childNodes.length > 0) {
-        activateTab(event, header.childNodes[1], document.getElementById(header.childNodes[1].getAttribute("data-tab")));
-      }
-    }
+    console.log(tab);
+    // the header by class ctab_HeaderButton 
+    const header = tab.querySelector("ul");
+    if (header.childNodes.length > 0) {
+      // second tab
+      activateTab(event, header.childNodes[1].querySelector("a"), document.getElementById(header.childNodes[1].getAttribute("data-tab")));
+
+    } // end if
   });
 
   // Now create cells inside the row
@@ -1099,16 +1081,14 @@ function drawPanelRow(
 
     // get the tab
     const tab = document.querySelector('[tagname="Tab"]');
-    if (tab) {
+    console.log(tab);
+    // the header by class ctab_HeaderButton 
+    const header = tab.querySelector("ul");
+    if (header.childNodes.length > 0) {
+      // second tab
+      activateTab(event, header.childNodes[1].querySelector("a"), document.getElementById(header.childNodes[1].getAttribute("data-tab")));
 
-      // the header by class ctab_tabs-header
-      const header = tab.querySelector(".ctab_tabs-header");
-
-      if (header.childNodes.length > 0) {
-        // second tab
-        activateTab(event, header.childNodes[1], document.getElementById(header.childNodes[1].getAttribute("data-tab")));
-      } // end if
-    } // end if (tab)
+    } // end if
   } // end addEventListener
   );
   var i = 0;
@@ -1154,4 +1134,15 @@ function drawPanelRow(
   body.appendChild(rowDiv);
 
 
+}
+
+
+// --- Helpers ---
+function safeJSON(str, fallback) { try { return JSON.parse(str); } catch { return fallback; } }
+
+/** Met à jour l'orderby puis relance la grille */
+function setOrderBy(main, DBName, fieldName, order) {
+  const arr = [{ fieldName, order }];           // mono-colonne ; adapte si tu veux multi
+  main.setAttribute("dataorderbygrid", JSON.stringify(arr));
+  searchGrid(DBName, "", "", "", main.id);
 }

@@ -1,3 +1,4 @@
+@import "../variables.css";
 .miniLoader {
   width: 32px;
   height: 32px;
@@ -22,10 +23,10 @@
   padding: 0.625rem 0.75rem;
   font-weight: 400;
   line-height: 1.5;
-  color: #8898aa;
-  background-color: #fff;
+  color: var(--color-95);
+  background-color: var(--color-2);
   background-clip: padding-box;
-  border: 1px solid #cad1d7;
+  border: 1px solid var(--color-96);
   border-radius: 0.375rem;
   -webkit-box-shadow: none;
   box-shadow: none;
@@ -34,18 +35,18 @@
 }
 
 .input-element:read-write {
-  color: black;
-  background-color: #fff;
+  color: var(--color-148);
+  background-color: var(--color-2);
 
   border-bottom: 3px solid green;
   outline: 0;
   -webkit-box-shadow: none;
-  box-shadow: 2px 2px 2px 2px rgba(221, 239, 239, 0.1);
+  box-shadow: 2px 2px 2px 2px var(--color-137);
 }
 
 .input-element:read-only {
-  background-color: #f8f9fa;
-  color: #8898aa;
+  background-color: var(--color-97);
+  color: var(--color-95);
   cursor: not-allowed;
 }
 
@@ -69,12 +70,12 @@
 .modal__backdrop {
   position: absolute;
   inset: 0;
-  background: #0004;
+  background: var(--color-10)4;
 }
 
 .modal__dialog {
   position: relative;
-  background: #fff;
+  background: var(--color-2);
   max-width: 90%;
   max-height: 90%;
   overflow: auto;
@@ -119,24 +120,24 @@
 .modal__backdrop {
   background:
     radial-gradient(circle at center,
-      rgba(0, 0, 0, .35) 0%,
-      rgba(0, 0, 0, .55) 100%);
+      var(--color-138) 0%,
+      var(--color-139) 100%);
 }
 
 /* Dialog : ombre, bordure douce, coin supérieur accentué ---*/
 .modal__dialog {
   border-radius: 1.2rem;
-  border: 1px solid rgba(0, 0, 0, .08);
+  border: 1px solid var(--color-128);
   box-shadow:
-    0 20px 32px -6px rgba(0, 0, 0, .25),
-    0 6px 10px -4px rgba(0, 0, 0, .12);
+    0 20px 32px -6px var(--color-133),
+    0 6px 10px -4px var(--color-140);
   transition: box-shadow .2s ease-in-out;
 }
 
 .modal__dialog:hover {
   box-shadow:
-    0 24px 40px -4px rgba(0, 0, 0, .28),
-    0 8px 14px -4px rgba(0, 0, 0, .15);
+    0 24px 40px -4px var(--color-141),
+    0 8px 14px -4px var(--color-142);
 }
 
 .modal__close {
@@ -151,7 +152,7 @@
 /* Corps : petites scrollbars discrètes --------------------*/
 .modal__body {
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, .25) transparent;
+  scrollbar-color: var(--color-133) var(--color-151);
 }
 
 .modal__body::-webkit-scrollbar {
@@ -159,11 +160,11 @@
 }
 
 .modal__body::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--color-151);
 }
 
 .modal__body::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, .25);
+  background: var(--color-133);
   border-radius: 3px;
 }
 

@@ -52,7 +52,18 @@
     "editFunction": "editDataSetComponentNavigate",
     "styles": "dataSetComponentNavigate.css",
     "icon": "fa fa-compass",
-    "renderFunction": ""
+    "renderFunction": "renderNavigationBar"
+  },
+  "insertOnlyWizard": {
+    "type": "insertOnlyWizard",
+    "description": "Insert Only Wizard",
+    "category": "Business Logic",
+    "scriptName": "insertOnlyWizardComponent.js",
+    "createFunction": "createElementInsertWizard",
+    "editFunction": "editElementInsertWizard",
+    "styles": "insertOnlyWizardComponent.css",
+    "icon": "fa fa-wizard",
+    "renderFunction": "renderInsertOnlyWizard"
   },
   "dataSet": {
     "type": "dataSet",
@@ -85,7 +96,7 @@
     "editFunction": "editDatabaseSearch",
     "styles": "dataSearch.css",
     "icon": "fa fa-search",
-    "renderFunction": ""
+    "renderFunction": "RenderDataSearch"
   },
   "dataSearchHor": {
     "type": "dataSearchHor",
@@ -141,6 +152,17 @@
     "styles": "cookieStorage.css",
     "icon": "fa fa-cookie",
     "renderFunction": "renderCookieStorage"
+  },
+  "loginComponent": {
+    "type": "loginComponent",
+    "description": "Login form",
+    "category": "Business Logic",
+    "scriptName": "loginComponent.js",
+    "createFunction": "createElementLogin",
+    "editFunction": "editElementLogin",
+    "styles": "loginComponent.css",
+    "icon": "fa fa-sign-in",
+    "renderFunction": "renderLoginComponent"
   },
   "SearchWindow": {
     "type": "SearchWindow",
@@ -272,7 +294,7 @@
     "editFunction": "editElementTab",
     "styles": "tab.css",
     "icon": "fa fa-folder",
-    "renderFunction": ""
+    "renderFunction": "renderTabComponent"
   },
   "grid": {
     "type": "grid",

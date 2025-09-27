@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * Data storage
+ * - This component manipulates modal visibility only and does not persist configuration attributes.
+ */
+
 
 function showUserModal(main) {
 

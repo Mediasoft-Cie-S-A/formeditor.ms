@@ -1,0 +1,164 @@
+@import "variables.css";
+.login {
+    border-radius: 5px;
+    box-shadow: 0 8px 16px 0 var(--color-117), 0 6px 20px 0 var(--color-118);
+    height: auto;
+    max-width: 400px;
+    padding: 40px 15px;
+    text-align: center;
+    width: 100%;
+    display: block;
+}
+
+.login .fas {
+    color: var(--color-3);
+    font-size: 30px;
+    margin-bottom: 5px;
+}
+
+.login strong {
+    color: var(--color-30);
+    display: block;
+    font-size: 28px;
+}
+
+.login span {
+    color: var(--color-34);
+    font-size: 18px;
+    opacity: .8;
+}
+
+.login .create-account {
+    border-top: 1px solid var(--color-55);
+    display: flex;
+    justify-content: center;
+    margin-top: 25px;
+    padding-top: 20px;
+}
+
+.login .create-account strong {
+    font-size: 16px;
+    margin-left: 5px;
+    text-decoration: underline;
+}
+
+.login {
+    background: var(--color-2);
+}
+
+.login .form {
+    margin-top: 30px;
+    padding: 0 20px;
+}
+
+.login .form .form-row {
+    position: relative;
+    text-align: left;
+}
+
+.login .form .form-row .fas {
+    font-size: 16px;
+    position: absolute;
+    right: 10px;
+    top: 30px;
+    color: var(--color-34);
+    opacity: .3;
+}
+
+.login .form .form-row.bottom {
+    display: flex;
+    justify-content: space-between;
+}
+
+.login .form .form-row.bottom .forgot {
+    color: var(--color-3);
+    font-size: 18px;
+    opacity: .7;
+}
+
+.login .form .form-row.bottom .forgot:hover {
+    opacity: 1;
+}
+
+.login .form .form-row.button-login {
+    margin-top: 30px;
+    height: 80px;
+    display: block;
+    width: 100%;
+    
+}
+
+.login .form .form-row.button-login .fas {
+    position: static;
+}
+
+.login .form .form-row .form-check input[type="checkbox"]+label {
+    cursor: pointer;
+    display: block;
+    color: var(--color-34);
+    font-size: 18px;
+    opacity: .7;
+}
+
+.login .form .form-row .form-check input[type="checkbox"] {
+    display: none;
+}
+
+.login .form .form-row .form-check input[type="checkbox"]+label:before {
+    border-radius: 3px;
+    border: 1px solid var(--color-55);
+    color: var(--color-151);
+    content: "\2714";
+    height: 18px;
+    margin-right: 5px;
+    transition: 0.2s;
+    vertical-align: inherit;
+    width: 18px;
+    text-align: center;
+    line-height: 20px;
+}
+
+.login .form .form-row .form-check input[type="checkbox"]+label:active:before {
+    transform: scale(1.1);
+}
+
+.login .form .form-row .form-check input[type="checkbox"]:checked+label:before {
+    background-color: var(--color-3);
+    border-color: var(--color-3);
+    color: var(--color-2);
+}
+
+.login .form .form-label {
+    color: var(--color-34);
+    font-size: 17px;
+    opacity: .7;
+}
+
+.login .form-password,
+.login .form-text {
+    color: var(--color-34);
+    font-size: 18px;
+    border: 0;
+    height: 40px;
+    margin-bottom: 15px;
+    padding: 0 40px 0 0px;
+    width: 100%;
+    background: var(--color-147) no-repeat;
+    transition: 100ms all linear 0s;
+    background-image: linear-gradient(to bottom, var(--color-125) 0%, var(--color-3) 90%), linear-gradient(to bottom, var(--color-47), var(--color-47));
+    background-size: 0 2px, 100% 1px;
+    background-position: 50% 100%, 50% 100%;
+    transition: background-size 0.3s cubic-bezier(0.64, 0.09, 0.08, 1);
+}
+
+.login .form-password:focus,
+.login .form-text:focus {
+    background-size: 100% 2px, 100% 1px;
+    outline: none;
+}
+
+
+.login .btn-login .fas.fa-arrow-right {
+    color: var(--color-2);
+    opacity: 1;
+}

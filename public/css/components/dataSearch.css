@@ -1,3 +1,4 @@
+@import "../variables.css";
 /* style for seach */
 /* Style the search field */
 .searchMain {
@@ -11,7 +12,7 @@
   margin-left: 9px;
 
   border-radius: 5px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-9);
 
 }
 
@@ -26,7 +27,7 @@
   border: none;
   float: left;
   width: 70%;
-  background: white;
+  background: var(--color-147);
   border-right: none;
   /* Prevent double borders */
   border-radius: 5px 0 0 5px;
@@ -35,7 +36,7 @@
 
 .search input[type=text]:focus {
   outline: none;
-  border-bottom: 1px solid greenyellow;
+  border-bottom: 1px solid var(--color-152);
 }
 
 
@@ -45,8 +46,8 @@
   width: 13%;
   margin-top: 2px;
   padding: 5px;
-  background: white;
-  color: #4d61fc;
+  background: var(--color-147);
+  color: var(--color-3);
   font-size: 17px;
   border-left: none;
   /* Prevent double borders */
@@ -57,8 +58,8 @@
 }
 
 .search button:hover {
-  background: #0b7dda;
-  color: white;
+  background: var(--color-116);
+  color: var(--color-147);
 }
 
 /* Clear floats */
@@ -70,29 +71,31 @@
 
 .autocomplete-results {
   position: absolute;
-  border: 1px solid #ccc;
-  background: white;
+  border: 1px solid var(--color-9);
+  background: var(--color-147);
   z-index: 1000;
   display: none;
   width: 100%;
   max-height: 250px;
+  max-width: 400px;
   overflow-y: auto;
   box-sizing: border-box;
   margin: 0;
   padding: 10px;
 
-  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  box-shadow: 0 8px 16px 0 var(--color-117), 0 6px 20px 0 var(--color-118);
   border-radius: 5px;
   transition: all 0.3s ease-in-out;
-  border-bottom: 1px solid #4d61fc;
-  border-top: 1px solid #4d61fc;
+  border-bottom: 1px solid var(--color-3);
+  border-top: 1px solid var(--color-3);
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(50px);
+  animation: slide-down 0.3s ease-in-out;
 
 }
 
 .autocomplete-row {
-  border-bottom: 1px dotted #ccc;
+  border-bottom: 1px dotted var(--color-9);
 }
 
 .autocomplete-results div {
@@ -101,5 +104,5 @@
 }
 
 .autocomplete-results div:hover {
-  background-color: #f0f0f0;
+  background-color: var(--color-29);
 }

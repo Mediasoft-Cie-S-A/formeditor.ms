@@ -13,6 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * Data storage
+ * - planningData: JSON array describing planning events (date, duration, metadata).
+ */
 // This component is used to create a new planning
 const planningData = {
     year: 2024, // Selected year
@@ -142,13 +147,31 @@ function createPlanning(type) {
     main.style.overflow = "scroll";
     main.style.display = "block";
     main.setAttribute("planningData", JSON.stringify(planningData));
+    // Render the Gantt chart first so additional elements are not removed
+    gantrender(main, planningData);
+
+    // Dialog used for editing activities
     var activityDialog = document.createElement('div');
     activityDialog.id = "activityDialog";
     activityDialog.style.display = "none";
     activityDialog.style.position = "fixed";
     main.appendChild(activityDialog);
-    // Render the Gantt chart
-    gantrender(main, planningData);
+
+    // Context menu container
+    var contextMenu = document.createElement('div');
+    contextMenu.id = 'taskContextMenu';
+    contextMenu.style.display = 'none';
+    contextMenu.style.position = 'absolute';
+    contextMenu.style.background = 'white';
+    contextMenu.style.border = '1px solid gray';
+    contextMenu.innerHTML = '<div onclick="contextEditTask()">Edit</div>' +
+        '<div onclick="contextDeleteTask()">Delete</div>';
+    main.appendChild(contextMenu);
+
+    // Hide context menu when clicking elsewhere
+    document.addEventListener('click', function () {
+        contextMenu.style.display = 'none';
+    });
 
     return main;
 }
@@ -161,6 +184,9 @@ function editPlanning(type, element, content) {
 
 
 function gantrender(main) {
+    // keep existing overlay elements before re-rendering
+    const activityDialog = main.querySelector('#activityDialog');
+    const contextMenu = main.querySelector('#taskContextMenu');
     // get the planning data from the main div
     const planningData = JSON.parse(main.getAttribute("planningData"));
     rows = planningData.tasks.length + 5;
@@ -318,23 +344,26 @@ function gantrender(main) {
 
 
     main.innerHTML = svg + "</svg>";
+    // reattach overlay elements
+    if (activityDialog) main.appendChild(activityDialog);
+    if (contextMenu) main.appendChild(contextMenu);
 }
 
 
 function createRoundedBar(main, task, x, y, width, height) {
     var svg = "";
-    // convert task in json string
-    var taskString = "";
-    console.log(taskString);
-    const rectHtml = `<rect x="${x}px" y="${y}px" width="${width * task.progress}" height="${height}" stroke="gray" stroke-width="1" fill="lightgreen" task="${taskString}" onclick="editActivity(this)"></rect>`;
+    // convert task to a JSON string safe for attributes
+    var taskString = encodeURIComponent(JSON.stringify(task));
+    const groupStart = `<g class="task-bar" data-task="${taskString}" data-x="${x}" data-y="${y}" transform="translate(${x},${y})" onmousedown="startTaskDrag(evt)" onmousemove="dragTask(evt)" onmouseup="endTaskDrag(evt)" onmouseleave="endTaskDrag(evt)" oncontextmenu="showTaskContextMenu(evt)" onclick="editActivity(this)">`;
+    svg += groupStart;
+    const rectHtml = `<rect x="0" y="0" width="${width * task.progress}" height="${height}" stroke="gray" stroke-width="1" fill="lightgreen"></rect>`;
     svg += rectHtml;
-    const rect1Html = `<rect x="${x + width * task.progress}px" y="${y}px" width="${width - width * task.progress}" height="${height}" stroke="gray" stroke-width="1" fill="yellow" task="${taskString}" onclick="editActivity(this)"></rect>`;
+    const rect1Html = `<rect x="${width * task.progress}" y="0" width="${width - width * task.progress}" height="${height}" stroke="gray" stroke-width="1" fill="yellow"></rect>`;
     svg += rect1Html;
-    const textHtml = `<text x="${x + width / 2}px" y="${y + height / 2}px" text-anchor="middle" dominant-baseline="middle" >${task.progress * 100}% ${task.title}</text>`;
+    const textHtml = `<text x="${width / 2}" y="${height / 2}" text-anchor="middle" dominant-baseline="middle" >${task.progress * 100}% ${task.title}</text>`;
     svg += textHtml;
+    svg += '</g>';
     return svg;
-
-
 }
 
 // draw svg cell
@@ -351,7 +380,8 @@ function drawCell(main, lastX, lastY, cellWidth, cellHeight, colspan, textConten
 
 function editActivity(element) {
     // get the task data from the element
-    const task = JSON.parse(element.getAttribute("task"));
+    const taskAttr = element.getAttribute("data-task") || element.getAttribute("task");
+    const task = JSON.parse(decodeURIComponent(taskAttr));
     // show the activity dialog
     showActivityDialog(task);
 
@@ -409,6 +439,89 @@ function showActivityDialog(taskData) {
     buttons.appendChild(cancelButton);
 
 
+}
+
+// Drag support for task bars
+let dragElement = null;
+let dragStartX = 0;
+let originalX = 0;
+let originalY = 0;
+
+function startTaskDrag(evt) {
+    if (evt.button !== 0) return; // only left button
+    dragElement = evt.currentTarget;
+    dragStartX = evt.clientX;
+    originalX = parseFloat(dragElement.getAttribute('data-x'));
+    originalY = parseFloat(dragElement.getAttribute('data-y'));
+    evt.preventDefault();
+}
+
+function dragTask(evt) {
+    if (!dragElement) return;
+    const dx = evt.clientX - dragStartX;
+    dragElement.setAttribute('transform', `translate(${originalX + dx},${originalY})`);
+}
+
+function endTaskDrag(evt) {
+    if (!dragElement) return;
+    const dx = evt.clientX - dragStartX;
+    const daysMoved = Math.round(dx / cellWidth);
+    if (daysMoved !== 0) {
+        const task = JSON.parse(decodeURIComponent(dragElement.getAttribute('data-task')));
+        const planning = dragElement.closest('.planning');
+        const planningData = JSON.parse(planning.getAttribute('planningData'));
+        const index = planningData.tasks.findIndex(t => t.id === task.id);
+        if (index > -1) {
+            const start = new Date(planningData.tasks[index].start);
+            start.setDate(start.getDate() + daysMoved);
+            const end = new Date(planningData.tasks[index].end);
+            end.setDate(end.getDate() + daysMoved);
+            planningData.tasks[index].start = start.toISOString().slice(0, 10);
+            planningData.tasks[index].end = end.toISOString().slice(0, 10);
+            planning.setAttribute('planningData', JSON.stringify(planningData));
+            gantrender(planning);
+        }
+    }
+    dragElement = null;
+}
+
+// Context menu handling
+let currentContextTask = null;
+let currentPlanning = null;
+
+function showTaskContextMenu(evt) {
+    evt.preventDefault();
+    const menu = document.getElementById('taskContextMenu');
+    currentContextTask = JSON.parse(decodeURIComponent(evt.currentTarget.getAttribute('data-task')));
+    currentPlanning = evt.currentTarget.closest('.planning');
+    menu.style.left = evt.clientX + 'px';
+    menu.style.top = evt.clientY + 'px';
+    menu.style.display = 'block';
+}
+
+function contextEditTask() {
+    if (currentContextTask) {
+        showActivityDialog(currentContextTask);
+    }
+    hideContextMenu();
+}
+
+function contextDeleteTask() {
+    if (currentContextTask && currentPlanning) {
+        const planningData = JSON.parse(currentPlanning.getAttribute('planningData'));
+        const index = planningData.tasks.findIndex(t => t.id === currentContextTask.id);
+        if (index > -1) {
+            planningData.tasks.splice(index, 1);
+            currentPlanning.setAttribute('planningData', JSON.stringify(planningData));
+            gantrender(currentPlanning);
+        }
+    }
+    hideContextMenu();
+}
+
+function hideContextMenu() {
+    const menu = document.getElementById('taskContextMenu');
+    if (menu) menu.style.display = 'none';
 }
 
 

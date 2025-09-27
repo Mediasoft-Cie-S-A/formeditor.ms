@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * Data storage
+ * - dataSet: JSON array describing API field mappings.
+ * - data-api-method / data-api-id: plain strings referencing the backend endpoint metadata.
+ * - get-by-id / update-by-id / create-api: JSON objects describing API routes and payloads.
+ * - data-current-length / data-current-row: numeric strings tracking pagination state.
+ */
+
 function createElementDataSetWeb(type) {
   var main = document.createElement("div");
   main.className = "form-container";
@@ -232,6 +240,7 @@ function createFieldFromJsonWeb(fieldJson, apiUrl) {
     einput.id = fieldJson.fieldId;
     einput.setAttribute("dataset-field-values", fieldJson.fieldValues);
     einput.setAttribute("dataset-field-name", fieldJson.fieldName);
+    einput.setAttribute("data-field-type", fieldJson.fieldDataType);
     einput.setAttribute("dataset-field-SQL", fieldJson.fieldSQL);
     einput.setAttribute("apiUrl", apiUrl);
     // currently no attribute is required separately

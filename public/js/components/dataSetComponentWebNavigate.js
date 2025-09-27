@@ -1,3 +1,9 @@
+/**
+ * Data storage
+ * - This navigation helper does not persist configuration on attributes;
+ *   it manipulates DOM state only.
+ */
+
 function createDataSetComponentWebNavigate(type) {
   var main = document.createElement("div");
   main.className = "dataSetComponentWebNavigate";

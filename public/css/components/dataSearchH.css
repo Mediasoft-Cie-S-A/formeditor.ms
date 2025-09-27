@@ -1,3 +1,4 @@
+@import "../variables.css";
 /* dataSearchH.css - Vertical layout version
  * Styles for Vertical Multi-Filter Data Search Component
  * Author: Mediasoft & Cie S.A. — 2025
@@ -18,23 +19,23 @@
 
 .ms-mode-toggle {
     padding: 0.25rem 0.5rem;
-    border: 1px solid #d0d7de;
+    border: 1px solid var(--color-107);
     border-radius: 6px;
-    background: #f9fafb;
+    background: var(--color-108);
     font-size: 0.9rem;
 }
 
 .ms-btn {
     padding: 0.35rem 0.6rem;
-    border: 1px solid #d0d7de;
-    background: #f6f8fa;
+    border: 1px solid var(--color-107);
+    background: var(--color-109);
     border-radius: 6px;
     cursor: pointer;
     font-size: 0.9rem;
 }
 
 .ms-btn:hover {
-    background: #eef1f4;
+    background: var(--color-110);
 }
 
 .ms-search-ribbon {
@@ -43,7 +44,7 @@
     /* ← vertical au lieu d’horizontal */
     gap: 0.75rem;
     padding: 0.25rem;
-    border: 1px dashed #e2e8f0;
+    border: 1px dashed var(--color-111);
     border-radius: 8px;
 }
 
@@ -53,29 +54,29 @@
     /* ← vertical */
     align-items: flex-start;
     gap: 0.4rem;
-    background: #fff;
+    background: var(--color-2);
     padding: 0.6rem 0.75rem;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--color-112);
     border-radius: 8px;
 }
 
 .ms-field-label {
     font-size: 0.85rem;
     font-weight: 600;
-    color: #475569;
+    color: var(--color-113);
 }
 
 .ms-op {
     padding: 0.35rem;
     border-radius: 6px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--color-112);
     font-size: 0.85rem;
     width: 100%;
 }
 
 .ms-input {
     padding: 0.4rem 0.5rem;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--color-112);
     border-radius: 6px;
     width: 100%;
     /* prend toute la largeur */
@@ -93,10 +94,10 @@
     display: none;
     max-height: 220px;
     overflow: auto;
-    background: #fff;
-    border: 1px solid #e5e7eb;
+    background: var(--color-2);
+    border: 1px solid var(--color-112);
     border-radius: 8px;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 18px var(--color-124);
 }
 
 .ms-ac-item {
@@ -106,7 +107,7 @@
 
 .ms-ac-item:hover,
 .ms-ac-item.active {
-    background: #f1f5f9;
+    background: var(--color-114);
 }
 
 .ms-chips {
@@ -118,7 +119,7 @@
 }
 
 .ms-chips-empty {
-    color: #94a3b8;
+    color: var(--color-115);
     font-style: italic;
 }
 
@@ -126,8 +127,8 @@
     display: flex;
     align-items: center;
     gap: 0.35rem;
-    background: #f1f5f9;
-    border: 1px solid #e2e8f0;
+    background: var(--color-114);
+    border: 1px solid var(--color-111);
     border-radius: 999px;
     padding: 0.25rem 0.5rem;
 }
@@ -136,13 +137,13 @@
     max-width: 360px;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+    var(--color-147)-space: nowrap;
     font-size: 0.85rem;
 }
 
 .ms-chip-remove {
     border: 0;
-    background: transparent;
+    background: var(--color-151);
     cursor: pointer;
     font-size: 1rem;
     line-height: 1;

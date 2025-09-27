@@ -13,6 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * Data storage
+ * - datasearch: JSON array describing API fields available for search/autocomplete.
+ * - filter: JSON string persisted on the search element to replay criteria.
+ * - data-value-* attributes: plain strings attached to suggestions to store API metadata (endpoint, field, type).
+ */
 function createDatabaseSearchWeb(type) {
   var main = document.createElement("div");
   main.className = "dataSetContainerWeb";
