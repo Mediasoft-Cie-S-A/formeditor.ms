@@ -1,5 +1,3 @@
-@import "../variables.css";
-
 .modal {
   display: none;
   position: fixed;
@@ -9,15 +7,15 @@
   width: 100%;
   height: 100%;
   overflow: auto;
-  background-color: var(--color-119);
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .modal-content {
-  background-color: var(--color-2);
-
+  background-color: #fff;
+  margin: 10% auto;
   padding: 20px;
-  border: 1px solid var(--color-50);
-
+  border: 1px solid #888;
+  width: 80%;
   border-radius: 10px;
 }
 
@@ -40,15 +38,15 @@
 
 
 .even-row {
-  background-color: var(--color-28);
+  background-color: silver;
 }
 
 .odd-row {
-  background-color: var(--color-2);
+  background-color: #ffffff;
 }
 
 .selected-row {
-  background-color: var(--color-75) !important;
+  background-color: #859bfc !important;
   /* Light green for selected row */
 
 }

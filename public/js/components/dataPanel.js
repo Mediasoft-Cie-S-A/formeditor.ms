@@ -14,14 +14,6 @@
  * limitations under the License.
  */
 
-/**
- * Data storage
- * - data: JSON object describing the rendered dataset field.
- * - description: plain string storing user friendly text.
- * - function: plain string referencing the bound function name.
- * - sql: JSON array of SQL statements used to populate the panel.
- */
-
 
 // This function creates a new HTML element of a given type, sets its ID and tag name, and makes it draggable.
 function createDataPanel(type) {

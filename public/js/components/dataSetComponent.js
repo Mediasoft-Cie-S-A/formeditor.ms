@@ -14,16 +14,6 @@
  * limitations under the License.
  */
 
-
-/**
- * Data storage
- * - sql: JSON array describing SQL statements bound to the dataset.
- * - dataSet: JSON array of field descriptors (name, type, validation, etc.).
- * - datalink: JSON array defining relations to other datasets or lookups.
- * - exceptionSet: JSON array listing exception handling rules.
- * - DataSet-Fields-List: serialized list of dataset field identifiers for quick lookup.
- */
-
 // This function creates a new HTML element of a given type, sets its ID and tag name, and makes it draggable.
 function createElementDateSet(type) {
   var main = document.createElement("div");
@@ -75,24 +65,9 @@ function editElementDataSet(type, element, content) {
     var target = content.querySelector("#Data");
     var jsonData = JSON.parse(element.getAttribute("dataSet"));
     jsonData.forEach((fieldJson) => {
-      if (fieldJson.fieldType == "search_win") {
-        addFieldToPropertiesBar(target, fieldJson);
-
-        // get the select input with name=fieldType
-        var selects = content.querySelectorAll("select[name='fieldType']");
-        // select the last select
-        var select = selects[selects.length - 1];
-        console.log("select", select);
-        // select search_win in the select
-        select.value = "search_win";
-        // execute the onchange event of the select
-        select.dispatchEvent(new Event('change'));
-
-      }
       if (fieldJson.fieldType !== "rowid")
         addFieldToPropertiesBar(target, fieldJson);
     });
-
   }
 
   if (element.getAttribute("datalink") != null) {
@@ -142,11 +117,9 @@ function editElementDataSet(type, element, content) {
       del.value = jsonData.delete;
 
     }
-    // add the api
   } // end if sql
 
-  // add input api key 
-  content.appendChild(createInputItem("Api Key", "apikey", "apikey", element.getAttribute("apikey"), "text", false));
+
   // filter
   if (element.getAttribute("filter") != null) {
     var target = content.querySelector("#Filter");
@@ -307,7 +280,6 @@ function renderDataSet(main) {
       fieldSize: "10",
       fieldMandatory: "0",
       fieldValues: "",
-      externalDBName: "",
       fieldSQL: ""
     });
   }
@@ -397,9 +369,6 @@ function createFieldFromJson(fieldJson) {
       console.log("Creating search window:", fieldJson);
       element = createElementInput(fieldJson.fieldType);
       einput = element.querySelector("input"); // Adjust to your combobox selector
-      // einput.style.display = "none";
-
-      einput.setAttribute("onchange", "loadValuesSearchWin(event)");
       // adding the search button
       var searchButton = document.createElement("button");
       searchButton.style.float = "right";
@@ -506,14 +475,12 @@ function createFieldFromJson(fieldJson) {
     einput.setAttribute("dataset-field-size", fieldJson.fieldSize);
     einput.setAttribute("dataset-field-mandatory", fieldJson.fieldMandatory);
     einput.setAttribute("dataset-field-values", fieldJson.fieldValues);
-    einput.setAttribute("dataset-field-externalDBName", fieldJson.externalDBName);
     einput.setAttribute("dataset-field-SQL", fieldJson.fieldSQL);
     einput.setAttribute("tagname", fieldJson.fieldType);
     einput.setAttribute("validation", fieldJson.validation);
 
-    // set einput disabled and readonly except for search windows, which must remain interactive
+    // set einput disabled and readonly
     console.log("dataSetComponent einput readonly");
-    // const shouldLockInput = fieldJson.fieldType !== "search_win";
     einput.disabled = true;
     einput.readOnly = true;
     if (fieldJson.fieldMandatory) {
@@ -531,25 +498,26 @@ function searchWinbuttonClick(event, elementId) {
 
   // generate the modalwindow for the search
   // Example JSON dataset and query
-  externalDBName = einput.getAttribute("dataset-field-externalDBName");
-  query = einput.getAttribute("dataset-field-SQL").toUpperCase();
 
-
-  if (!query.startsWith("SELECT")) {
-    showToast("Only SELECT queries are allowed in search window", 5000);
-    return;
-  }
+  query = einput.getAttribute("dataset-field-SQL");
+  console.log("query", query);
+  // split the query
+  var queryArray = query.split("|");
+  // get the database name
+  DBName = queryArray[0];
+  // get the query
+  query = queryArray[1];
   // extract all fields from the query
   var fields = query.match(/SELECT(.*?)FROM/)[1];
   // get the dataset from the query in this format  { fieldName: "field", fieldType: "string" },
   const datasetJson = fields.split(",").map((field) => {
     return {
-      fieldName: field.trim().toLowerCase(),
+      fieldName: field.trim(),
       fieldType: "string",
     };
   });
   // Show the modal with the query results
-  showQueryResultModal(externalDBName, datasetJson, query, einput.id);
+  showQueryResultModal(DBName, datasetJson, queryArray[1], einput.id);
 };
 
 
@@ -582,70 +550,6 @@ function RefreshRecord(DBName, tableName) {
     );
   }
 }
-
-
-async function loadValuesSearchWin(event) {
-  // event.preventDefault();
-  const element = event.target;
-  const einput = element.closest("input");
-
-  if (!einput) {
-    console.error("Input element not found");
-    return;
-  }
-  einput.style.display = "none";
-  //get filedJson from the einput
-
-  const externalDBName = einput.getAttribute("dataset-field-externalDBName");
-
-  const query = einput.getAttribute("dataset-field-SQL");
-  const fieldName = einput.getAttribute("dataset-field-name");
-  // execute the query and get the data
-
-  if (externalDBName == null || externalDBName == "" || query == null || query == "") {
-    showToast("Please set external database name and SQL query for search window", 5000);
-  }
-  fetch(`/table-data-sql/${externalDBName}/1/1000?sqlQuery=${query}`)
-    .then(response => response.json())
-    .then(data => {
-      // get the record of the fieldname = fieldvalue
-      if (data.length > 0) {
-        // get the keys of the first object in the data array
-        const keys = Object.keys(data[0]);
-        console.log("keys:", keys);
-        console.log("data:", data);
-        // check if the first column is equal to the einput value
-        // assuming the for each row has 'fieldname' and the second column is 'description'
-        // for each row in data check if the first column is equal to the einput value
-        for (var i = 0; i < data.length; i++) {
-          var row = data[i];
-          console.log("row:", row);
-          console.log("einput.value:", einput.value);
-
-          if (row[keys[0]] == einput.value) {
-
-            var label = element.parentElement.querySelector("label");
-            if (!label) {
-              label = document.createElement("label");
-            }
-            label.textContent = row[keys[1]]; // assuming the second column is 'description'
-            label.style.display = "block";
-            label.style.fontWeight = "bold";
-            label.style.marginBottom = "8px";
-            // adding the label to the parent of einput
-            einput.parentNode.insertBefore(label, einput);
-            break;
-          } // end if row[keys[0]] == einput.value
-        } // end for
-
-      }
-
-    })
-    .catch(error => {
-      console.error("Error fetching search window data:", error);
-    });
-
-} // end function loadValuesSearchWin
 
 
 
@@ -1012,14 +916,11 @@ async function updateInputs(data, DBName, tableName, dataset) {
         handleSelectField(input, fieldvalues, data[fieldLabel]);
         break;
       case "combo_sql":
-        let externalDBName = input.getAttribute("dataset-field-externalDBName");
-        if (!externalDBName) {
-          externalDBName = DBName;
-        }
+
         // get the values of the field
         let fieldSQL = input.getAttribute("dataset-field-SQL");
         handleSelectFieldSQL(
-          externalDBName,
+          DBName,
           input,
           fieldSQL,
           fieldLabel,
@@ -1030,11 +931,6 @@ async function updateInputs(data, DBName, tableName, dataset) {
       default:
         // if (fieldType === "input") {
         input.value = data[fieldLabel]?.toString().trim() || "";
-        // exectue loadValuesSearchWin if the fieldType is search_win
-        if (input.getAttribute("tagname") === "search_win") {
-          await loadValuesSearchWin({ target: input });
-        }
-
         input.disabled = false;
         if (input.type === "checkbox") {
           input.checked = data[fieldLabel] == 1 ? true : false;

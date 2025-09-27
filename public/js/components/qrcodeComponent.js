@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-/**
- * Data storage
- * - qrvalue: plain string used to generate the QR code payload.
- * - qrsize: numeric string controlling the rendered QR dimension.
- */
-
 function createQRCode(type) {
 
     console.log("createElement:" + type);

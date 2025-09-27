@@ -1,11 +1,10 @@
-@import "../variables.css";
 /* ========= Data-set container ===================================== */
 .dataSetContainer {
   /* supprime la bordure épaisse posée en inline */
   border: none !important;
 
   /* allège l’aspect général */
-  background: var(--color-151) !important;
+  background: transparent !important;
   padding: 8px;
   /* un peu moins que 10 px */
   gap: 12px;
@@ -21,7 +20,7 @@
   border-radius: 4px !important;
 
   /* ombre très légère plutôt qu’un trait */
-  box-shadow: 0 1px 3px var(--color-130);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
 }
 
 /* Option : texte du label un peu plus lisible */
@@ -38,7 +37,7 @@
 /* Boutons plus plats : pas de bordure, fond clair au survol */
 .navigation-bar-buttons button {
   border: none;
-  background: var(--color-151);
+  background: transparent;
   padding: 6px 8px;
   margin: 2px 0;
   cursor: pointer;
@@ -46,5 +45,5 @@
 }
 
 .navigation-bar-buttons button:hover {
-  background: var(--color-121);
+  background: rgba(0, 0, 0, .05);
 }

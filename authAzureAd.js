@@ -96,8 +96,9 @@ module.exports = function (app, session, passport) {
     `);
     }
   );
-}
 
 
 
 
+
+};

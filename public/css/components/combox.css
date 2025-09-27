@@ -1,4 +1,3 @@
-@import "../variables.css";
 .select-item-list {
     display: flex;
     padding: 100px 30px;
@@ -25,7 +24,7 @@
     width: 100%;
     padding: 3px;
     min-width: 300px;
-    background: var(--color-2);
+    background: #fff;
 }
 
 .directorist-select__container .directorist-select__label {
@@ -37,8 +36,8 @@
     border-radius: 4px;
     min-height: 42px;
     padding: 0 15px;
-    background-color: var(--color-2);
-    border: 1px solid var(--color-99);
+    background-color: #fff;
+    border: 1px solid #ececec;
     cursor: pointer;
 }
 
@@ -55,8 +54,8 @@
 }
 
 .directorist-select__dropdown {
-    background: var(--color-2);
-    box-shadow: 0 10px 40px var(--color-143);
+    background: #fff;
+    box-shadow: 0 10px 40px rgb(134 142 174 / 30%);
     padding: 15px;
     box-sizing: border-box;
     display: none;
@@ -73,7 +72,7 @@
     border-radius: 5px;
     width: 100%;
     margin-bottom: 8px;
-    border: 1px solid var(--color-99);
+    border: 1px solid #ececec;
 }
 
 .directorist-select__dropdown .directorist-select__search:focus {
@@ -110,7 +109,7 @@
 .directorist-select.directorist-select-multi .directorist-select__container .directorist-select__label {
     display: flex;
     flex-wrap: wrap;
-    border: 1px solid var(--color-28);
+    border: 1px solid #ddd;
     align-items: center;
     padding: 2.5px 15px;
     border-radius: 4px;
@@ -150,16 +149,16 @@
     align-items: center;
     font-size: 12px;
     font-weight: 600;
-    color: var(--color-2);
+    color: #fff;
     padding: 5px 8px;
-    background-color: var(--color-100);
+    background-color: #3C3D58;
     border-radius: 4px;
     min-height: 17px;
     margin: 4px;
 }
 
 .directorist-select.directorist-select-multi .directorist-select__container .directorist-select__label .directorist-select__selected-list .directorist-select__selected-list--item i {
-    color: var(--color-2);
+    color: #fff;
 }
 
 .directorist-select.directorist-select-multi .directorist-select__container .directorist-select__dropdown {
@@ -171,8 +170,8 @@
 }
 
 .directorist-select.directorist-select-multi .directorist-select__container .directorist-select__dropdown {
-    background: var(--color-2);
-    box-shadow: 0 10px 40px var(--color-143);
+    background: #fff;
+    box-shadow: 0 10px 40px rgb(134 142 174 / 30%);
     padding: 15px;
     box-sizing: border-box;
     margin-top: 2px;
@@ -193,7 +192,7 @@
 }
 
 .directorist-select.directorist-select-multi .directorist-select__container .directorist-select__dropdown ul li.directorist-select-item-show {
-    background-color: var(--color-101);
+    background-color: #F4F5F7;
     border-radius: 4px;
 }
 
@@ -203,12 +202,12 @@ span.directorist-select__selected-list--item:first-letter {
 
 /* Directorist Error */
 .directorist-select__container.directorist-error .directorist-select__label {
-    border-color: var(--color-144) !important;
+    border-color: rgb(199, 6, 6) !important;
 }
 
 .directorist-error .directorist-error__msg {
     display: inline-block;
     margin-top: 12px;
     font-size: 14px;
-    color: var(--color-144);
+    color: rgb(199, 6, 6);
 }

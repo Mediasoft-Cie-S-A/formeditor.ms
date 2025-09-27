@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 // Function to create json from DOM
 function domToJson(element) {
   // Create an array to hold the JSON representation of the children
@@ -155,6 +156,8 @@ function renderElements(parent) {
 }
 // Function to create DOM element from JSON
 function createDomElement(json, parent) {
+  console.log("Creating DOM element from JSON:", json);
+
   if (json.tag) {
     // Create element for tag
     var element = document.createElement(json.tag);
