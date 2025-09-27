@@ -123,6 +123,7 @@ function createQueryResultModal() {
 
     // set the value of the input element
     inputElement.value = selectedRowValue;
+    loadValuesSearchWin({ target: inputElement });
     console.log("Input Element Value Set:", inputElement.value);
 
   }; // modalOkBtn.onclick
@@ -263,7 +264,10 @@ function renderPaginatedGrid(data, fields) {
     dataRow.className = `grid-row ${i % 2 === 0 ? "even-row" : "odd-row"}`; // Alternate row color
     dataRow.addEventListener("click", (e) => {
       e.preventDefault();
-      selectedRowValue = row[fields[0]]; // Set the first column value as selected
+      console.log("Row clicked:", row);
+      console.log("Fields:", fields);
+      console.log("First field value:", row[fields[0].toUpperCase()]);
+      selectedRowValue = row[fields[0].toUpperCase()]; // Set the first column value as selected
       // Highlight selected row
       Array.from(grid.querySelectorAll(".grid-row")).forEach((r) => {
         r.classList.remove("selected-row");
