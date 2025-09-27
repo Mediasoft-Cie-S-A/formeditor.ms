@@ -399,7 +399,7 @@ function createFieldFromJson(fieldJson) {
       einput = element.querySelector("input"); // Adjust to your combobox selector
       // einput.style.display = "none";
 
-      einput.setAttribute("onclick", "loadValuesSearchWin(event)");
+      einput.setAttribute("onchange", "loadValuesSearchWin(event)");
       // adding the search button
       var searchButton = document.createElement("button");
       searchButton.style.float = "right";
@@ -619,6 +619,8 @@ async function loadValuesSearchWin(event) {
         // for each row in data check if the first column is equal to the einput value
         for (var i = 0; i < data.length; i++) {
           var row = data[i];
+          console.log("row:", row);
+          console.log("einput.value:", einput.value);
 
           if (row[keys[0]] == einput.value) {
 

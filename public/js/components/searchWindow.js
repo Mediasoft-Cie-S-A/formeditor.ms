@@ -105,27 +105,35 @@ function createQueryResultModal() {
       showToast("Please select a row", 3000);
       return;
     }
-    modal.style.display = "none"; // Close the modal
-    // get input element
-    var inputElement = document.getElementById(parentid);
-
+    var inputElements = document.querySelectorAll('input[id^="' + parentid + '"]');
+    console.log("Input Elements Found:", inputElements);
     // if the input is not found, return
-    if (!inputElement) {
+    if (!inputElements) {
       return;
     }
-    // Allow updates for search window fields even if they are normally readonly/disabled
-    const isSearchWindowField =
-      inputElement.getAttribute("dataset-field-type") === "search_win";
-    if (!isSearchWindowField && (inputElement.disabled || inputElement.readOnly)) {
-      showToast("Input is disabled or readonly");
-      return;
-    }
+    // for each input element, check if the dataset field name matches the parentid
+    inputElements.forEach((inputElement) => {
 
-    // set the value of the input element
-    inputElement.value = selectedRowValue;
-    loadValuesSearchWin({ target: inputElement });
-    console.log("Input Element Value Set:", inputElement.value);
 
+      // Allow updates for search window fields even if they are normally readonly/disabled
+      const isSearchWindowField =
+        inputElement.getAttribute("dataset-field-type") === "search_win";
+      if (!isSearchWindowField && (inputElement.disabled || inputElement.readOnly)) {
+        showToast("Input is disabled or readonly");
+        return;
+      }
+
+      // set the value of the input element
+      inputElement.value = selectedRowValue;
+      // dispatch input event to trigger any listeners
+      if (inputElement.onchange) {
+        inputElement.onchange({ target: inputElement });
+      }
+      // loadValuesSearchWin({ target: inputElement });
+      console.log("Input Element Value Set:", inputElement.value);
+      modal.style.display = "none"; // Close the modal
+      // get input element
+    }); // forEach inputElements
   }; // modalOkBtn.onclick
 
 
