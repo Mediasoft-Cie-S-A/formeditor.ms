@@ -101,7 +101,7 @@ function createQueryResultModal() {
     e.preventDefault();
     console.log("Selected Row Value:", selectedRowValue);
     console.log("Parent ID:", parentid);
-    if (!selectedRowValue) {
+    if (selectedRowValue === null) {
       showToast("Please select a row", 3000);
       return;
     }
@@ -196,6 +196,9 @@ function showQueryResultModal(DBName, datasetJson, query, pid) {
   // Pagination State
   parentid = pid;
   console.log("DBName:", DBName, "datasetJson:", datasetJson, "query:", query, "parentid:", parentid);
+
+  // Reset selection state for a fresh modal session
+  selectedRowValue = null;
 
   // Ensure modal is created
   modal = createQueryResultModal();

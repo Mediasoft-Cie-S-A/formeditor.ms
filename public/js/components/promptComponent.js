@@ -19,9 +19,12 @@
  * - promptText / promptPlaceholder / promptButtonText: plain strings controlling the UI labels.
  * - promptResponse: plain string holding the latest generated response.
  */
-
-
-
+/**
+ * Crée dynamiquement un composant de prompt prêt à être déposé dans l'éditeur.
+ * @param {string} type - Tag fonctionnel utilisé pour différencier les composants créés.
+ * @usage Appeler lorsque l'utilisateur ajoute un nouveau bloc "prompt" dans l'interface de conception; la fonction prépare
+ *        les attributs attendus par le panneau de propriétés avant de déléguer le rendu à {@link renderPromptComponent}.
+ */
 function createPromptComponent(type) {
     var main = document.createElement('div');
     main.className = 'form-container';
@@ -37,6 +40,14 @@ function createPromptComponent(type) {
     return main;
 }
 
+/**
+ * Génère l'interface de configuration dans la barre de propriétés pour un prompt existant.
+ * @param {string} type - Identifiant logique du composant à éditer.
+ * @param {HTMLElement} element - Élément DOM qui conserve les attributs de configuration du prompt.
+ * @param {HTMLElement} content - Conteneur dans lequel injecter les champs de configuration.
+ * @usage Utilisée lorsqu'un composant prompt est sélectionné dans le designer afin de permettre la mise à jour des textes
+ *        via les champs éditables puis d'enregistrer les modifications grâce à {@link updatePanelJsonData}.
+ */
 function editPromptComponent(type, element, content) {
     const button = document.createElement('button');
     button.textContent = 'Update';
@@ -57,6 +68,12 @@ function editPromptComponent(type, element, content) {
     content.appendChild(promptButtonText);
 }
 
+/**
+ * Reconstruit le contenu HTML du composant prompt à partir des attributs courants.
+ * @param {HTMLElement} element - Élément cible dont l'intérieur doit être re-rendu.
+ * @usage Appelée lors de la création initiale ou après une mise à jour d'attributs pour rafraîchir l'affichage du textarea,
+ *        des boutons d'action et du loader associé au composant.
+ */
 function renderPromptComponent(element) {
     element.innerHTML = `<div id="chat-container">
                     <textarea id="PromptText" placeholder="Type your message..."></textarea>
@@ -85,6 +102,12 @@ function renderPromptComponent(element) {
 let recognition;
 let isRecognizing = false;
 
+/**
+ * Initialise l'API de reconnaissance vocale du navigateur si disponible.
+ * @returns {SpeechRecognition|null} Instance prête à l'emploi ou `null` si l'API est absente.
+ * @usage Invoker avant le démarrage de l'écoute vocale pour configurer la langue, les callbacks de transcription et
+ *        signaler l'absence de support via `showToast`.
+ */
 function setupSpeechRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -121,6 +144,11 @@ function setupSpeechRecognition() {
     return recognizer;
 }
 
+/**
+ * Démarre l'enregistrement vocal et attache l'instance de reconnaissance si nécessaire.
+ * @usage Appelée par le bouton micro lors de l'événement `mousedown`; déclenche `recognition.start()` et positionne le flag
+ *        global `isRecognizing` afin d'éviter les démarrages multiples.
+ */
 function startVoice() {
     if (!recognition) {
         recognition = setupSpeechRecognition();
@@ -132,6 +160,11 @@ function startVoice() {
     }
 }
 
+/**
+ * Interrompt la reconnaissance vocale en cours et réinitialise le flag interne.
+ * @usage Appelée sur `mouseup`/`mouseleave` du bouton micro pour libérer proprement l'API et empêcher la transcription
+ *        continue lorsque l'utilisateur relâche le contrôle.
+ */
 function stopVoice() {
     if (recognition && isRecognizing) {
         recognition.stop();
@@ -140,6 +173,13 @@ function stopVoice() {
     }
 }
 
+/**
+ * Affiche une réponse formatée dans le panneau d'actions du composant en remplaçant les sorties précédentes.
+ * @param {Event} event - Événement déclencheur provenant du bouton d'action.
+ * @param {string} answer - Contenu HTML (fiable) à injecter dans la zone de réponse.
+ * @usage Utilisée par les actions IA/fichier pour présenter les retours ou erreurs en supprimant d'abord les réponses AI
+ *        précédentes via la classe `ai-response` afin de conserver un affichage unique.
+ */
 function displayAnswer(event, answer) {
     const responseElement = document.createElement('div');
     responseElement.classList.add('ai-response'); // Add a marker class
@@ -150,6 +190,12 @@ function displayAnswer(event, answer) {
     parent.appendChild(responseElement);
 }
 
+/**
+ * Soumet le contenu du textarea au service IA configuré et affiche la réponse obtenue.
+ * @param {Event} event - Événement `click` sur le bouton 🤖.
+ * @usage Branchée directement sur l'attribut `onclick` du bouton IA dans {@link renderPromptComponent}; gère l'état du
+ *        formulaire, la promesse retournée par {@link askAi} ainsi que les messages d'erreur éventuels.
+ */
 function handleAiButton(event) {
     event.preventDefault();
     // get the prompt text and button text
@@ -169,6 +215,12 @@ function handleAiButton(event) {
 
 
 
+/**
+ * Ouvre un sélecteur de fichier, extrait le texte du document choisi et demande à l'IA de remplir les champs du formulaire.
+ * @param {Event} event - Événement `click` sur le bouton de téléversement standard.
+ * @usage Reliée aux formulaires simples pour analyser un document unique; utilise {@link extractTextFromFile} puis
+ *        {@link askAi} afin de renseigner automatiquement les champs détectés.
+ */
 async function handlesFileUpload(event) {
     event.preventDefault();
     console.log("File upload button clicked");
@@ -266,6 +318,14 @@ async function handlesFileUpload(event) {
 }
 
 
+/**
+ * Convertit un fichier (PDF, image ou DOCX) en texte normalisé en s'appuyant sur pdf.js, Tesseract ou Mammoth.
+ * @param {File} file - Fichier fourni par l'utilisateur.
+ * @param {Function} [onProgress] - Callback optionnel pour indiquer l'avancement de l'OCR.
+ * @returns {Promise<string>} Texte nettoyé prêt à être utilisé par les prompts IA.
+ * @usage Appeler avant toute requête IA nécessitant la lecture d'un document; la fonction gère automatiquement la détection
+ *        du type MIME et applique la normalisation via {@link cleanExtractedText}.
+ */
 async function extractTextFromFile(file, onProgress = () => { }) {
     const mime = file.type;
     let cleanedText = '';
@@ -335,7 +395,13 @@ async function extractTextFromFile(file, onProgress = () => { }) {
 }
 
 
-// Helper function to normalize whitespace, remove junk, etc.
+/**
+ * Normalise le texte brut issu de l'OCR en réduisant les espaces et en harmonisant certains caractères.
+ * @param {string} text - Chaîne originale extraite du document.
+ * @returns {string} Texte prêt pour l'exploitation dans un prompt.
+ * @usage Utilisée systématiquement par {@link extractTextFromFile} pour s'assurer que les prompts générés restent concis et
+ *        lisibles par les modèles IA.
+ */
 function cleanExtractedText(text) {
     return text
         .replace(/\s+/g, ' ')          // collapse multiple spaces/newlines
@@ -345,6 +411,12 @@ function cleanExtractedText(text) {
 }
 
 
+/**
+ * Analyse le contenu du textarea pour suggérer des valeurs de champs via l'IA à partir du contexte du formulaire.
+ * @param {Event} event - Événement `click` sur le bouton ✨.
+ * @usage Conçu pour pré-remplir rapidement les champs existants: collecte les métadonnées du formulaire et construit un
+ *        prompt détaillé avant d'interroger {@link askAi} et d'injecter les valeurs retournées.
+ */
 async function handleFill(event) {
 
     event.preventDefault();
@@ -660,6 +732,12 @@ async function handleFill(event) {
     */
 }
 
+/**
+ * Variante avancée du chargement de document permettant d'extraire plusieurs entrées bancaires et de les afficher en modal.
+ * @param {Event} event - Événement `click` sur le bouton 📎 spécifique aux gros documents.
+ * @usage À utiliser lorsqu'un document contient potentiellement plusieurs banques; la réponse JSON est transmise à
+ *        `loadBigModalWithJson` pour permettre une sélection manuelle des enregistrements détectés.
+ */
 function handleBigDocument(event) {
     event.preventDefault();
     console.log("File upload button clicked");
@@ -794,6 +872,13 @@ function handleBigDocument(event) {
 
 }
 
+/**
+ * Interroge directement l'API locale (LM Studio/Ollama) et renvoie la réponse textuelle brute.
+ * @param {string} promptText - Prompt complet à transmettre au service distant.
+ * @returns {Promise<string>} Réponse du modèle ou message d'erreur formaté.
+ * @usage Méthode legacy conservée pour les scénarios où l'on souhaite contacter le service HTTP local au lieu du proxy
+ *        centralisé fourni par {@link askAi}; gère l'affichage du loader associé.
+ */
 async function fetchAIResponse(promptText) {
 
     const loader = document.getElementById('loader');
@@ -919,6 +1004,13 @@ async function fetchAIResponse(promptText) {
 
 }
 
+/**
+ * Récupère un objet JSON isolé à la suite du mot-clé "response" dans un texte libre.
+ * @param {string} text - Réponse textuelle potentiellement bruitée.
+ * @returns {Object|null} Objet JSON parsé ou `null` en cas d'échec.
+ * @usage Utile lorsqu'un modèle renvoie une structure `{ ... }` unique sans tableau; tente une réparation via `jsonrepair`
+ *        avant de parser le segment identifié.
+ */
 function extractJsonAfterResponse(text) {
 
     jsonrepair(text)
@@ -957,6 +1049,13 @@ function extractJsonAfterResponse(text) {
     }
 }
 
+/**
+ * Extrait et nettoie une structure JSON (tableau ou objet) renvoyée après le préfixe "response:".
+ * @param {string} text - Chaîne brute renvoyée par le modèle.
+ * @returns {Array|Object|null} Structure JSON parseable ou `null` si la réparation échoue.
+ * @usage Principal utilitaire pour les intégrations IA: nettoie les citations cassées via {@link escapeBrokenQuotes} et
+ *        garantit un résultat exploitable par les formulaires.
+ */
 function extractCleanJson(text) {
     console.log("Extracting clean JSON from text:", text);
 
@@ -1009,6 +1108,12 @@ function extractCleanJson(text) {
     }
 }
 
+/**
+ * Corrige les guillemets non échappés qui empêchent la validation JSON.
+ * @param {string} json - Chaîne JSON à réparer.
+ * @returns {string} Version corrigée avec les guillemets internes échappés.
+ * @usage S'utilise en complément d'{@link extractCleanJson} pour fiabiliser la chaîne avant parsing.
+ */
 function escapeBrokenQuotes(json) {
     return json.replace(/"(.*?)":\s*"([^"]*?)"([^,}\]])/g, (match, key, value, tail) => {
         // Check for inner unescaped quotes in value
@@ -1022,6 +1127,12 @@ function escapeBrokenQuotes(json) {
 
 
 
+/**
+ * Détecte les doublons de clés dans un blob JSON et conserve la valeur la plus pertinente.
+ * @param {string} rawText - Chaîne source potentiellement invalide.
+ * @returns {Object} Objet clé/valeur épuré des répétitions.
+ * @usage Permet de post-traiter des réponses IA contenant des répétitions afin de conserver une structure cohérente.
+ */
 function removeDuplicateKeys(rawText) {
     const deduped = {};
     const keyValuePattern = /["']?([\w]+)["']?\s*:\s*(null|"(.*?)"|'(.*?)'|[^,{}]+)/g;
@@ -1047,6 +1158,13 @@ function removeDuplicateKeys(rawText) {
     return deduped;
 }
 
+/**
+ * Point d'entrée unique pour interroger le moteur IA configuré côté client.
+ * @param {string} promptText - Prompt textuel complet.
+ * @returns {Promise<string>} Contenu renvoyé par le service.
+ * @usage Préférer cet utilitaire pour toutes les interactions IA afin de centraliser le choix du backend (actuellement
+ *        {@link askGroq}).
+ */
 async function askAi(promptText) {
 
     //always use askAi so if we change the AI service we only need to change it here
@@ -1054,6 +1172,12 @@ async function askAi(promptText) {
 
 }
 
+/**
+ * Envoie un prompt à l'endpoint `/api/lm` exposé par LM Studio.
+ * @param {string} promptText - Instructions destinées au modèle local.
+ * @returns {Promise<string>} Réponse textuelle du service ou message d'erreur.
+ * @usage Utilisé lorsqu'on souhaite cibler explicitement LM Studio; gère l'affichage du loader et la conversion JSON.
+ */
 async function askLmStudio(promptText) {
     const loader = document.getElementById('loader');
     // show the loader
@@ -1084,6 +1208,12 @@ async function askLmStudio(promptText) {
         });
 }
 
+/**
+ * Interroge le proxy `/api/ask-groq` pour obtenir une réponse conversationnelle.
+ * @param {string} promptText - Prompt utilisateur.
+ * @returns {Promise<string>} Contenu textuel retourné par Groq ou "No response".
+ * @usage Backend IA par défaut utilisé par {@link askAi}; assure également la gestion de l'indicateur de chargement.
+ */
 async function askGroq(promptText) {
     const loader = document.getElementById('loader');
     // show the loader
