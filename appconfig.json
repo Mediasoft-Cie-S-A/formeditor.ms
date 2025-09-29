@@ -54,5 +54,9 @@
       "usernameColumn": "username",
       "passwordColumn": "password"
     }
+  },
+  "askGroq": {
+    "postUrl": "https://api.groq.com/openai/v1/chat/completions",
+    "apiKey": ""
   }
 }
