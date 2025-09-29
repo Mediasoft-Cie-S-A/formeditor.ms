@@ -19,6 +19,9 @@ const askGroqConfig = {
   apiKey:
     (baseConfig.askGroq && baseConfig.askGroq.apiKey) ||
     '',
+  model:
+    (baseConfig.askGroq && baseConfig.askGroq.model) ||
+    'llama-3.3-70b-versatile',
 };
 
 module.exports = {

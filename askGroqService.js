@@ -1,5 +1,5 @@
 module.exports = function registerAskGroqRoute(app, askGroqConfig = {}) {
-  const { postUrl, apiKey } = askGroqConfig;
+  const { postUrl, apiKey, model = 'llama-3.3-70b-versatile' } = askGroqConfig;
 
   if (!postUrl) {
     console.warn('⚠️  askGroq.postUrl is not configured. The /api/ask-ai route will not be registered.');
@@ -20,7 +20,7 @@ module.exports = function registerAskGroqRoute(app, askGroqConfig = {}) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
+          model,
           messages: req.body.messages,
         }),
       });
