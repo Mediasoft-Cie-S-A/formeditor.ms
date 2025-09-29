@@ -57,6 +57,7 @@
   },
   "askGroq": {
     "postUrl": "https://api.groq.com/openai/v1/chat/completions",
-    "apiKey": ""
+    "apiKey": "",
+    "model": "llama-3.3-70b-versatile"
   }
 }
