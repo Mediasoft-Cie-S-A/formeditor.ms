@@ -220,34 +220,6 @@ process.on('rejectionHandled', (promise) => {
   console.warn('🔁 Rejection Handled:', promise);
 });
 
-const axios = require("axios");
-
-app.post("/api/lm", async (req, res) => {
-  const { prompt } = req.body;
-
-  try {
-    const response = await axios.post("http://localhost:1234/v1/chat/completions", {
-      model: "google/gemma-3-12b",  // or whichever model you're using
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.1,      // low creativity
-      top_p: 0.9,
-      max_tokens: 512,       // or more if your responses are longer
-      stop: ["}"],            // optional, helps terminate JSON
-    }, {
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer lm-studio"
-      },
-      timeout: 15 * 60 * 1000  // ✅ 15 minutes
-    });
-
-    res.json(response.data);
-  } catch (err) {
-    console.error("❌ LM Studio fetch failed:", err.message);
-    res.status(500).json({ error: "LM Studio timed out or failed." });
-  }
-});
-
 try {
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);
