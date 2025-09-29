@@ -26,6 +26,7 @@ const bodyParser = require("body-parser");
 const swaggerUi = require("swagger-ui-express");
 const swaggerJSDoc = require("swagger-jsdoc");
 const fs = require("fs");
+const appConfig = require('./appconfig');
 const router = express.Router();
 
 
@@ -81,12 +82,7 @@ app.post("/register", async (req, res) => {
 });
 
 // get the config
-app.config = {};
-try {
-  app.config = JSON.parse(fs.readFileSync("appconfig.json", "utf8"));
-} catch (err) {
-  console.log("Error loading config file:", err);
-}
+app.config = appConfig;
 
 // mongodb Connection URL
 const mongoDbUrl = app.config.mongoDbUrl;
@@ -127,6 +123,7 @@ const { registerDynamicRoutes } = require("./dynamic")(app, mongoDbUrl, dbName);
 // Register the dynamic routes
 registerDynamicRoutes();
 require("./pageService")(app, mongoDbUrl, dbName, registerDynamicRoutes);
+require('./askGroqService')(app, app.config.askGroq);
 
 // Swagger definition
 const swaggerDefinition = {
@@ -250,34 +247,6 @@ app.post("/api/lm", async (req, res) => {
     res.status(500).json({ error: "LM Studio timed out or failed." });
   }
 });
-
-app.post('/api/ask-groq', async (req, res) => {
-  try {
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: req.body.messages
-      })
-    });
-
-    if (!response.ok) {
-      console.error("❌ AI API fetch failed with status:", response.status);
-      return res.status(response.status).json({ error: `AI API error: ${response.statusText}` });
-    }
-
-    const result = await response.json();
-    res.json(result);
-  } catch (err) {
-    console.error("❌ AI API fetch failed:", err.message);
-    res.status(500).json({ error: "Failed to fetch from AI API." });
-  }
-});
-
 
 try {
   app.listen(port, () => {
