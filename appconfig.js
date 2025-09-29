@@ -17,6 +17,10 @@ const askGroqConfig = {
     process.env.GROQ_POST_URL ||
     (baseConfig.askGroq && baseConfig.askGroq.postUrl) ||
     'https://api.groq.com/openai/v1/chat/completions',
+  apiKey:
+    process.env.GROQ_API_KEY ||
+    (baseConfig.askGroq && baseConfig.askGroq.apiKey) ||
+    '',
 };
 
 module.exports = {
