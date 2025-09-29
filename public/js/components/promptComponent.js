@@ -1163,12 +1163,12 @@ function removeDuplicateKeys(rawText) {
  * @param {string} promptText - Prompt textuel complet.
  * @returns {Promise<string>} Contenu renvoyé par le service.
  * @usage Préférer cet utilitaire pour toutes les interactions IA afin de centraliser le choix du backend (actuellement
- *        {@link askGroq}).
+ *        {@link askAI}).
  */
 async function askAi(promptText) {
 
     //always use askAi so if we change the AI service we only need to change it here
-    return askGroq(promptText);
+    return askAI(promptText);
 
 }
 
@@ -1214,7 +1214,7 @@ async function askLmStudio(promptText) {
  * @returns {Promise<string>} Contenu textuel retourné par Groq ou "No response".
  * @usage Backend IA par défaut utilisé par {@link askAi}; assure également la gestion de l'indicateur de chargement.
  */
-async function askGroq(promptText) {
+async function askAI(promptText) {
     const loader = document.getElementById('loader');
     // show the loader
     if (loader) loader.style.display = 'block';

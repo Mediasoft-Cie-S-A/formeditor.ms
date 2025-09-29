@@ -11,20 +11,20 @@ try {
   console.error('Error loading config file:', err);
 }
 
-const askGroqConfig = {
-  ...baseConfig.askGroq,
+const askAIConfig = {
+  ...baseConfig.askAI,
   postUrl:
-    (baseConfig.askGroq && baseConfig.askGroq.postUrl) ||
+    (baseConfig.askAI && baseConfig.askAI.postUrl) ||
     'https://api.groq.com/openai/v1/chat/completions',
   apiKey:
-    (baseConfig.askGroq && baseConfig.askGroq.apiKey) ||
+    (baseConfig.askAI && baseConfig.askAI.apiKey) ||
     '',
   model:
-    (baseConfig.askGroq && baseConfig.askGroq.model) ||
+    (baseConfig.askAI && baseConfig.askAI.model) ||
     'llama-3.3-70b-versatile',
 };
 
 module.exports = {
   ...baseConfig,
-  askGroq: askGroqConfig,
+  askAI: askAIConfig,
 };

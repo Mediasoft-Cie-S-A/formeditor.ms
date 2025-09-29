@@ -1,13 +1,13 @@
-module.exports = function registerAskGroqRoute(app, askGroqConfig = {}) {
-  const { postUrl, apiKey, model = 'llama-3.3-70b-versatile' } = askGroqConfig;
+module.exports = function registerAskAiRoute(app, askAIConfig = {}) {
+  const { postUrl, apiKey, model = 'llama-3.3-70b-versatile' } = askAIConfig;
 
   if (!postUrl) {
-    console.warn('⚠️  askGroq.postUrl is not configured. The /api/ask-ai route will not be registered.');
+    console.warn('⚠️  askAI.postUrl is not configured. The /api/ask-ai route will not be registered.');
     return;
   }
 
   if (!apiKey) {
-    console.warn('⚠️  askGroq.apiKey is not configured. The /api/ask-ai route will not be registered.');
+    console.warn('⚠️  askAI.apiKey is not configured. The /api/ask-ai route will not be registered.');
     return;
   }
 
