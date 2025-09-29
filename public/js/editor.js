@@ -1182,7 +1182,7 @@ function createMultiSelectItem(id, label, styleProperty) {
     if (div.style.height > "20px") {
       div.style.height = "20px";
       // get the subDivs by tag
-      var subDivs = div.querySelectorAll("div");
+      var subDivs = div.querySelectorAll("div,input,select,textarea");
       // loop through the subDivs
       subDivs.forEach((subDiv) => {
         subDiv.style.display = "none";
@@ -1192,7 +1192,7 @@ function createMultiSelectItem(id, label, styleProperty) {
     } else {
       div.style.height = "auto";
       // get the subDivs by tag
-      var subDivs = div.querySelectorAll("div");
+      var subDivs = div.querySelectorAll("div,input,select,textarea");
       // loop through the subDivs
       subDivs.forEach((subDiv) => {
         subDiv.style.display = "block";
@@ -1702,7 +1702,7 @@ function addFunctionsFieldToPropertiesBar(target, fieldJson, dataTypeVisble = fa
   var height = dataObjet.clientHeight + div.clientHeight;
   dataObjet.style.height = height + 30 + "px";
   // hide all the subDivs, input and select elements
-  var subDivs = div.querySelectorAll("div,input,select");
+  var subDivs = div.querySelectorAll("div,input,select,textarea");
   // loop through the subDivs
   subDivs.forEach((subDiv) => {
     subDiv.style.display = "none";
@@ -1908,7 +1908,7 @@ function addFieldToPropertiesBar(target, fieldJson, dataTypeVisble = false) {
     div.appendChild(selectType);
   }
   // hide all the subDivs, input and select elements
-  var subDivs = div.querySelectorAll("div,input,select");
+  var subDivs = div.querySelectorAll("div,input,select,textarea");
   // loop through the subDivs
   subDivs.forEach((subDiv) => {
     subDiv.style.display = "none";
@@ -1930,7 +1930,7 @@ function expandReduceDiv(event, elementId) {
   if (div.style.height > "60px") {
     div.style.height = "60px";
     // get the subDivs by tag
-    var subDivs = div.querySelectorAll("div,input,select");
+    var subDivs = div.querySelectorAll("div,input,select,textarea");
     // loop through the subDivs
     subDivs.forEach((subDiv) => {
       subDiv.style.display = "none";
@@ -1940,7 +1940,7 @@ function expandReduceDiv(event, elementId) {
   } else {
     div.style.height = "auto";
     // get the subDivs by tag
-    var subDivs = div.querySelectorAll("div,input,select");
+    var subDivs = div.querySelectorAll("div,input,select,textarea");
     // loop through the subDivs
     subDivs.forEach((subDiv) => {
       subDiv.style.display = "block";
