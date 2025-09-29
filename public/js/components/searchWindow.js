@@ -101,7 +101,7 @@ function createQueryResultModal() {
     e.preventDefault();
     console.log("Selected Row Value:", selectedRowValue);
     console.log("Parent ID:", parentid);
-    if (selectedRowValue === null) {
+    if (!selectedRowValue) {
       showToast("Please select a row", 3000);
       return;
     }
