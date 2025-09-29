@@ -2,16 +2,16 @@ module.exports = function registerAskGroqRoute(app, askGroqConfig = {}) {
   const { postUrl, apiKey } = askGroqConfig;
 
   if (!postUrl) {
-    console.warn('⚠️  askGroq.postUrl is not configured. The /api/ask-groq route will not be registered.');
+    console.warn('⚠️  askGroq.postUrl is not configured. The /api/ask-ai route will not be registered.');
     return;
   }
 
   if (!apiKey) {
-    console.warn('⚠️  askGroq.apiKey is not configured. The /api/ask-groq route will not be registered.');
+    console.warn('⚠️  askGroq.apiKey is not configured. The /api/ask-ai route will not be registered.');
     return;
   }
 
-  app.post('/api/ask-groq', async (req, res) => {
+  app.post('/api/ask-ai', async (req, res) => {
     try {
       const response = await fetch(postUrl, {
         method: 'POST',

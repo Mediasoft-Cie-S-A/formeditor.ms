@@ -1209,7 +1209,7 @@ async function askLmStudio(promptText) {
 }
 
 /**
- * Interroge le proxy `/api/ask-groq` pour obtenir une réponse conversationnelle.
+ * Interroge le proxy `/api/ask-ai` pour obtenir une réponse conversationnelle.
  * @param {string} promptText - Prompt utilisateur.
  * @returns {Promise<string>} Contenu textuel retourné par Groq ou "No response".
  * @usage Backend IA par défaut utilisé par {@link askAi}; assure également la gestion de l'indicateur de chargement.
@@ -1218,7 +1218,7 @@ async function askGroq(promptText) {
     const loader = document.getElementById('loader');
     // show the loader
     if (loader) loader.style.display = 'block';
-    const response = await fetch("/api/ask-groq", {
+    const response = await fetch("/api/ask-ai", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
