@@ -266,15 +266,15 @@ app.post('/api/ask-groq', async (req, res) => {
     });
 
     if (!response.ok) {
-      console.error("❌ Groq API fetch failed with status:", response.status);
-      return res.status(response.status).json({ error: `Groq API error: ${response.statusText}` });
+      console.error("❌ AI API fetch failed with status:", response.status);
+      return res.status(response.status).json({ error: `AI API error: ${response.statusText}` });
     }
 
     const result = await response.json();
     res.json(result);
   } catch (err) {
-    console.error("❌ Groq API fetch failed:", err.message);
-    res.status(500).json({ error: "Failed to fetch from Groq API." });
+    console.error("❌ AI API fetch failed:", err.message);
+    res.status(500).json({ error: "Failed to fetch from AI API." });
   }
 });
 
