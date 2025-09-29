@@ -1,8 +1,13 @@
 module.exports = function registerAskGroqRoute(app, askGroqConfig = {}) {
-  const { postUrl } = askGroqConfig;
+  const { postUrl, apiKey } = askGroqConfig;
 
   if (!postUrl) {
     console.warn('⚠️  askGroq.postUrl is not configured. The /api/ask-groq route will not be registered.');
+    return;
+  }
+
+  if (!apiKey) {
+    console.warn('⚠️  askGroq.apiKey is not configured. The /api/ask-groq route will not be registered.');
     return;
   }
 
@@ -11,7 +16,7 @@ module.exports = function registerAskGroqRoute(app, askGroqConfig = {}) {
       const response = await fetch(postUrl, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+          Authorization: `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
