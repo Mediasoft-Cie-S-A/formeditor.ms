@@ -121,6 +121,47 @@
         </button>
     </div>
 
+    <div id="aiFormModalBackdrop" class="ai-form-modal__backdrop is-hidden" aria-hidden="true"></div>
+    <div id="aiFormModal" class="ai-form-modal is-hidden" role="dialog" aria-modal="true" aria-hidden="true"
+        aria-labelledby="aiFormModalTitle">
+        <div class="ai-form-modal__dialog">
+            <div class="ai-form-modal__header">
+                <h2 id="aiFormModalTitle">Create a Form with AI</h2>
+                <button type="button" class="ai-form-modal__close" id="aiFormCancelBtn" aria-label="Close">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="ai-form-modal__body">
+                <label for="aiFormRequestInput" class="ai-form-modal__label">Describe the form you want to create</label>
+                <textarea id="aiFormRequestInput" class="ai-form-modal__textarea" rows="6"
+                    placeholder="Explain the structure, fields or behavior you expect..."></textarea>
+
+                <div class="ai-form-modal__actions">
+                    <input type="file" id="aiFormDocumentInput" accept=".txt,.json,.csv,.md,.html,.xml,.yaml,.yml,.pdf"
+                        class="is-hidden">
+                    <button type="button" class="button ai-form-modal__button" id="aiFormLoadDocumentBtn">
+                        <i class="bi bi-upload"></i> Load document
+                    </button>
+                    <button type="button" class="button ai-form-modal__button" id="aiFormAnalyzeBtn">
+                        <i class="bi bi-search"></i> Analyse
+                    </button>
+                    <button type="button" class="button ai-form-modal__button" id="aiFormShowDatabaseBtn">
+                        <i class="bi bi-database"></i> Show database
+                    </button>
+                </div>
+                <p id="aiFormDocumentStatus" class="ai-form-modal__status">No document loaded.</p>
+            </div>
+            <div class="ai-form-modal__footer">
+                <button type="button" class="button ai-form-modal__button" id="aiFormCancelBtnFooter">
+                    Cancel
+                </button>
+                <button type="button" class="button success ai-form-modal__button" id="aiFormGenerateBtn">
+                    Generate form
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="editForm.js"></script>
     <link rel="stylesheet" href="/css/editForm.css">
 </div>
