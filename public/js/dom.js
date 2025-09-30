@@ -215,40 +215,249 @@ function exportJson() {
   downloadAnchorNode.remove();
 }
 
+let aiFormModalInitialized = false;
+let aiFormDocumentContent = "";
+
 function promptCreateForm() {
+  if (!aiFormModalInitialized) {
+    initializeAiFormModal();
+  }
 
+  resetAiFormModalState();
+  openAiFormModal();
+}
 
-  loadJson("/elementsConfig")
-    .then(async (data) => {
+function openAiFormModal() {
+  const modal = document.getElementById("aiFormModal");
+  const backdrop = document.getElementById("aiFormModalBackdrop");
+  const requestField = document.getElementById("aiFormRequestInput");
 
+  if (!modal || !backdrop) {
+    console.warn("AI form modal markup is missing.");
+    return;
+  }
 
-      const minimalData = Object.entries(data).map(([key, comp]) => ({
-        name: key,
-        type: comp.type,
-        description: comp.description,
-        category: comp.category,
-        props: comp.props ? Object.keys(comp.props) : []
-      }));
+  modal.classList.remove("is-hidden");
+  backdrop.classList.remove("is-hidden");
+  modal.setAttribute("aria-hidden", "false");
+  backdrop.setAttribute("aria-hidden", "false");
 
+  if (requestField) {
+    requestField.focus();
+  }
+}
 
-      console.log("Minimal Data:", minimalData);
+function closeAiFormModal() {
+  const modal = document.getElementById("aiFormModal");
+  const backdrop = document.getElementById("aiFormModalBackdrop");
 
-      const userInput = prompt("Describe the form you want to create:");
+  if (!modal || !backdrop) {
+    return;
+  }
 
-      if (!userInput) {
-        return; // User cancelled or input is empty
-      }
+  modal.classList.add("is-hidden");
+  backdrop.classList.add("is-hidden");
+  modal.setAttribute("aria-hidden", "true");
+  backdrop.setAttribute("aria-hidden", "true");
+}
 
-      let aiPrompt = `
-        You are a form generation assistant.
+function resetAiFormModalState() {
+  const requestField = document.getElementById("aiFormRequestInput");
+  const status = document.getElementById("aiFormDocumentStatus");
+  const fileInput = document.getElementById("aiFormDocumentInput");
 
-        Based on the user's request, generate a form structure in JSON or HTML format.
+  aiFormDocumentContent = "";
 
-        Request:
-        "${userInput}"
-      `.trim();
+  if (fileInput) {
+    fileInput.value = "";
+  }
 
-      aiPrompt = `
+  if (requestField) {
+    requestField.value = "";
+  }
+
+  if (status) {
+    status.textContent = "No document loaded.";
+    status.classList.remove("ai-form-modal__status--error");
+    status.classList.remove("ai-form-modal__status--success");
+    status.classList.remove("is-hidden");
+  }
+}
+
+function initializeAiFormModal() {
+  aiFormModalInitialized = true;
+
+  const modal = document.getElementById("aiFormModal");
+  const backdrop = document.getElementById("aiFormModalBackdrop");
+  const requestField = document.getElementById("aiFormRequestInput");
+  const status = document.getElementById("aiFormDocumentStatus");
+  const loadBtn = document.getElementById("aiFormLoadDocumentBtn");
+  const analyzeBtn = document.getElementById("aiFormAnalyzeBtn");
+  const showDatabaseBtn = document.getElementById("aiFormShowDatabaseBtn");
+  const cancelBtn = document.getElementById("aiFormCancelBtn");
+  const cancelBtnFooter = document.getElementById("aiFormCancelBtnFooter");
+  const generateBtn = document.getElementById("aiFormGenerateBtn");
+  const fileInput = document.getElementById("aiFormDocumentInput");
+
+  if (!modal || !backdrop) {
+    console.warn("AI form modal markup is missing.");
+    aiFormModalInitialized = false;
+    return;
+  }
+
+  const showStatusMessage = (message, type) => {
+    if (!status) {
+      return;
+    }
+
+    status.textContent = message;
+    status.classList.remove("ai-form-modal__status--error");
+    status.classList.remove("ai-form-modal__status--success");
+
+    if (type === "error") {
+      status.classList.add("ai-form-modal__status--error");
+    } else if (type === "success") {
+      status.classList.add("ai-form-modal__status--success");
+    }
+
+    status.classList.remove("is-hidden");
+  };
+
+  loadBtn?.addEventListener("click", () => {
+    fileInput?.click();
+  });
+
+  fileInput?.addEventListener("change", (event) => {
+    const file = event.target.files && event.target.files[0];
+
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      aiFormDocumentContent = typeof reader.result === "string" ? reader.result : "";
+      showStatusMessage(`Loaded \"${file.name}\" (${file.size} bytes).`, "success");
+    };
+
+    reader.onerror = () => {
+      aiFormDocumentContent = "";
+      showStatusMessage(`Unable to read \"${file.name}\".`, "error");
+    };
+
+    reader.readAsText(file);
+  });
+
+  analyzeBtn?.addEventListener("click", () => {
+    if (!aiFormDocumentContent) {
+      showStatusMessage("Load a document before analyzing.", "error");
+      return;
+    }
+
+    if (requestField) {
+      const preview = aiFormDocumentContent.slice(0, 2000);
+      const existing = requestField.value.trim();
+      requestField.value = `${existing ? `${existing}\n\n` : ""}Document context:\n${preview}`;
+      requestField.focus();
+    }
+
+    showStatusMessage("Document content added to the request.", "success");
+  });
+
+  showDatabaseBtn?.addEventListener("click", () => {
+    const databaseTabLink = document.querySelector('.nav-tabs a[href="#DatabaseForm"]');
+
+    if (databaseTabLink) {
+      databaseTabLink.click();
+      closeAiFormModal();
+    } else {
+      showStatusMessage("Database tab is not available.", "error");
+    }
+  });
+
+  cancelBtn?.addEventListener("click", () => {
+    closeAiFormModal();
+  });
+
+  cancelBtnFooter?.addEventListener("click", () => {
+    closeAiFormModal();
+  });
+
+  backdrop.addEventListener("click", () => {
+    closeAiFormModal();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !modal.classList.contains("is-hidden")) {
+      closeAiFormModal();
+    }
+  });
+
+  generateBtn?.addEventListener("click", async () => {
+    if (!requestField) {
+      return;
+    }
+
+    if (generateBtn.disabled) {
+      return;
+    }
+
+    const requestText = requestField.value.trim();
+    const hasDocument = aiFormDocumentContent && aiFormDocumentContent.trim().length > 0;
+
+    if (!requestText && !hasDocument) {
+      showStatusMessage("Please describe the form or load a document before generating.", "error");
+      requestField.focus();
+      return;
+    }
+
+    generateBtn.disabled = true;
+
+    closeAiFormModal();
+
+    try {
+      await generateFormFromRequest(requestText, aiFormDocumentContent);
+    } finally {
+      generateBtn.disabled = false;
+    }
+  });
+}
+
+async function generateFormFromRequest(userInput, documentContent) {
+  let data;
+
+  try {
+    data = await loadJson("/elementsConfig");
+  } catch (err) {
+    console.error("Error loading elementsConfig:", err);
+    alert("Failed to load form components.");
+    return;
+  }
+
+  const minimalData = Object.entries(data).map(([key, comp]) => ({
+    name: key,
+    type: comp.type,
+    description: comp.description,
+    category: comp.category,
+    props: comp.props ? Object.keys(comp.props) : [],
+  }));
+
+  console.log("Minimal Data:", minimalData);
+
+  const sanitizedRequest = userInput && userInput.trim().length > 0
+    ? userInput.trim()
+    : "Create a form that matches the uploaded document.";
+  const sanitizedDocument = documentContent ? documentContent.trim() : "";
+  const truncatedDocument = sanitizedDocument.length > 8000
+    ? `${sanitizedDocument.slice(0, 8000)}\n...[truncated]`
+    : sanitizedDocument;
+
+  if (sanitizedDocument.length > 8000) {
+    console.warn("Uploaded document content truncated to 8000 characters.");
+  }
+
+  let aiPrompt = `
         You are a form generation assistant.
 
         You have access to a predefined list of UI components. Based on the user's request, generate the corresponding form element(s) using the JSON structure provided below.
@@ -260,58 +469,69 @@ function promptCreateForm() {
         =============================
 
         User Request:
-        "${userInput}"
+        "${sanitizedRequest}"
+  `;
+
+  if (truncatedDocument) {
+    aiPrompt += `
+
+        Uploaded Document Content:
+        ${truncatedDocument}
+    `;
+  }
+
+  aiPrompt += `
 
         Respond ONLY with valid JSON that matches the structure of one or more components from the list above.
 
         Do not explain, comment, or include any other text — just return JSON.
-      `.trim();
+      `;
 
+  aiPrompt = aiPrompt.trim();
 
-      console.log("AI Prompt:", aiPrompt);
+  console.log("AI Prompt:", aiPrompt);
 
+  let response;
 
-      try {
-        const response = await askAi(aiPrompt);
-        console.log("AI Response:", response);
+  try {
+    response = await askAi(aiPrompt);
+  } catch (err) {
+    console.error("Error communicating with AI:", err);
+    alert("An error occurred while generating the form.");
+    return;
+  }
 
-        // Handle single or multiple components
-        let components = JSON.parse(response);
-        components = Array.isArray(components) ? components : [components];
+  console.log("AI Response:", response);
 
-        // Load full component definitions
-        const fullComponentDefs = data; // this is your elementsConfig
+  let components;
 
-        const formContainer = document.getElementById("formContainer");
+  try {
+    components = JSON.parse(response);
+  } catch (err) {
+    console.error("Invalid AI response:", err);
+    alert("The AI response was not valid JSON.");
+    return;
+  }
 
-        components.forEach((comp) => {
-          try {
-            const enriched = enrichComponent(comp, fullComponentDefs);
-            console.log("Enriched Component:", enriched);
-            console.log("Form Container:", formContainer);
-            //createDomElement(enriched, formContainer);
-            const newElement = createFormElement(enriched.type);
+  components = Array.isArray(components) ? components : [components];
 
-            if (newElement) {
-              formContainer.appendChild(newElement);
-            }
+  const formContainer = document.getElementById("formContainer");
 
-          } catch (e) {
-            console.error("Component error:", e);
-          }
-        });
+  components.forEach((comp) => {
+    try {
+      const enriched = enrichComponent(comp, data);
+      console.log("Enriched Component:", enriched);
+      console.log("Form Container:", formContainer);
 
-        // You can display or inject the result here
-        // alert("AI Response:\n" + response);
-      } catch (err) {
-        console.error("Error communicating with AI:", err);
-        alert("An error occurred while generating the form.");
+      const newElement = createFormElement(enriched.type);
+
+      if (newElement) {
+        formContainer.appendChild(newElement);
       }
-    })
-    .catch((err) => {
-      console.error("Error loading elementsConfig:", err);
-      alert("Failed to load form components.");
-    });
+    } catch (e) {
+      console.error("Component error:", e);
+    }
+  });
 }
 
 function enrichComponent(aiJson, fullComponentDefs) {
