@@ -16,6 +16,7 @@
 
 const OdbcDatabase = require("./OdbcDatabase.js");
 const MySqlDatabase = require("./MySqlDatabase.js");
+const PrismaDatabase = require("./PrismaDatabase.js");
 const VALID_API_KEY = "e7f4b0f3-5c6b-4a29-b821-93f0d99d1cb6";
 class dblayer {
 
@@ -53,6 +54,7 @@ class dblayer {
 
     this.dbtype = app.config.dbtype;
     this.SMTP = app.config.SMTP;
+    this.prismaConfig = app.config.prisma || {};
     console.log(this.SMTP);
     // get key value from dblist           
   }
@@ -65,12 +67,17 @@ class dblayer {
 
         case "mysql":
           this.databases[key] = new MySqlDatabase(value);
-          // await this.databases[key].connect();    
+          // await this.databases[key].connect();
 
           this.dbCache[key] = await this.databases[key].getTablesList();
-          //  console.log(this.dbCache[key]);     
+          //  console.log(this.dbCache[key]);
           this.tableToDatabaseMapping = this.createTableDatabaseMapping(this.dbCache);
-          // await  this.databases[key].close();   
+          // await  this.databases[key].close();
+          break;
+        case "prisma":
+          this.databases[key] = new PrismaDatabase(value, this.prismaConfig);
+          this.dbCache[key] = await this.databases[key].getTablesList();
+          this.tableToDatabaseMapping = this.createTableDatabaseMapping(this.dbCache);
           break;
         case "odbc":
           this.databases[key] = new OdbcDatabase(value);

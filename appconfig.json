@@ -1,9 +1,10 @@
 {
-  "dbtype": "mysql",
+  "dbtype": "prisma",
   "port": 3000,
   "dblist": {
     "ove_lt": {
-      "ConnectionString": "mysql://OVEUser:123456!@localhost:3306/OVE_ERP_LT"
+      "ConnectionString": "mysql://OVEUser:123456!@localhost:3306/OVE_ERP_LT",
+      "provider": "mysql"
     }
   },
   "SMTP": {
@@ -59,5 +60,16 @@
     "postUrl": "https://api.groq.com/openai/v1/chat/completions",
     "apiKey": "",
     "model": "llama-3.3-70b-versatile"
+  },
+  "prisma": {
+    "log": [
+      "warn",
+      "error"
+    ],
+    "defaultSchema": {
+      "postgresql": "public",
+      "sqlserver": "dbo"
+    },
+    "rowId": "rowid"
   }
 }

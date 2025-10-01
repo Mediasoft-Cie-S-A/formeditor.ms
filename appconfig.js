@@ -24,7 +24,15 @@ const askAIConfig = {
     '',
 };
 
+const prismaConfig = {
+  ...baseConfig.prisma,
+  log: (baseConfig.prisma && baseConfig.prisma.log) || ['error'],
+  defaultSchema: (baseConfig.prisma && baseConfig.prisma.defaultSchema) || {},
+  rowId: (baseConfig.prisma && baseConfig.prisma.rowId) || 'rowid',
+};
+
 module.exports = {
   ...baseConfig,
   askAI: askAIConfig,
+  prisma: prismaConfig,
 };
