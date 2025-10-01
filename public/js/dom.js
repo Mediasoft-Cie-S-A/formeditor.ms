@@ -366,13 +366,11 @@ function initializeAiFormModal() {
   });
 
   showDatabaseBtn?.addEventListener("click", () => {
-    const databaseTabLink = document.querySelector('.nav-tabs a[href="#DatabaseForm"]');
-
-    if (databaseTabLink) {
-      databaseTabLink.click();
+    if (typeof showModalDbStrc === "function") {
+      showModalDbStrc(null, "dataSetComponent");
       closeAiFormModal();
     } else {
-      showStatusMessage("Database tab is not available.", "error");
+      showStatusMessage("Database viewer is not available.", "error");
     }
   });
 
