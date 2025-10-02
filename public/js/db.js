@@ -781,10 +781,12 @@ function showModalDbStrc(main, type) {
         return;
     }
 
-    modal.dataset.contextType = type || '';
-
     const overl = document.getElementById('overlayModal');
-    modal.style.display = 'block';
+    const isAiFormContext = type === 'aiForm';
+
+    modal.dataset.contextType = type || '';
+    modal.classList.toggle('modal--over-ai-form', isAiFormContext);
+    modal.style.display = isAiFormContext ? 'flex' : 'block';
     // overl.style.display = 'block';
     // get the table list
     const list = modal.querySelector('#modalTableListPanel');
@@ -1065,6 +1067,7 @@ function applyDBModal(button) {
     }
 
     const overl = document.getElementById('overlayModal');
+    modal.classList.remove('modal--over-ai-form');
     modal.style.display = 'none';
     if (overl) {
         overl.style.display = 'none';
@@ -1081,8 +1084,11 @@ function closeModalDbStrct() {
 function closeDBModalEdit(button) {
     const modal = button.closest('.modal');
     const overl = document.getElementById('overlayModal');
+    modal.classList.remove('modal--over-ai-form');
     modal.style.display = 'none';
-    overl.style.display = 'none';
+    if (overl) {
+        overl.style.display = 'none';
+    }
 
 }
 
