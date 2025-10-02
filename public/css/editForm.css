@@ -8,6 +8,37 @@
     align-items: left;
 }
 
+.editor-fields {
+    gap: 12px;
+}
+
+.editor-fields .form-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+}
+
+.editor-fields .form-field label {
+    margin-bottom: 0;
+    white-space: nowrap;
+}
+
+.editor-fields .form-field input,
+.editor-fields .form-field select,
+.editor-fields .form-field textarea {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.editor-fields .form-field--textarea {
+    align-items: flex-start;
+}
+
+.editor-fields .form-field--textarea label {
+    padding-top: 0.25rem;
+}
+
 
 .category {
     cursor: pointer;
