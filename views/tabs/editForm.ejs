@@ -3,34 +3,34 @@
         <!-- Form properties will be added here -->
         <form class="container-fluid" id="formDataForm">
             <div class="row table-hover editor-fields"
-                style="display:flex;align-items:flex-start;justify-content:center;">
-                <div class="col" style="display:inline">
-                    <label for="objectId" class="input-group-text" style="display:inline">ID:</label><input
-                        class="input-element" id="objectId" name="objectId" placeholder="ID" required type="text"
-                        value="" style="display:inline">
+                style="display:flex;align-items:flex-start;justify-content:center;flex-wrap:wrap;">
+                <div class="col form-field">
+                    <label for="objectId" class="input-group-text">ID:</label>
+                    <input class="input-element" id="objectId" name="objectId" placeholder="ID" required type="text"
+                        value="">
                 </div>
-                <div class="col" style="display:inline">
-                    <label for="objectName" class="input-group-text" style="display:inline">Name:</label><input
-                        class="input-element" id="objectName" name="objectName" placeholder="Insert Name" required
+                <div class="col form-field">
+                    <label for="objectName" class="input-group-text">Name:</label>
+                    <input class="input-element" id="objectName" name="objectName" placeholder="Insert Name" required
                         type="text" value="" style="width:150px;">
                 </div>
-                <div class="col" style="display:inline">
-                    <label for="objectSlug" class="input-group-text" style="display:inline">Slug:</label><input
-                        class="input-element" id="objectSlug" name="objectSlug" placeholder="Insert Slug" required
+                <div class="col form-field">
+                    <label for="objectSlug" class="input-group-text">Slug:</label>
+                    <input class="input-element" id="objectSlug" name="objectSlug" placeholder="Insert Slug" required
                         type="text" value="" style="width:150px;">
                 </div>
-                <div class="col" style="display:inline">
-                    <label for="userCreated" class="input-group-text" style="display:inline">User Created:</label><input
-                        class="input-element" id="userCreated" name="userCreated" placeholder="User Created" required
-                        type="text" value="<%= userName %>" style="display:inline">
+                <div class="col form-field">
+                    <label for="userCreated" class="input-group-text">User Created:</label>
+                    <input class="input-element" id="userCreated" name="userCreated" placeholder="User Created" required
+                        type="text" value="<%= userName %>">
                 </div>
-                <div class="col" style="display:inline">
-                    <label for="userModified" class="input-group-text" style="display:inline">User
-                        Modified:</label><input class="input-element" id="userModified" name="userModified"
-                        placeholder="User Modified" required type="text" value="<%= userName %>" style="display:inline">
+                <div class="col form-field">
+                    <label for="userModified" class="input-group-text">User Modified:</label>
+                    <input class="input-element" id="userModified" name="userModified" placeholder="User Modified"
+                        required type="text" value="<%= userName %>">
                 </div>
-                <div class="col" style="display:inline">
-                    <label for="objectType">Type:</label><br>
+                <div class="col form-field">
+                    <label for="objectType">Type:</label>
                     <select class="input-element" id="objectType" name="type" required>
                         <option value="" disabled selected>Select Type</option>
                         <option value="page">Page</option>
@@ -39,8 +39,8 @@
                     </select>
                     <input id="objectTypeHidden" name="pageHeader" type="hidden" value="">
                 </div>
-                <div class="col" style="display:inline-block">
-                    <label for="objectDescription">Description:</label><br>
+                <div class="col form-field form-field--textarea">
+                    <label for="objectDescription">Description:</label>
                     <textarea class="input-element" id="objectDescription" name="objectDescription"
                         placeholder="Insert Description" required rows="3"></textarea>
                 </div>
