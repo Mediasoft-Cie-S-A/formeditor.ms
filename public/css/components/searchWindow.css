@@ -12,6 +12,14 @@
   background-color: var(--color-119);
 }
 
+.modal--over-ai-form {
+  z-index: 10060;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
 .modal-content {
   background-color: var(--color-2);
 
@@ -19,6 +27,12 @@
   border: 1px solid var(--color-50);
 
   border-radius: 10px;
+}
+
+.modal--over-ai-form .modal-content {
+  width: min(80vw, 1200px);
+  max-height: 90vh;
+  overflow: auto;
 }
 
 .modal-header {
