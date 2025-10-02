@@ -11,6 +11,39 @@ try {
   console.error('Error loading config file:', err);
 }
 
+function ensurePrismaEnvironmentVariables(config) {
+  if (!config || typeof config !== 'object') {
+    return;
+  }
+
+  const { dbtype, dblist } = config;
+  if (dbtype !== 'prisma' || !dblist || typeof dblist !== 'object') {
+    return;
+  }
+
+  for (const [name, dbConfig] of Object.entries(dblist)) {
+    if (!dbConfig || typeof dbConfig !== 'object') {
+      continue;
+    }
+
+    const connectionString = dbConfig.ConnectionString || dbConfig.connectionString || dbConfig.url;
+    if (!connectionString) {
+      continue;
+    }
+
+    const envKey = `PRISMA_${name.toUpperCase()}_URL`;
+    if (!process.env[envKey]) {
+      process.env[envKey] = connectionString;
+    }
+
+    if (!process.env.DATABASE_URL) {
+      process.env.DATABASE_URL = connectionString;
+    }
+  }
+}
+
+ensurePrismaEnvironmentVariables(baseConfig);
+
 const askAIConfig = {
   ...baseConfig.askAI,
   postUrl:
