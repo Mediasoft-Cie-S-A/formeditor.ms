@@ -1,6 +1,27 @@
 let PrismaClient;
 const { parse: json2csv } = require('json2csv');
 
+function maskConnectionString(connectionString) {
+  if (!connectionString) {
+    return 'unknown';
+  }
+
+  try {
+    const parsed = new URL(connectionString);
+    if (parsed.password) {
+      parsed.password = '***';
+    }
+    if (parsed.username) {
+      const username = parsed.username;
+      parsed.username = username.length > 1 ? `${username[0]}***` : '***';
+    }
+    return parsed.toString();
+  } catch (error) {
+    console.warn('Unable to mask connection string:', error.message);
+    return '<hidden>';
+  }
+}
+
 function loadPrismaClient() {
   if (PrismaClient) {
     return PrismaClient;
@@ -67,14 +88,38 @@ class PrismaDatabase {
 
     const PrismaClientConstructor = loadPrismaClient();
 
-    this.prisma = new PrismaClientConstructor({
-      datasources: {
-        db: {
-          url: this.connectionString,
+    try {
+      this.prisma = new PrismaClientConstructor({
+        datasources: {
+          db: {
+            url: this.connectionString,
+          },
         },
-      },
-      ...prismaOptions,
-    });
+        ...prismaOptions,
+      });
+    } catch (error) {
+      const hints = [];
+      if (error?.code === 'P1001') {
+        hints.push('Verify that the database server is reachable and that the connection string is correct.');
+      }
+      if (error?.code === 'P1003') {
+        hints.push('Confirm that the specified database exists and that the credentials have access to it.');
+      }
+      if (error?.code === 'P5019' || /Query engine library for current platform/i.test(error?.message || '')) {
+        hints.push('Run `npx prisma generate` to rebuild the Prisma client for this platform.');
+      }
+      const maskedConnection = maskConnectionString(this.connectionString);
+      const messageParts = [
+        `Failed to initialize Prisma client for provider "${this.provider}".`,
+        `Connection: ${maskedConnection}.`,
+      ];
+      if (hints.length > 0) {
+        messageParts.push(`Hints: ${hints.join(' ')}`);
+      }
+      const wrappedError = new Error(messageParts.join(' '), { cause: error });
+      wrappedError.code = error?.code || wrappedError.code;
+      throw wrappedError;
+    }
   }
 
   detectProviderFromUrl(url) {
