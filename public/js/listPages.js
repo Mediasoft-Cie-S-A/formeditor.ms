@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-
+let pagesData = [];
+let pagesViewMode = 'grid';
 
 function loadPages() {
 
@@ -24,63 +24,231 @@ function loadPages() {
         }
         return response.json();
     }).then(pages => {
-        const pagesList = document.getElementById("pageListContainerBody");
-        pagesList.innerHTML = ""; // Clear existing content
-        pages.forEach(page => {
-            const container = document.createElement("tr");
-            container.innerHTML = `
-                <td>${page.objectId}</td>
-                <td>${page.slug}</td>
-                <td>${page.layout}</td>
-                <td>${page.title}</td>
-                <td>${page.meta}</td>
-                <td>${page.meta}</td>
-            `;
-            // Create delete button
-            const deleteButton = document.createElement('button');
-            deleteButton.innerHTML = '<i class="fa fa-trash" style="margin-left:-5px"></i>'
-            deleteButton.className = 'portal-delete-button';
-            deleteButton.onclick = function (event) {
-                event.preventDefault();
-                deletePage(page.objectId);
-            }; // delete button functionality
-
-            // create edit button
-            const editButton = document.createElement('button');
-            editButton.innerHTML = '<i class="fa fa-edit" style="margin-left:-5px"></i>'
-            editButton.className = 'portal-edit-button';
-            editButton.onclick = function (event) {
-                event.preventDefault();
-                loadPage(page.objectId);
-                const editTab = document.querySelector('.nav-tabs a[href="#editForm"]');
-                if (editTab) {
-                    editTab.click(); // Simulate click
-                }  // Simulate click on the edit tab
-
-            }; // edit button functionality
-            // create show button
-            const showButton = document.createElement('button');
-            showButton.innerHTML = '<i class="fa fa-eye" style="margin-left:-5px"></i>'
-            showButton.className = 'portal-show-button';
-            showButton.onclick = function (event) {
-                event.preventDefault();
-                // call window.open with the page slug
-                const pageUrl = `/${page.slug}`;
-                window.open(pageUrl, '_blank'); // Open the page in a new tab
-            }; // show button functionality
-            const itemActions = document.createElement('td');
-            itemActions.appendChild(showButton); // Append the show button
-            itemActions.appendChild(editButton); // Append the edit button
-            itemActions.appendChild(deleteButton); // Append the delete button
-            container.appendChild(itemActions); // Append the actions cell to the container
-
-            pagesList.appendChild(container);
-        });
+        pagesData = Array.isArray(pages) ? pages : [];
+        renderPages();
     }).catch(error => {
         console.error("Error fetching pages:", error);
-        const pagesList = document.getElementById("pagesList");
-        pagesList.innerHTML = "<li>Error loading pages</li>";
+        const emptyState = document.getElementById("pagesEmptyState");
+        if (emptyState) {
+            emptyState.textContent = "Error loading pages.";
+            emptyState.classList.remove('d-none');
+        }
     });
+}
+
+function renderPages() {
+    const tableBody = document.getElementById("pageListContainerBody");
+    const panelContainer = document.getElementById('pagesPanelContainer');
+    const emptyState = document.getElementById("pagesEmptyState");
+
+    if (!tableBody || !panelContainer) {
+        return;
+    }
+
+    tableBody.innerHTML = "";
+    panelContainer.innerHTML = "";
+
+    const filters = getPageFilters();
+    const filteredPages = pagesData.filter(page => matchesPageFilters(page, filters));
+
+    filteredPages.forEach(page => {
+        tableBody.appendChild(buildPageRow(page));
+        panelContainer.appendChild(buildPageCard(page));
+    });
+
+    const hasResults = filteredPages.length > 0;
+    if (emptyState) {
+        emptyState.classList.toggle('d-none', hasResults);
+        emptyState.textContent = pagesData.length === 0 ? 'No pages available.' : 'No pages match the current filters.';
+    }
+
+    updatePagesView();
+}
+
+function buildPageRow(page) {
+    const container = document.createElement("tr");
+
+    const metaInfo = normalisePageMeta(page.meta);
+
+    const idCell = document.createElement('td');
+    idCell.textContent = page.objectId;
+    container.appendChild(idCell);
+
+    const slugCell = document.createElement('td');
+    slugCell.textContent = page.slug;
+    container.appendChild(slugCell);
+
+    const layoutCell = document.createElement('td');
+    layoutCell.textContent = page.layout;
+    container.appendChild(layoutCell);
+
+    const titleCell = document.createElement('td');
+    titleCell.textContent = page.title;
+    container.appendChild(titleCell);
+
+    const metaDescCell = document.createElement('td');
+    metaDescCell.textContent = metaInfo.description;
+    container.appendChild(metaDescCell);
+
+    const metaKeywordsCell = document.createElement('td');
+    metaKeywordsCell.textContent = metaInfo.keywords;
+    container.appendChild(metaKeywordsCell);
+
+    const actionsCell = document.createElement('td');
+    const { showButton, editButton, deleteButton } = createPageActionButtons(page);
+    actionsCell.appendChild(showButton);
+    actionsCell.appendChild(editButton);
+    actionsCell.appendChild(deleteButton);
+    container.appendChild(actionsCell);
+
+    return container;
+}
+
+function buildPageCard(page) {
+    const column = document.createElement('div');
+    column.className = 'col-12 col-md-6 col-xl-4';
+
+    const card = document.createElement('div');
+    card.className = 'card h-100 shadow-sm';
+
+    const metaInfo = normalisePageMeta(page.meta);
+
+    const cardBody = document.createElement('div');
+    cardBody.className = 'card-body';
+    cardBody.innerHTML = `
+        <h5 class="card-title mb-2">${page.title || page.slug}</h5>
+        <h6 class="card-subtitle text-muted mb-3">/${page.slug}</h6>
+        <dl class="row mb-0 small">
+            <dt class="col-5">ID</dt>
+            <dd class="col-7 text-end">${page.objectId}</dd>
+            <dt class="col-5">Layout</dt>
+            <dd class="col-7 text-end">${page.layout || '-'}</dd>
+            <dt class="col-5">Meta Description</dt>
+            <dd class="col-7 text-end">${metaInfo.description || '-'}</dd>
+            <dt class="col-5">Meta Keywords</dt>
+            <dd class="col-7 text-end">${metaInfo.keywords || '-'}</dd>
+        </dl>
+    `;
+
+    const cardFooter = document.createElement('div');
+    cardFooter.className = 'card-footer bg-transparent border-0 pt-0 d-flex gap-2 flex-wrap';
+    const { showButton, editButton, deleteButton } = createPageActionButtons(page);
+    cardFooter.appendChild(showButton);
+    cardFooter.appendChild(editButton);
+    cardFooter.appendChild(deleteButton);
+
+    card.appendChild(cardBody);
+    card.appendChild(cardFooter);
+    column.appendChild(card);
+
+    return column;
+}
+
+function createPageActionButtons(page) {
+    const showButton = document.createElement('button');
+    showButton.innerHTML = '<i class="fa fa-eye" style="margin-left:-5px"></i>';
+    showButton.className = 'portal-show-button';
+    showButton.onclick = function (event) {
+        event.preventDefault();
+        const pageUrl = `/${page.slug}`;
+        window.open(pageUrl, '_blank');
+    };
+
+    const editButton = document.createElement('button');
+    editButton.innerHTML = '<i class="fa fa-edit" style="margin-left:-5px"></i>';
+    editButton.className = 'portal-edit-button';
+    editButton.onclick = function (event) {
+        event.preventDefault();
+        loadPage(page.objectId);
+        const editTab = document.querySelector('.nav-tabs a[href="#editForm"]');
+        if (editTab) {
+            editTab.click();
+        }
+    };
+
+    const deleteButton = document.createElement('button');
+    deleteButton.innerHTML = '<i class="fa fa-trash" style="margin-left:-5px"></i>';
+    deleteButton.className = 'portal-delete-button';
+    deleteButton.onclick = function (event) {
+        event.preventDefault();
+        deletePage(page.objectId);
+    };
+
+    return { showButton, editButton, deleteButton };
+}
+
+function getPageFilters() {
+    const idInput = document.getElementById('searchPageInput');
+    const slugInput = document.getElementById('searchPageSlugInput');
+
+    return {
+        id: idInput ? idInput.value.trim().toLowerCase() : '',
+        slug: slugInput ? slugInput.value.trim().toLowerCase() : ''
+    };
+}
+
+function matchesPageFilters(page, filters) {
+    const idMatch = !filters.id || String(page.objectId).toLowerCase().includes(filters.id);
+    const slugMatch = !filters.slug || (page.slug || '').toLowerCase().includes(filters.slug);
+    return idMatch && slugMatch;
+}
+
+function normalisePageMeta(meta) {
+    if (!meta) {
+        return { description: '', keywords: '' };
+    }
+
+    if (typeof meta === 'string') {
+        try {
+            const parsed = JSON.parse(meta);
+            return normalisePageMeta(parsed);
+        } catch (err) {
+            return { description: meta, keywords: meta };
+        }
+    }
+
+    if (typeof meta === 'object') {
+        const description = meta.description || '';
+        const keywordsValue = meta.keywords;
+        const keywords = Array.isArray(keywordsValue) ? keywordsValue.join(', ') : (keywordsValue || '');
+        return { description, keywords };
+    }
+
+    return { description: '', keywords: '' };
+}
+
+function updatePagesView() {
+    const gridWrapper = document.getElementById('pagesGridWrapper');
+    const panelWrapper = document.getElementById('pagesPanelWrapper');
+    const gridButton = document.getElementById('pagesGridViewBtn');
+    const panelButton = document.getElementById('pagesPanelViewBtn');
+
+    if (gridWrapper && panelWrapper) {
+        gridWrapper.classList.toggle('d-none', pagesViewMode !== 'grid');
+        panelWrapper.classList.toggle('d-none', pagesViewMode !== 'panel');
+    }
+
+    if (gridButton && panelButton) {
+        if (pagesViewMode === 'grid') {
+            gridButton.classList.add('btn-primary');
+            gridButton.classList.remove('btn-outline-secondary');
+            panelButton.classList.add('btn-outline-secondary');
+            panelButton.classList.remove('btn-primary');
+        } else {
+            panelButton.classList.add('btn-primary');
+            panelButton.classList.remove('btn-outline-secondary');
+            gridButton.classList.add('btn-outline-secondary');
+            gridButton.classList.remove('btn-primary');
+        }
+    }
+}
+
+function togglePagesView(mode) {
+    if (pagesViewMode === mode) {
+        return;
+    }
+    pagesViewMode = mode;
+    updatePagesView();
 }
 
 function loadPage(pageId) {
@@ -217,13 +385,24 @@ function deletePage(pageID) {
                     showToast("Error deleting page: " + response.statusText);
                 } else {
                     showToast("Page deleted successfully");
-                    loadPages(); // Reload the pages list
+                    pagesData = pagesData.filter(page => page.objectId !== pageID);
+                    renderPages();
                 }
             }).catch(error => {
                 console.error("Error deleting page:", error);
                 showToast("Error deleting page: " + error.message);
             });
     }
+}
+
+function searchPagebyID(event) {
+    event.preventDefault();
+    renderPages();
+}
+
+function searchPagebySlug(event) {
+    event.preventDefault();
+    renderPages();
 }
 
 loadPages();

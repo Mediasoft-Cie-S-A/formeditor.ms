@@ -16,6 +16,8 @@
 
 //Use to read database after insert and delete in dataSetComponentNavigate.js
 let activeForm = null;
+let formsData = [];
+let formsViewMode = 'grid';
 
 function loadForms() {
     console.log('Loading forms...');
@@ -27,140 +29,234 @@ function loadForms() {
             return response.json();
         })
         .then(forms => {
-            const list = document.getElementById('componentsListBody');
-
-            list.innerHTML = ''; // Clear the list
-
-            forms.forEach(form => {
-                const container = document.createElement('tr'); // Create a new container for the forms
-
-                container.className = 'portal-container';
-                container.setAttribute('data-form-id', form.objectId); // Set the form ID as a data attribute
-                container.setAttribute('title', `double click to view form`);
-                const ItemID = document.createElement('td'); // Create a new list item for each form
-                ItemID.innerHTML = `<b>${form.objectId}</b>`; // Adjust according to your form object structure
-                container.appendChild(ItemID); // Append the list item to the container
-                const ItemName = document.createElement('td');
-                ItemName.innerHTML = `<b>${form.objectName}</b>`; // Adjust according to your form object structure
-
-
-                container.appendChild(ItemName); // Append the list item to the container
-                const ItemSlug = document.createElement('td');
-                ItemSlug.innerHTML = `<i>${form.objectSlug}</i>`; // Adjust according to your form object structure
-                container.appendChild(ItemSlug); // Append the list item to the container
-                const ItemUser = document.createElement('td');
-                ItemUser.innerHTML = `<i>${form.userCreated}</i>`; // Adjust according to your form object structure
-                container.appendChild(ItemUser); // Append the list item to the container
-                const ItemModified = document.createElement('td');
-                ItemModified.innerHTML = `<i>${form.userModified}</i>`; // Adjust according to your form object structure
-                container.appendChild(ItemModified); // Append the list item to the container
-                const ItemDate = document.createElement('td');
-                ItemDate.innerHTML = `<i>${form.modificationDate}</i>`; // Adjust according to your form object structure
-                container.appendChild(ItemDate); // Append the list item to the container
-
-                // Create delete button
-                const deleteButton = document.createElement('button');
-                deleteButton.innerHTML = '<i class="fa fa-trash" style="margin-left:-5px"></i>'
-                deleteButton.className = 'portal-delete-button';
-                deleteButton.onclick = function (event) {
-                    event.preventDefault();
-                    deleteForm(form.objectId, container);
-                }; // delete button functionality
-
-                // create edit button
-                const editButton = document.createElement('button');
-                editButton.innerHTML = '<i class="fa fa-edit" style="margin-left:-5px"></i>'
-                editButton.className = 'portal-edit-button';
-                editButton.onclick = function (event) {
-                    //document.getElementById('renderContainer').innerHTML = ''; // Clear the render container
-                    //loadFormData(form.objectId, document.getElementById('formContainer'), false, "");
-                    helperLoadContainer(event, form.objectId); // Load the form data into the form container
-                    const showTab = document.querySelector('.nav-tabs a[href="#editForm"]');
-                    activeForm = form;
-                    if (showTab) {
-                        showTab.click(); // Simulate click
-                    }// if (showTab) {
-
-                }; // edit button functionality
-                // create show button
-                const showButton = document.createElement('button');
-                showButton.innerHTML = '<i class="fa fa-eye" style="margin-left:-5px"></i>'
-                showButton.className = 'portal-show-button';
-                showButton.onclick = function (event) {
-                    //document.getElementById('formContainer').innerHTML = ''; // Clear the form container
-                    //loadFormData(form.objectId, document.getElementById('renderContainer'), true, "");
-                    helperLoadContainer(event, form.objectId); // Load the form data into the form container
-                    const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
-                    activeForm = form;
-                    if (showTab) {
-                        showTab.click(); // Simulate click
-                    }// if (showTab) {
-                }; // show button functionality
-                const itemActions = document.createElement('td');
-                container.appendChild(itemActions); // Append the actions cell to the container
-                //append the delete button to the list item
-
-                itemActions.appendChild(showButton);
-                itemActions.appendChild(editButton);
-                itemActions.appendChild(deleteButton);
-                container.addEventListener('dblclick', function (event) {
-                    //document.getElementById('formContainer').innerHTML = ''; // Clear the render container
-                    //loadFormData(form.objectId, document.getElementById('renderContainer'), true, "render");
-                    helperLoadContainer(event, form.objectId);
-                    const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
-                    activeForm = form;
-                    if (showTab) {
-                        showTab.click(); // Simulate click
-                    }// if (showTab) {
-                }); // Add a double-click event listener to the list item
-
-                container.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    // check if the event is a click on the delete,show or edit button
-                    if (e.target.className === 'portal-list-item') {
-
-                        showHint(`ID:${form.objectId}<br>User:${form.userCreated}<br>Last mod:${form.modificationDate}`, 5000, event);
-                    }
-                }
-                ); // ListItem.addEventListener 
-
-
-                list.appendChild(container); // Append the container to the list
-                // Add the container to the list
-            }); // forEach
-            // Check if there are no forms
-            if (forms.length === 0) {
-                const noFormsMessage = document.createElement('div');
-                noFormsMessage.className = 'portal-no-forms';
-                noFormsMessage.textContent = 'No forms available.';
-                container.appendChild(noFormsMessage);
-            }
-
-            // Manually trigger the search functions
-            const searchIdInput = document.getElementById('searchFormInput');
-            if (searchIdInput && searchIdInput.value) {
-                searchFormbyID({ target: searchIdInput, preventDefault: () => { } });
-            }
-
-            // Manually trigger the search functions
-            const searchNameInput = document.getElementById('searchNameInput');
-            if (searchNameInput && searchNameInput.value) {
-                searchFormbyName({ target: searchNameInput, preventDefault: () => { } });
-            }
-
-            // Manually trigger the search functions
-            const searchSlugInput = document.getElementById('searchSlugInput');
-            if (searchSlugInput && searchSlugInput.value) {
-                searchFormbySlug({ target: searchSlugInput, preventDefault: () => { } });
-            }
-
-
+            formsData = Array.isArray(forms) ? forms : [];
+            renderForms();
         })// Handle the response
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
+}
 
+function renderForms() {
+    const list = document.getElementById('componentsListBody');
+    const panel = document.getElementById('formsPanelContainer');
+    const emptyState = document.getElementById('formsEmptyState');
 
+    if (!list || !panel) {
+        return;
+    }
+
+    list.innerHTML = '';
+    panel.innerHTML = '';
+
+    const filters = getFormFilters();
+    const filteredForms = formsData.filter(form => matchesFormFilters(form, filters));
+
+    filteredForms.forEach(form => {
+        list.appendChild(buildFormRow(form));
+        panel.appendChild(buildFormCard(form));
+    });
+
+    const hasResults = filteredForms.length > 0;
+    if (emptyState) {
+        emptyState.classList.toggle('d-none', hasResults);
+        emptyState.textContent = formsData.length === 0 ? 'No forms available.' : 'No forms match the current filters.';
+    }
+
+    updateFormsView();
+}
+
+function buildFormRow(form) {
+    const container = document.createElement('tr');
+    container.className = 'portal-container';
+    container.setAttribute('data-form-id', form.objectId);
+    container.setAttribute('title', 'double click to view form');
+
+    const itemId = document.createElement('td');
+    itemId.innerHTML = `<b>${form.objectId}</b>`;
+    container.appendChild(itemId);
+
+    const itemName = document.createElement('td');
+    itemName.innerHTML = `<b>${form.objectName}</b>`;
+    container.appendChild(itemName);
+
+    const itemSlug = document.createElement('td');
+    itemSlug.innerHTML = `<i>${form.objectSlug}</i>`;
+    container.appendChild(itemSlug);
+
+    const itemUser = document.createElement('td');
+    itemUser.innerHTML = `<i>${form.userCreated}</i>`;
+    container.appendChild(itemUser);
+
+    const itemModified = document.createElement('td');
+    itemModified.innerHTML = `<i>${form.userModified}</i>`;
+    container.appendChild(itemModified);
+
+    const itemDate = document.createElement('td');
+    itemDate.innerHTML = `<i>${form.modificationDate}</i>`;
+    container.appendChild(itemDate);
+
+    const itemActions = document.createElement('td');
+    const { showButton, editButton, deleteButton } = createFormActionButtons(form);
+    itemActions.appendChild(showButton);
+    itemActions.appendChild(editButton);
+    itemActions.appendChild(deleteButton);
+    container.appendChild(itemActions);
+
+    container.addEventListener('dblclick', event => {
+        helperLoadContainer(event, form.objectId);
+        const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
+        activeForm = form;
+        if (showTab) {
+            showTab.click();
+        }
+    });
+
+    container.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (e.target.className === 'portal-list-item') {
+            showHint(`ID:${form.objectId}<br>User:${form.userCreated}<br>Last mod:${form.modificationDate}`, 5000, e);
+        }
+    });
+
+    return container;
+}
+
+function buildFormCard(form) {
+    const column = document.createElement('div');
+    column.className = 'col-12 col-md-6 col-xl-4';
+
+    const card = document.createElement('div');
+    card.className = 'card h-100 shadow-sm';
+    card.setAttribute('data-form-id', form.objectId);
+
+    const cardBody = document.createElement('div');
+    cardBody.className = 'card-body';
+    cardBody.innerHTML = `
+        <h5 class="card-title mb-2">${form.objectName}</h5>
+        <h6 class="card-subtitle text-muted mb-3">${form.objectSlug}</h6>
+        <dl class="row mb-0 small">
+            <dt class="col-5">ID</dt>
+            <dd class="col-7 text-end">${form.objectId}</dd>
+            <dt class="col-5">Created by</dt>
+            <dd class="col-7 text-end">${form.userCreated || '-'}</dd>
+            <dt class="col-5">Modified by</dt>
+            <dd class="col-7 text-end">${form.userModified || '-'}</dd>
+            <dt class="col-5">Modified on</dt>
+            <dd class="col-7 text-end">${form.modificationDate || '-'}</dd>
+        </dl>
+    `;
+
+    const cardFooter = document.createElement('div');
+    cardFooter.className = 'card-footer bg-transparent border-0 pt-0 d-flex gap-2 flex-wrap';
+    const { showButton, editButton, deleteButton } = createFormActionButtons(form);
+    cardFooter.appendChild(showButton);
+    cardFooter.appendChild(editButton);
+    cardFooter.appendChild(deleteButton);
+
+    card.appendChild(cardBody);
+    card.appendChild(cardFooter);
+
+    card.addEventListener('dblclick', event => {
+        helperLoadContainer(event, form.objectId);
+        const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
+        activeForm = form;
+        if (showTab) {
+            showTab.click();
+        }
+    });
+
+    column.appendChild(card);
+    return column;
+}
+
+function createFormActionButtons(form) {
+    const showButton = document.createElement('button');
+    showButton.innerHTML = '<i class="fa fa-eye" style="margin-left:-5px"></i>';
+    showButton.className = 'portal-show-button';
+    showButton.onclick = function (event) {
+        helperLoadContainer(event, form.objectId);
+        const showTab = document.querySelector('.nav-tabs a[href="#renderForm"]');
+        activeForm = form;
+        if (showTab) {
+            showTab.click();
+        }
+    };
+
+    const editButton = document.createElement('button');
+    editButton.innerHTML = '<i class="fa fa-edit" style="margin-left:-5px"></i>';
+    editButton.className = 'portal-edit-button';
+    editButton.onclick = function (event) {
+        helperLoadContainer(event, form.objectId);
+        const showTab = document.querySelector('.nav-tabs a[href="#editForm"]');
+        activeForm = form;
+        if (showTab) {
+            showTab.click();
+        }
+    };
+
+    const deleteButton = document.createElement('button');
+    deleteButton.innerHTML = '<i class="fa fa-trash" style="margin-left:-5px"></i>';
+    deleteButton.className = 'portal-delete-button';
+    deleteButton.onclick = function (event) {
+        event.preventDefault();
+        deleteForm(form.objectId);
+    };
+
+    return { showButton, editButton, deleteButton };
+}
+
+function updateFormsView() {
+    const gridWrapper = document.getElementById('formsGridWrapper');
+    const panelWrapper = document.getElementById('formsPanelWrapper');
+    const gridButton = document.getElementById('formsGridViewBtn');
+    const panelButton = document.getElementById('formsPanelViewBtn');
+
+    if (gridWrapper && panelWrapper) {
+        gridWrapper.classList.toggle('d-none', formsViewMode !== 'grid');
+        panelWrapper.classList.toggle('d-none', formsViewMode !== 'panel');
+    }
+
+    if (gridButton && panelButton) {
+        if (formsViewMode === 'grid') {
+            gridButton.classList.add('btn-primary');
+            gridButton.classList.remove('btn-outline-secondary');
+            panelButton.classList.add('btn-outline-secondary');
+            panelButton.classList.remove('btn-primary');
+        } else {
+            panelButton.classList.add('btn-primary');
+            panelButton.classList.remove('btn-outline-secondary');
+            gridButton.classList.add('btn-outline-secondary');
+            gridButton.classList.remove('btn-primary');
+        }
+    }
+}
+
+function toggleFormsView(mode) {
+    if (formsViewMode === mode) {
+        return;
+    }
+    formsViewMode = mode;
+    updateFormsView();
+}
+
+function getFormFilters() {
+    const idInput = document.getElementById('searchFormInput');
+    const nameInput = document.getElementById('searchNameInput');
+    const slugInput = document.getElementById('searchSlugInput');
+
+    return {
+        id: idInput ? idInput.value.trim().toLowerCase() : '',
+        name: nameInput ? nameInput.value.trim().toLowerCase() : '',
+        slug: slugInput ? slugInput.value.trim().toLowerCase() : ''
+    };
+}
+
+function matchesFormFilters(form, filters) {
+    const idMatch = !filters.id || String(form.objectId).toLowerCase().includes(filters.id);
+    const nameMatch = !filters.name || (form.objectName || '').toLowerCase().includes(filters.name);
+    const slugMatch = !filters.slug || (form.objectSlug || '').toLowerCase().includes(filters.slug);
+    return idMatch && nameMatch && slugMatch;
 }
 
 function helperLoadContainer(event, objectId) {
@@ -171,7 +267,7 @@ function helperLoadContainer(event, objectId) {
     loadFormData(objectId, document.getElementById('formContainer'), false, "");
 }
 
-function deleteForm(objectId, listItem) {
+function deleteForm(objectId) {
     fetch(`/delete-form/${objectId}`, { method: 'DELETE' })
         .then(response => {
             if (!response.ok) {
@@ -181,7 +277,8 @@ function deleteForm(objectId, listItem) {
         })
         .then(data => {
             console.log(data.message);
-            listItem.remove(); // Remove the list item from the DOM
+            formsData = formsData.filter(form => form.objectId !== objectId);
+            renderForms();
         })
         .catch(error => {
             console.error('There was a problem with the delete operation:', error);
@@ -189,75 +286,18 @@ function deleteForm(objectId, listItem) {
 }
 
 function searchFormbyID(event) {
-    event.preventDefault(); // Prevent the default form submission
-    const searchInput = event.target;
-    const list = document.getElementById('componentsListBody');
-    const searchTerm = searchInput.value.trim().toLowerCase(); // Get the search term and convert to lowercase
-    console.log('Searching for form with ID:', searchTerm);
-    // get the all the rows in the list
-    const rows = list.querySelectorAll('tr'); // Select all rows with the class 'portal-container'
-    let found = false; // Flag to check if any form is found
-    rows.forEach(row => {
-        const formId = row.getAttribute('data-form-id'); // Get the form ID from the data attribute
-        if (formId && formId.toLowerCase().includes(searchTerm)) { // Check if the form ID includes the search term
-            row.style.display = ''; // Show the row if it matches
-            found = true; // Set the flag to true if a match is found
-        } else {
-            row.style.display = 'none'; // Hide the row if it doesn't match
-        }
-    });
-    if (!found) {
-        showToast('No forms found with ID: ' + searchTerm, 5000); // Show a toast message if no forms are found
-    }
-    console.log('Search completed.');
+    event.preventDefault();
+    renderForms();
 }
 
 function searchFormbyName(event) {
-    event.preventDefault(); // Prevent the default form submission  
-    const searchInput = event.target;
-    const list = document.getElementById('componentsListBody');
-    const searchTerm = searchInput.value.trim().toLowerCase(); // Get the search term and convert to lowercase
-    console.log('Searching for form with Name:', searchTerm);
-    // get the all the rows in the list
-    const rows = list.querySelectorAll('tr'); // Select all rows with the class 'portal-container'
-    let found = false; // Flag to check if any form is found
-    rows.forEach(row => {
-        const formName = row.querySelector('td:nth-child(2)').textContent; // Get the form name from the second cell
-        if (formName && formName.toLowerCase().includes(searchTerm)) { // Check if the form name includes the search term
-            row.style.display = ''; // Show the row if it matches
-            found = true; // Set the flag to true if a match is found
-        } else {
-            row.style.display = 'none'; // Hide the row if it doesn't match
-        }
-    });
-    if (!found) {
-        showToast('No forms found with Name: ' + searchTerm, 5000); // Show a toast message if no forms are found
-    }
-    console.log('Search completed.');
+    event.preventDefault();
+    renderForms();
 }
 
 function searchFormbySlug(event) {
-    event.preventDefault(); // Prevent the default form submission
-    const searchInput = event.target;
-    const list = document.getElementById('componentsListBody');
-    const searchTerm = searchInput.value.trim().toLowerCase(); // Get the search term and convert to lowercase
-    console.log('Searching for form with Slug:', searchTerm);
-    // get the all the rows in the list
-    const rows = list.querySelectorAll('tr'); // Select all rows with the class 'portal-container'
-    let found = false; // Flag to check if any form is found
-    rows.forEach(row => {
-        const formSlug = row.querySelector('td:nth-child(3)').textContent; // Get the form slug from the third cell
-        if (formSlug && formSlug.toLowerCase().includes(searchTerm)) { // Check if the form slug includes the search term
-            row.style.display = ''; // Show the row if it matches
-            found = true; // Set the flag to true if a match is found
-        } else {
-            row.style.display = 'none'; // Hide the row if it doesn't match
-        }
-    });
-    if (!found) {
-        showToast('No forms found with Slug: ' + searchTerm, 5000); // Show a toast message if no forms are found
-    }
-    console.log('Search completed.');
+    event.preventDefault();
+    renderForms();
 }
 
 function updateAllIdsInJson(jsonObj, prefix) {
