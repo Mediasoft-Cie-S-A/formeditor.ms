@@ -367,7 +367,7 @@ function initializeAiFormModal() {
 
   showDatabaseBtn?.addEventListener("click", () => {
     if (typeof showModalDbStrc === "function") {
-      showModalDbStrc(null, "dataSetComponent");
+      showModalDbStrc(null, "aiForm");
       closeAiFormModal();
     } else {
       showStatusMessage("Database viewer is not available.", "error");

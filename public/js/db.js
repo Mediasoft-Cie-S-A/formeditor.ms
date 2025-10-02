@@ -777,6 +777,12 @@ function showModalDbStrc(main, type) {
     console.log(type);
     const modal = document.getElementById('DatabaseDetailsModal');
 
+    if (!modal) {
+        return;
+    }
+
+    modal.dataset.contextType = type || '';
+
     const overl = document.getElementById('overlayModal');
     modal.style.display = 'block';
     // overl.style.display = 'block';
@@ -800,9 +806,10 @@ function showModalDbStrc(main, type) {
             console.log('contentDiv:', contentDiv);
             contentDiv.innerHTML = '';
 
-            const DBName = event.target.getAttribute('database-name');
-            const tableName = event.target.getAttribute('data-table-name');
-            const tableLabel = event.target.getAttribute('data-table-label');
+            const target = event.currentTarget || event.target;
+            const DBName = target.getAttribute('database-name');
+            const tableName = target.getAttribute('data-table-name');
+            const tableLabel = target.getAttribute('data-table-label');
             // get the table details div
             var header = ['X', 'Name', 'Field Description', 'Type', 'Mandatory', 'Up', 'Down'];
             const table = document.createElement('table');
@@ -861,6 +868,7 @@ function showModalDbStrc(main, type) {
                         const json = {
                             DBName: DBName,
                             tableName: tableName,
+                            tableLabel: tableLabel,
                             fieldName: field.NAME,
                             fieldLabel: field.LABEL,
                             fieldType: field.TYPE,
@@ -947,33 +955,120 @@ function showModalDbStrc(main, type) {
 
 }
 
-function applyDBModal(button) {
-    const contentDiv = button.closest('.modal').querySelector('#modaltableDetails').querySelector('tBody');
-    // get all the tr in contentDiv
-    const trs = contentDiv.querySelectorAll('tr');
-    // get the propertiesBar
-    const propertiesBar = document.getElementById('propertiesBar');
-    console.log('propertiesBar:', propertiesBar);
-    // gest Data div
-    const dataDiv = propertiesBar.querySelector('#Data');
-    console.log('dataDiv:', dataDiv);
-    trs.forEach(tr => {
-        console.log('tr:', tr);
-        // check if the checkbox is checked
-        if (tr.querySelector('input[name="fieldItem"]').checked) {
-            const json = JSON.parse(tr.getAttribute('filed-data'));
-            addFieldToPropertiesBar(dataDiv, json);
+function buildDatabaseStructureJson(rows) {
+    const grouped = new Map();
+
+    rows.forEach((row) => {
+        const {
+            DBName,
+            tableName,
+            tableLabel,
+            fieldName,
+            fieldLabel,
+            fieldType,
+            fieldDataType,
+            fieldMandatory,
+            fieldWidth,
+            fieldDefault
+        } = row;
+
+        const key = `${DBName || ''}.${tableName || ''}`;
+        if (!grouped.has(key)) {
+            grouped.set(key, {
+                database: DBName || '',
+                table: tableName || '',
+                label: tableLabel || '',
+                fields: []
+            });
         }
 
+        grouped.get(key).fields.push({
+            name: fieldName || '',
+            label: fieldLabel || '',
+            type: fieldType || '',
+            dataType: fieldDataType || '',
+            mandatory: typeof fieldMandatory === 'string' ? fieldMandatory.trim() : fieldMandatory,
+            width: fieldWidth ?? '',
+            default: fieldDefault ?? ''
+        });
     });
 
+    const structures = Array.from(grouped.values());
+    if (structures.length === 1) {
+        return structures[0];
+    }
 
-    // close the modal
+    return structures;
+}
+
+function applyDBModal(button) {
     const modal = button.closest('.modal');
+    if (!modal) {
+        return;
+    }
+    const contextType = modal?.dataset?.contextType || '';
+    const contentDiv = modal?.querySelector('#modaltableDetails')?.querySelector('tBody');
+
+    if (!contentDiv) {
+        return;
+    }
+
+    const trs = Array.from(contentDiv.querySelectorAll('tr'));
+    const selectedRows = trs.filter((tr) => tr.querySelector('input[name="fieldItem"]')?.checked);
+
+    if (selectedRows.length === 0) {
+        if (typeof showToast === 'function') {
+            showToast('Select at least one field');
+        }
+        return;
+    }
+
+    if (contextType === 'aiForm') {
+        const requestField = document.getElementById('aiFormRequestInput');
+
+        if (requestField) {
+            const rowsData = selectedRows.map((tr) => {
+                try {
+                    return JSON.parse(tr.getAttribute('filed-data'));
+                } catch (error) {
+                    console.error('Invalid field data', error);
+                    return null;
+                }
+            }).filter(Boolean);
+
+            if (rowsData.length > 0) {
+                const structure = buildDatabaseStructureJson(rowsData);
+                const jsonString = JSON.stringify(structure, null, 2);
+                const existing = requestField.value.trim();
+                const prefix = Array.isArray(structure)
+                    ? 'Database structures:'
+                    : `Database structure for ${structure.database || 'selected database'}.${structure.table || 'selected table'}:`;
+
+                requestField.value = `${existing ? `${existing}\n\n` : ''}${prefix}\n${jsonString}`;
+                requestField.focus();
+
+                if (typeof showToast === 'function') {
+                    showToast('Database structure added to the AI request');
+                }
+            }
+        }
+    } else {
+        const propertiesBar = document.getElementById('propertiesBar');
+        const dataDiv = propertiesBar?.querySelector('#Data');
+
+        if (propertiesBar && dataDiv) {
+            selectedRows.forEach(tr => {
+                const json = JSON.parse(tr.getAttribute('filed-data'));
+                addFieldToPropertiesBar(dataDiv, json);
+            });
+        }
+    }
+
     const overl = document.getElementById('overlayModal');
     modal.style.display = 'none';
-    overl.style.display = 'none';
-
+    if (overl) {
+        overl.style.display = 'none';
+    }
 }
 
 function closeModalDbStrct() {
