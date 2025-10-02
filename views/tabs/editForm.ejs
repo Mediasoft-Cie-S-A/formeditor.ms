@@ -4,32 +4,32 @@
         <form class="container-fluid" id="formDataForm">
             <div class="row table-hover editor-fields"
                 style="display:flex;align-items:flex-start;justify-content:center;">
-                <div class="col" style="display:inline-block;">
-                    <label for="objectId">ID:</label><br>
-                    <input class="input-element" id="objectId" name="objectId" placeholder="ID" required type="text"
-                        value=""><br>
+                <div class="col" style="display:inline">
+                    <label for="objectId" class="input-group-text" style="display:inline">ID:</label><input
+                        class="input-element" id="objectId" name="objectId" placeholder="ID" required type="text"
+                        value="" style="display:inline">
                 </div>
-                <div class="col" style="display:inline-block">
-                    <label for="objectName">Name:</label><br>
-                    <input class="input-element" id="objectName" name="objectName" placeholder="Insert Name" required
-                        type="text" value="" style="width:150px;"><br>
+                <div class="col" style="display:inline">
+                    <label for="objectName" class="input-group-text" style="display:inline">Name:</label><input
+                        class="input-element" id="objectName" name="objectName" placeholder="Insert Name" required
+                        type="text" value="" style="width:150px;">
                 </div>
-                <div class="col" style="display:inline-block">
-                    <label for="objectSlug">Slug:</label><br>
-                    <input class="input-element" id="objectSlug" name="objectSlug" placeholder="Insert Slug" required
-                        type="text" value="" style="width:150px;"><br>
+                <div class="col" style="display:inline">
+                    <label for="objectSlug" class="input-group-text" style="display:inline">Slug:</label><input
+                        class="input-element" id="objectSlug" name="objectSlug" placeholder="Insert Slug" required
+                        type="text" value="" style="width:150px;">
                 </div>
-                <div class="col" style="display:inline-block">
-                    <label for="userCreated">User Created:</label><br>
-                    <input class="input-element" id="userCreated" name="userCreated" placeholder="User Created" required
-                        type="text" value="<%= userName %>"><br>
+                <div class="col" style="display:inline">
+                    <label for="userCreated" class="input-group-text" style="display:inline">User Created:</label><input
+                        class="input-element" id="userCreated" name="userCreated" placeholder="User Created" required
+                        type="text" value="<%= userName %>" style="display:inline">
                 </div>
-                <div class="col" style="display:inline-block">
-                    <label for="userModified">User Modified:</label><br>
-                    <input class="input-element" id="userModified" name="userModified" placeholder="User Modified"
-                        required type="text" value="<%= userName %>"><br>
+                <div class="col" style="display:inline">
+                    <label for="userModified" class="input-group-text" style="display:inline">User
+                        Modified:</label><input class="input-element" id="userModified" name="userModified"
+                        placeholder="User Modified" required type="text" value="<%= userName %>" style="display:inline">
                 </div>
-                <div class="col" style="display:inline-block">
+                <div class="col" style="display:inline">
                     <label for="objectType">Type:</label><br>
                     <select class="input-element" id="objectType" name="type" required>
                         <option value="" disabled selected>Select Type</option>
@@ -61,9 +61,10 @@
                         style="float:left;">
                         <i class="bi bi-filetype-json"></i>
                     </button>
-                    <button class="button form-edit-button" id="createFormBtn" onclick="promptCreateForm()" title="Create Form" type="button" style="float: left;">
-                  <i class="bi bi-ui-checks"></i>
-                </button>
+                    <button class="button form-edit-button" id="createFormBtn" onclick="promptCreateForm()"
+                        title="Create Form" type="button" style="float: left;">
+                        <i class="bi bi-ui-checks"></i>
+                    </button>
                 </div>
             </div>
         </form>
@@ -132,14 +133,16 @@
                 </button>
             </div>
             <div class="ai-form-modal__body">
-                <label for="aiFormRequestInput" class="ai-form-modal__label">Describe the form you want to create</label>
+                <label for="aiFormRequestInput" class="ai-form-modal__label">Describe the form you want to
+                    create</label>
                 <textarea id="aiFormRequestInput" class="ai-form-modal__textarea" rows="6"
                     placeholder="Explain the structure, fields or behavior you expect..."></textarea>
 
                 <div class="ai-form-modal__actions">
                     <input type="file" id="aiFormDocumentInput" accept=".txt,.json,.csv,.md,.html,.xml,.yaml,.yml,.pdf"
                         class="is-hidden">
-                    <button type="button" class="button ai-form-modal__button ai-form-modal__button--primary" id="aiFormShowDatabaseBtn">
+                    <button type="button" class="button ai-form-modal__button ai-form-modal__button--primary"
+                        id="aiFormShowDatabaseBtn">
                         <i class="bi bi-database"></i> Show DB
                     </button>
                     <button type="button" class="button ai-form-modal__button" id="aiFormLoadDocumentBtn">
