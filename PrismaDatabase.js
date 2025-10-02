@@ -1,5 +1,21 @@
-const { PrismaClient } = require('@prisma/client');
+let PrismaClient;
 const { parse: json2csv } = require('json2csv');
+
+function loadPrismaClient() {
+  if (PrismaClient) {
+    return PrismaClient;
+  }
+
+  try {
+    ({ PrismaClient } = require('@prisma/client'));
+    return PrismaClient;
+  } catch (error) {
+    if (error && (error.code === 'MODULE_NOT_FOUND' || error.code === 'ERR_MODULE_NOT_FOUND')) {
+      throw new Error("Unable to load '@prisma/client'. Install the package and run `npx prisma generate` before using the Prisma database layer.");
+    }
+    throw error;
+  }
+}
 
 const PROVIDER_CONFIG = {
   mysql: { quoteStart: '`', quoteEnd: '`', supportsLimit: true, defaultSchema: null },
@@ -49,7 +65,9 @@ class PrismaDatabase {
       prismaOptions.log = mergedLog;
     }
 
-    this.prisma = new PrismaClient({
+    const PrismaClientConstructor = loadPrismaClient();
+
+    this.prisma = new PrismaClientConstructor({
       datasources: {
         db: {
           url: this.connectionString,
