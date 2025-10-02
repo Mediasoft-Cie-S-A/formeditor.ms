@@ -288,6 +288,19 @@
     white-space: nowrap;
 }
 
+.ai-form-modal__button--primary {
+    background: var(--color-58);
+    color: var(--color-2);
+    font-weight: 600;
+    border: none;
+    order: -1;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+.ai-form-modal__button--primary:hover {
+    background: var(--color-59);
+}
+
 .ai-form-modal__status {
     margin: 0;
     font-size: 0.9rem;
