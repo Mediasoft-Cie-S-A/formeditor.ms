@@ -1,5 +1,5 @@
 {
-  "dbtype": "prisma",
+  "dbtype": "mysql",
   "port": 3000,
   "dblist": {
     "ove_lt": {
