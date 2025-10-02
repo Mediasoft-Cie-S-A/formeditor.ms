@@ -40,12 +40,12 @@
     "odbc": "^2.4.8",
     "passport": "^0.6.0",
     "passport-local": "^1.0.0",
+    "prisma": "^5.20.0",
     "pug": "^3.0.2",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0"
   },
   "devDependencies": {
-    "@microsoft/microsoft-graph-types": "^2.40.0",
-    "prisma": "^5.20.0"
+    "@microsoft/microsoft-graph-types": "^2.40.0"
   }
 }
