@@ -23,6 +23,233 @@
 let translationDictionary = {};
 let translationDictionaryPromise;
 
+const LANGUAGE_COOKIE_NAME = 'preferredLanguage';
+const LANGUAGE_SESSION_KEY = 'preferredLanguage';
+const CURRENT_USER_STORAGE_KEY = 'currentUser';
+const USER_LANGUAGE_PATHS = [
+    ['preferredLanguage'],
+    ['language'],
+    ['lang'],
+    ['locale'],
+    ['parameters', 'preferredLanguage'],
+    ['parameters', 'language'],
+    ['parameters', 'lang'],
+    ['parameters', 'locale'],
+    ['preferences', 'preferredLanguage'],
+    ['preferences', 'language'],
+    ['preferences', 'lang'],
+    ['preferences', 'locale'],
+    ['settings', 'preferredLanguage'],
+    ['settings', 'language'],
+];
+
+function setCookie(name, value, options = {}) {
+    if (typeof document === 'undefined') {
+        return;
+    }
+    const { days = 365, path = '/' } = options;
+    let cookie = `${name}=${encodeURIComponent(value)}; path=${path}; SameSite=Lax`;
+    if (typeof days === 'number') {
+        const maxAge = Math.round(days * 24 * 60 * 60);
+        cookie += `; max-age=${maxAge}`;
+    }
+    document.cookie = cookie;
+}
+
+function getCookie(name) {
+    if (typeof document === 'undefined') {
+        return null;
+    }
+    const cookies = (document.cookie || '').split(';');
+    for (const cookie of cookies) {
+        const [key, ...rest] = cookie.trim().split('=');
+        if (key === name) {
+            return decodeURIComponent(rest.join('='));
+        }
+    }
+    return null;
+}
+
+function safeGetStorageItem(storage, key) {
+    try {
+        if (storage) {
+            return storage.getItem(key);
+        }
+    } catch (err) {
+        console.warn('Unable to access storage item', key, err);
+    }
+    return null;
+}
+
+function safeSetStorageItem(storage, key, value) {
+    try {
+        if (storage) {
+            storage.setItem(key, value);
+            return true;
+        }
+    } catch (err) {
+        console.warn('Unable to persist storage item', key, err);
+    }
+    return false;
+}
+
+function getStoredUser() {
+    if (typeof window !== 'undefined' && window.currentUser && typeof window.currentUser === 'object') {
+        return window.currentUser;
+    }
+
+    if (typeof window !== 'undefined') {
+        const stored =
+            safeGetStorageItem(window.sessionStorage, CURRENT_USER_STORAGE_KEY) ||
+            safeGetStorageItem(window.localStorage, CURRENT_USER_STORAGE_KEY);
+        if (stored) {
+            try {
+                const parsed = JSON.parse(stored);
+                if (parsed && typeof parsed === 'object') {
+                    return parsed;
+                }
+            } catch (err) {
+                console.warn('Unable to parse stored user information', err);
+            }
+        }
+    }
+
+    return null;
+}
+
+function persistCurrentUser(user) {
+    if (typeof window === 'undefined' || !user || typeof user !== 'object') {
+        return;
+    }
+
+    window.currentUser = user;
+    let serialized;
+    try {
+        serialized = JSON.stringify(user);
+    } catch (err) {
+        console.warn('Unable to serialise user information', err);
+        return;
+    }
+
+    const sessionSaved = safeSetStorageItem(window.sessionStorage, CURRENT_USER_STORAGE_KEY, serialized);
+    safeSetStorageItem(window.localStorage, CURRENT_USER_STORAGE_KEY, serialized);
+
+    if (sessionSaved) {
+        try {
+            document.dispatchEvent(new CustomEvent('userChanged', { detail: { user } }));
+        } catch (err) {
+            console.warn('Unable to dispatch userChanged event', err);
+        }
+    }
+}
+
+function getNestedValue(source, path) {
+    return path.reduce((value, key) => {
+        if (value && typeof value === 'object' && key in value) {
+            return value[key];
+        }
+        return undefined;
+    }, source);
+}
+
+function getUserLanguagePreference() {
+    const user = getStoredUser();
+    if (!user) {
+        return null;
+    }
+
+    for (const path of USER_LANGUAGE_PATHS) {
+        const value = getNestedValue(user, path);
+        if (typeof value === 'string' && value.trim()) {
+            return value.trim();
+        }
+    }
+
+    return null;
+}
+
+function setUserLanguagePreference(language) {
+    if (!language) {
+        return;
+    }
+
+    const user = getStoredUser();
+    if (!user) {
+        return;
+    }
+
+    const currentPreference = getUserLanguagePreference();
+    if (currentPreference === language) {
+        const existingParameters = user.parameters && typeof user.parameters === 'object' ? user.parameters : null;
+        const currentParameterLanguage = existingParameters && (existingParameters.language || existingParameters.preferredLanguage);
+        if (currentParameterLanguage === language) {
+            return;
+        }
+    }
+
+    const updatedUser = { ...user, preferredLanguage: language };
+
+    if (user.parameters && typeof user.parameters === 'object') {
+        updatedUser.parameters = { ...user.parameters, language, preferredLanguage: language };
+    } else {
+        updatedUser.parameters = { language, preferredLanguage: language };
+    }
+
+    if (user.preferences && typeof user.preferences === 'object') {
+        updatedUser.preferences = { ...user.preferences, language, preferredLanguage: language };
+    }
+
+    persistCurrentUser(updatedUser);
+}
+
+function getSessionLanguagePreference() {
+    if (typeof window === 'undefined') {
+        return null;
+    }
+    return safeGetStorageItem(window.sessionStorage, LANGUAGE_SESSION_KEY);
+}
+
+function persistSessionLanguagePreference(language) {
+    if (typeof window === 'undefined' || !language) {
+        return false;
+    }
+    return safeSetStorageItem(window.sessionStorage, LANGUAGE_SESSION_KEY, language);
+}
+
+function determineInitialLanguage(languages) {
+    if (!Array.isArray(languages) || !languages.length) {
+        return { language: null, needsPersistence: false };
+    }
+
+    const cookieLanguage = (getCookie(LANGUAGE_COOKIE_NAME) || '').trim();
+    if (cookieLanguage && languages.includes(cookieLanguage)) {
+        return { language: cookieLanguage, needsPersistence: false };
+    }
+
+    const sessionLanguage = (getSessionLanguagePreference() || '').trim();
+    if (sessionLanguage && languages.includes(sessionLanguage)) {
+        const needsPersistence = !cookieLanguage;
+        return { language: sessionLanguage, needsPersistence };
+    }
+
+    const userLanguage = (getUserLanguagePreference() || '').trim();
+    if (userLanguage && languages.includes(userLanguage)) {
+        return { language: userLanguage, needsPersistence: true };
+    }
+
+    const fallbackLanguage = languages[0];
+    return { language: fallbackLanguage, needsPersistence: true };
+}
+
+function persistPreferredLanguage(language) {
+    if (!language) {
+        return;
+    }
+    setCookie(LANGUAGE_COOKIE_NAME, language, { days: 365, path: '/' });
+    persistSessionLanguagePreference(language);
+    setUserLanguagePreference(language);
+}
+
 function setTranslationDictionary(newDictionary = {}) {
     translationDictionary = newDictionary;
     translationDictionaryPromise = Promise.resolve(translationDictionary);
@@ -346,6 +573,12 @@ async function renderTranslationComponent(mainDiv) {
         languageSelector.title = 'No translations configured yet.';
     }
 
+    const { language: initialLanguage, needsPersistence } = determineInitialLanguage(languages);
+    if (initialLanguage) {
+        languageSelector.value = initialLanguage;
+        translatePage(languageSelector.id, initialLanguage, { persistPreference: needsPersistence });
+    }
+
     floatButton.onclick = () => {
         if (languageSelector.disabled) {
             alert('No translations available. Please configure the dictionary.');
@@ -389,12 +622,17 @@ function translatePage(language) {
     });
 }*/
 
-function translatePage(langSelectorID, language) {
+function translatePage(langSelectorID, language, options = {}) {
+    const { persistPreference = true } = options;
     const dictionary = translationDictionary[language];
     const languageSelector = document.getElementById(langSelectorID);
     if (!dictionary) {
         alert(`Translation for ${language} is not available.`);
         return;
+    }
+
+    if (persistPreference) {
+        persistPreferredLanguage(language);
     }
 
     const replaceTextInDOM = (node) => {
