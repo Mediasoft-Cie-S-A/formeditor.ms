@@ -28,57 +28,85 @@ module.exports = function (app, mongoDbUrl, dbName) {
   async function registerDynamicRoutes() {
     console.log("Registering dynamic routes from the database...");
     const client = new mongoClient(mongoDbUrl, {});
-    client.connect();
-    const db = client.db(dbName);
-    const pageCol = db.collection("pages");
-    // Create a new collection for pages if it doesn't exist
-    if (!pageCol) {
-      console.error("Collection 'Pages' does not exist in the database.");
-      return;
-    }
 
-    pageCol.find({}).toArray().then(pages => {
+    try {
+      await client.connect();
+      const db = client.db(dbName);
+      const pageCol = db.collection("pages");
+
+      if (!pageCol) {
+        console.error("Collection 'Pages' does not exist in the database.");
+        return;
+      }
+
+      const pages = await pageCol.find({}).toArray();
       console.log(`Found ${pages.length} pages in the database.`);
+
       if (pages.length === 0) {
         console.warn("No pages found in the database.");
         return;
       }
-      pages.forEach(({ slug, layout, content, title, meta, header }) => {
+
+      pages.forEach((page) => {
+        const {
+          slug: originalSlug,
+          layout,
+          content,
+          title,
+          header,
+        } = page;
+        let { meta } = page;
+
+        let slug = originalSlug;
         console.log(`Defining route for slug: ${slug}, layout: ${layout}, title: ${title}`);
+
         // Evita collisioni con rotte già definite
-        if (app._router.stack.some(r => r.route?.path === slug)) return;
+        if (app._router.stack.some((r) => r.route?.path === slug)) {
+          return;
+        }
+
         console.log(`Registering route: ${slug}`);
+
         // check if the first character of the slug is a slash
-        if (!slug.startsWith("/")) {
+        if (typeof slug === "string" && !slug.startsWith("/")) {
           slug = `/${slug}`;
         }
+
         // check if meta is an object
-        if (typeof meta !== 'object' || meta === null) {
+        if (typeof meta !== "object" || meta === null) {
           meta = {};
         }
+
         // assign meta.description if not defined
         if (!meta.description) {
           meta.description = `Page ${title}`;
         }
+
         // assign meta.keywords if not defined
-        if (!meta.keywords) {
+        if (!meta.keywords && typeof title === "string") {
           meta.keywords = title.split(" ").join(", ");
         }
+
         app.get(slug, (req, res) => {
           res.render(`layouts/${layout}.ejs`, {
             title,
             meta,
-            body: content,  // verrà iniettato nella view
+            body: content, // verrà iniettato nella view
             description: meta.description,
             keywords: meta.keywords,
-            header: header || "" // Aggiungi header se esiste
+            header: header || "", // Aggiungi header se esiste
           });
         });
       });
-    }
-    ).catch(err => {
+    } catch (err) {
       console.error("Error fetching pages:", err);
-    });
+    } finally {
+      try {
+        await client.close();
+      } catch (closeErr) {
+        console.error("Error closing MongoDB client:", closeErr);
+      }
+    }
   } // register dynamic routes from the database
 
 
