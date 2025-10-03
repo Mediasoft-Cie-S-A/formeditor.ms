@@ -20,7 +20,6 @@ function createPdfDocumentComponent(type) {
 function editPdfDocumentComponent(type, element, content) {
   initializePdfDocumentElement(element);
 
-  const savedDatasetId = element.getAttribute("data-dataset-id") || "";
   const savedTemplate = decodePdfDocumentTemplate(element.getAttribute("data-template"));
   const savedStructure = decodePdfDocumentStructure(element.getAttribute("data-structure"));
   const savedFileName = element.getAttribute("data-pdf-filename") || "document.pdf";
@@ -32,27 +31,17 @@ function editPdfDocumentComponent(type, element, content) {
   title.textContent = "Document PDF";
   content.appendChild(title);
 
-  const datasetWrapper = document.createElement("div");
-  datasetWrapper.className = "pdf-editor-row";
+  const datasetSectionTitle = document.createElement("label");
+  datasetSectionTitle.textContent = "Dataset";
+  content.appendChild(datasetSectionTitle);
 
-  const datasetLabel = document.createElement("label");
-  datasetLabel.textContent = "Dataset source";
-  datasetLabel.setAttribute("for", "pdfDatasetSelect");
-  datasetWrapper.appendChild(datasetLabel);
+  const datasetEditorContainer = document.createElement("div");
+  datasetEditorContainer.className = "pdf-dataset-editor";
+  content.appendChild(datasetEditorContainer);
 
-  const datasetSelect = document.createElement("select");
-  datasetSelect.id = "pdfDatasetSelect";
-  datasetSelect.className = "pdf-editor-select";
-  datasetSelect.appendChild(createOption("", "Sélectionnez un dataset"));
-
-  const datasetSources = collectPdfDatasetSources();
-  datasetSources.forEach((source) => {
-    const option = createOption(source.id, source.label);
-    datasetSelect.appendChild(option);
-  });
-  datasetSelect.value = savedDatasetId;
-  datasetWrapper.appendChild(datasetSelect);
-  content.appendChild(datasetWrapper);
+  if (typeof editElementDataSet === "function") {
+    editElementDataSet(type, element, datasetEditorContainer);
+  }
 
   const paletteLabel = document.createElement("label");
   paletteLabel.textContent = "Champs disponibles";
@@ -116,43 +105,6 @@ function editPdfDocumentComponent(type, element, content) {
 
   let currentFields = [];
   let currentRange = null;
-
-  function createOption(value, label) {
-    const option = document.createElement("option");
-    option.value = value;
-    option.textContent = label;
-    return option;
-  }
-
-  function collectPdfDatasetSources() {
-    const nodes = document.querySelectorAll("[tagname='dataSet']");
-    const sources = [];
-    nodes.forEach((node) => {
-      if (!node.id) {
-        return;
-      }
-      const structure = decodePdfDocumentStructure(node.getAttribute("data-structure")) || [];
-      let dataset = [];
-      if (!structure.length) {
-        dataset = parseJsonSafe(node.getAttribute("dataset"));
-      }
-      const fields = structure.length ? structure : extractFieldsFromDataset(dataset);
-      const label = buildDatasetLabel(node, dataset, fields);
-      sources.push({ id: node.id, label, fields });
-    });
-    return sources;
-  }
-
-  function buildDatasetLabel(node, dataset, fields) {
-    const firstField = dataset && dataset.length ? dataset[0] : null;
-    const tableName = firstField?.tableName || fields[0]?.tableName || "";
-    const dbName = firstField?.DBName || fields[0]?.DBName || "";
-    const parts = [];
-    if (tableName) parts.push(tableName);
-    if (dbName) parts.push(`DB: ${dbName}`);
-    const detail = parts.length ? ` (${parts.join(" - ")})` : "";
-    return `${node.id}${detail}`;
-  }
 
   function extractFieldsFromDataset(dataset) {
     if (!Array.isArray(dataset)) {
@@ -331,11 +283,19 @@ function editPdfDocumentComponent(type, element, content) {
     });
   }
 
+  function getDatasetFieldsFromAttributes() {
+    const datasetAttribute = element.getAttribute("dataSet") || element.getAttribute("dataset");
+    const dataset = parseJsonSafe(datasetAttribute);
+    if (Array.isArray(dataset) && dataset.length) {
+      return extractFieldsFromDataset(dataset);
+    }
+    return null;
+  }
+
   function refreshFields() {
-    const selected = datasetSelect.value;
-    const selectedSource = datasetSources.find((source) => source.id === selected);
-    if (selectedSource) {
-      currentFields = selectedSource.fields;
+    const datasetFields = getDatasetFieldsFromAttributes();
+    if (datasetFields && datasetFields.length) {
+      currentFields = datasetFields;
     } else if (savedStructure && savedStructure.length) {
       currentFields = savedStructure;
     } else {
@@ -346,7 +306,7 @@ function editPdfDocumentComponent(type, element, content) {
 
   function saveChanges() {
     const cleanHtml = getCleanTemplateHtml();
-    element.setAttribute("data-dataset-id", datasetSelect.value || "");
+    element.setAttribute("data-dataset-id", "");
     element.setAttribute("data-template", encodeURIComponent(cleanHtml));
     element.setAttribute("data-pdf-filename", fileNameInput.value.trim() || "document.pdf");
     element.setAttribute("data-structure", encodeURIComponent(JSON.stringify(currentFields || [])));
@@ -356,14 +316,22 @@ function editPdfDocumentComponent(type, element, content) {
     }
   }
 
-  datasetSelect.addEventListener("change", () => {
-    refreshFields();
-    if (!templateEditor.innerHTML.trim()) {
-      templateEditor.innerHTML = buildDefaultTemplate(currentFields);
-      prepareEditorTags();
-      updateLivePreview();
+  function bindDatasetUpdateEvents() {
+    const buttons = Array.from(datasetEditorContainer.querySelectorAll("button"));
+    const updateButton = buttons.find((btn) => btn.textContent && btn.textContent.trim().toLowerCase() === "update");
+    if (updateButton) {
+      updateButton.addEventListener("click", () => {
+        setTimeout(() => {
+          refreshFields();
+          if (!templateEditor.innerHTML.trim() && currentFields.length) {
+            templateEditor.innerHTML = buildDefaultTemplate(currentFields);
+            prepareEditorTags();
+          }
+          updateLivePreview();
+        }, 0);
+      });
     }
-  });
+  }
 
   templateEditor.addEventListener("dragover", (event) => {
     event.preventDefault();
@@ -443,8 +411,12 @@ function editPdfDocumentComponent(type, element, content) {
   }
 
   refreshFields();
+  if (!templateEditor.innerHTML.trim() && currentFields.length) {
+    templateEditor.innerHTML = buildDefaultTemplate(currentFields);
+  }
   prepareEditorTags();
   updateLivePreview();
+  bindDatasetUpdateEvents();
 }
 
 function renderPdfDocument(element) {
@@ -497,7 +469,7 @@ function updatePdfDocumentPreview(element, html) {
     });
   } else {
     preview.innerHTML =
-      '<div class="pdf-document-placeholder">Sélectionnez un dataset et composez votre document.</div>';
+      '<div class="pdf-document-placeholder">Configurez un dataset et composez votre document.</div>';
   }
 }
 
