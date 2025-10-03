@@ -51,16 +51,7 @@ function editElementDataSet(type, element, content) {
   content.appendChild(button);
 
   // button showModalDbStrc for show the database structure
-  const buttonShowDbStrc = document.createElement("button");
-  buttonShowDbStrc.style.width = "100%";
-  buttonShowDbStrc.textContent = "Show DB";
-  buttonShowDbStrc.onclick = function () {
-    const propertiesBar = document.getElementById("propertiesBar");
-    const gridID = propertiesBar.querySelector("label").textContent;
-    const main = document.getElementById(gridID);
-    showModalDbStrc(content, type);
-  };
-  content.appendChild(buttonShowDbStrc);
+  createShowDatabaseStructureButton(content, type);
 
   content.appendChild(createMultiSelectItem("SQL", "sql", "sql"));
   content.appendChild(createMultiSelectItem("Data", "data", "data"));
