@@ -856,5 +856,16 @@
     "styles": "promptComponent.css",
     "icon": "fa fa-commenting-o",
     "renderFunction": "renderPromptComponent"
+  },
+  "pdfDocument": {
+    "type": "pdfDocument",
+    "description": "PDF Document Generator",
+    "category": "Business Logic",
+    "scriptName": "pdfDocumentComponent.js",
+    "createFunction": "createPdfDocumentComponent",
+    "editFunction": "editPdfDocumentComponent",
+    "styles": "pdfDocumentComponent.css",
+    "icon": "fa fa-file-pdf-o",
+    "renderFunction": "renderPdfDocument"
   }
 }
