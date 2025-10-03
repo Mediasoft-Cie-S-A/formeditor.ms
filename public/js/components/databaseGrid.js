@@ -331,6 +331,10 @@ function insertNavBar(
     `<i class='fa fa-download' grid-id='${gridContainer.parentElement.id}' style='color:#4d61fc;'></i>` +
     `</button>`;
 
+  html += `<button name='ImportGRIDBtn' title='Import Data' grid-id='${gridContainer.parentElement.id}' onclick='openImportModal(event,"${DBName}","${tableName}")'>` +
+    `<i class='fa fa-upload' grid-id='${gridContainer.parentElement.id}' style='color:#4d61fc;'></i>` +
+    `</button>`;
+
   // adding button for grid or panel 
   html += `<button name='gridView' title='Grid View' grid-id='${gridContainer.parentElement.id}' onclick='switchView(event,"${DBName}","${gridContainer.parentElement.id}","standard")'>` +
     `<i class='fa fa-th' grid-id='${gridContainer.parentElement.id}' style='color:green;'></i>` +
@@ -631,16 +635,224 @@ function export2CSV(e, DBName, tableName) {
   e.preventDefault();
   const grid = document.getElementById("Data-Grid_" + tableName);
   var main = e.currentTarget.closest('[tagname="dataGrid"]');
-  // get the dataset from the main in json format
-  const dataset = JSON.parse(main.getAttribute("dataset"));
-  // get the dataset fields names
-  const datasetFields = dataset.map((field) => {
-    return field.fieldName;
+  if (!main) {
+    console.error("Grid container not found for export");
+    return;
+  }
+
+  const datasetFields = getGridFieldNames(main);
+  if (!datasetFields.length) {
+    showToast("No fields available for export", 4000);
+    return;
+  }
+
+  const url = `/export-table/${DBName}/${tableName}?fields=${encodeURIComponent(datasetFields.join(","))}`;
+  window.open(url, "_blank");
+}
+
+function getGridFieldNames(main) {
+  try {
+    const datasetAttr = main.getAttribute("dataset");
+    if (!datasetAttr) {
+      return [];
+    }
+    const dataset = JSON.parse(datasetAttr);
+    const seen = new Set();
+    return dataset
+      .map((field) => field.fieldName || field.FieldName || field.name)
+      .filter((name) => {
+        if (!name) {
+          return false;
+        }
+        const normalized = name.toLowerCase();
+        if (normalized === "rowid") {
+          return false;
+        }
+        if (seen.has(normalized)) {
+          return false;
+        }
+        seen.add(normalized);
+        return true;
+      });
+  } catch (error) {
+    console.error("Unable to parse dataset field names", error);
+    return [];
+  }
+}
+
+function openImportModal(e, DBName, tableName) {
+  e.preventDefault();
+  const main = e.currentTarget.closest('[tagname="dataGrid"]');
+  if (!main) {
+    console.error("Grid container not found for import");
+    return;
+  }
+
+  const fieldNames = getGridFieldNames(main);
+  if (!fieldNames.length) {
+    showToast("No fields available for import", 4000);
+    return;
+  }
+
+  const overlay = document.createElement("div");
+  overlay.className = "grid-import-overlay";
+  overlay.innerHTML = `
+    <div class="grid-import-modal" role="dialog" aria-modal="true" aria-labelledby="gridImportTitle">
+      <div class="grid-import-header">
+        <h3 id="gridImportTitle">Import data</h3>
+        <button type="button" class="grid-import-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="grid-import-body">
+        <p>Select a CSV file to import into <strong>${tableName}</strong>.</p>
+        <div class="grid-import-help">
+          <button type="button" class="grid-import-help-toggle">Show format</button>
+          <div class="grid-import-help-content" hidden>
+            <p>The CSV file must include the following columns. The <code>rowid</code> column is ignored automatically.</p>
+            <pre class="grid-import-help-header"></pre>
+            <pre class="grid-import-help-sample"></pre>
+          </div>
+        </div>
+        <div class="grid-import-input-wrapper">
+          <input type="file" accept=".csv,text/csv" class="grid-import-input" aria-label="CSV file" />
+        </div>
+        <div class="grid-import-feedback" role="status"></div>
+      </div>
+      <div class="grid-import-actions">
+        <button type="button" class="grid-import-upload" disabled>Import</button>
+        <button type="button" class="grid-import-cancel">Cancel</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  const helpHeader = overlay.querySelector(".grid-import-help-header");
+  const helpSample = overlay.querySelector(".grid-import-help-sample");
+  if (helpHeader && helpSample) {
+    const formatExample = buildImportFormatExample(fieldNames);
+    helpHeader.textContent = formatExample.header;
+    helpSample.textContent = formatExample.sample;
+  }
+
+  const fileInput = overlay.querySelector(".grid-import-input");
+  const uploadButton = overlay.querySelector(".grid-import-upload");
+  const feedback = overlay.querySelector(".grid-import-feedback");
+  const closeButton = overlay.querySelector(".grid-import-close");
+  const cancelButton = overlay.querySelector(".grid-import-cancel");
+  const helpToggle = overlay.querySelector(".grid-import-help-toggle");
+  const helpContent = overlay.querySelector(".grid-import-help-content");
+
+  const closeModal = () => {
+    overlay.remove();
+  };
+
+  if (closeButton) {
+    closeButton.addEventListener("click", closeModal);
+  }
+  if (cancelButton) {
+    cancelButton.addEventListener("click", closeModal);
+  }
+
+  overlay.addEventListener("click", (event) => {
+    if (event.target === overlay) {
+      closeModal();
+    }
   });
 
-  // call the export service
-  const url = `/export-table/${DBName}/${tableName}?fields=${datasetFields}`;
-  window.open(url, "_blank");
+  if (helpToggle && helpContent) {
+    helpToggle.addEventListener("click", () => {
+      const isHidden = helpContent.hasAttribute("hidden");
+      if (isHidden) {
+        helpContent.removeAttribute("hidden");
+        helpToggle.textContent = "Hide format";
+      } else {
+        helpContent.setAttribute("hidden", "");
+        helpToggle.textContent = "Show format";
+      }
+    });
+  }
+
+  if (fileInput && uploadButton) {
+    fileInput.addEventListener("change", () => {
+      if (feedback) {
+        feedback.textContent = "";
+        feedback.classList.remove("grid-import-feedback-error");
+      }
+      uploadButton.disabled = !fileInput.files || fileInput.files.length === 0;
+    });
+
+    uploadButton.addEventListener("click", async () => {
+      if (!fileInput.files || !fileInput.files.length) {
+        return;
+      }
+      await submitGridImport(fileInput.files[0], fieldNames, DBName, tableName, main, uploadButton, feedback, closeModal);
+    });
+  }
+}
+
+function buildImportFormatExample(fieldNames) {
+  const header = fieldNames.join(",");
+  const sample = fieldNames.map((name) => `${name}_sample`).join(",");
+  return { header, sample };
+}
+
+async function submitGridImport(file, fieldNames, DBName, tableName, main, uploadButton, feedback, closeModal) {
+  if (!uploadButton) {
+    return;
+  }
+
+  const originalLabel = uploadButton.textContent;
+  uploadButton.disabled = true;
+  uploadButton.textContent = "Importing...";
+
+  if (feedback) {
+    feedback.textContent = "";
+    feedback.classList.remove("grid-import-feedback-error");
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("fields", JSON.stringify(fieldNames));
+
+    const response = await fetch(`/import-table/${DBName}/${tableName}`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      let message = "Error importing data";
+      try {
+        const errorData = await response.json();
+        if (errorData && errorData.error) {
+          message = errorData.error;
+        }
+      } catch (jsonError) {
+        console.error("Failed to parse import error response", jsonError);
+      }
+      if (feedback) {
+        feedback.textContent = message;
+        feedback.classList.add("grid-import-feedback-error");
+      }
+      uploadButton.disabled = false;
+      uploadButton.textContent = originalLabel;
+      return;
+    }
+
+    const result = await response.json();
+    const inserted = result && typeof result.inserted === "number" ? result.inserted : 0;
+    showToast(`Imported ${inserted} record${inserted === 1 ? "" : "s"}`, 5000);
+    await searchGrid(DBName, "", "", "", main.id);
+    closeModal();
+  } catch (error) {
+    console.error("Error importing grid data", error);
+    if (feedback) {
+      feedback.textContent = "Unexpected error while importing data";
+      feedback.classList.add("grid-import-feedback-error");
+    }
+    uploadButton.disabled = false;
+    uploadButton.textContent = originalLabel;
+  }
 }
 
 

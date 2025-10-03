@@ -148,3 +148,137 @@
 #HTMLCodeDialog button:hover {
     background-color: var(--color-8);
 }
+
+.grid-import-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.45);
+    z-index: 2000;
+}
+
+.grid-import-modal {
+    background-color: var(--color-147);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    width: min(420px, 90%);
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.grid-import-header {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--color-1);
+    color: var(--color-147);
+}
+
+.grid-import-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.grid-import-close {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.grid-import-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.grid-import-help {
+    border: 1px solid var(--color-5);
+    border-radius: 8px;
+    padding: 12px;
+    background-color: var(--color-146);
+}
+
+.grid-import-help-toggle {
+    background-color: var(--color-5);
+    color: var(--color-147);
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.grid-import-help-toggle:hover {
+    background-color: var(--color-6);
+}
+
+.grid-import-help-content {
+    margin-top: 12px;
+    font-size: 0.9rem;
+}
+
+.grid-import-help-content pre {
+    background-color: var(--color-147);
+    border-radius: 6px;
+    padding: 8px;
+    overflow-x: auto;
+    margin: 6px 0 0 0;
+}
+
+.grid-import-input-wrapper input[type="file"] {
+    width: 100%;
+}
+
+.grid-import-feedback {
+    min-height: 20px;
+    font-size: 0.9rem;
+}
+
+.grid-import-feedback-error {
+    color: var(--color-10);
+}
+
+.grid-import-actions {
+    padding: 16px 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    border-top: 1px solid var(--color-5);
+    background-color: var(--color-146);
+}
+
+.grid-import-actions button {
+    padding: 6px 16px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.grid-import-upload {
+    background-color: var(--color-5);
+    color: var(--color-147);
+}
+
+.grid-import-upload:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.grid-import-cancel {
+    background-color: transparent;
+    color: var(--color-1);
+}
+
+.grid-import-cancel:hover,
+.grid-import-upload:hover:not(:disabled) {
+    filter: brightness(1.1);
+}
