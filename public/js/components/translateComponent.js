@@ -20,77 +20,158 @@
  * - tagName: plain string stored on the root element for serialization.
  */
 
-const translationDictionary = {
+let translationDictionary = {};
+let translationDictionaryPromise;
 
-    "fr": {
-        // Add French translations here if needed
-        "Tableau de bord": "Tableau de bord",
-        "Apercu": "Apercu",
-        "Analyse": "Analyse",
-        "Comptabilité": "Comptabilité",
-        "Clients": "Clients",
-        "Fournisseurs": "Fournisseurs",
-        "Produits": "Produits",
-        "Stocks": "Stocks",
-        "Commandes": "Commandes",
-        "Factures": "Factures",
-        "Paiements": "Paiements",
+function setTranslationDictionary(newDictionary = {}) {
+    translationDictionary = newDictionary;
+    translationDictionaryPromise = Promise.resolve(translationDictionary);
+}
 
-    },
-    "en": {
-        "Tableau de bord": "Dashboard",
-        "Apercu": "Overview",
-        "Analyse": "Analysis",
-        "Comptabilité": "Accounting",
-        "Clients": "Clients",
-        "Fournisseurs": "Suppliers",
-        "Produits": "Products",
-        "Stocks": "Stocks",
-        "Commandes": "Orders",
-        "Factures": "Invoices",
-        "Paiements": "Payments",
-        "Banques": "Banks",
-        "Reports": "Reports",
-        "Daily Report": "Daily Report",
-        "Monthly Report": "Monthly Report"
-    },
-    "de": {
-        // Add German translations here if needed
-        "Tableau de bord": "Instrumententafel",
-        "Apercu": "Überblick",
-        "Analyse": "Analyse",
-        "Comptabilité": "Buchhaltung",
-        "Clients": "Kunden",
-        "Fournisseurs": "Lieferanten",
-        "Produits": "Produkte",
-        "Stocks": "Bestände",
-        "Commandes": "Bestellungen",
-        "Factures": "Rechnungen",
-        "Paiements": "Zahlungen",
-        "Banques": "Banken",
-        "Reports": "Berichte",
-        "Daily Report": "Täglicher Bericht",
-        "Monthly Report": "Monatlicher Bericht"
-    },
-    "it": {
-        // Add Italian translations here if needed
-        "Tableau de bord": "Cruscotto",
-        "Apercu": "Panoramica",
-        "Analyse": "Analisi",
-        "Comptabilité": "Contabilità",
-        "Clients": "Clienti",
-        "Fournisseurs": "Fornitori",
-        "Produits": "Prodotti",
-        "Stocks": "Scorte",
-        "Commandes": "Ordini",
-        "Factures": "Fatture",
-        "Paiements": "Pagamenti",
-        "Banques": "Banche",
-        "Reports": "Rapporti",
-        "Daily Report": "Rapporto giornaliero",
-        "Monthly Report": "Rapporto mensile"
-    },
-};
+async function loadTranslationDictionary(forceReload = false) {
+    if (!forceReload && translationDictionaryPromise) {
+        return translationDictionaryPromise;
+    }
+
+    translationDictionaryPromise = fetch('/api/translations', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+    })
+        .then(async response => {
+            if (!response.ok) {
+                throw new Error('Unable to load translation dictionary');
+            }
+            const payload = await response.json();
+            setTranslationDictionary(payload.dictionary || {});
+            return translationDictionary;
+        })
+        .catch(err => {
+            console.error('Failed to load translation dictionary:', err);
+            setTranslationDictionary({});
+            return translationDictionary;
+        });
+
+    return translationDictionaryPromise;
+}
+
+async function saveTranslationDictionary(newDictionary) {
+    const response = await fetch('/api/translations', {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ dictionary: newDictionary }),
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to save translation dictionary');
+    }
+
+    const payload = await response.json();
+    setTranslationDictionary(payload.dictionary || {});
+    return translationDictionary;
+}
+
+async function importTranslationDictionary(newDictionary) {
+    const response = await fetch('/api/translations/import', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ dictionary: newDictionary }),
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to import translation dictionary');
+    }
+
+    const payload = await response.json();
+    setTranslationDictionary(payload.dictionary || {});
+    return translationDictionary;
+}
+
+async function generateTranslationDictionaryWithAI(promptText, baseDictionary) {
+    const response = await fetch('/api/translations/ai-generate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ prompt: promptText, baseDictionary }),
+    });
+
+    if (!response.ok) {
+        const errorPayload = await response.json().catch(() => ({}));
+        throw new Error(errorPayload.error || 'Failed to generate dictionary with AI');
+    }
+
+    const payload = await response.json();
+    setTranslationDictionary(payload.dictionary || {});
+    return translationDictionary;
+}
+
+function createLanguageEditor(language, dictionary) {
+    const languageBox = document.createElement('div');
+    languageBox.className = 'translation-language-box';
+    languageBox.setAttribute('tagName', 'language');
+
+    const languageHeader = document.createElement('div');
+    languageHeader.className = 'translation-language-header';
+
+    const languageNameInput = document.createElement('input');
+    languageNameInput.placeholder = 'Language';
+    languageNameInput.value = language || '';
+    languageNameInput.className = 'translation-language-input';
+
+    const deleteButton = document.createElement('button');
+    deleteButton.type = 'button';
+    deleteButton.textContent = 'Remove';
+    deleteButton.className = 'translation-language-remove';
+    deleteButton.onclick = () => {
+        languageBox.remove();
+    };
+
+    languageHeader.appendChild(languageNameInput);
+    languageHeader.appendChild(deleteButton);
+
+    const languageDictionaryInput = document.createElement('textarea');
+    languageDictionaryInput.placeholder = 'Language dictionary as JSON';
+    languageDictionaryInput.value = dictionary ? JSON.stringify(dictionary, null, 2) : '';
+    languageDictionaryInput.className = 'translation-language-textarea';
+
+    languageBox.appendChild(languageHeader);
+    languageBox.appendChild(languageDictionaryInput);
+
+    return languageBox;
+}
+
+function collectDictionaryFromEditors(editorContainer) {
+    const result = {};
+    const languageBoxes = editorContainer.querySelectorAll("div[tagName='language']");
+    languageBoxes.forEach(languageBox => {
+        const languageName = languageBox.querySelector('input').value.trim();
+        const languageDictionaryText = languageBox.querySelector('textarea').value.trim();
+        if (!languageName) {
+            return;
+        }
+        if (!languageDictionaryText) {
+            result[languageName] = {};
+            return;
+        }
+        try {
+            const parsedDictionary = JSON.parse(languageDictionaryText);
+            result[languageName] = parsedDictionary;
+        } catch (err) {
+            throw new Error(`Invalid JSON for language ${languageName}`);
+        }
+    });
+    return result;
+}
 // create component
 function createTranslateComponent(type) {
     console.log("createTranslateComponent");
@@ -99,56 +180,138 @@ function createTranslateComponent(type) {
     mainDiv.className = "form-element";
     mainDiv.id = `translateComponent-${Date.now()}`;
 
-    renderTranslationComponent(mainDiv);
+    renderTranslationComponent(mainDiv).catch(err => console.error('Failed to render translate component:', err));
     return mainDiv;
 }
 
 // edit component
-function editTranslateComponent(type, element, content) {
-    // Add translation dictionary editor here
-    // update button translation
-    const updateButton = document.createElement("button");
-    updateButton.textContent = "Update";
-    updateButton.onclick = () => {
-        // Update translation dictionary from the editor
-        // get the language name and dictionary
-        const languageBoxes = content.querySelectorAll("div[tagName='language']");
-        languageBoxes.forEach(languageBox => {
-            const languageName = languageBox.querySelector("input").value;
-            const languageDictionary = languageBox.querySelector("textarea").value;
-            translationDictionary[languageName] = JSON.parse(languageDictionary);
+async function editTranslateComponent(type, element, content) {
+    content.innerHTML = '';
+
+    const editorContainer = document.createElement('div');
+    editorContainer.className = 'translation-editor-container';
+
+    const controlsContainer = document.createElement('div');
+    controlsContainer.className = 'translation-editor-controls';
+
+    const statusMessage = document.createElement('div');
+    statusMessage.className = 'translation-editor-status';
+
+    const importInput = document.createElement('input');
+    importInput.type = 'file';
+    importInput.accept = 'application/json';
+    importInput.style.display = 'none';
+
+    const rebuildEditors = (dictionary) => {
+        editorContainer.innerHTML = '';
+        Object.entries(dictionary || {}).forEach(([language, languageDictionary]) => {
+            editorContainer.appendChild(createLanguageEditor(language, languageDictionary));
         });
-
+        if (!editorContainer.children.length) {
+            editorContainer.appendChild(createLanguageEditor('', {}));
+        }
     };
-    content.appendChild(updateButton);
 
-    // Add translation languages button
-    const addLanguageButton = document.createElement("button");
-    addLanguageButton.textContent = "Add Language";
+    const refreshDictionary = async (force = false) => {
+        await loadTranslationDictionary(force);
+        rebuildEditors(translationDictionary);
+        try {
+            await renderTranslationComponent(element);
+        } catch (err) {
+            console.error('Failed to refresh translate component:', err);
+        }
+    };
+
+    await refreshDictionary(true);
+
+    const addLanguageButton = document.createElement('button');
+    addLanguageButton.type = 'button';
+    addLanguageButton.textContent = 'Add Language';
     addLanguageButton.onclick = () => {
-        console.log("addLanguageButton");
-        // generate a box to add a new language
-        const newLanguageBox = document.createElement("div");
-        newLanguageBox.tagName = "language";
-        const languageNameInput = document.createElement("input");
-        languageNameInput.placeholder = "Language Name";
-        const languageDictionaryInput = document.createElement("textarea");
-        languageDictionaryInput.placeholder = "Language Dictionary";
-        newLanguageBox.appendChild(languageNameInput);
-        newLanguageBox.appendChild(languageDictionaryInput);
-        content.appendChild(newLanguageBox);
-
+        editorContainer.appendChild(createLanguageEditor('', {}));
     };
-    content.appendChild(addLanguageButton);
 
+    const saveButton = document.createElement('button');
+    saveButton.type = 'button';
+    saveButton.textContent = 'Save Dictionary';
+    saveButton.onclick = async () => {
+        try {
+            const updatedDictionary = collectDictionaryFromEditors(editorContainer);
+            await saveTranslationDictionary(updatedDictionary);
+            statusMessage.textContent = 'Dictionary saved successfully.';
+            await refreshDictionary();
+        } catch (err) {
+            console.error('Failed to save dictionary:', err);
+            statusMessage.textContent = err.message || 'Unable to save dictionary.';
+        }
+    };
+
+    const importButton = document.createElement('button');
+    importButton.type = 'button';
+    importButton.textContent = 'Import JSON';
+    importButton.onclick = () => importInput.click();
+
+    importInput.onchange = async (event) => {
+        const file = event.target.files && event.target.files[0];
+        if (!file) {
+            return;
+        }
+        try {
+            const fileContent = await file.text();
+            const importedDictionary = JSON.parse(fileContent);
+            await importTranslationDictionary(importedDictionary);
+            statusMessage.textContent = `Dictionary imported from ${file.name}.`;
+            importInput.value = '';
+            await refreshDictionary();
+        } catch (err) {
+            console.error('Failed to import dictionary:', err);
+            statusMessage.textContent = err.message || 'Unable to import dictionary.';
+        }
+    };
+
+    const aiButton = document.createElement('button');
+    aiButton.type = 'button';
+    aiButton.textContent = 'Generate with AI';
+    aiButton.onclick = async () => {
+        const promptText = window.prompt('Describe the dictionary you want to generate (languages, keys, etc.):');
+        if (!promptText) {
+            return;
+        }
+        try {
+            await generateTranslationDictionaryWithAI(promptText, translationDictionary);
+            statusMessage.textContent = 'Dictionary generated with AI.';
+            await refreshDictionary();
+        } catch (err) {
+            console.error('Failed to generate dictionary with AI:', err);
+            statusMessage.textContent = err.message || 'Unable to generate dictionary with AI.';
+        }
+    };
+
+    controlsContainer.appendChild(addLanguageButton);
+    controlsContainer.appendChild(saveButton);
+    controlsContainer.appendChild(importButton);
+    controlsContainer.appendChild(aiButton);
+
+    content.appendChild(editorContainer);
+    content.appendChild(controlsContainer);
+    content.appendChild(importInput);
+    content.appendChild(statusMessage);
 }
 
 
-function renderTranslationComponent(mainDiv) {
+async function renderTranslationComponent(mainDiv) {
 
     mainDiv.innerHTML = ''; // Clear the mainDiv content
+
+    const loadingIndicator = document.createElement('div');
+    loadingIndicator.className = 'translation-loading-indicator';
+    loadingIndicator.textContent = 'Loading translations...';
+    mainDiv.appendChild(loadingIndicator);
+
+    await loadTranslationDictionary();
+
+    mainDiv.innerHTML = '';
     const floatButton = document.createElement('div');
-    // floatButton.style.position = 'fixed';
 
     floatButton.style.backgroundColor = '#007bff';
     floatButton.style.color = '#fff';
@@ -170,18 +333,30 @@ function renderTranslationComponent(mainDiv) {
     languageSelector.style.borderRadius = '5px';
     languageSelector.style.display = 'none';
 
-    Object.keys(translationDictionary).forEach(lang => {
+    const languages = Object.keys(translationDictionary || {});
+    languages.forEach(lang => {
         const option = document.createElement('option');
         option.value = lang;
         option.textContent = lang;
         languageSelector.appendChild(option);
     });
 
-    floatButton.setAttribute('onclick', `showlanguageSelector('${languageSelector.id}')`);
+    if (!languages.length) {
+        languageSelector.disabled = true;
+        languageSelector.title = 'No translations configured yet.';
+    }
 
+    floatButton.onclick = () => {
+        if (languageSelector.disabled) {
+            alert('No translations available. Please configure the dictionary.');
+            return;
+        }
+        showlanguageSelector(languageSelector.id);
+    };
 
-    languageSelector.setAttribute('onchange', `translatePage('${languageSelector.id}', this.value)`);
-
+    languageSelector.onchange = (event) => {
+        translatePage(languageSelector.id, event.target.value);
+    };
 
     mainDiv.appendChild(floatButton);
     mainDiv.appendChild(languageSelector);
@@ -189,7 +364,10 @@ function renderTranslationComponent(mainDiv) {
 
 function showlanguageSelector(langSelectorID) {
     const languageSelector = document.getElementById(langSelectorID);
-    languageSelector.style.display = languageSelector.style.display === 'none' ? 'block' : 'none'
+    if (!languageSelector || languageSelector.disabled) {
+        return;
+    }
+    languageSelector.style.display = languageSelector.style.display === 'none' ? 'block' : 'none';
 }
 
 

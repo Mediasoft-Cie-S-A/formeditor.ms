@@ -123,6 +123,7 @@ const { registerDynamicRoutes } = require("./dynamic")(app, mongoDbUrl, dbName);
 // Register the dynamic routes
 registerDynamicRoutes();
 require("./pageService")(app, mongoDbUrl, dbName, registerDynamicRoutes);
+require('./translationService')(app, mongoDbUrl, dbName);
 require('./askAiService')(app, app.config.askAI);
 
 // Swagger definition
