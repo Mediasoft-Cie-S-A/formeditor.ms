@@ -222,8 +222,107 @@ function editPdfDocumentComponent(type, element, content) {
   datasetEditorContainer.className = "pdf-dataset-editor";
   content.appendChild(datasetEditorContainer);
 
-  if (typeof editElementDataSet === "function") {
-    editElementDataSet(type, element, datasetEditorContainer);
+  // button showModalDbStrc for show the database structure
+  const buttonShowDbStrc = document.createElement("button");
+  buttonShowDbStrc.style.width = "100%";
+  buttonShowDbStrc.textContent = "Show DB";
+  buttonShowDbStrc.onclick = function () {
+    const propertiesBar = document.getElementById("propertiesBar");
+    const gridID = propertiesBar.querySelector("label").textContent;
+    const main = document.getElementById(gridID);
+    showModalDbStrc(content, type);
+  };
+  content.appendChild(buttonShowDbStrc);
+
+  content.appendChild(createMultiSelectItem("SQL", "sql", "sql"));
+  content.appendChild(createMultiSelectItem("Data", "data", "data"));
+  content.appendChild(createMultiSelectItem("Link", "link", "link"));
+  content.appendChild(createMultiSelectItem("Exception", "exception", "exception"));
+  content.appendChild(createSelectItem("Filter", "filter", "filter", element.getAttribute("filter"), "text", true));
+
+
+  // load the data
+  // check if jsonData is not empty
+  if (element.getAttribute("dataSet") != null) {
+    var target = content.querySelector("#Data");
+    var jsonData = JSON.parse(element.getAttribute("dataSet"));
+    jsonData.forEach((fieldJson) => {
+      if (fieldJson.fieldType == "search_win") {
+        addFieldToPropertiesBar(target, fieldJson);
+
+        // get the select input with name=fieldType
+        var selects = content.querySelectorAll("select[name='fieldType']");
+        // select the last select
+        var select = selects[selects.length - 1];
+        console.log("select", select);
+        // select search_win in the select
+        select.value = "search_win";
+        // execute the onchange event of the select
+        select.dispatchEvent(new Event('change'));
+
+      }
+      if (fieldJson.fieldType !== "rowid")
+        addFieldToPropertiesBar(target, fieldJson);
+    });
+
+  }
+
+  if (element.getAttribute("datalink") != null) {
+    var target = content.querySelector("#Link");
+    var jsonData = JSON.parse(element.getAttribute("datalink"));
+    jsonData.forEach((fieldJson) => {
+      addFieldToPropertiesBar(target, fieldJson);
+    });
+  }
+  // exception
+  if (element.getAttribute("exceptionSet") != null) {
+    var target = content.querySelector("#Exception");
+    var jsonData = JSON.parse(element.getAttribute("exceptionSet"));
+    jsonData.forEach((fieldJson) => {
+      addFieldToPropertiesBar(target, fieldJson);
+    });
+  }
+
+  // sql
+  if (element.getAttribute("sql") != null) {
+    var target = content.querySelector("#SQL");
+    var jsonData = JSON.parse(element.getAttribute("sql"));
+
+    // add the db name
+    if (jsonData.DBName != null) {
+      var dbinput = target.querySelector("[tagname='dbname']");
+      dbinput.value = jsonData.DBName;
+    }
+    // add the select
+    if (jsonData.select != null) {
+      var select = target.querySelector("[tagname='select']");
+      select.value = jsonData.select;
+    }
+    // add the update
+    if (jsonData.update != null) {
+      var update = target.querySelector("[tagname='update']");
+      update.value = jsonData.update
+    }
+    // add the insert
+    if (jsonData.insert != null) {
+      var insert = target.querySelector("[tagname='insert']");
+      insert.value = jsonData.insert;
+    }
+    // add the delete
+    if (jsonData.delete != null) {
+      var del = target.querySelector("[tagname='delete']");
+      del.value = jsonData.delete;
+
+    }
+    // add the api
+  } // end if sql
+
+  // add input api key 
+  content.appendChild(createInputItem("Api Key", "apikey", "apikey", element.getAttribute("apikey"), "text", false));
+  // filter
+  if (element.getAttribute("filter") != null) {
+    var target = content.querySelector("#Filter");
+    target.value = element.getAttribute("filter");
   }
 
   const datasetStructureLabel = document.createElement("label");
@@ -412,8 +511,8 @@ function editPdfDocumentComponent(type, element, content) {
       row.innerHTML = `
         <div class=\"pdf-template-label\">${escapeHtml(field.label)}</div>
         <div class=\"pdf-template-value\"><span class=\"pdf-template-tag\" data-field="${escapeHtml(
-          field.name
-        )}\" data-label=\"${escapeHtml(field.label)}\" contenteditable=\"false\">${escapeHtml(field.label)}</span></div>
+        field.name
+      )}\" data-label=\"${escapeHtml(field.label)}\" contenteditable=\"false\">${escapeHtml(field.label)}</span></div>
       `;
       wrapper.appendChild(row);
     });
@@ -583,22 +682,6 @@ function editPdfDocumentComponent(type, element, content) {
     }
   }
 
-  function bindDatasetUpdateEvents() {
-    const buttons = Array.from(datasetEditorContainer.querySelectorAll("button"));
-    const updateButton = buttons.find((btn) => btn.textContent && btn.textContent.trim().toLowerCase() === "update");
-    if (updateButton) {
-      updateButton.addEventListener("click", () => {
-        setTimeout(() => {
-          refreshFields();
-          if (!templateEditor.innerHTML.trim() && currentFields.length) {
-            templateEditor.innerHTML = buildDefaultTemplate(currentFields);
-            prepareEditorTags();
-          }
-          updateLivePreview();
-        }, 0);
-      });
-    }
-  }
 
   function observeDatasetChanges() {
     if (typeof MutationObserver !== "function") {
@@ -728,7 +811,7 @@ function editPdfDocumentComponent(type, element, content) {
   }
   prepareEditorTags();
   updateLivePreview();
-  bindDatasetUpdateEvents();
+
   observeDatasetChanges();
 }
 
