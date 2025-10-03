@@ -17,6 +17,74 @@
 const OdbcDatabase = require("./OdbcDatabase.js");
 const MySqlDatabase = require("./MySqlDatabase.js");
 const PrismaDatabase = require("./PrismaDatabase.js");
+const multer = require("multer");
+
+function parseCsvTable(csvText) {
+  const rows = [];
+  let current = "";
+  let row = [];
+  let inQuotes = false;
+
+  for (let i = 0; i < csvText.length; i++) {
+    const char = csvText[i];
+
+    if (char === "\"") {
+      if (inQuotes && csvText[i + 1] === "\"") {
+        current += "\"";
+        i += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (char === "," && !inQuotes) {
+      row.push(current);
+      current = "";
+      continue;
+    }
+
+    if ((char === "\n" || char === "\r") && !inQuotes) {
+      if (char === "\r" && csvText[i + 1] === "\n") {
+        i += 1;
+      }
+      row.push(current);
+      current = "";
+      if (row.length && row.some((value) => value.trim() !== "")) {
+        rows.push(row);
+      }
+      row = [];
+      continue;
+    }
+
+    current += char;
+  }
+
+  row.push(current);
+  if (row.length && row.some((value) => value.trim() !== "")) {
+    rows.push(row);
+  }
+
+  if (!rows.length) {
+    return { headers: [], records: [] };
+  }
+
+  const headers = rows.shift().map((header, index) => {
+    const trimmed = header.trim();
+    return trimmed || `Column${index + 1}`;
+  });
+
+  const records = rows.map((values) => {
+    const record = {};
+    headers.forEach((header, index) => {
+      const rawValue = values[index] !== undefined ? values[index] : "";
+      record[header] = typeof rawValue === "string" ? rawValue.trim() : rawValue;
+    });
+    return record;
+  }).filter((record) => Object.values(record).some((value) => value !== ""));
+
+  return { headers, records };
+}
 const VALID_API_KEY = "e7f4b0f3-5c6b-4a29-b821-93f0d99d1cb6";
 class dblayer {
 
@@ -312,6 +380,11 @@ class dblayer {
   }
 
   generateRoutes(app, dbs) {
+    const upload = multer({
+      storage: multer.memoryStorage(),
+      limits: { fileSize: 5 * 1024 * 1024 },
+    });
+
     /**
      * @swagger
      * /table-structure/{tableName}:
@@ -1019,7 +1092,12 @@ class dblayer {
         const db = dbs.databases[database];
 
         const fields = req.query.fields ? req.query.fields.split(",") : null;
-        const result = await db.exportTableToCSV(tableName, fields);
+        const sanitizedFields = Array.isArray(fields)
+          ? fields
+            .map((field) => (typeof field === "string" ? field.trim() : null))
+            .filter((field) => field && field.toLowerCase() !== "rowid")
+          : null;
+        const result = await db.exportTableToCSV(tableName, sanitizedFields);
         // res set header
         res.set("Content-Type", "text/csv");
         res.set("Content-Disposition", `attachment; filename=${tableName}.csv`);
@@ -1028,6 +1106,87 @@ class dblayer {
       } catch (err) {
         console.error(err);
         res.status(500).send("Error exporting table");
+      }
+    });
+
+    app.post("/import-table/:database/:tableName", dbs.checkAuthenticated, upload.single("file"), async (req, res) => {
+      try {
+        const { database, tableName } = req.params;
+        const db = dbs.databases[database];
+
+        if (!db) {
+          return res.status(404).json({ error: "Database not found" });
+        }
+
+        if (!req.file || !req.file.buffer) {
+          return res.status(400).json({ error: "No file uploaded" });
+        }
+
+        let fieldsPayload = [];
+        if (req.body.fields) {
+          try {
+            const parsed = JSON.parse(req.body.fields);
+            if (Array.isArray(parsed)) {
+              fieldsPayload = parsed;
+            }
+          } catch (error) {
+            console.error("Invalid fields payload", error);
+            return res.status(400).json({ error: "Invalid field metadata" });
+          }
+        }
+
+        const allowedFields = Array.from(new Set(fieldsPayload
+          .filter((field) => typeof field === "string" && field.trim() !== "")
+          .map((field) => field.trim())
+          .filter((field) => field.toLowerCase() !== "rowid")));
+
+        if (!allowedFields.length) {
+          return res.status(400).json({ error: "No importable fields defined" });
+        }
+
+        const csvText = req.file.buffer.toString("utf8");
+        if (!csvText.trim()) {
+          return res.status(400).json({ error: "CSV file is empty" });
+        }
+
+        const { headers, records } = parseCsvTable(csvText);
+        if (!headers.length) {
+          return res.status(400).json({ error: "CSV file is missing a header row" });
+        }
+
+        if (!Array.isArray(records) || !records.length) {
+          return res.status(400).json({ error: "CSV file does not contain data" });
+        }
+
+        const importableFields = allowedFields.filter((field) => headers.includes(field));
+        if (!importableFields.length) {
+          return res.status(400).json({ error: "CSV columns do not match expected fields" });
+        }
+
+        let inserted = 0;
+        for (const record of records) {
+          const filteredEntries = importableFields
+            .filter((field) => Object.prototype.hasOwnProperty.call(record, field))
+            .map((field) => ({ field, value: record[field] }))
+            .filter(({ value }) => value !== undefined && value !== null && value !== "");
+
+          if (!filteredEntries.length) {
+            continue;
+          }
+
+          const data = {
+            fields: filteredEntries.map((entry) => entry.field),
+            values: filteredEntries.map((entry) => entry.value),
+          };
+
+          await db.insertRecord(tableName, data);
+          inserted += 1;
+        }
+
+        res.json({ success: true, inserted });
+      } catch (error) {
+        console.error("Error importing table", error);
+        res.status(500).json({ error: "Error importing table" });
       }
     });
 
