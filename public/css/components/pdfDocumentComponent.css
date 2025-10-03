@@ -80,6 +80,18 @@
   margin: 0 2px;
 }
 
+.pdf-template-tag.pdf-template-value-populated {
+  background-color: #ecfdf3;
+  border-color: #a6f4c5;
+  color: #027a48;
+}
+
+.pdf-template-tag.pdf-template-value-missing {
+  background-color: #f4f4f5;
+  border: 1px dashed #d0d5dd;
+  color: #667085;
+}
+
 .pdf-document-properties {
   display: flex;
   flex-direction: column;
@@ -141,6 +153,74 @@
 .pdf-field-empty {
   color: #98a2b3;
   font-style: italic;
+}
+
+.pdf-dataset-structure {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: 1px solid #e4e7ec;
+  border-radius: 6px;
+  background-color: #f9fafb;
+  padding: 12px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.pdf-dataset-structure-empty {
+  color: #98a2b3;
+  font-style: italic;
+}
+
+.pdf-dataset-structure-group {
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+.pdf-dataset-structure-group-title {
+  padding: 8px 12px;
+  font-weight: 600;
+  color: #1d2939;
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e4e7ec;
+}
+
+.pdf-dataset-structure-table {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px 12px;
+  padding: 8px 12px 12px;
+  align-items: flex-start;
+}
+
+.pdf-dataset-structure-row {
+  display: contents;
+}
+
+.pdf-dataset-structure-row--header .pdf-dataset-structure-cell {
+  font-weight: 600;
+  color: #475467;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+}
+
+.pdf-dataset-structure-row--hidden .pdf-dataset-structure-cell {
+  color: #98a2b3;
+  font-style: italic;
+}
+
+.pdf-dataset-structure-cell {
+  font-size: 0.85rem;
+  color: #344054;
+  padding: 4px 0;
+  word-break: break-word;
+}
+
+.pdf-dataset-structure-cell--sample {
+  color: #026aa2;
 }
 
 .pdf-template-editor {

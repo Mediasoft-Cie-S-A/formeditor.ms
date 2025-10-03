@@ -8,6 +8,189 @@
 let pdfDocumentLibrariesPromise = null;
 let pdfDocumentDraggedTag = null;
 
+function parseJsonSafe(value, fallback = null) {
+  if (value === undefined || value === null || value === "") {
+    return fallback;
+  }
+  if (typeof value !== "string") {
+    return value;
+  }
+  try {
+    return JSON.parse(value);
+  } catch (error) {
+    console.warn("Impossible de parser le JSON pour le composant PDF", error);
+    return fallback;
+  }
+}
+
+function normalizeFieldDescriptor(field) {
+  if (!field) {
+    return null;
+  }
+
+  const name = field.name || field.fieldName || field.columnName || field.id;
+  if (!name) {
+    return null;
+  }
+
+  const label = field.label || field.fieldLabel || field.title || name;
+  const type = field.type || field.fieldType || field.dataType || "";
+  const typeLower = typeof type === "string" ? type.toLowerCase() : "";
+  const dbName = field.DBName || field.dbName || field.database || "";
+  const tableName = field.tableName || field.table || field.table_name || "";
+
+  const sampleCandidates = [
+    field.sampleValue,
+    field.previewValue,
+    field.preview,
+    field.defaultValue,
+    field.default,
+    field.fieldDefaultValue,
+    field.value,
+    field.fieldValue,
+  ];
+
+  let sampleValue = "";
+  for (const candidate of sampleCandidates) {
+    if (candidate === undefined || candidate === null) {
+      continue;
+    }
+    if (Array.isArray(candidate)) {
+      if (candidate.length === 0) {
+        continue;
+      }
+      sampleValue = candidate.join(", ");
+      break;
+    }
+    const candidateString = String(candidate);
+    if (candidateString.trim() === "") {
+      continue;
+    }
+    sampleValue = candidateString;
+    break;
+  }
+
+  return {
+    ...field,
+    name,
+    label,
+    type,
+    typeLower,
+    DBName: dbName,
+    tableName,
+    sampleValue,
+    hidden: typeLower === "rowid" || typeLower === "hidden",
+  };
+}
+
+function extractFieldsFromDataset(dataset) {
+  if (!Array.isArray(dataset)) {
+    return [];
+  }
+  return dataset.map((field) => normalizeFieldDescriptor(field)).filter(Boolean);
+}
+
+function isPdfFieldVisible(field) {
+  if (!field) {
+    return false;
+  }
+  const type = field.typeLower || (typeof field.type === "string" ? field.type.toLowerCase() : "");
+  return type !== "rowid" && type !== "hidden";
+}
+
+function buildFieldValueMap(fields) {
+  const map = {};
+  if (!Array.isArray(fields)) {
+    return map;
+  }
+
+  fields.forEach((field) => {
+    if (!field || !field.name) {
+      return;
+    }
+
+    let value = field.sampleValue;
+    if (value === undefined || value === null || (typeof value === "string" && value.trim() === "")) {
+      const candidates = [
+        field.previewValue,
+        field.defaultValue,
+        field.default,
+        field.fieldDefaultValue,
+        field.value,
+        field.fieldValue,
+      ];
+      for (const candidate of candidates) {
+        if (candidate === undefined || candidate === null) {
+          continue;
+        }
+        value = Array.isArray(candidate) ? candidate.join(", ") : String(candidate);
+        if (value.trim() !== "") {
+          break;
+        }
+        value = undefined;
+      }
+    }
+
+    if (value === undefined || value === null) {
+      return;
+    }
+
+    if (Array.isArray(value)) {
+      map[field.name] = value.join(", ");
+      return;
+    }
+
+    const stringValue = String(value);
+    if (stringValue.trim() === "") {
+      return;
+    }
+
+    map[field.name] = stringValue;
+  });
+
+  return map;
+}
+
+function populatePreviewValues(container, fields) {
+  if (!container) {
+    return;
+  }
+
+  const valueMap = buildFieldValueMap(fields);
+  const tags = container.querySelectorAll("span[data-field]");
+
+  tags.forEach((tag) => {
+    const fieldName = tag.getAttribute("data-field");
+    const fallback = tag.getAttribute("data-label") || tag.dataset.label || tag.textContent || fieldName || "";
+    const value = valueMap[fieldName];
+
+    tag.classList.remove("pdf-template-value-populated", "pdf-template-value-missing");
+
+    if (value !== undefined) {
+      tag.textContent = value;
+      tag.classList.add("pdf-template-value-populated");
+    } else {
+      tag.textContent = fallback || fieldName || "";
+      tag.classList.add("pdf-template-value-missing");
+    }
+  });
+}
+
+function getDatasetFieldsFromAttributes(element) {
+  const datasetAttribute = element.getAttribute("dataSet") || element.getAttribute("dataset");
+  const dataset = parseJsonSafe(datasetAttribute, []);
+  return extractFieldsFromDataset(dataset);
+}
+
+function getPdfDocumentFieldsForPreview(element) {
+  const structureAttribute = element.getAttribute("data-structure");
+  const structure = decodePdfDocumentStructure(structureAttribute);
+  if (Array.isArray(structure) && structure.length) {
+    return structure;
+  }
+  return getDatasetFieldsFromAttributes(element);
+}
+
 function createPdfDocumentComponent(type) {
   const main = document.createElement("div");
   main.id = `${type}${Date.now()}`;
@@ -42,6 +225,14 @@ function editPdfDocumentComponent(type, element, content) {
   if (typeof editElementDataSet === "function") {
     editElementDataSet(type, element, datasetEditorContainer);
   }
+
+  const datasetStructureLabel = document.createElement("label");
+  datasetStructureLabel.textContent = "Structure du dataset";
+  content.appendChild(datasetStructureLabel);
+
+  const datasetStructureContainer = document.createElement("div");
+  datasetStructureContainer.className = "pdf-dataset-structure";
+  content.appendChild(datasetStructureContainer);
 
   const paletteLabel = document.createElement("label");
   paletteLabel.textContent = "Champs disponibles";
@@ -106,47 +297,123 @@ function editPdfDocumentComponent(type, element, content) {
   let currentFields = [];
   let currentRange = null;
 
-  function extractFieldsFromDataset(dataset) {
-    if (!Array.isArray(dataset)) {
-      return [];
-    }
-    return dataset
-      .filter((field) => field && field.fieldName && field.fieldType !== "rowid" && field.fieldType !== "hidden")
-      .map((field) => ({
-        name: field.fieldName,
-        label: field.fieldLabel || field.fieldName,
-        type: field.fieldType,
-        DBName: field.DBName,
-        tableName: field.tableName,
-      }));
-  }
+  function renderDatasetStructure(fields) {
+    datasetStructureContainer.innerHTML = "";
 
-  function parseJsonSafe(value) {
-    if (!value) {
-      return null;
+    if (!fields || !fields.length) {
+      const empty = document.createElement("div");
+      empty.className = "pdf-dataset-structure-empty";
+      empty.textContent = "Aucun dataset sélectionné.";
+      datasetStructureContainer.appendChild(empty);
+      return;
     }
-    try {
-      return JSON.parse(value);
-    } catch (error) {
-      console.warn("Impossible de parser le dataset du composant", error);
-      return null;
-    }
+
+    const grouped = fields.reduce((accumulator, field) => {
+      const keyParts = [];
+      if (field.DBName) {
+        keyParts.push(field.DBName);
+      }
+      if (field.tableName) {
+        keyParts.push(field.tableName);
+      }
+      const key = keyParts.length ? keyParts.join(" / ") : "Dataset";
+      if (!accumulator[key]) {
+        accumulator[key] = [];
+      }
+      accumulator[key].push(field);
+      return accumulator;
+    }, {});
+
+    const groupEntries = Object.entries(grouped).sort((a, b) =>
+      a[0].localeCompare(b[0], undefined, { sensitivity: "base" })
+    );
+
+    groupEntries.forEach(([groupKey, groupFields]) => {
+      const group = document.createElement("div");
+      group.className = "pdf-dataset-structure-group";
+
+      const title = document.createElement("div");
+      title.className = "pdf-dataset-structure-group-title";
+      title.textContent = groupKey;
+      group.appendChild(title);
+
+      const table = document.createElement("div");
+      table.className = "pdf-dataset-structure-table";
+
+      const headerRow = document.createElement("div");
+      headerRow.className = "pdf-dataset-structure-row pdf-dataset-structure-row--header";
+      ["Libellé", "Champ", "Type", "Valeur d'exemple"].forEach((columnLabel) => {
+        const cell = document.createElement("div");
+        cell.className = "pdf-dataset-structure-cell";
+        cell.textContent = columnLabel;
+        headerRow.appendChild(cell);
+      });
+      table.appendChild(headerRow);
+
+      const sortedFields = [...groupFields].sort((a, b) => {
+        const labelA = (a.label || a.name || "").toString();
+        const labelB = (b.label || b.name || "").toString();
+        return labelA.localeCompare(labelB, undefined, { sensitivity: "base" });
+      });
+
+      sortedFields.forEach((field) => {
+        const row = document.createElement("div");
+        row.className = "pdf-dataset-structure-row";
+        if (!isPdfFieldVisible(field)) {
+          row.classList.add("pdf-dataset-structure-row--hidden");
+        }
+
+        const labelCell = document.createElement("div");
+        labelCell.className = "pdf-dataset-structure-cell";
+        labelCell.textContent = field.label || field.name || "—";
+        labelCell.title = labelCell.textContent;
+        row.appendChild(labelCell);
+
+        const nameCell = document.createElement("div");
+        nameCell.className = "pdf-dataset-structure-cell";
+        nameCell.textContent = field.name || "—";
+        nameCell.title = nameCell.textContent;
+        row.appendChild(nameCell);
+
+        const typeCell = document.createElement("div");
+        typeCell.className = "pdf-dataset-structure-cell";
+        typeCell.textContent = field.type || "—";
+        typeCell.title = typeCell.textContent;
+        row.appendChild(typeCell);
+
+        const sampleCell = document.createElement("div");
+        sampleCell.className = "pdf-dataset-structure-cell pdf-dataset-structure-cell--sample";
+        const sampleText = field.sampleValue && String(field.sampleValue).trim() !== "" ? field.sampleValue : "—";
+        sampleCell.textContent = sampleText;
+        sampleCell.title = sampleText;
+        row.appendChild(sampleCell);
+
+        table.appendChild(row);
+      });
+
+      group.appendChild(table);
+      datasetStructureContainer.appendChild(group);
+    });
   }
 
   function buildDefaultTemplate(fields) {
     if (!fields || !fields.length) {
       return "<div class=\"pdf-template-placeholder\">Aucun champ disponible.</div>";
     }
+    const visibleFields = fields.filter((field) => isPdfFieldVisible(field));
+    if (!visibleFields.length) {
+      return "<div class=\"pdf-template-placeholder\">Aucun champ disponible.</div>";
+    }
     const wrapper = document.createElement("div");
     wrapper.className = "pdf-template-grid";
-    fields.forEach((field) => {
+    visibleFields.forEach((field) => {
       const row = document.createElement("div");
       row.className = "pdf-template-row";
       row.innerHTML = `
         <div class=\"pdf-template-label\">${escapeHtml(field.label)}</div>
         <div class=\"pdf-template-value\"><span class=\"pdf-template-tag\" data-field="${escapeHtml(
           field.name
-        )}\" contenteditable="false">${escapeHtml(field.label)}</span></div>
+        )}\" data-label=\"${escapeHtml(field.label)}\" contenteditable=\"false\">${escapeHtml(field.label)}</span></div>
       `;
       wrapper.appendChild(row);
     });
@@ -163,9 +430,9 @@ function editPdfDocumentComponent(type, element, content) {
     if (!fieldName) {
       return;
     }
-    const html = `<span class=\"pdf-template-tag\" data-field="${escapeHtml(fieldName)}" contenteditable="false">${escapeHtml(
-      fieldLabel || fieldName
-    )}</span>&nbsp;`;
+    const safeName = escapeHtml(fieldName);
+    const safeLabel = escapeHtml(fieldLabel || fieldName);
+    const html = `<span class=\"pdf-template-tag\" data-field="${safeName}" data-label="${safeLabel}" contenteditable=\"false\">${safeLabel}</span>&nbsp;`;
     templateEditor.focus();
     const selection = window.getSelection();
     let range = null;
@@ -212,6 +479,9 @@ function editPdfDocumentComponent(type, element, content) {
       tag.classList.add("pdf-template-tag");
       tag.setAttribute("contenteditable", "false");
       tag.setAttribute("draggable", "true");
+      if (!tag.getAttribute("data-label")) {
+        tag.setAttribute("data-label", tag.textContent || tag.getAttribute("data-field") || "");
+      }
       if (!tag.dataset.pdfTagBound) {
         tag.addEventListener("dragstart", (event) => {
           pdfDocumentDraggedTag = tag;
@@ -229,6 +499,9 @@ function editPdfDocumentComponent(type, element, content) {
       tag.classList.add("pdf-template-tag");
       tag.removeAttribute("contenteditable");
       tag.removeAttribute("draggable");
+      if (!tag.getAttribute("data-label")) {
+        tag.setAttribute("data-label", tag.textContent || tag.getAttribute("data-field") || "");
+      }
       delete tag.dataset.pdfTagBound;
     });
   }
@@ -238,6 +511,7 @@ function editPdfDocumentComponent(type, element, content) {
     if (html) {
       livePreview.innerHTML = html;
       preparePreviewTags(livePreview);
+      populatePreviewValues(livePreview, currentFields);
     } else {
       livePreview.innerHTML =
         "<div class=\"pdf-document-placeholder\">Ajoutez des balises pour générer un aperçu.</div>";
@@ -257,14 +531,15 @@ function editPdfDocumentComponent(type, element, content) {
 
   function renderFieldPalette(fields) {
     fieldPalette.innerHTML = "";
-    if (!fields || !fields.length) {
+    const visibleFields = (fields || []).filter((field) => isPdfFieldVisible(field));
+    if (!visibleFields.length) {
       const empty = document.createElement("div");
       empty.className = "pdf-field-empty";
       empty.textContent = "Aucun champ disponible.";
       fieldPalette.appendChild(empty);
       return;
     }
-    fields.forEach((field) => {
+    visibleFields.forEach((field) => {
       const chip = document.createElement("span");
       chip.className = "pdf-field-chip";
       chip.textContent = field.label;
@@ -283,25 +558,17 @@ function editPdfDocumentComponent(type, element, content) {
     });
   }
 
-  function getDatasetFieldsFromAttributes() {
-    const datasetAttribute = element.getAttribute("dataSet") || element.getAttribute("dataset");
-    const dataset = parseJsonSafe(datasetAttribute);
-    if (Array.isArray(dataset) && dataset.length) {
-      return extractFieldsFromDataset(dataset);
-    }
-    return null;
-  }
-
   function refreshFields() {
-    const datasetFields = getDatasetFieldsFromAttributes();
+    const datasetFields = getDatasetFieldsFromAttributes(element);
     if (datasetFields && datasetFields.length) {
-      currentFields = datasetFields;
+      currentFields = datasetFields.map((field) => ({ ...field }));
     } else if (savedStructure && savedStructure.length) {
-      currentFields = savedStructure;
+      currentFields = savedStructure.map((field) => ({ ...field }));
     } else {
       currentFields = [];
     }
     renderFieldPalette(currentFields);
+    renderDatasetStructure(currentFields);
   }
 
   function saveChanges() {
@@ -512,7 +779,12 @@ function updatePdfDocumentPreview(element, html) {
       tag.classList.add("pdf-template-tag");
       tag.removeAttribute("contenteditable");
       tag.removeAttribute("draggable");
+      if (!tag.getAttribute("data-label")) {
+        tag.setAttribute("data-label", tag.textContent || tag.getAttribute("data-field") || "");
+      }
     });
+    const previewFields = getPdfDocumentFieldsForPreview(element);
+    populatePreviewValues(preview, previewFields);
   } else {
     preview.innerHTML =
       '<div class="pdf-document-placeholder">Configurez un dataset et composez votre document.</div>';
@@ -535,13 +807,23 @@ function decodePdfDocumentStructure(value) {
   if (!value) {
     return [];
   }
-  try {
-    const decoded = decodeURIComponent(value);
-    return JSON.parse(decoded);
-  } catch (error) {
-    console.warn("Impossible de décoder la structure du PDF", error);
+
+  let decodedValue = value;
+  if (typeof value === "string") {
+    try {
+      decodedValue = decodeURIComponent(value);
+    } catch (error) {
+      console.warn("Impossible de décoder la structure du PDF", error);
+      decodedValue = value;
+    }
+  }
+
+  const parsed = parseJsonSafe(decodedValue, []);
+  if (!Array.isArray(parsed)) {
     return [];
   }
+
+  return parsed.map((field) => normalizeFieldDescriptor(field)).filter(Boolean);
 }
 
 function bindPdfDocumentDownload(element) {
