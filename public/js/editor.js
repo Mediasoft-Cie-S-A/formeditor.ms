@@ -1095,6 +1095,42 @@ function createSelectItem(id, label, styleProperty) {
   return div;
 }
 
+function createShowDatabaseStructureButton(content, type) {
+  const buttonShowDbStrc = document.createElement("button");
+  buttonShowDbStrc.style.width = "100%";
+  buttonShowDbStrc.textContent = "Show DB";
+  buttonShowDbStrc.onclick = function () {
+    const propertiesBar = document.getElementById("propertiesBar");
+    if (!propertiesBar) {
+      console.warn("propertiesBar not found");
+      return;
+    }
+
+    const propertiesLabel = propertiesBar.querySelector("label");
+    if (!propertiesLabel) {
+      console.warn("propertiesBar label not found");
+      return;
+    }
+
+    const gridID = propertiesLabel.textContent;
+    if (!gridID) {
+      console.warn("propertiesBar label is empty");
+      return;
+    }
+
+    const main = document.getElementById(gridID);
+    if (!main) {
+      console.warn(`Element with id ${gridID} not found`);
+      return;
+    }
+
+    showModalDbStrc(content, type);
+  };
+
+  content.appendChild(buttonShowDbStrc);
+  return buttonShowDbStrc;
+}
+
 function setOptionsByType(select, fieldDataType) {
   // Define some options (this could be customized based on fieldDataType)
   /* var options = [
