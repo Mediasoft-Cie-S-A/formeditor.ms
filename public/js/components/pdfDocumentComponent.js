@@ -333,6 +333,51 @@ function editPdfDocumentComponent(type, element, content) {
     }
   }
 
+  function observeDatasetChanges() {
+    if (typeof MutationObserver !== "function") {
+      return;
+    }
+
+    let lastSignature = element.getAttribute("dataSet") || element.getAttribute("dataset") || "";
+
+    const observer = new MutationObserver((mutations) => {
+      const datasetChanged = mutations.some(
+        (mutation) =>
+          mutation.type === "attributes" &&
+          (mutation.attributeName === "dataset" || mutation.attributeName === "dataSet")
+      );
+
+      if (!datasetChanged) {
+        return;
+      }
+
+      const currentSignature = element.getAttribute("dataSet") || element.getAttribute("dataset") || "";
+      if (currentSignature === lastSignature) {
+        return;
+      }
+
+      lastSignature = currentSignature;
+
+      refreshFields();
+      if (!templateEditor.innerHTML.trim() && currentFields.length) {
+        templateEditor.innerHTML = buildDefaultTemplate(currentFields);
+        prepareEditorTags();
+      } else {
+        prepareEditorTags();
+      }
+      updateLivePreview();
+    });
+
+    observer.observe(element, {
+      attributes: true,
+      attributeFilter: ["dataset", "dataSet"],
+    });
+
+    const disconnectObserver = () => observer.disconnect();
+    content.addEventListener("DOMNodeRemoved", disconnectObserver, { once: true });
+    content.addEventListener("DOMNodeRemovedFromDocument", disconnectObserver, { once: true });
+  }
+
   templateEditor.addEventListener("dragover", (event) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "copy";
@@ -417,6 +462,7 @@ function editPdfDocumentComponent(type, element, content) {
   prepareEditorTags();
   updateLivePreview();
   bindDatasetUpdateEvents();
+  observeDatasetChanges();
 }
 
 function renderPdfDocument(element) {
