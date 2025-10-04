@@ -91,6 +91,28 @@ function ensurePdfDatasetStructureModal() {
   modalTemplateEditor.setAttribute("aria-live", "polite");
   modalTemplateSection.appendChild(modalTemplateEditor);
 
+  const modalTemplateHtmlWrapper = document.createElement("div");
+  modalTemplateHtmlWrapper.className = "pdf-template-html-wrapper";
+
+  const modalTemplateHtmlLabel = document.createElement("label");
+  modalTemplateHtmlLabel.className = "pdf-template-html-label";
+  const modalTemplateHtmlTextareaId = "pdfTemplateHtmlTextarea";
+  modalTemplateHtmlLabel.setAttribute("for", modalTemplateHtmlTextareaId);
+  modalTemplateHtmlLabel.textContent = "Éditeur HTML";
+
+  const modalTemplateHtmlTextarea = document.createElement("textarea");
+  modalTemplateHtmlTextarea.id = modalTemplateHtmlTextareaId;
+  modalTemplateHtmlTextarea.className = "pdf-template-html-textarea";
+  modalTemplateHtmlTextarea.setAttribute(
+    "aria-label",
+    "Modifier le HTML du template"
+  );
+  modalTemplateHtmlTextarea.spellcheck = false;
+
+  modalTemplateHtmlWrapper.appendChild(modalTemplateHtmlLabel);
+  modalTemplateHtmlWrapper.appendChild(modalTemplateHtmlTextarea);
+  modalTemplateSection.appendChild(modalTemplateHtmlWrapper);
+
   const modalTemplateHelper = document.createElement("p");
   modalTemplateHelper.className = "pdf-editor-helper";
   modalTemplateHelper.textContent =
@@ -150,6 +172,7 @@ function ensurePdfDatasetStructureModal() {
     fieldsContainer: modalFieldPalette,
     componentsContainer: modalComponentPalette,
     templateContainer: modalTemplateEditor,
+    templateHtmlTextarea: modalTemplateHtmlTextarea,
     previewContainer: modalPreview,
     open,
     close,
@@ -581,6 +604,7 @@ function editPdfDocumentComponent(type, element, content) {
   const fieldPalette = datasetStructureModal.fieldsContainer;
   const componentPalette = datasetStructureModal.componentsContainer;
   const templateEditor = datasetStructureModal.templateContainer;
+  const templateHtmlEditor = datasetStructureModal.templateHtmlTextarea;
   const livePreview = datasetStructureModal.previewContainer;
 
   const fileNameWrapper = document.createElement("div");
@@ -613,6 +637,14 @@ function editPdfDocumentComponent(type, element, content) {
 
   let currentFields = [];
   let currentRange = null;
+  let isSyncingFromHtmlEditor = false;
+
+  function updateTemplateHtmlTextarea(html) {
+    if (!templateHtmlEditor || isSyncingFromHtmlEditor) {
+      return;
+    }
+    templateHtmlEditor.value = html || "";
+  }
 
   function renderDatasetStructure(fields) {
     const hasFields = Array.isArray(fields) && fields.length > 0;
@@ -869,6 +901,7 @@ function editPdfDocumentComponent(type, element, content) {
         datasetStructurePreviewContainer.innerHTML = placeholder;
       }
     }
+    updateTemplateHtmlTextarea(html);
   }
 
   function getCleanTemplateHtml() {
@@ -1094,6 +1127,17 @@ function editPdfDocumentComponent(type, element, content) {
     const disconnectObserver = () => observer.disconnect();
     content.addEventListener("DOMNodeRemoved", disconnectObserver, { once: true });
     content.addEventListener("DOMNodeRemovedFromDocument", disconnectObserver, { once: true });
+  }
+
+  if (templateHtmlEditor) {
+    templateHtmlEditor.addEventListener("input", () => {
+      isSyncingFromHtmlEditor = true;
+      templateEditor.innerHTML = templateHtmlEditor.value;
+      prepareEditorTags();
+      updateLivePreview();
+      currentRange = null;
+      isSyncingFromHtmlEditor = false;
+    });
   }
 
   templateEditor.addEventListener("dragover", (event) => {

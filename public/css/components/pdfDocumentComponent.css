@@ -454,6 +454,38 @@
   overflow-y: auto;
 }
 
+.pdf-template-html-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 16px;
+}
+
+.pdf-template-html-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475467;
+}
+
+.pdf-template-html-textarea {
+  min-height: 200px;
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.85rem;
+  color: #1d2939;
+  background-color: #f8fafc;
+  resize: vertical;
+  line-height: 1.45;
+}
+
+.pdf-template-html-textarea:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.45);
+}
+
 .pdf-template-editor.drag-over {
   border-color: #6366f1;
   box-shadow: inset 0 0 0 2px rgba(99, 102, 241, 0.15);
