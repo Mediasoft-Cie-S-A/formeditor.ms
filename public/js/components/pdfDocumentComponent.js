@@ -83,11 +83,19 @@ function ensurePdfDatasetStructureModal() {
   sectionsWrapper.appendChild(modalComponentSection);
 
   const modalTemplateSection = createSection("Template HTML");
-  const modalTemplatePreview = document.createElement("pre");
-  modalTemplatePreview.className = "pdf-dataset-modal__template";
-  modalTemplatePreview.setAttribute("aria-live", "polite");
-  modalTemplatePreview.setAttribute("tabindex", "0");
-  modalTemplateSection.appendChild(modalTemplatePreview);
+  const modalTemplateEditor = document.createElement("div");
+  modalTemplateEditor.className =
+    "pdf-template-editor pdf-template-editor--modal";
+  modalTemplateEditor.contentEditable = "true";
+  modalTemplateEditor.spellcheck = false;
+  modalTemplateEditor.setAttribute("aria-live", "polite");
+  modalTemplateSection.appendChild(modalTemplateEditor);
+
+  const modalTemplateHelper = document.createElement("p");
+  modalTemplateHelper.className = "pdf-editor-helper";
+  modalTemplateHelper.textContent =
+    "Glissez les champs ou les composants pour enrichir le template, ou cliquez pour les insérer. Les balises sont repositionnables.";
+  modalTemplateSection.appendChild(modalTemplateHelper);
   sectionsWrapper.appendChild(modalTemplateSection);
 
   const modalPreviewSection = createSection("Aperçu");
@@ -141,7 +149,7 @@ function ensurePdfDatasetStructureModal() {
     container,
     fieldsContainer: modalFieldPalette,
     componentsContainer: modalComponentPalette,
-    templateContainer: modalTemplatePreview,
+    templateContainer: modalTemplateEditor,
     previewContainer: modalPreview,
     open,
     close,
@@ -520,8 +528,6 @@ function editPdfDocumentComponent(type, element, content) {
   const datasetStructureFieldsContainer = datasetStructureModal.fieldsContainer;
   const datasetStructureComponentsContainer =
     datasetStructureModal.componentsContainer;
-  const datasetStructureTemplateContainer =
-    datasetStructureModal.templateContainer;
   const datasetStructurePreviewContainer =
     datasetStructureModal.previewContainer;
 
@@ -531,13 +537,13 @@ function editPdfDocumentComponent(type, element, content) {
   const datasetStructureHelper = document.createElement("p");
   datasetStructureHelper.className = "pdf-dataset-structure-helper";
   datasetStructureHelper.textContent =
-    "Consultez la structure du dataset et les valeurs d'exemple dans une fenêtre dédiée.";
+    "Configurez le template HTML, les champs disponibles et les composants dans une fenêtre dédiée.";
   datasetStructureLauncher.appendChild(datasetStructureHelper);
 
   const datasetStructureButton = document.createElement("button");
   datasetStructureButton.type = "button";
   datasetStructureButton.className = "pdf-dataset-structure-button";
-  datasetStructureButton.textContent = "Structure du dataset";
+  datasetStructureButton.textContent = "Ouvrir l'éditeur PDF";
   datasetStructureButton.setAttribute("aria-haspopup", "dialog");
   datasetStructureButton.setAttribute("aria-expanded", "false");
   datasetStructureButton.addEventListener("click", () => {
@@ -572,45 +578,10 @@ function editPdfDocumentComponent(type, element, content) {
     }
   });
 
-  const paletteLabel = document.createElement("label");
-  paletteLabel.textContent = "Champs disponibles";
-  content.appendChild(paletteLabel);
-
-  const fieldPalette = document.createElement("div");
-  fieldPalette.className = "pdf-field-palette";
-  content.appendChild(fieldPalette);
-
-  const componentLabel = document.createElement("label");
-  componentLabel.textContent = "Composants";
-  content.appendChild(componentLabel);
-
-  const componentPalette = document.createElement("div");
-  componentPalette.className = "pdf-component-palette";
-  content.appendChild(componentPalette);
-
-  const editorLabel = document.createElement("label");
-  editorLabel.textContent = "Template HTML";
-  content.appendChild(editorLabel);
-
-  const templateEditor = document.createElement("div");
-  templateEditor.className = "pdf-template-editor";
-  templateEditor.contentEditable = "true";
-  templateEditor.spellcheck = false;
-  content.appendChild(templateEditor);
-
-  const editorHelper = document.createElement("p");
-  editorHelper.className = "pdf-editor-helper";
-  editorHelper.textContent =
-    "Glissez les champs ou les composants pour enrichir le template, ou cliquez pour les insérer. Les balises sont repositionnables.";
-  content.appendChild(editorHelper);
-
-  const livePreviewLabel = document.createElement("label");
-  livePreviewLabel.textContent = "Aperçu";
-  content.appendChild(livePreviewLabel);
-
-  const livePreview = document.createElement("div");
-  livePreview.className = "pdf-template-preview pdf-document-preview";
-  content.appendChild(livePreview);
+  const fieldPalette = datasetStructureModal.fieldsContainer;
+  const componentPalette = datasetStructureModal.componentsContainer;
+  const templateEditor = datasetStructureModal.templateContainer;
+  const livePreview = datasetStructureModal.previewContainer;
 
   const fileNameWrapper = document.createElement("div");
   fileNameWrapper.className = "pdf-editor-row";
@@ -649,7 +620,7 @@ function editPdfDocumentComponent(type, element, content) {
       datasetStructureButton.disabled = !hasFields;
       datasetStructureButton.setAttribute("aria-disabled", hasFields ? "false" : "true");
       datasetStructureButton.title = hasFields
-        ? "Afficher la structure du dataset"
+        ? "Ouvrir l'éditeur PDF"
         : "Aucun dataset sélectionné";
     }
 
@@ -872,33 +843,30 @@ function editPdfDocumentComponent(type, element, content) {
   function updateLivePreview() {
     const html = getCleanTemplateHtml();
     if (html) {
-      livePreview.innerHTML = html;
-      preparePreviewTags(livePreview);
-      populatePreviewValues(livePreview, currentFields);
-      if (datasetStructurePreviewContainer) {
+      if (livePreview) {
+        livePreview.innerHTML = html;
+        preparePreviewTags(livePreview);
+        populatePreviewValues(livePreview, currentFields);
+      }
+      if (
+        datasetStructurePreviewContainer &&
+        datasetStructurePreviewContainer !== livePreview
+      ) {
         datasetStructurePreviewContainer.innerHTML = html;
         preparePreviewTags(datasetStructurePreviewContainer);
         populatePreviewValues(datasetStructurePreviewContainer, currentFields);
       }
-      if (datasetStructureTemplateContainer) {
-        datasetStructureTemplateContainer.textContent = html;
-        datasetStructureTemplateContainer.classList.remove(
-          "pdf-dataset-modal__template--empty"
-        );
-      }
     } else {
-      livePreview.innerHTML =
+      const placeholder =
         "<div class=\"pdf-document-placeholder\">Ajoutez des balises pour générer un aperçu.</div>";
-      if (datasetStructurePreviewContainer) {
-        datasetStructurePreviewContainer.innerHTML =
-          "<div class=\"pdf-document-placeholder\">Ajoutez des balises pour générer un aperçu.</div>";
+      if (livePreview) {
+        livePreview.innerHTML = placeholder;
       }
-      if (datasetStructureTemplateContainer) {
-        datasetStructureTemplateContainer.textContent =
-          "Aucun template défini.";
-        datasetStructureTemplateContainer.classList.add(
-          "pdf-dataset-modal__template--empty"
-        );
+      if (
+        datasetStructurePreviewContainer &&
+        datasetStructurePreviewContainer !== livePreview
+      ) {
+        datasetStructurePreviewContainer.innerHTML = placeholder;
       }
     }
   }
@@ -946,10 +914,14 @@ function editPdfDocumentComponent(type, element, content) {
   }
 
   function renderComponentPalette() {
-    const componentPalettes = [
-      { element: componentPalette, interactive: true },
-    ];
-    if (datasetStructureComponentsContainer) {
+    const componentPalettes = [];
+    if (componentPalette) {
+      componentPalettes.push({ element: componentPalette, interactive: true });
+    }
+    if (
+      datasetStructureComponentsContainer &&
+      datasetStructureComponentsContainer !== componentPalette
+    ) {
       componentPalettes.push({
         element: datasetStructureComponentsContainer,
         interactive: false,
@@ -1003,9 +975,18 @@ function editPdfDocumentComponent(type, element, content) {
   }
 
   function renderFieldPalette(fields) {
-    const palettes = [{ element: fieldPalette, interactive: true }];
-    if (datasetStructureFieldsContainer) {
-      palettes.push({ element: datasetStructureFieldsContainer, interactive: false });
+    const palettes = [];
+    if (fieldPalette) {
+      palettes.push({ element: fieldPalette, interactive: true });
+    }
+    if (
+      datasetStructureFieldsContainer &&
+      datasetStructureFieldsContainer !== fieldPalette
+    ) {
+      palettes.push({
+        element: datasetStructureFieldsContainer,
+        interactive: false,
+      });
     }
 
     const visibleFields = (fields || []).filter((field) => isPdfFieldVisible(field));
