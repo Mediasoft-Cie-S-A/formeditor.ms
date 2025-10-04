@@ -53,6 +53,52 @@ function ensurePdfDatasetStructureModal() {
   container.className = "pdf-dataset-structure";
   body.appendChild(container);
 
+  const sectionsWrapper = document.createElement("div");
+  sectionsWrapper.className = "pdf-dataset-modal__sections";
+
+  const createSection = (titleText) => {
+    const section = document.createElement("section");
+    section.className = "pdf-dataset-modal__section";
+
+    const sectionTitle = document.createElement("h3");
+    sectionTitle.className = "pdf-dataset-modal__section-title";
+    sectionTitle.textContent = titleText;
+    section.appendChild(sectionTitle);
+
+    return section;
+  };
+
+  const modalFieldSection = createSection("Champs disponibles");
+  const modalFieldPalette = document.createElement("div");
+  modalFieldPalette.className = "pdf-field-palette pdf-field-palette--modal";
+  modalFieldPalette.setAttribute("aria-live", "polite");
+  modalFieldSection.appendChild(modalFieldPalette);
+  sectionsWrapper.appendChild(modalFieldSection);
+
+  const modalComponentSection = createSection("Composants");
+  const modalComponentPalette = document.createElement("div");
+  modalComponentPalette.className =
+    "pdf-component-palette pdf-component-palette--modal";
+  modalComponentSection.appendChild(modalComponentPalette);
+  sectionsWrapper.appendChild(modalComponentSection);
+
+  const modalTemplateSection = createSection("Template HTML");
+  const modalTemplatePreview = document.createElement("pre");
+  modalTemplatePreview.className = "pdf-dataset-modal__template";
+  modalTemplatePreview.setAttribute("aria-live", "polite");
+  modalTemplatePreview.setAttribute("tabindex", "0");
+  modalTemplateSection.appendChild(modalTemplatePreview);
+  sectionsWrapper.appendChild(modalTemplateSection);
+
+  const modalPreviewSection = createSection("Aperçu");
+  const modalPreview = document.createElement("div");
+  modalPreview.className =
+    "pdf-template-preview pdf-document-preview pdf-dataset-modal__preview";
+  modalPreviewSection.appendChild(modalPreview);
+  sectionsWrapper.appendChild(modalPreviewSection);
+
+  body.appendChild(sectionsWrapper);
+
   dialog.appendChild(header);
   dialog.appendChild(body);
   modal.appendChild(dialog);
@@ -90,7 +136,16 @@ function ensurePdfDatasetStructureModal() {
   closeButton.addEventListener("click", close);
   backdrop.addEventListener("click", close);
 
-  pdfDatasetStructureModalControls = { modal, container, open, close };
+  pdfDatasetStructureModalControls = {
+    modal,
+    container,
+    fieldsContainer: modalFieldPalette,
+    componentsContainer: modalComponentPalette,
+    templateContainer: modalTemplatePreview,
+    previewContainer: modalPreview,
+    open,
+    close,
+  };
   return pdfDatasetStructureModalControls;
 }
 
@@ -462,6 +517,13 @@ function editPdfDocumentComponent(type, element, content) {
 
   const datasetStructureModal = ensurePdfDatasetStructureModal();
   const datasetStructureContainer = datasetStructureModal.container;
+  const datasetStructureFieldsContainer = datasetStructureModal.fieldsContainer;
+  const datasetStructureComponentsContainer =
+    datasetStructureModal.componentsContainer;
+  const datasetStructureTemplateContainer =
+    datasetStructureModal.templateContainer;
+  const datasetStructurePreviewContainer =
+    datasetStructureModal.previewContainer;
 
   const datasetStructureLauncher = document.createElement("div");
   datasetStructureLauncher.className = "pdf-dataset-structure-launcher";
@@ -483,6 +545,9 @@ function editPdfDocumentComponent(type, element, content) {
       return;
     }
     renderDatasetStructure(currentFields);
+    renderFieldPalette(currentFields);
+    renderComponentPalette();
+    updateLivePreview();
     datasetStructureModal.open();
   });
   datasetStructureButton.disabled = true;
@@ -810,9 +875,31 @@ function editPdfDocumentComponent(type, element, content) {
       livePreview.innerHTML = html;
       preparePreviewTags(livePreview);
       populatePreviewValues(livePreview, currentFields);
+      if (datasetStructurePreviewContainer) {
+        datasetStructurePreviewContainer.innerHTML = html;
+        preparePreviewTags(datasetStructurePreviewContainer);
+        populatePreviewValues(datasetStructurePreviewContainer, currentFields);
+      }
+      if (datasetStructureTemplateContainer) {
+        datasetStructureTemplateContainer.textContent = html;
+        datasetStructureTemplateContainer.classList.remove(
+          "pdf-dataset-modal__template--empty"
+        );
+      }
     } else {
       livePreview.innerHTML =
         "<div class=\"pdf-document-placeholder\">Ajoutez des balises pour générer un aperçu.</div>";
+      if (datasetStructurePreviewContainer) {
+        datasetStructurePreviewContainer.innerHTML =
+          "<div class=\"pdf-document-placeholder\">Ajoutez des balises pour générer un aperçu.</div>";
+      }
+      if (datasetStructureTemplateContainer) {
+        datasetStructureTemplateContainer.textContent =
+          "Aucun template défini.";
+        datasetStructureTemplateContainer.classList.add(
+          "pdf-dataset-modal__template--empty"
+        );
+      }
     }
   }
 
@@ -859,66 +946,101 @@ function editPdfDocumentComponent(type, element, content) {
   }
 
   function renderComponentPalette() {
-    componentPalette.innerHTML = "";
-
-    PDF_TEMPLATE_COMPONENTS.forEach((component) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "pdf-component-chip";
-      button.title = component.description;
-
-      const title = document.createElement("span");
-      title.className = "pdf-component-chip-title";
-      title.textContent = component.label;
-      button.appendChild(title);
-
-      const description = document.createElement("span");
-      description.className = "pdf-component-chip-description";
-      description.textContent = component.description;
-      button.appendChild(description);
-
-      button.addEventListener("click", () => {
-        insertHtmlSnippet(component.html);
+    const componentPalettes = [
+      { element: componentPalette, interactive: true },
+    ];
+    if (datasetStructureComponentsContainer) {
+      componentPalettes.push({
+        element: datasetStructureComponentsContainer,
+        interactive: false,
       });
+    }
 
-      button.draggable = true;
-      button.addEventListener("dragstart", (event) => {
-        event.dataTransfer.setData("text/x-component-html", component.html);
-        event.dataTransfer.setData("text/html", component.html);
-        event.dataTransfer.setData("text/plain", component.label);
-        event.dataTransfer.effectAllowed = "copy";
+    componentPalettes.forEach(({ element, interactive }) => {
+      element.innerHTML = "";
+
+      PDF_TEMPLATE_COMPONENTS.forEach((component) => {
+        const item = document.createElement(interactive ? "button" : "div");
+        if (interactive) {
+          item.type = "button";
+        }
+        item.className = "pdf-component-chip";
+        if (!interactive) {
+          item.classList.add("pdf-component-chip--static");
+        }
+        item.title = component.description;
+
+        const title = document.createElement("span");
+        title.className = "pdf-component-chip-title";
+        title.textContent = component.label;
+        item.appendChild(title);
+
+        const description = document.createElement("span");
+        description.className = "pdf-component-chip-description";
+        description.textContent = component.description;
+        item.appendChild(description);
+
+        if (interactive) {
+          item.addEventListener("click", () => {
+            insertHtmlSnippet(component.html);
+          });
+
+          item.draggable = true;
+          item.addEventListener("dragstart", (event) => {
+            event.dataTransfer.setData(
+              "text/x-component-html",
+              component.html
+            );
+            event.dataTransfer.setData("text/html", component.html);
+            event.dataTransfer.setData("text/plain", component.label);
+            event.dataTransfer.effectAllowed = "copy";
+          });
+        }
+
+        element.appendChild(item);
       });
-
-      componentPalette.appendChild(button);
     });
   }
 
   function renderFieldPalette(fields) {
-    fieldPalette.innerHTML = "";
-    const visibleFields = (fields || []).filter((field) => isPdfFieldVisible(field));
-    if (!visibleFields.length) {
-      const empty = document.createElement("div");
-      empty.className = "pdf-field-empty";
-      empty.textContent = "Aucun champ disponible.";
-      fieldPalette.appendChild(empty);
-      return;
+    const palettes = [{ element: fieldPalette, interactive: true }];
+    if (datasetStructureFieldsContainer) {
+      palettes.push({ element: datasetStructureFieldsContainer, interactive: false });
     }
-    visibleFields.forEach((field) => {
-      const chip = document.createElement("span");
-      chip.className = "pdf-field-chip";
-      chip.textContent = field.label;
-      chip.title = field.name;
-      chip.draggable = true;
-      chip.addEventListener("dragstart", (event) => {
-        event.dataTransfer.setData("text/x-field-name", field.name);
-        event.dataTransfer.setData("text/x-field-label", field.label);
-        event.dataTransfer.setData("text/plain", field.name);
-        event.dataTransfer.effectAllowed = "copy";
+
+    const visibleFields = (fields || []).filter((field) => isPdfFieldVisible(field));
+
+    palettes.forEach(({ element, interactive }) => {
+      element.innerHTML = "";
+      if (!visibleFields.length) {
+        const empty = document.createElement("div");
+        empty.className = "pdf-field-empty";
+        empty.textContent = "Aucun champ disponible.";
+        element.appendChild(empty);
+        return;
+      }
+
+      visibleFields.forEach((field) => {
+        const chip = document.createElement("span");
+        chip.className = "pdf-field-chip";
+        chip.textContent = field.label;
+        chip.title = field.name;
+        if (interactive) {
+          chip.draggable = true;
+          chip.addEventListener("dragstart", (event) => {
+            event.dataTransfer.setData("text/x-field-name", field.name);
+            event.dataTransfer.setData("text/x-field-label", field.label);
+            event.dataTransfer.setData("text/plain", field.name);
+            event.dataTransfer.effectAllowed = "copy";
+          });
+          chip.addEventListener("click", () => {
+            insertTag(field.name, field.label);
+          });
+        } else {
+          chip.classList.add("pdf-field-chip--static");
+        }
+        element.appendChild(chip);
       });
-      chip.addEventListener("click", () => {
-        insertTag(field.name, field.label);
-      });
-      fieldPalette.appendChild(chip);
     });
   }
 
