@@ -150,6 +150,15 @@
   cursor: grabbing;
 }
 
+.pdf-field-chip--static {
+  cursor: default;
+}
+
+.pdf-field-chip--static:hover {
+  background-color: #eff6ff;
+  transform: none;
+}
+
 .pdf-component-palette {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -182,6 +191,16 @@
 
 .pdf-component-chip:active {
   cursor: grabbing;
+}
+
+.pdf-component-chip--static {
+  cursor: default;
+}
+
+.pdf-component-chip--static:hover {
+  border-color: #d0d5dd;
+  box-shadow: none;
+  transform: none;
 }
 
 .pdf-component-chip-title {
@@ -334,6 +353,26 @@
   max-height: calc(80vh - 72px);
 }
 
+.pdf-dataset-modal__sections {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.pdf-dataset-modal__section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pdf-dataset-modal__section-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1d2939;
+}
+
 .pdf-dataset-modal .pdf-dataset-structure {
   max-height: none;
   height: auto;
@@ -413,6 +452,27 @@
   padding: 12px;
   background-color: #ffffff;
   overflow-y: auto;
+}
+
+.pdf-dataset-modal__template {
+  margin: 0;
+  border: 1px dashed #cbd2e0;
+  border-radius: 6px;
+  min-height: 160px;
+  padding: 12px;
+  background-color: #ffffff;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #1d2939;
+}
+
+.pdf-dataset-modal__template--empty {
+  color: #98a2b3;
+  font-style: italic;
 }
 
 .pdf-template-editor.drag-over {
