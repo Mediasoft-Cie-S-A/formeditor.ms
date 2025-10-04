@@ -7,6 +7,92 @@
 
 let pdfDocumentLibrariesPromise = null;
 let pdfDocumentDraggedTag = null;
+let pdfDatasetStructureModalControls = null;
+
+function ensurePdfDatasetStructureModal() {
+  if (pdfDatasetStructureModalControls) {
+    return pdfDatasetStructureModalControls;
+  }
+
+  const modal = document.createElement("div");
+  modal.id = "pdfDatasetStructureModal";
+  modal.className = "pdf-dataset-modal";
+  modal.setAttribute("aria-hidden", "true");
+
+  const backdrop = document.createElement("div");
+  backdrop.className = "pdf-dataset-modal__backdrop";
+  modal.appendChild(backdrop);
+
+  const dialog = document.createElement("div");
+  dialog.className = "pdf-dataset-modal__dialog";
+  dialog.setAttribute("role", "dialog");
+  dialog.setAttribute("aria-modal", "true");
+  dialog.setAttribute("aria-labelledby", "pdfDatasetStructureTitle");
+  dialog.setAttribute("tabindex", "-1");
+
+  const header = document.createElement("div");
+  header.className = "pdf-dataset-modal__header";
+
+  const title = document.createElement("h2");
+  title.className = "pdf-dataset-modal__title";
+  title.id = "pdfDatasetStructureTitle";
+  title.textContent = "Structure du dataset";
+  header.appendChild(title);
+
+  const closeButton = document.createElement("button");
+  closeButton.type = "button";
+  closeButton.className = "pdf-dataset-modal__close";
+  closeButton.setAttribute("aria-label", "Fermer");
+  closeButton.textContent = "×";
+  header.appendChild(closeButton);
+
+  const body = document.createElement("div");
+  body.className = "pdf-dataset-modal__body";
+
+  const container = document.createElement("div");
+  container.className = "pdf-dataset-structure";
+  body.appendChild(container);
+
+  dialog.appendChild(header);
+  dialog.appendChild(body);
+  modal.appendChild(dialog);
+
+  document.body.appendChild(modal);
+
+  const keydownHandler = (event) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      close();
+    }
+  };
+
+  const close = () => {
+    if (!modal.classList.contains("is-open")) {
+      return;
+    }
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+    document.removeEventListener("keydown", keydownHandler);
+    modal.dispatchEvent(new CustomEvent("pdf-dataset-modal-close"));
+  };
+
+  const open = () => {
+    if (modal.classList.contains("is-open")) {
+      return;
+    }
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
+    document.addEventListener("keydown", keydownHandler);
+    modal.dispatchEvent(new CustomEvent("pdf-dataset-modal-open"));
+    requestAnimationFrame(() => dialog.focus());
+  };
+
+  closeButton.addEventListener("click", close);
+  backdrop.addEventListener("click", close);
+
+  pdfDatasetStructureModalControls = { modal, container, open, close };
+  return pdfDatasetStructureModalControls;
+}
 
 const PDF_TEMPLATE_COMPONENTS = [
   {
@@ -374,13 +460,52 @@ function editPdfDocumentComponent(type, element, content) {
     target.value = element.getAttribute("filter");
   }
 
-  const datasetStructureLabel = document.createElement("label");
-  datasetStructureLabel.textContent = "Structure du dataset";
-  content.appendChild(datasetStructureLabel);
+  const datasetStructureModal = ensurePdfDatasetStructureModal();
+  const datasetStructureContainer = datasetStructureModal.container;
 
-  const datasetStructureContainer = document.createElement("div");
-  datasetStructureContainer.className = "pdf-dataset-structure";
-  content.appendChild(datasetStructureContainer);
+  const datasetStructureLauncher = document.createElement("div");
+  datasetStructureLauncher.className = "pdf-dataset-structure-launcher";
+
+  const datasetStructureHelper = document.createElement("p");
+  datasetStructureHelper.className = "pdf-dataset-structure-helper";
+  datasetStructureHelper.textContent =
+    "Consultez la structure du dataset et les valeurs d'exemple dans une fenêtre dédiée.";
+  datasetStructureLauncher.appendChild(datasetStructureHelper);
+
+  const datasetStructureButton = document.createElement("button");
+  datasetStructureButton.type = "button";
+  datasetStructureButton.className = "pdf-dataset-structure-button";
+  datasetStructureButton.textContent = "Structure du dataset";
+  datasetStructureButton.setAttribute("aria-haspopup", "dialog");
+  datasetStructureButton.setAttribute("aria-expanded", "false");
+  datasetStructureButton.addEventListener("click", () => {
+    if (datasetStructureButton.disabled) {
+      return;
+    }
+    renderDatasetStructure(currentFields);
+    datasetStructureModal.open();
+  });
+  datasetStructureButton.disabled = true;
+  datasetStructureButton.setAttribute("aria-disabled", "true");
+  datasetStructureButton.title = "Aucun dataset sélectionné";
+  datasetStructureLauncher.appendChild(datasetStructureButton);
+
+  content.appendChild(datasetStructureLauncher);
+
+  datasetStructureModal.modal.addEventListener("pdf-dataset-modal-open", () => {
+    datasetStructureButton.setAttribute("aria-expanded", "true");
+  });
+
+  datasetStructureModal.modal.addEventListener("pdf-dataset-modal-close", () => {
+    datasetStructureButton.setAttribute("aria-expanded", "false");
+    if (
+      !datasetStructureButton.disabled &&
+      document.body &&
+      document.body.contains(datasetStructureButton)
+    ) {
+      datasetStructureButton.focus({ preventScroll: true });
+    }
+  });
 
   const paletteLabel = document.createElement("label");
   paletteLabel.textContent = "Champs disponibles";
@@ -454,9 +579,22 @@ function editPdfDocumentComponent(type, element, content) {
   let currentRange = null;
 
   function renderDatasetStructure(fields) {
+    const hasFields = Array.isArray(fields) && fields.length > 0;
+    if (datasetStructureButton) {
+      datasetStructureButton.disabled = !hasFields;
+      datasetStructureButton.setAttribute("aria-disabled", hasFields ? "false" : "true");
+      datasetStructureButton.title = hasFields
+        ? "Afficher la structure du dataset"
+        : "Aucun dataset sélectionné";
+    }
+
+    if (!datasetStructureContainer) {
+      return;
+    }
+
     datasetStructureContainer.innerHTML = "";
 
-    if (!fields || !fields.length) {
+    if (!hasFields) {
       const empty = document.createElement("div");
       empty.className = "pdf-dataset-structure-empty";
       empty.textContent = "Aucun dataset sélectionné.";

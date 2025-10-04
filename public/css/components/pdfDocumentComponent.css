@@ -200,6 +200,145 @@
   font-style: italic;
 }
 
+.pdf-dataset-structure-launcher {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 16px;
+  margin: 12px 0 20px;
+  padding: 12px 16px;
+  border: 1px dashed #cbd2e0;
+  border-radius: 8px;
+  background-color: #f8fafc;
+}
+
+.pdf-dataset-structure-helper {
+  flex: 1;
+  margin: 0;
+  font-size: 0.85rem;
+  color: #475467;
+  line-height: 1.5;
+}
+
+.pdf-dataset-structure-button {
+  flex-shrink: 0;
+  appearance: none;
+  border: 1px solid #1d4ed8;
+  background-color: #1d4ed8;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pdf-dataset-structure-button:not(:disabled):hover,
+.pdf-dataset-structure-button:not(:disabled):focus-visible {
+  background-color: #1e3a8a;
+  border-color: #1e3a8a;
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.25);
+  outline: none;
+}
+
+.pdf-dataset-structure-button:disabled,
+.pdf-dataset-structure-button[aria-disabled="true"] {
+  border-color: #e4e7ec;
+  background-color: #e4e7ec;
+  color: #98a2b3;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+@media (max-width: 640px) {
+  .pdf-dataset-structure-button {
+    width: 100%;
+  }
+}
+
+.pdf-dataset-modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2147483646;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.pdf-dataset-modal.is-open {
+  display: flex;
+}
+
+.pdf-dataset-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.pdf-dataset-modal__dialog {
+  position: relative;
+  z-index: 1;
+  width: min(920px, 92%);
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+  overflow: hidden;
+  outline: none;
+}
+
+.pdf-dataset-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e4e7ec;
+}
+
+.pdf-dataset-modal__title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1d2939;
+}
+
+.pdf-dataset-modal__close {
+  appearance: none;
+  border: none;
+  background: transparent;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #475467;
+  padding: 4px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.pdf-dataset-modal__close:hover,
+.pdf-dataset-modal__close:focus-visible {
+  background-color: rgba(148, 163, 184, 0.2);
+  color: #1d2939;
+  outline: none;
+}
+
+.pdf-dataset-modal__body {
+  padding: 20px 24px 24px;
+  overflow: auto;
+  max-height: calc(80vh - 72px);
+}
+
+.pdf-dataset-modal .pdf-dataset-structure {
+  max-height: none;
+  height: auto;
+}
+
 .pdf-dataset-structure {
   display: flex;
   flex-direction: column;
@@ -208,7 +347,6 @@
   border-radius: 6px;
   background-color: #f9fafb;
   padding: 12px;
-  max-height: 320px;
   overflow-y: auto;
 }
 
