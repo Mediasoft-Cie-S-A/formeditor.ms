@@ -89,6 +89,10 @@ Adjust these values to match your environment before starting the server.
 
 The installation process will also ask if you would like to download an application. If selected, the application can be found at the following URL.
 
+## Progress ABL Reference
+
+For quick access to common Progress OpenEdge syntax used within this project, see the new [DEFINE TEMP-TABLE statement reference](docs/temp-table.md). The guide includes a runnable example and the full option breakdown for building compatible dialog-box temp-tables.
+
 ## Adding Component
 
 JSON elements.json, in the config folder, is a configuration file for component configuration. Each key in the JSON object represents a low-code component type.
