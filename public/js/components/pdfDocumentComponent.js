@@ -8,6 +8,55 @@
 let pdfDocumentLibrariesPromise = null;
 let pdfDocumentDraggedTag = null;
 
+const PDF_TEMPLATE_COMPONENTS = [
+  {
+    id: "heading",
+    label: "Titre",
+    description: "Ajoute un titre principal pour structurer le document.",
+    html: '<h1 class="pdf-heading">Titre principal</h1>',
+  },
+  {
+    id: "subheading",
+    label: "Sous-titre",
+    description: "Ajoute un sous-titre ou un bloc de contexte.",
+    html: '<h2 class="pdf-subheading">Sous-titre</h2>',
+  },
+  {
+    id: "paragraph",
+    label: "Paragraphe",
+    description: "Insère un paragraphe de texte éditable.",
+    html:
+      '<p class="pdf-paragraph">Ajoutez ici le contenu détaillé de votre section. Ce texte peut être remplacé par vos propres informations.</p>',
+  },
+  {
+    id: "columns",
+    label: "2 colonnes",
+    description: "Crée une mise en page à deux colonnes.",
+    html:
+      '<div class="pdf-columns"><div class="pdf-column">Contenu colonne 1</div><div class="pdf-column">Contenu colonne 2</div></div>',
+  },
+  {
+    id: "table",
+    label: "Tableau",
+    description: "Insère un tableau simple pour présenter des données.",
+    html:
+      '<table class="pdf-table"><thead><tr><th>Colonne 1</th><th>Colonne 2</th><th>Colonne 3</th></tr></thead><tbody><tr><td>Valeur 1</td><td>Valeur 2</td><td>Valeur 3</td></tr></tbody></table>',
+  },
+  {
+    id: "separator",
+    label: "Séparateur",
+    description: "Ajoute une ligne de séparation pour aérer la mise en page.",
+    html: '<hr class="pdf-separator" />',
+  },
+  {
+    id: "signature",
+    label: "Signature",
+    description: "Insère un bloc de signature avec ligne et libellé.",
+    html:
+      '<div class="pdf-signature"><div class="pdf-signature-line"></div><div class="pdf-signature-label">Signature</div></div>',
+  },
+];
+
 function parseJsonSafe(value, fallback = null) {
   if (value === undefined || value === null || value === "") {
     return fallback;
@@ -341,6 +390,14 @@ function editPdfDocumentComponent(type, element, content) {
   fieldPalette.className = "pdf-field-palette";
   content.appendChild(fieldPalette);
 
+  const componentLabel = document.createElement("label");
+  componentLabel.textContent = "Composants";
+  content.appendChild(componentLabel);
+
+  const componentPalette = document.createElement("div");
+  componentPalette.className = "pdf-component-palette";
+  content.appendChild(componentPalette);
+
   const editorLabel = document.createElement("label");
   editorLabel.textContent = "Template HTML";
   content.appendChild(editorLabel);
@@ -354,7 +411,7 @@ function editPdfDocumentComponent(type, element, content) {
   const editorHelper = document.createElement("p");
   editorHelper.className = "pdf-editor-helper";
   editorHelper.textContent =
-    "Glissez les champs dans le template ou cliquez pour les insérer. Les balises sont repositionnables.";
+    "Glissez les champs ou les composants pour enrichir le template, ou cliquez pour les insérer. Les balises sont repositionnables.";
   content.appendChild(editorHelper);
 
   const livePreviewLabel = document.createElement("label");
@@ -552,6 +609,10 @@ function editPdfDocumentComponent(type, element, content) {
     selection.removeAllRanges();
     selection.addRange(range);
     document.execCommand("insertHTML", false, html);
+    const updatedSelection = window.getSelection();
+    if (updatedSelection && updatedSelection.rangeCount > 0) {
+      currentRange = updatedSelection.getRangeAt(0).cloneRange();
+    }
     prepareEditorTags();
     updateLivePreview();
   }
@@ -626,6 +687,72 @@ function editPdfDocumentComponent(type, element, content) {
     const datasets = clone.querySelectorAll("span[data-field]");
     datasets.forEach((node) => node.classList.add("pdf-template-tag"));
     return clone.innerHTML.trim();
+  }
+
+  function insertHtmlSnippet(html) {
+    if (!html) {
+      return;
+    }
+
+    templateEditor.focus();
+    const selection = window.getSelection();
+    let range = null;
+
+    if (currentRange) {
+      range = currentRange.cloneRange();
+    } else if (selection && selection.rangeCount > 0) {
+      range = selection.getRangeAt(0).cloneRange();
+    }
+
+    if (range && selection) {
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+
+    document.execCommand("insertHTML", false, html);
+
+    const updatedSelection = window.getSelection();
+    if (updatedSelection && updatedSelection.rangeCount > 0) {
+      currentRange = updatedSelection.getRangeAt(0).cloneRange();
+    }
+
+    prepareEditorTags();
+    updateLivePreview();
+  }
+
+  function renderComponentPalette() {
+    componentPalette.innerHTML = "";
+
+    PDF_TEMPLATE_COMPONENTS.forEach((component) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "pdf-component-chip";
+      button.title = component.description;
+
+      const title = document.createElement("span");
+      title.className = "pdf-component-chip-title";
+      title.textContent = component.label;
+      button.appendChild(title);
+
+      const description = document.createElement("span");
+      description.className = "pdf-component-chip-description";
+      description.textContent = component.description;
+      button.appendChild(description);
+
+      button.addEventListener("click", () => {
+        insertHtmlSnippet(component.html);
+      });
+
+      button.draggable = true;
+      button.addEventListener("dragstart", (event) => {
+        event.dataTransfer.setData("text/x-component-html", component.html);
+        event.dataTransfer.setData("text/html", component.html);
+        event.dataTransfer.setData("text/plain", component.label);
+        event.dataTransfer.effectAllowed = "copy";
+      });
+
+      componentPalette.appendChild(button);
+    });
   }
 
   function renderFieldPalette(fields) {
@@ -751,6 +878,11 @@ function editPdfDocumentComponent(type, element, content) {
       pdfDocumentDraggedTag = null;
       return;
     }
+    const componentHtml = event.dataTransfer.getData("text/x-component-html");
+    if (componentHtml) {
+      insertHtmlSnippet(componentHtml);
+      return;
+    }
     const fieldName = event.dataTransfer.getData("text/x-field-name");
     const fieldLabel = event.dataTransfer.getData("text/x-field-label") || fieldName;
     if (fieldName) {
@@ -759,6 +891,13 @@ function editPdfDocumentComponent(type, element, content) {
   });
 
   templateEditor.addEventListener("keyup", () => {
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      currentRange = selection.getRangeAt(0).cloneRange();
+    }
+  });
+
+  templateEditor.addEventListener("input", () => {
     const selection = window.getSelection();
     if (selection && selection.rangeCount > 0) {
       currentRange = selection.getRangeAt(0).cloneRange();
@@ -806,6 +945,7 @@ function editPdfDocumentComponent(type, element, content) {
   }
 
   refreshFields();
+  renderComponentPalette();
   if (!templateEditor.innerHTML.trim() && currentFields.length) {
     templateEditor.innerHTML = buildDefaultTemplate(currentFields);
   }
