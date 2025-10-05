@@ -69,7 +69,7 @@ function signOut() {
     // 🔐 Déconnexion Azure
     myMSALObj.logoutPopup(logoutRequest).then(() => {
         // 🔐 Déconnexion backend (Express)
-        fetch('/logout', { credentials: 'include' })
+        apiFetch('/logout', { credentials: 'include' })
             .then(() => {
                 window.location.href = '../../../../views/login.ejs'; // ← chemin vers ton vrai login
             })

@@ -256,7 +256,7 @@ function searchAutoComplete(event, element) {
         url = url + " and " + fieldName + "='" + fieldValue + "'";
       });
     });
-    fetch(url)
+    apiFetch(url)
       .then((response) => response.json())
       .then((data) => {
         autocomplete.innerHTML = "";

@@ -124,7 +124,7 @@ function refreshCombox(element) {
     const DBName = jsonData[0].DBName;
     element.querySelector("label").innerText = fieldName;
     var url = "/select-distinct/" + DBName + "/" + tableName + "/" + fieldName;
-    fetch(url)
+    apiFetch(url)
         .then(response => response.json())
         .then(data => {
             var select = element.querySelector("select");

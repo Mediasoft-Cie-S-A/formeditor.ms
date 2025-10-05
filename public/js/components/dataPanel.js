@@ -188,7 +188,7 @@ function renderDataPanel(main) {
   // execute the sql
   // get the data with query select "/table-data-sql/:database/:page/:pageSize"?sqlQuery=select * from table
   const url = "/table-data-sql/" + dbName + "/1/10?sqlQuery=" + select;
-  const response = fetch(url, {
+  const response = apiFetch(url, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

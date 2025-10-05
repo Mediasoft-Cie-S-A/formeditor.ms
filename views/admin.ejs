@@ -48,9 +48,10 @@
     </tbody>
   </table>
 
+  <script src="/js/apiClient.js"></script>
   <script>
     async function fetchPages() {
-      const res = await fetch("/api/pages");
+      const res = await apiFetch("/api/pages");
       const pages = await res.json();
       const tbody = document.querySelector("#pages-table tbody");
       tbody.innerHTML = "";
@@ -78,7 +79,7 @@
 
     async function deletePage(id) {
       if (!confirm("Confirmer la suppression ?")) return;
-      const res = await fetch(`/api/pages/${id}`, { method: "DELETE" });
+      const res = await apiFetch(`/api/pages/${id}`, { method: "DELETE" });
       if (res.ok) {
         alert("Page supprimée");
         fetchPages();

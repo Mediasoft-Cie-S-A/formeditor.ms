@@ -1257,7 +1257,7 @@ async function CreateInsert(DBName, tableName, divLine) {
 async function navigateSequence(DBName, tableName, sequenceName) {
   const url = `/next-sequence/${DBName}/${tableName}/${sequenceName}`;
   try {
-    const response = await fetch(url);
+    const response = await apiFetch(url);
     const data = await response.json();
     return data[0]?.sequence_next; // Return the desired sequence
   } catch (error) {
@@ -1268,7 +1268,7 @@ async function navigateSequence(DBName, tableName, sequenceName) {
 
 async function updateRecordDB(DBName, tableName, nextRowId, data, actions) {
   try {
-    const response = await fetch(
+    const response = await apiFetch(
       `/update-record/${DBName}/${tableName}/${nextRowId}`,
       {
         method: "PUT",
@@ -1310,7 +1310,7 @@ async function updateRecordDB(DBName, tableName, nextRowId, data, actions) {
 
 async function insertRecordDB(DBName, tableName, data, actions, apikey) {
   try {
-    const response = await fetch(`/insert-record/${DBName}/${tableName}`, {
+    const response = await apiFetch(`/insert-record/${DBName}/${tableName}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1341,7 +1341,7 @@ async function insertRecordDB(DBName, tableName, data, actions, apikey) {
 async function deleteRecordDB(DBName, tableName, rowId, actions) {
   console.log("New delete record from data set component navigate");
   try {
-    const response = await fetch(
+    const response = await apiFetch(
       `/delete-record/${DBName}/${tableName}/${rowId}`,
       {
         method: "POST",
