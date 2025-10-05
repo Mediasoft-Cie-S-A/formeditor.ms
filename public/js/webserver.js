@@ -316,7 +316,7 @@ async function fetchAndParseOpenApiJson(url) {
     if (!url) {
       return null;
     }
-    const response = await fetch(url);
+    const response = await apiFetch(url);
 
     if (!response.ok) {
       throw new Error(`Fetch failed: ${response.status} ${response.statusText}`);
@@ -928,13 +928,13 @@ async function callApi(apiUrl, apiMethod, body = {}) {
     let response;
     switch (apiMethod) {
       case "GET":
-        response = await fetch(apiUrl, {
+        response = await apiFetch(apiUrl, {
           method: "GET",
         });
         break;
 
       case "POST":
-        response = await fetch(apiUrl, {
+        response = await apiFetch(apiUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -944,7 +944,7 @@ async function callApi(apiUrl, apiMethod, body = {}) {
         break;
 
       case "PUT":
-        response = await fetch(apiUrl, {
+        response = await apiFetch(apiUrl, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -954,7 +954,7 @@ async function callApi(apiUrl, apiMethod, body = {}) {
         break;
 
       case "PATCH":
-        response = await fetch(apiUrl, {
+        response = await apiFetch(apiUrl, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -964,7 +964,7 @@ async function callApi(apiUrl, apiMethod, body = {}) {
         break;
 
       case "Delete":
-        response = await fetch(apiUrl, {
+        response = await apiFetch(apiUrl, {
           method: "DELETE",
         });
         break;

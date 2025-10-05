@@ -141,7 +141,7 @@ function renderLoginComponent(element) {
                 const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
                 formData.set("password", hashHex);
             }
-            await fetch(endpoint, { method: "POST", body: formData });
+            await apiFetch(endpoint, { method: "POST", body: formData });
         } catch (err) {
             console.error("Login failed", err);
         }

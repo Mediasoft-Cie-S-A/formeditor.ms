@@ -162,7 +162,7 @@ function renderCookieStorage(main) {
                 select.style.width = "150px";
                 select.title = cookieValue;
                 const url = `/query-data/${DBName}/${SQL}`;
-                fetch(url)
+                apiFetch(url)
                     .then(response => response.json())
                     .then(data => {
                         data.forEach((val) => {

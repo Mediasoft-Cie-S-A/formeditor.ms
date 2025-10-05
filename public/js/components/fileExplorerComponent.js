@@ -76,7 +76,7 @@ function readFolder(path, fileExplorer, filter) {
     table.appendChild(tbody);
 
     const url = '/fileExplorer?directory=' + path;
-    fetch(url)
+    apiFetch(url)
         .then(response => {
             if (!response.ok) {
                 showToast('Error: ' + response.statusText);
@@ -177,7 +177,7 @@ function uploadFile(event, path, fileExplorer) {
         formData.append('fileupload', files[i], files[i].name);
 
     }
-    fetch(url, {
+    apiFetch(url, {
         method: 'POST',
         body: formData
     }).then(response => {

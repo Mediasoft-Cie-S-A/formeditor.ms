@@ -68,6 +68,7 @@
   </aside>
 
   <script src="https://unpkg.com/grapesjs"></script>
+  <script src="/js/apiClient.js"></script>
   <script>
     // definition de l'éditeur GrapesJS with html, css, and js components
     const editor = grapesjs.init({
@@ -143,7 +144,7 @@
     // Charger une page existante depuis l’API
     const pageId = new URLSearchParams(window.location.search).get("id");
     if (pageId) {
-      fetch(`/api/pages/${pageId}`)
+      apiFetch(`/api/pages/${pageId}`)
         .then(res => res.json())
         .then(page => {
           editor.setComponents(page.content);
@@ -174,7 +175,7 @@
           meta: {}
         };
 
-        fetch(pageId ? `/api/pages/${pageId}` : `/api/pages`, {
+        apiFetch(pageId ? `/api/pages/${pageId}` : `/api/pages`, {
           method: pageId ? 'PUT' : 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)

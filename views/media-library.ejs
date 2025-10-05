@@ -81,11 +81,12 @@
     </div>
   </div>
   <!-- Script to fetch and render images -->
+  <script src="/js/apiClient.js"></script>
   <script>
     // Function to fetch images from the /images endpoint
     async function fetchMedia() {
       try {
-        const response = await fetch('/media');
+        const response = await apiFetch('/media');
         if (!response.ok) {
           throw new Error('Failed to fetch images');
         }
@@ -167,7 +168,7 @@
       const uploadForm = document.getElementById('uploadForm');
       const formData = new FormData(uploadForm);
       try {
-        const response = await fetch('/upload-media', {
+        const response = await apiFetch('/upload-media', {
           method: 'POST',
           body: formData,
         });
