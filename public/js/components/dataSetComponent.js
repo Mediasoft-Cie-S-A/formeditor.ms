@@ -201,7 +201,7 @@ async function updateDataSet(main, content) {
     // get the db name
 
     // get the data with query select "/table-data-sql/:database/:page/:pageSize"?sqlQuery=select * from table
-    const response = await fetch(`/table-data-sql/${sqlJson.DBName}/1/1?sqlQuery=${sqlJson.select}`).then((response) => {
+    const response = await apiFetch(`/table-data-sql/${sqlJson.DBName}/1/1?sqlQuery=${sqlJson.select}`).then((response) => {
       if (!response.ok) {
         showToast("Error retrieving data", 5000);
       }
@@ -596,7 +596,7 @@ async function loadValuesSearchWin(event) {
   if (externalDBName == null || externalDBName == "" || query == null || query == "") {
     showToast("Please set external database name and SQL query for search window", 5000);
   }
-  fetch(`/table-data-sql/${externalDBName}/1/1000?sqlQuery=${query}`)
+  apiFetch(`/table-data-sql/${externalDBName}/1/1000?sqlQuery=${query}`)
     .then(response => response.json())
     .then(data => {
       // get the record of the fieldname = fieldvalue
@@ -693,7 +693,7 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum, dataset, link,
       const url = `/get-record-by-rowid/${dataset[0].DBName}/${dataset[0].tableName}/${rowId}?fields=${datasetFields}`;
       //console.log("[FETCH by ROWID] URL:", url);
 
-      fetch(url)
+      apiFetch(url)
         .then((response) => response.json())
         .then((data) => {
           if (data.length > 0) {
@@ -746,7 +746,7 @@ async function linkRecordToGrid(DBName, tableName, rowId, rowNum, dataset, link,
 
 
       const url = `/get-records-by-indexes/${dataset[0].DBName}/${dataset[0].tableName}?indexes=${indexes}&values=${values}&fields=${datasetFields}`;
-      fetch(url)
+      apiFetch(url)
         .then((response) => response.json())
         .then((data) => {
           // get the divs document.querySelectorAll("#DataSet_" + tableName);
@@ -1066,7 +1066,7 @@ async function addFieldDescription(DBName, tableName) {
     const url = `/get-field-labels/${DBName}/${tableName}?fields=${datasetFields}`;
 
     // Fetch metadata (this should return array of { NAME, LABEL })
-    fetch(url)
+    apiFetch(url)
       .then((response) => response.json())
       .then((metadata) => {
         console.log("Field metadata received:", metadata);
@@ -1219,7 +1219,7 @@ function handleSelectFieldSQL(DBName, input, SQL, fieldLabel, selectedValue) {
 
   if (!selectElement) {
     const url = `/query-data/${DBName}/${encodeURIComponent(SQL)}`;
-    fetch(url)
+    apiFetch(url)
       .then((response) => response.json())
       .then((data) => {
         // convert the options to an array by fieldLabel

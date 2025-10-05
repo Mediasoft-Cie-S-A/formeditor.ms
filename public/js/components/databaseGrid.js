@@ -187,7 +187,7 @@ async function updateGridData(main, content) {
     // get the db name
 
     // get the data with query select "/table-data-sql/:database/:page/:pageSize"?sqlQuery=select * from table
-    const response = await fetch(`/table-data-sql/${sqlJson.DBName}/1/1?sqlQuery=${sqlJson.select}`).then((response) => {
+    const response = await apiFetch(`/table-data-sql/${sqlJson.DBName}/1/1?sqlQuery=${sqlJson.select}`).then((response) => {
       if (!response.ok) {
         showToast("Error retrieving data", 5000);
       }
@@ -806,7 +806,7 @@ async function submitGridImport(file, fieldNames, DBName, tableName, main, uploa
     formData.append("file", file);
     formData.append("fields", JSON.stringify(fieldNames));
 
-    const response = await fetch(`/import-table/${DBName}/${tableName}`, {
+    const response = await apiFetch(`/import-table/${DBName}/${tableName}`, {
       method: "POST",
       body: formData,
     });
@@ -979,7 +979,7 @@ async function gridGetData(
   }
   // Fetch the data from the web service
 
-  fetch(url).then(async response => {
+  apiFetch(url).then(async response => {
     // Parse the response as JSON
     console.log("Data fetched successfully");
 

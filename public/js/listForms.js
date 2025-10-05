@@ -21,7 +21,7 @@ let formsViewMode = 'grid';
 
 function loadForms() {
     console.log('Loading forms...');
-    fetch('/list-forms')
+    apiFetch('/list-forms')
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -268,7 +268,7 @@ function helperLoadContainer(event, objectId) {
 }
 
 function deleteForm(objectId) {
-    fetch(`/delete-form/${objectId}`, { method: 'DELETE' })
+    apiFetch(`/delete-form/${objectId}`, { method: 'DELETE' })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -334,7 +334,7 @@ function updateAllIdsInJson(jsonObj, prefix) {
 
 function loadFormData(objectId, renderContainer, renderElem, prefix) {
     console.log("Load form data : " + objectId);
-    fetch(`/get-form/${objectId}`)
+    apiFetch(`/get-form/${objectId}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -416,7 +416,7 @@ function loadFormDataInModal(objectId, container) {
     }
 
     // ❌ Sinon, faire le fetch
-    fetch(`/get-form/${objectId}`)
+    apiFetch(`/get-form/${objectId}`)
         .then(response => {
             if (!response.ok) throw new Error('Network error');
             return response.json();
@@ -681,7 +681,7 @@ async function newForm() {
     };
 
     try {
-        const response = await fetch("/create-form", {
+        const response = await apiFetch("/create-form", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(formPayload),

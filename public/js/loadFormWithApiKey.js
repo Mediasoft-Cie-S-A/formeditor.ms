@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    fetch(url, {
+    apiFetch(url, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",

@@ -17,7 +17,7 @@
 async function loadBusinessComponent() {
   console.log("Loading Business component.......");
   try {
-    const response = await fetch("/list-business-component");
+    const response = await apiFetch("/list-business-component");
     if (!response.ok) {
       throw new Error("Network response was not ok");
     }
@@ -29,7 +29,7 @@ async function loadBusinessComponent() {
 }
 
 // function deleteForm(objectId, listItem) {
-//   fetch(`/delete-form/${objectId}`, { method: "DELETE" })
+//   apiFetch(`/delete-form/${objectId}`, { method: "DELETE" })
 //     .then((response) => {
 //       if (!response.ok) {
 //         throw new Error("Network response was not ok");
@@ -49,7 +49,7 @@ async function loadBusinessComponent() {
 //   objectId,
 //   renderContainer = document.getElementById("renderForm")
 // ) {
-//   fetch(`/get-form/${objectId}`)
+//   apiFetch(`/get-form/${objectId}`)
 //     .then((response) => {
 //       if (!response.ok) {
 //         throw new Error("Network response was not ok");

@@ -114,7 +114,7 @@ function createEditableTableList(list, tableDetails) {
 
 // called when you change the tab to create a new table
 function drageDroptableTableList(list) {
-    fetch('/tables-list')
+    apiFetch('/tables-list')
         .then(response => response.json())
         .then(dbs => {
             // Clear the list
@@ -185,7 +185,7 @@ function fetchTableFields(database, tableName, detailsDiv) {
     console.log('detailsDiv:', detailsDiv);
     removeAllChildNodes(detailsDiv);
 
-    fetch(`/table-fields/${database}/${tableName}`)
+    apiFetch(`/table-fields/${database}/${tableName}`)
         .then(response => response.json())
         .then(data => {
             console.log(data);
@@ -235,7 +235,7 @@ function fetchTableDetails(DBName, tableName, tableLabel, detailsDiv) {
     console.log('detailsDiv:', detailsDiv);
     removeAllChildNodes(detailsDiv);
     Promise.all([
-        fetch(`/table-fields/${DBName}/${tableName}`).then(response => response.json())
+        apiFetch(`/table-fields/${DBName}/${tableName}`).then(response => response.json())
     ])
         .then(([fields]) => {
 
@@ -415,7 +415,7 @@ function loadFieldsList(DBName, fieldName) {
     var select = document.querySelector('tr[data-field-name="' + fieldName + '"] select[name="fieldName"]');
     select.innerHTML = '';
     if (table) {
-        fetch(`/table-fields/${DBName}/${tableName}`)
+        apiFetch(`/table-fields/${DBName}/${tableName}`)
             .then(response => response.json())
             .then(fields => {
                 fields.forEach(field => {
@@ -435,7 +435,7 @@ async function editTableDetails(DBName, tableName, tableLabel, detailsDiv) {
     detailsDiv.innerHTML = '';
     try {
         // Fetch table fields
-        const response = await fetch(`/table-fields/${DBName}/${tableName}`);
+        const response = await apiFetch(`/table-fields/${DBName}/${tableName}`);
         const fields = await response.json();
         // Set innerHTML
         detailsDiv.innerHTML = `<h3 id='TableDetails_TableName' DBName='${DBName}' table-name='${tableName}'>Table Name:${tableName} Description:${tableLabel}</h3>`;
@@ -629,7 +629,7 @@ function addTableColumn(DBName, table) {
 
 async function alterTable(DBName, tableName, action, columnName, columnType, newColumnName, newColumnType) {
     try {
-        const response = await fetch(`/alter-table/${DBName}/${tableName}`, {
+        const response = await apiFetch(`/alter-table/${DBName}/${tableName}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -751,7 +751,7 @@ async function createTable(DBName, table) {
 async function postCreateTable(DBName, tableName, columns) {
 
     try {
-        const response = await fetch(`/create-table/${DBName}/${tableName}`, {
+        const response = await apiFetch(`/create-table/${DBName}/${tableName}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -856,7 +856,7 @@ function showModalDbStrc(main, type) {
             contentDiv.appendChild(table);
 
             header = ['X', 'NAME', 'LABEL', 'TYPE', 'MANDATORY', 'UP', 'DOWN'];
-            fetch(`/table-fields/${DBName}/${tableName}`).then(response => response.json())
+            apiFetch(`/table-fields/${DBName}/${tableName}`).then(response => response.json())
                 .then(fields => {
                     // add to the tbody the fields with this structure  const header = ['X', 'Field Name', 'Field Description', 'Type', 'Mandatory'];
                     //  console.log('fields:', fields);

@@ -44,7 +44,7 @@ function registerForm(e) {
     };
 
     // Check if form exists
-    fetch(`/get-form/${objectId}`)
+    apiFetch(`/get-form/${objectId}`)
       .then((response) => {
         console.log("response");
         console.log(response);
@@ -58,7 +58,7 @@ function registerForm(e) {
         console.log("existingForm");
         console.log(existingForm);
         // If form exists, update it
-        return fetch(`/update-form/${objectId}`, {
+        return apiFetch(`/update-form/${objectId}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -70,7 +70,7 @@ function registerForm(e) {
         console.log("error");
         console.log(error);
         // If form does not exist, store it
-        return fetch("/store-json", {
+        return apiFetch("/store-json", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

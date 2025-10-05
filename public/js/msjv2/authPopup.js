@@ -123,7 +123,7 @@ function showWelcomeMessage(username) {
     // and print the response in innerHTML
     getTokenRedirect(loginRequest)
         .then(response => {
-            fetch('/customLogin', {
+            apiFetch('/customLogin', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

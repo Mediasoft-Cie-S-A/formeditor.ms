@@ -879,7 +879,7 @@ function deleteElement() {
   parent.removeChild(editorElementSelected);
 
   // 🔁 Envoie la suppression au serveur
-  fetch('/api/delete-component', {
+  apiFetch('/api/delete-component', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -2153,7 +2153,7 @@ function createFilterField(main) {
       const url = `/select-distinct/${DBName}/${tableName}/${fieldName}`;
       //    const url = '/getDatasetDataDistinct/' + dataset + '/' + this.value;
 
-      fetch(url)
+      apiFetch(url)
         .then(response => response.json())
         .then(data => {
           multiSelect.innerHTML = '';
@@ -2292,7 +2292,7 @@ function generateJson(event) {
 
   // Here you could also send the JSON to a server, save it, or use it in some other way
   // For example:
-  // fetch('/api/filters', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(filterInfo) });
+  // apiFetch('/api/filters', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(filterInfo) });
 }
 
 // Function to regenerate filters from JSON

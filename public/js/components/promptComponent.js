@@ -885,8 +885,8 @@ async function fetchAIResponse(promptText) {
     // show the loader
     loader.style.display = 'block';
     // call ollama API or any AI service with the prompt text with full URL
-    // return  fetch('http://demo01:5001/api/v1/generate', {
-    return fetch('http://localhost:5001/api/v1/generate', {
+    // return  apiFetch('http://demo01:5001/api/v1/generate', {
+    return apiFetch('http://localhost:5001/api/v1/generate', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -1182,7 +1182,7 @@ async function askLmStudio(promptText) {
     const loader = document.getElementById('loader');
     // show the loader
     loader.style.display = 'block';
-    return fetch('/api/lm', {
+    return apiFetch('/api/lm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: promptText })
@@ -1218,7 +1218,7 @@ async function askAI(promptText) {
     const loader = document.getElementById('loader');
     // show the loader
     if (loader) loader.style.display = 'block';
-    const response = await fetch("/api/ask-ai", {
+    const response = await apiFetch("/api/ask-ai", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"

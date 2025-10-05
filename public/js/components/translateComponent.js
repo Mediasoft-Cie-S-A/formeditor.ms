@@ -260,7 +260,7 @@ async function loadTranslationDictionary(forceReload = false) {
         return translationDictionaryPromise;
     }
 
-    translationDictionaryPromise = fetch('/api/translations', {
+    translationDictionaryPromise = apiFetch('/api/translations', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -285,7 +285,7 @@ async function loadTranslationDictionary(forceReload = false) {
 }
 
 async function saveTranslationDictionary(newDictionary) {
-    const response = await fetch('/api/translations', {
+    const response = await apiFetch('/api/translations', {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -304,7 +304,7 @@ async function saveTranslationDictionary(newDictionary) {
 }
 
 async function importTranslationDictionary(newDictionary) {
-    const response = await fetch('/api/translations/import', {
+    const response = await apiFetch('/api/translations/import', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -323,7 +323,7 @@ async function importTranslationDictionary(newDictionary) {
 }
 
 async function generateTranslationDictionaryWithAI(promptText, baseDictionary) {
-    const response = await fetch('/api/translations/ai-generate', {
+    const response = await apiFetch('/api/translations/ai-generate', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

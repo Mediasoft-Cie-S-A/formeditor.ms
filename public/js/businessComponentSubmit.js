@@ -44,7 +44,7 @@ function registerBusinessComponent(e) {
     };
 
     // Check if form exists
-    fetch(`/store-business-json/${objectId}`)
+    apiFetch(`/store-business-json/${objectId}`)
       .then((response) => {
         console.log("response");
         console.log(response);
@@ -58,7 +58,7 @@ function registerBusinessComponent(e) {
         console.log("existingForm");
         console.log(existingForm);
         // If form exists, update it
-        return fetch(`/update-business-component/${objectId}`, {
+        return apiFetch(`/update-business-component/${objectId}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -70,7 +70,7 @@ function registerBusinessComponent(e) {
         console.log("error");
         console.log(error);
         // If form does not exist, store it
-        return fetch("/store-business-json", {
+        return apiFetch("/store-business-json", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

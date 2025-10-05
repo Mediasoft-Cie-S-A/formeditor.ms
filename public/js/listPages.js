@@ -18,7 +18,7 @@ let pagesViewMode = 'grid';
 
 function loadPages() {
 
-    fetch("/pages").then(response => {
+    apiFetch("/pages").then(response => {
         if (!response.ok) {
             throw new Error("Network response was not ok");
         }
@@ -253,7 +253,7 @@ function togglePagesView(mode) {
 
 function loadPage(pageId) {
     console.log("Loading page with ID:", pageId);
-    fetch(`/pages/${pageId}`)
+    apiFetch(`/pages/${pageId}`)
         .then(response => {
             if (!response.ok) {
                 showToast("Error loading page: " + response.statusText);
@@ -355,7 +355,7 @@ function registerPage(e) {
             header: header,
         };
         // post the form data to the server to store it /page
-        fetch("/pages", {
+        apiFetch("/pages", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -377,7 +377,7 @@ function registerPage(e) {
 
 function deletePage(pageID) {
     if (confirm("Are you sure you want to delete this page?")) {
-        fetch(`/pages/${pageID}`, {
+        apiFetch(`/pages/${pageID}`, {
             method: "DELETE"
         })
             .then(response => {

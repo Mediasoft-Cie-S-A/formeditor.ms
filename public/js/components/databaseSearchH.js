@@ -317,7 +317,7 @@ function searchAutoCompleteHorizontalH(event, input, acPanel) {
         });
     });
 
-    fetch(url)
+    apiFetch(url)
         .then((r) => r.json())
         .then((data) => {
             acPanel.innerHTML = "";

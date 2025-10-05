@@ -68,7 +68,7 @@ function loadCssIfNotLoaded(cssUrl, csslist) {
   // Check if the css is already loaded
   if (csslist.indexOf(cssUrl) === -1) {
     // The css is not loaded, check if it exists and load it
-    fetch(cssUrl)
+    apiFetch(cssUrl)
       .then((response) => {
         if (response.ok) {
           // The css exists, load it
@@ -93,7 +93,7 @@ function loadScriptIfNotLoaded(scriptUrl, scriptslist) {
   // Check if the script is already loaded
 
   // The script is not loaded, check if it exists and load it
-  return fetch(scriptUrl)
+  return apiFetch(scriptUrl)
     .then((response) => {
       if (response.ok) {
         // The script exists, load it
@@ -430,7 +430,7 @@ function doubleclick(event) {
 
 // Assuming you're in a browser environment
 async function loadJson(url) {
-  const response = await fetch(url);
+  const response = await apiFetch(url);
   const data = await response.json();
   return data;
 }

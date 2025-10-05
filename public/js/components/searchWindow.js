@@ -336,7 +336,7 @@ function updatePaginationControls(datasetJson) {
 async function fetchQueryData(DBName, query) {
   try {
     const url = `/query-data/${DBName}/${encodeURIComponent(query)}`;
-    const response = await fetch(url, { method: "GET" });
+    const response = await apiFetch(url, { method: "GET" });
     if (!response.ok) {
       throw new Error("Failed to fetch query data");
     }
