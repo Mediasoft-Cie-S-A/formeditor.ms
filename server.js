@@ -109,6 +109,7 @@ require('./authStatic')(app, session, passport);
 const dblayer = require('./dblayer');
 const dbs = new dblayer(app, session, passport);
 dbs.init();
+require('./authDatabase')(app, session, passport, dbs);
 try {
   dbs.generateRoutes(app, dbs);
 }
