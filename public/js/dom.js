@@ -421,32 +421,131 @@ function initializeAiFormModal() {
   });
 }
 
+function tryParseJson(candidate) {
+  try {
+    return JSON.parse(candidate);
+  } catch (e) {
+    return null;
+  }
+}
+
+function convertDatasetSourceToDestinationStructure(source) {
+  if (!source) {
+    return null;
+  }
+
+  if (Array.isArray(source)) {
+    return source;
+  }
+
+  if (typeof source !== "object") {
+    return null;
+  }
+
+  const tableFields = Array.isArray(source.fields) ? source.fields : null;
+
+  if (!tableFields) {
+    return null;
+  }
+
+  const databaseName = source.database || source.DBName || source.dbName || "";
+  const tableName = source.table || source.tableName || "";
+  const tableLabel = source.label || source.tableLabel || "";
+
+  const normalizedFields = tableFields
+    .map((field) => {
+      if (!field || typeof field !== "object") {
+        return null;
+      }
+
+      const mandatoryValue = field.mandatory;
+      const fieldMandatory = typeof mandatoryValue === "boolean"
+        ? mandatoryValue
+        : mandatoryValue == null
+          ? false
+          : ["1", 1, "true", true].includes(mandatoryValue);
+
+      const widthValue = field.width;
+      let fieldWidth = null;
+
+      if (typeof widthValue === "number") {
+        fieldWidth = Number.isFinite(widthValue) ? Math.trunc(widthValue) : null;
+      } else if (typeof widthValue === "string" && widthValue.trim() !== "") {
+        const parsedWidth = Number(widthValue);
+        fieldWidth = Number.isFinite(parsedWidth) ? Math.trunc(parsedWidth) : null;
+      }
+
+      return {
+        DBName: databaseName,
+        tableName,
+        tableLabel,
+        fieldName: field.name || "",
+        fieldLabel: field.label || field.name || "",
+        fieldType: field.type || "",
+        fieldDataType: field.dataType || "",
+        fieldMandatory,
+        fieldWidth,
+        copyType: field.copyType || "Data",
+        fieldDefault: field.default ?? null,
+        displayName: field.displayName || field.label || field.name || "",
+      };
+    })
+    .filter(Boolean);
+
+  return normalizedFields.length > 0 ? normalizedFields : null;
+}
+
 function extractDatasetFieldsFromText(text) {
   if (!text || typeof text !== "string") {
     return null;
   }
 
-  // Decode the most common HTML entity to improve JSON parsing success.
   const normalizedText = text.replace(/&quot;/g, '"');
-  const jsonArrayRegex = /\[[\s\S]*?\]/g;
-  const matches = normalizedText.match(jsonArrayRegex);
+  const trimmed = normalizedText.trim();
 
-  if (!matches) {
-    return null;
+  const directParsed = tryParseJson(trimmed);
+
+  if (directParsed) {
+    const converted = convertDatasetSourceToDestinationStructure(directParsed);
+
+    if (converted) {
+      return converted;
+    }
+
+    if (Array.isArray(directParsed)) {
+      return directParsed;
+    }
   }
 
-  for (const candidate of matches) {
-    try {
-      const parsed = JSON.parse(candidate);
+  const datasetObjectRegex = /{[\s\S]*?"fields"\s*:\s*\[[\s\S]*?\][\s\S]*?}/g;
+  const objectMatches = normalizedText.match(datasetObjectRegex) || [];
 
-      if (
-        Array.isArray(parsed) &&
-        parsed.every((item) => item && typeof item === "object")
-      ) {
-        return parsed;
-      }
-    } catch (e) {
-      // Ignore parse errors and continue scanning other candidates.
+  for (const candidate of objectMatches) {
+    const parsed = tryParseJson(candidate);
+
+    if (!parsed) {
+      continue;
+    }
+
+    const converted = convertDatasetSourceToDestinationStructure(parsed);
+
+    if (converted) {
+      return converted;
+    }
+  }
+
+  const jsonArrayRegex = /\[[\s\S]*?\]/g;
+  const matches = normalizedText.match(jsonArrayRegex) || [];
+
+  for (const candidate of matches) {
+    const parsed = tryParseJson(candidate);
+
+    if (
+      parsed &&
+      Array.isArray(parsed) &&
+      parsed.every((item) => item && typeof item === "object")
+    ) {
+      return parsed;
     }
   }
 
@@ -465,25 +564,33 @@ function normalizeDatasetFields(candidate) {
       return null;
     }
 
-    try {
-      return JSON.parse(trimmed);
-    } catch (e) {
-      const decoded = trimmed.replace(/&quot;/g, '"');
+    const parsed = tryParseJson(trimmed);
 
-      if (decoded !== trimmed) {
-        try {
-          return JSON.parse(decoded);
-        } catch (err) {
-          return null;
-        }
-      }
+    if (parsed) {
+      const converted = convertDatasetSourceToDestinationStructure(parsed);
 
-      return null;
+      return converted || parsed;
     }
+
+    const decoded = trimmed.replace(/&quot;/g, '"');
+
+    if (decoded !== trimmed) {
+      const decodedParsed = tryParseJson(decoded);
+
+      if (decodedParsed) {
+        const converted = convertDatasetSourceToDestinationStructure(decodedParsed);
+
+        return converted || decodedParsed;
+      }
+    }
+
+    return null;
   }
 
   if (typeof candidate === "object") {
-    return candidate;
+    const converted = convertDatasetSourceToDestinationStructure(candidate);
+
+    return converted || candidate;
   }
 
   return null;
