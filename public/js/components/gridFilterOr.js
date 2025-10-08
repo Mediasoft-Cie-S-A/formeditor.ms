@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Mediasoft & Cie S.A.
+ * Copyright (c) 2023 Mediasoft & Cie S.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,18 @@
 
 /**
  * Data storage
- * - placeholder: plain string displayed inside the search input.
- * - data-grid-target: ID of the grid component to filter.
- * - filter-value: last value applied to the filter input.
- * - data-original-json-data: cached JSON string containing the unfiltered rows.
+ * - datasearch: JSON array describing searchable dataset fields.
+ * - data-value-* attributes: plain strings attached to suggestion items to carry metadata (DB/table/field/type).
  */
-
 function createGridFilterOr(type) {
-  const main = document.createElement("div");
-  main.className = "grid-filter-or";
-  main.id = type + Date.now();
-  main.tagName = type;
+  var main = document.createElement("div");
+  main.className = "dataSetContainer";
+  main.id = type + Date.now(); // Unique ID for each new element
   main.draggable = true;
-  main.setAttribute("placeholder", "Filtrer la grille...");
-  renderGridFilterOr(main);
+  main.tagName = type;
+  const list = document.getElementById("ContentTableList");
+  const detailsDiv = document.getElementById("tableDetails");
+
   return main;
 }
 
@@ -38,375 +36,342 @@ function editGridFilterOr(type, element, content) {
   button.textContent = "update";
   button.onclick = function () {
     const propertiesBar = document.getElementById("propertiesBar");
-    const gridID = propertiesBar.getAttribute("data-element-id");
-    if (!gridID) return;
+    const gridID = propertiesBar.querySelector("label").textContent;
     const main = document.getElementById(gridID);
-    updateGridFilterOr(main, content);
+    updateGridFilterOrData(main, content);
   };
   content.appendChild(button);
+  content.appendChild(createMultiSelectItem("Data", "data", "data"));
 
-  const placeholder = element.getAttribute("placeholder") || "";
-  content.appendChild(
-    createInputItem(
-      "grid-filter-or-placeholder",
-      "Placeholder",
-      "placeholder",
-      placeholder,
-      "text",
-      "placeholder"
-    )
-  );
+  // load the data
+  // check if jsonData is not empty
+  if (element.getAttribute("datasearch") != null) {
+    var target = content.querySelector("#Data");
+    var jsonData = JSON.parse(element.getAttribute("datasearch"));
+    jsonData.forEach((fieldJson) => {
+      addFieldToPropertiesBar(target, fieldJson);
+    });
+  }
+  // load the data
+  // check if jsonData is not empty
+}
 
-  const wrapper = document.createElement("div");
-  wrapper.className = "input-wrapper";
-  const label = document.createElement("label");
-  label.textContent = "Grid target";
-  label.style.fontSize = "9px";
-  label.style.height = "20px";
-  const select = document.createElement("select");
-  select.id = "grid-filter-or-target";
-  select.className = "input-element";
-
-  const grids = document.querySelectorAll(
-    "[tagname='dataGridWeb'], [tagname='dataGrid']"
-  );
-  const emptyOption = document.createElement("option");
-  emptyOption.value = "";
-  emptyOption.textContent = "Auto (first grid)";
-  select.appendChild(emptyOption);
-
-  grids.forEach((grid) => {
-    const option = document.createElement("option");
-    option.value = grid.id;
-    option.textContent = grid.id;
-    select.appendChild(option);
+function updateGridFilterOrData(main, content) {
+  // get all the span elements from data
+  var data = content.querySelectorAll('#Data span[name="dataContainer"]');
+  // generate the json of all the data
+  var jsonData = [];
+  data.forEach((span) => {
+    console.log(span.getAttribute("data-field"));
+    // get the json data from the span
+    var json = JSON.parse(span.getAttribute("data-field"));
+    // add the field to the json
+    jsonData.push(json);
   });
-
-  const currentTarget = element.getAttribute("data-grid-target") || "";
-  select.value = currentTarget;
-
-  wrapper.appendChild(label);
-  wrapper.appendChild(select);
-  content.appendChild(wrapper);
+  main.setAttribute("datasearch", JSON.stringify(jsonData));
+  RenderGridFilterOr(main);
 }
 
-function updateGridFilterOr(main, content) {
-  if (!main) return;
-  const placeholderInput = content.querySelector("#grid-filter-or-placeholder");
-  if (placeholderInput) {
-    main.setAttribute("placeholder", placeholderInput.value || "");
-  }
 
-  const targetSelect = content.querySelector("#grid-filter-or-target");
-  if (targetSelect) {
-    if (targetSelect.value) {
-      main.setAttribute("data-grid-target", targetSelect.value);
-    } else {
-      main.removeAttribute("data-grid-target");
-    }
-  }
-
-  renderGridFilterOr(main);
-}
-
-function renderGridFilterOr(main) {
-  if (!main) return;
+function RenderGridFilterOr(main) {
   main.innerHTML = "";
-  main.classList.add("grid-filter-or");
 
-  const wrapper = document.createElement("div");
-  wrapper.className = "grid-filter-or__wrapper";
+  const searchMainDiv = document.createElement("div");
+  searchMainDiv.className = "search-container";
+  searchMainDiv.id = "searchDiv";
+  searchMainDiv.style.display = "inline-block"; // correction: "infline" -> "inline"
+  main.appendChild(searchMainDiv);
 
-  const input = document.createElement("input");
-  input.type = "text";
-  input.className = "input-element grid-filter-or__input";
-  input.placeholder = main.getAttribute("placeholder") || "";
-  input.value = main.getAttribute("filter-value") || "";
+  const jsonData = JSON.parse(main.getAttribute("datasearch") || "[]");
 
-  const clearButton = document.createElement("button");
-  clearButton.type = "button";
-  clearButton.className = "grid-filter-or__clear";
-  clearButton.innerHTML = "&times;";
-  clearButton.title = "Effacer le filtre";
+  jsonData.forEach((field) => {
+    const searchMain = document.createElement("div");
+    searchMain.className = "searchMain";
+    searchMain.id = `search_${field.tableName}_${Date.now()}`;
 
-  const status = document.createElement("div");
-  status.className = "grid-filter-or__status";
-  status.textContent = "";
+    const searchDiv = document.createElement("div");
+    searchDiv.className = "search";
+    searchDiv.id = `search_${field.tableName}_searchDiv`;
 
-  const helper = document.createElement("div");
-  helper.className = "grid-filter-or__hint";
-  helper.textContent = buildGridFilterOrHelper(main);
+    // input
+    const input = document.createElement("input");
+    input.type = "text";
+    input.id = `search_${field.tableName}_${field.fieldName}_input`;
+    input.setAttribute("list", "searchList");
+    input.placeholder = field.fieldLabel;
+    input.autocomplete = "off";
+    // set auotocomplete off
+    input.autocorrect = "off";
+    input.autocapitalize = "off";
+    input.spellcheck = false;
+    input.setAttribute("data-value-DBName", field.DBName);
+    input.setAttribute("data-value-table-name", field.tableName);
+    input.setAttribute("data-value-field-name", field.fieldName);
+    input.setAttribute("data-value-field-type", field.fieldType);
+    input.oninput = (event) => searchAutoComplete(event, input);
+    input.onclick = () => {
+      searchDiv.querySelector(".autocomplete-results").style.display = "none";
+    };
 
-  input.addEventListener("input", function () {
-    main.setAttribute("filter-value", this.value);
-    applyGridFilterOr(main, this.value);
-    toggleClearButton(clearButton, this.value);
+    // search button
+    const btnSearch = document.createElement("button");
+    btnSearch.type = "button";
+    btnSearch.onclick = (event) => gridSearch(event);
+    const iconSearch = document.createElement("i");
+    iconSearch.className = "fas fa-search";
+    btnSearch.appendChild(iconSearch);
+
+
+
+    // autocomplete div
+    const autoDiv = document.createElement("div");
+    autoDiv.id = `search_${field.tableName}_${Date.now()}_autocomplete`;
+    autoDiv.className = "autocomplete-results";
+    autoDiv.style.display = "none";
+
+
+    // clear button
+    const btnClear = document.createElement("button");
+    btnClear.type = "button";
+    btnClear.onclick = (event) => {
+      console.log("clear");
+      event.preventDefault();
+      input.value = "";
+      autoDiv.style.display = "none";
+      gridSearch(event);
+    };
+    const iconClear = document.createElement("i");
+    iconClear.className = "fas fa-times";
+    btnClear.appendChild(iconClear);
+    // assemble
+    searchDiv.appendChild(input);
+    searchDiv.appendChild(btnSearch);
+    searchDiv.appendChild(btnClear);
+    searchDiv.appendChild(autoDiv);
+
+    searchMain.appendChild(searchDiv);
+    searchMainDiv.appendChild(searchMain);
   });
 
-  clearButton.addEventListener("click", function () {
-    input.value = "";
-    main.setAttribute("filter-value", "");
-    applyGridFilterOr(main, "");
-    toggleClearButton(clearButton, "");
-  });
-
-  wrapper.appendChild(input);
-  wrapper.appendChild(clearButton);
-  main.appendChild(wrapper);
-  main.appendChild(status);
-  main.appendChild(helper);
-
-  toggleClearButton(clearButton, input.value);
-  applyGridFilterOr(main, input.value);
+  return searchMainDiv;
 }
 
-function toggleClearButton(button, value) {
-  if (!button) return;
-  button.style.visibility = value ? "visible" : "hidden";
-}
 
-function buildGridFilterOrHelper(main) {
-  const target = main.getAttribute("data-grid-target");
-  if (target) {
-    return `Grille ciblée : ${target}`;
+function gridSearch(event) {
+  console.log("gridSearch");
+  event.preventDefault();
+  const maindiv = event.target.parentElement.parentElement;
+  // get autocomplete div¨
+  const autocomplete = maindiv.querySelector(".autocomplete-results");
+  //hide autocomplete div
+  autocomplete.style.display = "none";
+  // get the input element
+  const element = maindiv.querySelector("input");
+  const DBName = element.getAttribute("data-value-DBName");
+  const filedName = element.getAttribute("data-value-field-name");
+  const tableName = element.getAttribute("data-value-table-name");
+  const searchValue = element.value;
+  const normalizedValue = (searchValue || "").toString();
+  let componentRoot = element.closest("[tagname]");
+  if (!componentRoot || !componentRoot.hasAttribute("datasearch")) {
+    componentRoot = element.closest(".dataSetContainer");
   }
-  return "Aucune grille sélectionnée (première grille trouvée utilisée).";
-}
-
-function applyGridFilterOr(main, query) {
-  if (!main) return;
-  const targetGrid = resolveGridForFilter(main);
-  const status = main.querySelector(".grid-filter-or__status");
-  const helper = main.querySelector(".grid-filter-or__hint");
-  if (helper) {
-    helper.textContent = buildGridFilterOrHelper(main);
-  }
-  if (!targetGrid) {
-    if (status) status.textContent = "Grille introuvable.";
-    return;
-  }
-
-  const tableGrid = targetGrid.querySelector("[dataset-api-table-name]") ||
-    targetGrid.querySelector("[tagname='dataTable']") ||
-    targetGrid;
-
-  const datasetFieldsAttr =
-    tableGrid.getAttribute("dataset-fields-names") ||
-    tableGrid.getAttribute("Dataset-Fields-Names") ||
-    tableGrid.getAttribute("datasetFields") ||
-    tableGrid.getAttribute("dataset-fields");
-
-  const datasetFields = datasetFieldsAttr
-    ? datasetFieldsAttr.split(",").map((field) => field.trim()).filter(Boolean)
-    : [];
-
-  const jsonDataRaw = tableGrid.getAttribute("jsonData") || "[]";
-
-  if (!query) {
-    main.setAttribute("data-original-json-data", jsonDataRaw);
-  }
-
-  const originalDataRaw =
-    main.getAttribute("data-original-json-data") || jsonDataRaw;
-
-  let originalData;
-  try {
-    originalData = JSON.parse(originalDataRaw);
-  } catch (error) {
-    console.error("Invalid JSON data on grid:", error);
-    originalData = [];
-  }
-
-  const normalizedQuery = query ? query.toString().trim().toLowerCase() : "";
-  let filteredData = originalData;
-
-  if (normalizedQuery) {
-    filteredData = originalData.filter((record) =>
-      recordMatchesQuery(record, normalizedQuery)
-    );
-  }
-
-  renderFilteredGridData(tableGrid, filteredData, datasetFields);
-
-  if (status) {
-    const total = originalData.length;
-    const current = filteredData.length;
-    if (!total) {
-      status.textContent = "Aucune donnée disponible.";
-    } else if (normalizedQuery) {
-      status.textContent = `${current} / ${total} éléments correspondent.`;
-    } else {
-      status.textContent = `${total} éléments affichés.`;
-    }
-  }
-}
-
-function resolveGridForFilter(main) {
-  const explicitTarget = main.getAttribute("data-grid-target");
-  if (explicitTarget) {
-    const direct = document.getElementById(explicitTarget);
-    if (direct) {
-      return direct;
-    }
-  }
-  const fallback = document.querySelector("[tagname='dataGridWeb']") ||
-    document.querySelector("[tagname='dataGrid']");
-  if (fallback && !explicitTarget) {
-    main.setAttribute("data-grid-target", fallback.id);
-  }
-  return fallback;
-}
-
-function recordMatchesQuery(record, query) {
-  if (!record || typeof record !== "object") return false;
-  return Object.keys(record).some((key) => {
-    const value = record[key];
-    if (value === null || value === undefined) {
-      return false;
-    }
-    if (typeof value === "object") {
-      try {
-        return JSON.stringify(value).toLowerCase().includes(query);
-      } catch (error) {
-        return false;
-      }
-    }
-    return value.toString().toLowerCase().includes(query);
-  });
-}
-
-function renderFilteredGridData(grid, data, datasetFields) {
-  if (!grid) return;
-  const body = grid.querySelector(".grid-body");
-  if (!body) return;
-  body.innerHTML = "";
-
-  const view = (grid.parentElement && grid.parentElement.getAttribute("view-web")) ||
-    grid.getAttribute("view-web") ||
-    "standard";
-
-  if (!data || data.length === 0) {
-    const emptyState = document.createElement("div");
-    emptyState.className = "grid-filter-or__empty";
-    emptyState.textContent = "Aucun enregistrement trouvé.";
-    body.appendChild(emptyState);
-    const header = grid.querySelector(".grid-header");
-    if (header) {
-      header.style.display = view === "panel" ? "none" : "";
-    }
-    return;
-  }
-
-  if (view === "panel") {
-    renderFilteredPanelView(grid, data, datasetFields);
-  } else {
-    renderFilteredGridView(grid, data, datasetFields);
-  }
-}
-
-function renderFilteredGridView(grid, data, datasetFields) {
-  const body = grid.querySelector(".grid-body");
-  if (!body) return;
-  const header = grid.querySelector(".grid-header");
-  if (header) {
-    header.style.display = "";
-  }
-
-  const fields = datasetFields.length > 0 ? datasetFields : Object.keys(data[0] || {});
-
-  data.forEach((record, index) => {
-    const rowDiv = document.createElement("div");
-    rowDiv.className = "grid-row";
-
-    const rowIdField = fields[0];
-    if (rowIdField && record[rowIdField] !== undefined) {
-      rowDiv.setAttribute("rowid", record[rowIdField]);
-    }
-
-    let cellIndex = 0;
-    fields.forEach((field) => {
-      const cell = document.createElement("div");
-      cell.className = "grid-cell";
-      if (cellIndex === 0 && field === "rowid") {
-        cell.style.display = "none";
-      }
-      const value = record[field];
-      cell.textContent = value === undefined || value === null ? "" : value;
-      rowDiv.appendChild(cell);
-      cellIndex++;
-    });
-
-    rowDiv.addEventListener("click", function () {
-      const allRows = grid.querySelectorAll(".grid-row");
-      allRows.forEach((row) => row.classList.remove("grid-row-selected"));
-      this.classList.add("grid-row-selected");
-      notifyGridSelection(record, index);
-    });
-
-    if (index === 0) {
-      rowDiv.classList.add("grid-row-selected");
-      notifyGridSelection(record, index);
-    }
-
-    body.appendChild(rowDiv);
-  });
-}
-
-function renderFilteredPanelView(grid, data, datasetFields) {
-  const body = grid.querySelector(".grid-body");
-  if (!body) return;
-  const header = grid.querySelector(".grid-header");
-  if (header) {
-    header.style.display = "none";
-  }
-
-  const fields = datasetFields.length > 0 ? datasetFields : Object.keys(data[0] || {});
-
-  data.forEach((record, index) => {
-    const panelDiv = document.createElement("div");
-    panelDiv.className = "panel";
-
-    fields.forEach((field) => {
-      if (field === "rowid") return;
-      const fieldRow = document.createElement("div");
-      fieldRow.className = "panel-row";
-
-      const label = document.createElement("span");
-      label.className = "panel-label";
-      label.textContent = `${field}:`;
-
-      const valueSpan = document.createElement("span");
-      valueSpan.className = "panel-value";
-      const value = record[field];
-      valueSpan.textContent = value === undefined || value === null ? "" : value;
-
-      fieldRow.appendChild(label);
-      fieldRow.appendChild(valueSpan);
-      panelDiv.appendChild(fieldRow);
-    });
-
-    panelDiv.addEventListener("click", function () {
-      const allPanels = grid.querySelectorAll(".panel");
-      allPanels.forEach((panel) => panel.classList.remove("selected-panel"));
-      this.classList.add("selected-panel");
-      notifyGridSelection(record, index);
-    });
-
-    if (index === 0) {
-      panelDiv.classList.add("selected-panel");
-      notifyGridSelection(record, index);
-    }
-
-    body.appendChild(panelDiv);
-  });
-}
-
-function notifyGridSelection(record, index) {
-  if (typeof linkRecordToGridWeb === "function") {
+  let dataSearchConfig = [];
+  if (componentRoot) {
     try {
-      linkRecordToGridWeb(record, index);
+      dataSearchConfig = JSON.parse(componentRoot.getAttribute("datasearch") || "[]");
     } catch (error) {
-      console.warn("Unable to notify dataset selection:", error);
+      console.error("Unable to parse datasearch configuration", error);
+      dataSearchConfig = [];
     }
   }
+  const fieldConfig = dataSearchConfig.find(
+    (field) =>
+      field &&
+      field.DBName === DBName &&
+      field.tableName === tableName &&
+      field.fieldName === filedName
+  );
+  let orFilterGroup = null;
+  if (
+    fieldConfig &&
+    fieldConfig.filterJson &&
+    fieldConfig.filterJson.condition &&
+    fieldConfig.filterJson.condition.toLowerCase() === "or" &&
+    Array.isArray(fieldConfig.filterJson.filters)
+  ) {
+    orFilterGroup = {
+      ...fieldConfig.filterJson,
+      filters: fieldConfig.filterJson.filters.map((filter) => ({
+        ...filter,
+        value: normalizedValue,
+      })),
+    };
+    fieldConfig.filterJson = orFilterGroup;
+    if (componentRoot) {
+      componentRoot.setAttribute("datasearch", JSON.stringify(dataSearchConfig));
+    }
+  }
+  // define the operator based on the field type
+  const fieldType = element.getAttribute("data-value-field-type");
+  var operator = "=";
+  switch (fieldType) {
+    case "character":
+      operator = "like";
+      break;
+    case "integer":
+      operator = "=";
+      break;
+    case "date":
+      operator = "=";
+      break;
+    case "logical":
+      operator = "=";
+      break;
+    default:
+      operator = "like";
+  }
+  // get all the grid div with attribute tagname=dataGrid
+  let idObjects = document.querySelectorAll("div[tagname='dataGrid']");
+
+
+  idObjects.forEach((idObject) => {
+    // if the grid is visible
+    if (idObject.style.display != "none") {
+      if (orFilterGroup) {
+        const filterAttr = idObject.getAttribute("filter");
+        let filterJSON;
+        try {
+          filterJSON = filterAttr ? JSON.parse(filterAttr) : {};
+        } catch (error) {
+          console.error("Unable to parse grid filter JSON", error);
+          filterJSON = {};
+        }
+        if (!Array.isArray(filterJSON.filters)) {
+          filterJSON.filters = [];
+        }
+        const groupKey =
+          orFilterGroup.groupId ||
+          orFilterGroup.id ||
+          (orFilterGroup.filters
+            .map((filter) =>
+              [
+                filter.DBName || filter.dbName || DBName || "",
+                filter.tableName || tableName || "",
+                filter.field || filter.fieldName || "",
+              ]
+                .filter(Boolean)
+                .join(".")
+            )
+            .sort()
+            .join("|"));
+        filterJSON.filters = filterJSON.filters.filter((filter) => {
+          if (!filter) {
+            return false;
+          }
+          const currentKey =
+            filter.groupId || filter.id || filter._groupKey;
+          return currentKey !== groupKey;
+        });
+        if (normalizedValue.trim() !== "") {
+          filterJSON.filters.push({
+            ...orFilterGroup,
+            groupId: groupKey,
+            _groupKey: groupKey,
+          });
+        }
+        idObject.setAttribute("filter", JSON.stringify(filterJSON));
+      }
+      // call the searchGrid function
+      searchGrid(DBName, filedName, operator, searchValue, idObject.id);
+    }
+
+  });
+
+
 }
+// searchAutoComplete that call the search function "/select-distinct/:tableName/:fieldName" and display the result in the autocomplete div
+function searchAutoComplete(event, element) {
+  event.preventDefault();
+  const DBName = element.getAttribute("data-value-DBName");
+  const tableName = element.getAttribute("data-value-table-name");
+  const fieldName = element.getAttribute("data-value-field-name");
+  const fieldType = element.getAttribute("data-value-field-type");
+  const autocomplete = element.parentElement.querySelector(
+    ".autocomplete-results"
+  );
+  const searchValue = element.value.trim();
+  var url =
+    "/select-distinct-idvalue/" +
+    DBName +
+    "/" +
+    tableName +
+    "/" +
+    fieldName +
+    "?id=" +
+    fieldName;
+  const isWhitespaceString = str => !str.replace(/\s/g, '').length
+  console.log(isWhitespaceString(searchValue))
+  // generate filter from searchValue if fieldType is text with openedge syntax
+  if (searchValue.length > 0 && !isWhitespaceString(searchValue)) {
+    switch (fieldType) {
+      case "character":
+        url = url + "&filter=" + fieldName + " like '%" + searchValue + "%'";
+        break;
+      case "integer":
+        url = url + "&filter=" + fieldName + "=" + searchValue;
+        break;
+      case "date":
+        url = url + "&filter=" + fieldName + "=" + searchValue;
+        break;
+      case "logical":
+        url = url + "&filter=" + fieldName + "=" + searchValue;
+        break;
+      default:
+        url = url + "&filter=" + fieldName + " like '%" + searchValue + "%'";
+    }
+    // get all the cookieStorage by tagname=cookieStorage
+    var cookieStorage = document.querySelectorAll("div[tagname=cookieStorage]");
+    // foreach cookieStorage extract the field name and value = select.value
+    cookieStorage.forEach((storage) => {
+      select = storage.querySelectorAll("select");
+      select.forEach((select) => {
+        var fieldName = select.getAttribute("var_name");
+        var fieldValue = select.value;
+        // add the field to the url
+        url = url + " and " + fieldName + "='" + fieldValue + "'";
+      });
+    });
+    apiFetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        autocomplete.innerHTML = "";
+        autocomplete.style.display = "block";
+
+
+
+        data.forEach((row) => {
+          var rowDiv = document.createElement("div");
+          rowDiv.className = "autocomplete-row";
+          rowDiv.setAttribute("data-value-DBName", DBName);
+          rowDiv.setAttribute("data-value-table-name", tableName);
+          rowDiv.setAttribute("data-value-field-name", fieldName);
+          rowDiv.setAttribute("data-value-field-type", fieldType);
+          rowDiv.addEventListener("click", function (event) {
+            event.preventDefault();
+
+            element.value = row[fieldName];
+            autocomplete.style.display = "none";
+          });
+
+          rowDiv.innerHTML = row[fieldName];
+          autocomplete.appendChild(rowDiv);
+        });
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
+}
+
+
