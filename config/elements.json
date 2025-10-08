@@ -871,7 +871,7 @@
   "gridFilterOr": {
     "type": "gridFilterOr",
     "description": "Grid Filter (OR)",
-    "category": "Web Server",
+    "category": "Business Logic",
     "scriptName": "gridFilterOr.js",
     "createFunction": "createGridFilterOr",
     "editFunction": "editGridFilterOr",
