@@ -421,6 +421,112 @@ function initializeAiFormModal() {
   });
 }
 
+function extractDatasetFieldsFromText(text) {
+  if (!text || typeof text !== "string") {
+    return null;
+  }
+
+  // Decode the most common HTML entity to improve JSON parsing success.
+  const normalizedText = text.replace(/&quot;/g, '"');
+  const jsonArrayRegex = /\[[\s\S]*?\]/g;
+  const matches = normalizedText.match(jsonArrayRegex);
+
+  if (!matches) {
+    return null;
+  }
+
+  for (const candidate of matches) {
+    try {
+      const parsed = JSON.parse(candidate);
+
+      if (
+        Array.isArray(parsed) &&
+        parsed.every((item) => item && typeof item === "object")
+      ) {
+        return parsed;
+      }
+    } catch (e) {
+      // Ignore parse errors and continue scanning other candidates.
+    }
+  }
+
+  return null;
+}
+
+function normalizeDatasetFields(candidate) {
+  if (!candidate) {
+    return null;
+  }
+
+  if (typeof candidate === "string") {
+    const trimmed = candidate.trim();
+
+    if (!trimmed) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(trimmed);
+    } catch (e) {
+      const decoded = trimmed.replace(/&quot;/g, '"');
+
+      if (decoded !== trimmed) {
+        try {
+          return JSON.parse(decoded);
+        } catch (err) {
+          return null;
+        }
+      }
+
+      return null;
+    }
+  }
+
+  if (typeof candidate === "object") {
+    return candidate;
+  }
+
+  return null;
+}
+
+function serializeDatasetFields(fields) {
+  if (!fields) {
+    return null;
+  }
+
+  if (typeof fields === "string") {
+    const trimmed = fields.trim();
+
+    if (!trimmed) {
+      return null;
+    }
+
+    try {
+      JSON.parse(trimmed);
+      return trimmed;
+    } catch (e) {
+      const decoded = trimmed.replace(/&quot;/g, '"');
+
+      if (decoded !== trimmed) {
+        try {
+          JSON.parse(decoded);
+          return decoded;
+        } catch (err) {
+          return null;
+        }
+      }
+
+      return null;
+    }
+  }
+
+  try {
+    return JSON.stringify(fields);
+  } catch (e) {
+    return null;
+  }
+}
+
 async function generateFormFromRequest(userInput, documentContent) {
   let data;
 
@@ -449,6 +555,8 @@ async function generateFormFromRequest(userInput, documentContent) {
   const truncatedDocument = sanitizedDocument.length > 8000
     ? `${sanitizedDocument.slice(0, 8000)}\n...[truncated]`
     : sanitizedDocument;
+
+  const datasetFieldsFromPrompt = extractDatasetFieldsFromText(sanitizedRequest);
 
   if (sanitizedDocument.length > 8000) {
     console.warn("Uploaded document content truncated to 8000 characters.");
@@ -523,6 +631,28 @@ async function generateFormFromRequest(userInput, documentContent) {
       const newElement = createFormElement(enriched.type);
 
       if (newElement) {
+        const isDatasetComponent =
+          enriched.type === "dataSet" ||
+          enriched.type === "dataGrid" ||
+          enriched.type === "dataSetWeb" ||
+          enriched.type === "dataGridWeb";
+
+        if (isDatasetComponent) {
+          const datasetCandidate =
+            comp.dataset ??
+            comp.dataSet ??
+            (comp.props && (comp.props.dataset || comp.props.dataSet)) ??
+            datasetFieldsFromPrompt;
+
+          const normalized = normalizeDatasetFields(datasetCandidate);
+          const serialized = serializeDatasetFields(normalized);
+
+          if (serialized) {
+            newElement.setAttribute("dataSet", serialized);
+            newElement.setAttribute("dataset", serialized);
+          }
+        }
+
         formContainer.appendChild(newElement);
       }
     } catch (e) {
