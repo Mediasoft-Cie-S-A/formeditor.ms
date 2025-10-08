@@ -867,5 +867,16 @@
     "styles": "pdfDocumentComponent.css",
     "icon": "fa fa-file-pdf-o",
     "renderFunction": "renderPdfDocument"
+  },
+  "gridFilterOr": {
+    "type": "gridFilterOr",
+    "description": "Grid Filter (OR)",
+    "category": "Web Server",
+    "scriptName": "gridFilterOr.js",
+    "createFunction": "createGridFilterOr",
+    "editFunction": "editGridFilterOr",
+    "styles": "gridFilterOr.css",
+    "icon": "fa fa-filter",
+    "renderFunction": "renderGridFilterOr"
   }
 }
