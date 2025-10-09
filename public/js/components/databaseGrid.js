@@ -244,6 +244,8 @@ function renderGrid(main) {
   var table = document.createElement("div");
   table.className = "table-container";
   table.setAttribute("tagName", "dataTable");
+  // check dataset is not empty
+  if (!dataset || dataset.length === 0) return;
   table.id = "Data-Grid_" + dataset[0].tableName;
   table.setAttribute("DBName", dataset[0].DBName);
 
@@ -578,8 +580,9 @@ function searchGrid(DBName, filterName, FilterOp, filterValue, gridID) {
 
   // get the dataset from the main in json format
   const dataset = JSON.parse(grid.getAttribute("dataset"));
-
+  if (!dataset || dataset.length === 0) return;
   const tableGrid = grid.querySelector('[tagname="dataTable"]');
+  if (!tableGrid) return;
   // get the dataset labels
 
   if (tableGrid.getAttribute("current_page") == null) {

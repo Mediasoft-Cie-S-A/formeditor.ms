@@ -187,6 +187,7 @@ function createTabContent(tabsHeader, tabsContent) {
     const li = document.createElement('li');
     const tabHeader = document.createElement('a');
     tabHeader.href = '#';
+    tabHeader.setAttribute('onclick', 'activateTab(event)');
     tabHeader.setAttribute('data-tab', tabId);
     tabHeader.innerText = (tabcount === 1) ? "Edit" : `Tab-${tabcount}`;
     tabHeader.className = 'ctab_HeaderButton';
@@ -212,16 +213,18 @@ function createTabContent(tabsHeader, tabsContent) {
 
 
 
-function activateTab(event, tabHeader, tabContent) {
+function activateTab(event) {
     if (event) {
         event.preventDefault();
     }
-    console.log("activateTab", tabHeader, tabContent);
-    if (!tabHeader) return;
+    console.log("activateTab");
 
+    const tabHeader = event ? event.target : document.querySelector('.ctab_HeaderButton.active');
     const tabId = tabHeader.getAttribute('data-tab');
     const contentWrapper = tabHeader.closest('[tagname="Tab"]');
-
+    // if contentWrapper is null return
+    if (!contentWrapper) return;
+    // get the content with the name attribute equal to tabId
     const targetContent = contentWrapper.querySelector(`[name="${tabId}"]`);
     console.log("activateTab tabId", tabId, targetContent);
 
@@ -257,7 +260,16 @@ function renderTabComponent(container) {
         console.log("renderTabComponent header", header);
         const tabId = header.getAttribute('data-tab');
         console.log("renderTabComponent tabId", tabId);
-        // get data-tab attibute from the li
+        // check if onclick is already set
+        if (!header.onclick) {
+            header.addEventListener('click', function (event) {
+                const contentWrapper = header.closest('[tagname="Tab"]');
+                if (!contentWrapper) return;
+                const targetContent = contentWrapper.querySelector(`[name="${tabId}"]`);
+                activateTab(event, header, targetContent);
+            });
+        }
+
     });
 
     let activeHeader = Array.from(headers).find(h => h.classList.contains('active'));

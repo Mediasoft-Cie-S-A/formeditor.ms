@@ -265,6 +265,9 @@ function renderDataSet(main) {
 
   // Generate the dataset container
   var dataset = document.createElement("div");
+  // check if jsonData is not empty to get the table name
+  if (!jsonData || jsonData.length === 0) return;
+
   dataset.id = "DataSet_" + (jsonData[0]?.tableName || "");
   dataset.setAttribute("data-table-name", jsonData[0]?.tableName || "");
   dataset.className = "dataSetContainer";
