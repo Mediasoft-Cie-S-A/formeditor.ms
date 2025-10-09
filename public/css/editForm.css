@@ -9,45 +9,34 @@
 }
 
 .editor-fields {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-    align-items: start;
+    gap: 12px;
 }
 
 .editor-fields .form-field {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
 }
 
 .editor-fields .form-field label {
     margin-bottom: 0;
-    font-weight: 600;
-}
-
-.editor-fields .form-field small {
-    color: var(--color-36);
-    font-size: 0.85rem;
+    white-space: nowrap;
 }
 
 .editor-fields .form-field input,
 .editor-fields .form-field select,
 .editor-fields .form-field textarea {
-    width: 100%;
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
-.editor-fields .form-field--textarea textarea {
-    resize: vertical;
+.editor-fields .form-field--textarea {
+    align-items: flex-start;
 }
 
-.editor-fields .form-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 0;
-    grid-column: 1 / -1;
-    flex-wrap: wrap;
+.editor-fields .form-field--textarea label {
+    padding-top: 0.25rem;
 }
 
 
