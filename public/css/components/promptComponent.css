@@ -1,4 +1,12 @@
 @import "../variables.css";
+
+.prompt-component-wrapper {
+  width: 80%;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+}
+
 #chat-container {
   background: var(--color-147);
   padding: 15px;
