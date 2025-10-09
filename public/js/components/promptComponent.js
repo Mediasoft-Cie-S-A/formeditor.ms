@@ -27,7 +27,7 @@
  */
 function createPromptComponent(type) {
     var main = document.createElement('div');
-    main.className = 'form-container';
+    main.className = 'form-container prompt-component-wrapper';
     main.id = type + Date.now(); // Unique ID for each new element
     main.draggable = true;
     main.tagName = type;
@@ -75,6 +75,9 @@ function editPromptComponent(type, element, content) {
  *        des boutons d'action et du loader associé au composant.
  */
 function renderPromptComponent(element) {
+    if (element.classList && !element.classList.contains('prompt-component-wrapper')) {
+        element.classList.add('prompt-component-wrapper');
+    }
     element.innerHTML = `<div id="chat-container">
                     <textarea id="PromptText" placeholder="Type your message..."></textarea>
 
