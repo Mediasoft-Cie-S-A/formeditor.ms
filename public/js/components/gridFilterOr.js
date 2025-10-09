@@ -110,7 +110,7 @@ function RenderGridFilterOr(main) {
   // search button
   const btnSearch = document.createElement("button");
   btnSearch.type = "button";
-  btnSearch.onclick = (event) => gridSearch(event);
+  btnSearch.onclick = (event) => gridSearchOR(event);
   const iconSearch = document.createElement("i");
   iconSearch.className = "fas fa-search";
   btnSearch.appendChild(iconSearch);
@@ -122,7 +122,7 @@ function RenderGridFilterOr(main) {
     console.log("clear");
     event.preventDefault();
     input.value = "";
-    gridSearch(event);
+    gridSearchOR(event);
   };
   const iconClear = document.createElement("i");
   iconClear.className = "fas fa-times";
@@ -140,7 +140,7 @@ function RenderGridFilterOr(main) {
 }
 
 
-function gridSearch(event) {
+function gridSearchOR(event) {
   console.log("gridSearch");
   event.preventDefault();
   const maindiv = event.target.closest(".search");
@@ -197,17 +197,17 @@ function gridSearch(event) {
   const orFilterGroup =
     fieldsData.length && trimmedValue !== ""
       ? {
-          condition: "or",
-          filters: fieldsData.map((field) => ({
-            DBName: field.DBName,
-            tableName: field.tableName,
-            field: field.fieldName,
-            fieldName: field.fieldName,
-            operator: getOperatorByType(field.fieldType),
-            value: normalizedValue,
-            type: field.fieldType,
-          })),
-        }
+        condition: "or",
+        filters: fieldsData.map((field) => ({
+          DBName: field.DBName,
+          tableName: field.tableName,
+          field: field.fieldName,
+          fieldName: field.fieldName,
+          operator: getOperatorByType(field.fieldType),
+          value: normalizedValue,
+          type: field.fieldType,
+        })),
+      }
       : null;
 
   if (componentRoot && dataSearchConfig.length) {
