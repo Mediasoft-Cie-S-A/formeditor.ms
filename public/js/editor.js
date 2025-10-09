@@ -204,10 +204,9 @@ function editElement(element) {
     }
   }
   // check if in the formDataForm the value of objectType = page
-  const typeSelect = document.getElementById("objectType");
-  const headerTextarea = document.getElementById("pageHeaderTextarea");
-  if (typeSelect && typeSelect.value === "page") {
-    // create a box to show and edit the header of the page and store it in the header textarea
+  const formDataForm = document.getElementById("formDataForm");
+  if (formDataForm && formDataForm.objectType && formDataForm.objectType.value === "page") {
+    // create a box to show and edit the header of the page and store the it in hidden input pageHeader
     const headerBox = document.createElement("div");
     headerBox.className = "editor-box";
     headerBox.style.border = "1px solid #ccc";
@@ -219,21 +218,19 @@ function editElement(element) {
     // create an input to edit the header
     const headerInput = document.createElement("textarea");
     headerInput.type = "textarea";
+    // set the textarea to be 100% width
     headerInput.style.width = "100%";
+    // set the textarea to 3 rows
     headerInput.rows = 3;
-    headerInput.id = "pageHeaderEditor";
-    headerInput.value = headerTextarea ? headerTextarea.value : "";
+    headerInput.id = "pageHeader";
+    headerInput.value = formDataForm.pageHeader ? formDataForm.pageHeader.value : "";
     headerInput.style.fontSize = "9px";
     headerInput.style.marginBottom = "5px";
     headerInput.onchange = () => {
       const newHeader = headerInput.value.trim();
-      if (headerTextarea) {
-        headerTextarea.value = newHeader;
-      }
       if (newHeader) {
+        formDataForm.pageHeader.value = newHeader; // Update the form's hidden input
         element.setAttribute("data-page-header", newHeader); // Set the attribute on the element
-      } else {
-        element.removeAttribute("data-page-header");
       }
     };
     // Append the input to the headerBox
