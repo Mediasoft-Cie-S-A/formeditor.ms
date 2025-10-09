@@ -1,4 +1,20 @@
 @import "../variables.css";
+
+.prompt-component-wrapper {
+  width: 80%;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+}
+
+.render_PromptText {
+  width: 100%;
+  border: 1px solid var(--color-9);
+  border-radius: 8px;
+  padding: 10px;
+  height: auto;
+}
+
 #chat-container {
   background: var(--color-147);
   padding: 15px;
@@ -10,7 +26,7 @@
 
 #chat-container textarea {
   width: 100%;
-  height: 80px;
+  height: auto;
   padding: 10px;
   border-radius: 8px;
   border: 1px solid var(--color-9);
