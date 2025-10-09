@@ -268,10 +268,15 @@ function loadPage(pageId) {
             document.getElementById("objectSlug").value = page.slug;
             document.getElementById("userCreated").value = page.userCreated;
             document.getElementById("userModified").value = page.userModified;
-            document.getElementById("objectTypeHidden").value = page.header || ""; // Use header if available
             var objectType = document.getElementById('objectType');
             // select in the objecttype the value form
             objectType.value = 'page';
+            const headerTextarea = document.getElementById("pageHeaderTextarea");
+            if (headerTextarea) {
+                headerTextarea.value = page.header || "";
+            }
+            const changeEvent = new Event('change');
+            objectType.dispatchEvent(changeEvent);
             // Assuming formContainer is where the page content is displayed
             const formContainer = document.getElementById("formContainer");
             formContainer.innerHTML = ""; // Clear existing content
@@ -326,7 +331,8 @@ function registerPage(e) {
     var userCreated = document.getElementById("userCreated").value;
     var userModified = document.getElementById("userModified").value;
     var type = document.getElementById("objectType").value;
-    var header = document.getElementById("objectTypeHidden").value;
+    var headerField = document.getElementById("pageHeaderTextarea");
+    var header = headerField ? headerField.value : "";
 
     var formContainer = document.getElementById("formContainer");
     // var jsonData = domToJson(formContainer);
