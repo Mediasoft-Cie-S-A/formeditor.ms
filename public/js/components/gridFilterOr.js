@@ -84,74 +84,57 @@ function RenderGridFilterOr(main) {
 
   const jsonData = JSON.parse(main.getAttribute("datasearch") || "[]");
 
-  jsonData.forEach((field) => {
-    const searchMain = document.createElement("div");
-    searchMain.className = "searchMain";
-    searchMain.id = `search_${field.tableName}_${Date.now()}`;
+  const uniqueId = Date.now();
 
-    const searchDiv = document.createElement("div");
-    searchDiv.className = "search";
-    searchDiv.id = `search_${field.tableName}_searchDiv`;
+  const searchMain = document.createElement("div");
+  searchMain.className = "searchMain";
+  searchMain.id = `search_${uniqueId}`;
 
-    // input
-    const input = document.createElement("input");
-    input.type = "text";
-    input.id = `search_${field.tableName}_${field.fieldName}_input`;
-    input.setAttribute("list", "searchList");
-    input.placeholder = field.fieldLabel;
-    input.autocomplete = "off";
-    // set auotocomplete off
-    input.autocorrect = "off";
-    input.autocapitalize = "off";
-    input.spellcheck = false;
-    input.setAttribute("data-value-DBName", field.DBName);
-    input.setAttribute("data-value-table-name", field.tableName);
-    input.setAttribute("data-value-field-name", field.fieldName);
-    input.setAttribute("data-value-field-type", field.fieldType);
-    input.oninput = (event) => searchAutoComplete(event, input);
-    input.onclick = () => {
-      searchDiv.querySelector(".autocomplete-results").style.display = "none";
-    };
+  const searchDiv = document.createElement("div");
+  searchDiv.className = "search";
+  searchDiv.id = `search_${uniqueId}_searchDiv`;
 
-    // search button
-    const btnSearch = document.createElement("button");
-    btnSearch.type = "button";
-    btnSearch.onclick = (event) => gridSearch(event);
-    const iconSearch = document.createElement("i");
-    iconSearch.className = "fas fa-search";
-    btnSearch.appendChild(iconSearch);
+  // input
+  const input = document.createElement("input");
+  input.type = "text";
+  input.id = `search_${uniqueId}_input`;
+  input.placeholder =
+    jsonData.map((field) => field.fieldLabel).filter(Boolean).join(", ") ||
+    "Search";
+  input.autocomplete = "off";
+  input.autocorrect = "off";
+  input.autocapitalize = "off";
+  input.spellcheck = false;
+  input.setAttribute("data-fields", JSON.stringify(jsonData));
 
+  // search button
+  const btnSearch = document.createElement("button");
+  btnSearch.type = "button";
+  btnSearch.onclick = (event) => gridSearch(event);
+  const iconSearch = document.createElement("i");
+  iconSearch.className = "fas fa-search";
+  btnSearch.appendChild(iconSearch);
 
+  // clear button
+  const btnClear = document.createElement("button");
+  btnClear.type = "button";
+  btnClear.onclick = (event) => {
+    console.log("clear");
+    event.preventDefault();
+    input.value = "";
+    gridSearch(event);
+  };
+  const iconClear = document.createElement("i");
+  iconClear.className = "fas fa-times";
+  btnClear.appendChild(iconClear);
 
-    // autocomplete div
-    const autoDiv = document.createElement("div");
-    autoDiv.id = `search_${field.tableName}_${Date.now()}_autocomplete`;
-    autoDiv.className = "autocomplete-results";
-    autoDiv.style.display = "none";
+  // assemble
+  searchDiv.appendChild(input);
+  searchDiv.appendChild(btnSearch);
+  searchDiv.appendChild(btnClear);
 
-
-    // clear button
-    const btnClear = document.createElement("button");
-    btnClear.type = "button";
-    btnClear.onclick = (event) => {
-      console.log("clear");
-      event.preventDefault();
-      input.value = "";
-      autoDiv.style.display = "none";
-      gridSearch(event);
-    };
-    const iconClear = document.createElement("i");
-    iconClear.className = "fas fa-times";
-    btnClear.appendChild(iconClear);
-    // assemble
-    searchDiv.appendChild(input);
-    searchDiv.appendChild(btnSearch);
-    searchDiv.appendChild(btnClear);
-    searchDiv.appendChild(autoDiv);
-
-    searchMain.appendChild(searchDiv);
-    searchMainDiv.appendChild(searchMain);
-  });
+  searchMain.appendChild(searchDiv);
+  searchMainDiv.appendChild(searchMain);
 
   return searchMainDiv;
 }
@@ -160,218 +143,185 @@ function RenderGridFilterOr(main) {
 function gridSearch(event) {
   console.log("gridSearch");
   event.preventDefault();
-  const maindiv = event.target.parentElement.parentElement;
-  // get autocomplete div¨
-  const autocomplete = maindiv.querySelector(".autocomplete-results");
-  //hide autocomplete div
-  autocomplete.style.display = "none";
-  // get the input element
+  const maindiv = event.target.closest(".search");
+  if (!maindiv) {
+    return;
+  }
   const element = maindiv.querySelector("input");
-  const DBName = element.getAttribute("data-value-DBName");
-  const filedName = element.getAttribute("data-value-field-name");
-  const tableName = element.getAttribute("data-value-table-name");
+  if (!element) {
+    return;
+  }
+
   const searchValue = element.value;
   const normalizedValue = (searchValue || "").toString();
+
+  let fieldsData = [];
+  try {
+    fieldsData = JSON.parse(element.getAttribute("data-fields") || "[]");
+  } catch (error) {
+    console.error("Unable to parse data-fields attribute", error);
+    fieldsData = [];
+  }
+
   let componentRoot = element.closest("[tagname]");
   if (!componentRoot || !componentRoot.hasAttribute("datasearch")) {
     componentRoot = element.closest(".dataSetContainer");
   }
+
   let dataSearchConfig = [];
   if (componentRoot) {
     try {
-      dataSearchConfig = JSON.parse(componentRoot.getAttribute("datasearch") || "[]");
+      dataSearchConfig = JSON.parse(
+        componentRoot.getAttribute("datasearch") || "[]"
+      );
     } catch (error) {
       console.error("Unable to parse datasearch configuration", error);
       dataSearchConfig = [];
     }
   }
-  const fieldConfig = dataSearchConfig.find(
-    (field) =>
-      field &&
-      field.DBName === DBName &&
-      field.tableName === tableName &&
-      field.fieldName === filedName
-  );
-  let orFilterGroup = null;
-  if (
-    fieldConfig &&
-    fieldConfig.filterJson &&
-    fieldConfig.filterJson.condition &&
-    fieldConfig.filterJson.condition.toLowerCase() === "or" &&
-    Array.isArray(fieldConfig.filterJson.filters)
-  ) {
-    orFilterGroup = {
-      ...fieldConfig.filterJson,
-      filters: fieldConfig.filterJson.filters.map((filter) => ({
-        ...filter,
-        value: normalizedValue,
-      })),
-    };
-    fieldConfig.filterJson = orFilterGroup;
-    if (componentRoot) {
-      componentRoot.setAttribute("datasearch", JSON.stringify(dataSearchConfig));
-    }
-  }
-  // define the operator based on the field type
-  const fieldType = element.getAttribute("data-value-field-type");
-  var operator = "=";
-  switch (fieldType) {
-    case "character":
-      operator = "like";
-      break;
-    case "integer":
-      operator = "=";
-      break;
-    case "date":
-      operator = "=";
-      break;
-    case "logical":
-      operator = "=";
-      break;
-    default:
-      operator = "like";
-  }
-  // get all the grid div with attribute tagname=dataGrid
-  let idObjects = document.querySelectorAll("div[tagname='dataGrid']");
 
-
-  idObjects.forEach((idObject) => {
-    // if the grid is visible
-    if (idObject.style.display != "none") {
-      if (orFilterGroup) {
-        const filterAttr = idObject.getAttribute("filter");
-        let filterJSON;
-        try {
-          filterJSON = filterAttr ? JSON.parse(filterAttr) : {};
-        } catch (error) {
-          console.error("Unable to parse grid filter JSON", error);
-          filterJSON = {};
-        }
-        if (!Array.isArray(filterJSON.filters)) {
-          filterJSON.filters = [];
-        }
-        const groupKey =
-          orFilterGroup.groupId ||
-          orFilterGroup.id ||
-          (orFilterGroup.filters
-            .map((filter) =>
-              [
-                filter.DBName || filter.dbName || DBName || "",
-                filter.tableName || tableName || "",
-                filter.field || filter.fieldName || "",
-              ]
-                .filter(Boolean)
-                .join(".")
-            )
-            .sort()
-            .join("|"));
-        filterJSON.filters = filterJSON.filters.filter((filter) => {
-          if (!filter) {
-            return false;
-          }
-          const currentKey =
-            filter.groupId || filter.id || filter._groupKey;
-          return currentKey !== groupKey;
-        });
-        if (normalizedValue.trim() !== "") {
-          filterJSON.filters.push({
-            ...orFilterGroup,
-            groupId: groupKey,
-            _groupKey: groupKey,
-          });
-        }
-        idObject.setAttribute("filter", JSON.stringify(filterJSON));
-      }
-      // call the searchGrid function
-      searchGrid(DBName, filedName, operator, searchValue, idObject.id);
-    }
-
-  });
-
-
-}
-// searchAutoComplete that call the search function "/select-distinct/:tableName/:fieldName" and display the result in the autocomplete div
-function searchAutoComplete(event, element) {
-  event.preventDefault();
-  const DBName = element.getAttribute("data-value-DBName");
-  const tableName = element.getAttribute("data-value-table-name");
-  const fieldName = element.getAttribute("data-value-field-name");
-  const fieldType = element.getAttribute("data-value-field-type");
-  const autocomplete = element.parentElement.querySelector(
-    ".autocomplete-results"
-  );
-  const searchValue = element.value.trim();
-  var url =
-    "/select-distinct-idvalue/" +
-    DBName +
-    "/" +
-    tableName +
-    "/" +
-    fieldName +
-    "?id=" +
-    fieldName;
-  const isWhitespaceString = str => !str.replace(/\s/g, '').length
-  console.log(isWhitespaceString(searchValue))
-  // generate filter from searchValue if fieldType is text with openedge syntax
-  if (searchValue.length > 0 && !isWhitespaceString(searchValue)) {
+  const getOperatorByType = (fieldType) => {
     switch (fieldType) {
       case "character":
-        url = url + "&filter=" + fieldName + " like '%" + searchValue + "%'";
-        break;
+        return "like";
       case "integer":
-        url = url + "&filter=" + fieldName + "=" + searchValue;
-        break;
       case "date":
-        url = url + "&filter=" + fieldName + "=" + searchValue;
-        break;
       case "logical":
-        url = url + "&filter=" + fieldName + "=" + searchValue;
-        break;
+        return "=";
       default:
-        url = url + "&filter=" + fieldName + " like '%" + searchValue + "%'";
+        return "like";
     }
-    // get all the cookieStorage by tagname=cookieStorage
-    var cookieStorage = document.querySelectorAll("div[tagname=cookieStorage]");
-    // foreach cookieStorage extract the field name and value = select.value
-    cookieStorage.forEach((storage) => {
-      select = storage.querySelectorAll("select");
-      select.forEach((select) => {
-        var fieldName = select.getAttribute("var_name");
-        var fieldValue = select.value;
-        // add the field to the url
-        url = url + " and " + fieldName + "='" + fieldValue + "'";
-      });
+  };
+
+  const trimmedValue = normalizedValue.trim();
+  const orFilterGroup =
+    fieldsData.length && trimmedValue !== ""
+      ? {
+          condition: "or",
+          filters: fieldsData.map((field) => ({
+            DBName: field.DBName,
+            tableName: field.tableName,
+            field: field.fieldName,
+            fieldName: field.fieldName,
+            operator: getOperatorByType(field.fieldType),
+            value: normalizedValue,
+            type: field.fieldType,
+          })),
+        }
+      : null;
+
+  if (componentRoot && dataSearchConfig.length) {
+    const updatedConfig = dataSearchConfig.map((field) => {
+      if (!field) {
+        return field;
+      }
+      if (!orFilterGroup) {
+        if (field.filterJson) {
+          const clone = { ...field };
+          delete clone.filterJson;
+          return clone;
+        }
+        return field;
+      }
+      return {
+        ...field,
+        filterJson: {
+          ...orFilterGroup,
+        },
+      };
     });
-    apiFetch(url)
-      .then((response) => response.json())
-      .then((data) => {
-        autocomplete.innerHTML = "";
-        autocomplete.style.display = "block";
-
-
-
-        data.forEach((row) => {
-          var rowDiv = document.createElement("div");
-          rowDiv.className = "autocomplete-row";
-          rowDiv.setAttribute("data-value-DBName", DBName);
-          rowDiv.setAttribute("data-value-table-name", tableName);
-          rowDiv.setAttribute("data-value-field-name", fieldName);
-          rowDiv.setAttribute("data-value-field-type", fieldType);
-          rowDiv.addEventListener("click", function (event) {
-            event.preventDefault();
-
-            element.value = row[fieldName];
-            autocomplete.style.display = "none";
-          });
-
-          rowDiv.innerHTML = row[fieldName];
-          autocomplete.appendChild(rowDiv);
-        });
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    componentRoot.setAttribute("datasearch", JSON.stringify(updatedConfig));
+    element.setAttribute(
+      "data-fields",
+      componentRoot.getAttribute("datasearch") || "[]"
+    );
+  } else {
+    element.setAttribute("data-fields", JSON.stringify(fieldsData));
   }
+
+  const visibleGrids = document.querySelectorAll("div[tagname='dataGrid']");
+  visibleGrids.forEach((grid) => {
+    if (grid.style.display === "none") {
+      return;
+    }
+
+    if (orFilterGroup) {
+      const filterAttr = grid.getAttribute("filter");
+      let filterJSON;
+      try {
+        filterJSON = filterAttr ? JSON.parse(filterAttr) : {};
+      } catch (error) {
+        console.error("Unable to parse grid filter JSON", error);
+        filterJSON = {};
+      }
+      if (!Array.isArray(filterJSON.filters)) {
+        filterJSON.filters = [];
+      }
+
+      const groupKey =
+        orFilterGroup.groupId ||
+        orFilterGroup.id ||
+        orFilterGroup.filters
+          .map((filter) =>
+            [
+              filter.DBName || filter.dbName || "",
+              filter.tableName || "",
+              filter.field || filter.fieldName || "",
+            ]
+              .filter(Boolean)
+              .join(".")
+          )
+          .sort()
+          .join("|");
+
+      filterJSON.filters = filterJSON.filters.filter((filter) => {
+        if (!filter) {
+          return false;
+        }
+        const currentKey = filter.groupId || filter.id || filter._groupKey;
+        return currentKey !== groupKey;
+      });
+
+      filterJSON.filters.push({
+        ...orFilterGroup,
+        groupId: groupKey,
+        _groupKey: groupKey,
+      });
+
+      grid.setAttribute("filter", JSON.stringify(filterJSON));
+    } else {
+      const filterAttr = grid.getAttribute("filter");
+      if (filterAttr) {
+        try {
+          const filterJSON = JSON.parse(filterAttr);
+          if (Array.isArray(filterJSON.filters)) {
+            filterJSON.filters = filterJSON.filters.filter((filter) => {
+              if (!filter) {
+                return false;
+              }
+              if (!filter.condition || filter.condition.toLowerCase() !== "or") {
+                return true;
+              }
+              return false;
+            });
+            grid.setAttribute("filter", JSON.stringify(filterJSON));
+          }
+        } catch (error) {
+          console.error("Unable to clear grid OR filter", error);
+        }
+      }
+    }
+
+    if (fieldsData.length) {
+      const primaryField = fieldsData[0];
+      const operator = getOperatorByType(primaryField.fieldType);
+      searchGrid(
+        primaryField.DBName,
+        primaryField.fieldName,
+        operator,
+        searchValue,
+        grid.id
+      );
+    }
+  });
 }
-
-
