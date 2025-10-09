@@ -16,22 +16,65 @@ function orderByClause(orderBy = []) {
   return ' ORDER BY ' + parts.join(', ');
 }
 function whereFromJson(json) {
-  if (!json || !Array.isArray(json.filters) || json.filters.length === 0) return { where: '', params: [] };
-  const params = [];
-  const conds = json.filters.map(f => {
-    const col = ident(f.field);
-    if (Array.isArray(f.values) && f.values.length > 0) {
-      const qs = f.values.map(() => '?').join(', ');
-      params.push(...f.values);
-      return `${col} IN (${qs})`;
+  const buildClause = (filter) => {
+    if (!filter) {
+      return { clause: '', params: [] };
     }
-    if (f.value !== undefined && f.operator) {
-      params.push(f.value);
-      return `${col} ${f.operator} ?`;
+
+    const subFilters = Array.isArray(filter.filters) ? filter.filters : null;
+    if (subFilters && subFilters.length > 0) {
+      const condition = (filter.condition || 'and').toLowerCase() === 'or' ? 'OR' : 'AND';
+      const built = subFilters
+        .map((sub) => buildClause(sub))
+        .filter((result) => result.clause);
+
+      if (!built.length) {
+        return { clause: '', params: [] };
+      }
+
+      const clause = built.length === 1
+        ? built[0].clause
+        : '(' + built.map((item) => item.clause).join(` ${condition} `) + ')';
+      const params = built.reduce((acc, item) => acc.concat(item.params), []);
+      return { clause, params };
     }
-    return '1=1';
-  });
-  return { where: ' WHERE ' + conds.filter(Boolean).join(' AND '), params };
+
+    const fieldName = filter.field || filter.fieldName;
+    if (!fieldName) {
+      return { clause: '', params: [] };
+    }
+
+    if (Array.isArray(filter.values) && filter.values.length > 0) {
+      const placeholders = filter.values.map(() => '?').join(', ');
+      return {
+        clause: `${ident(fieldName)} IN (${placeholders})`,
+        params: [...filter.values],
+      };
+    }
+
+    if (filter.value !== undefined && filter.operator) {
+      return {
+        clause: `${ident(fieldName)} ${filter.operator} ?`,
+        params: [filter.value],
+      };
+    }
+
+    return { clause: '', params: [] };
+  };
+
+  const rootFilters = Array.isArray(json)
+    ? json
+    : Array.isArray(json?.filters)
+    ? json.filters
+    : [];
+  const rootCondition = typeof json?.condition === 'string' ? json.condition : 'and';
+  const { clause, params } = buildClause({ filters: rootFilters, condition: rootCondition });
+
+  if (!clause) {
+    return { where: '', params: [] };
+  }
+
+  return { where: ' WHERE ' + clause, params };
 }
 
 class MySqlDatabase {
