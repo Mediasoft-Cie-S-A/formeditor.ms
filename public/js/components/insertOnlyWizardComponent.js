@@ -21,8 +21,6 @@
  * - data-current-step: numeric string tracking the currently visible step.
  */
 
-const e = require("express");
-
 // This function creates a new HTML element of a given type, sets its ID and tag name, and makes it draggable.
 function createElementInsertWizard(type) {
     var main = document.createElement("div");

@@ -27,7 +27,7 @@
  */
 function createPromptComponent(type) {
     var main = document.createElement('div');
-    main.className = 'form-container';
+    main.className = 'form-container prompt-component-wrapper';
     main.id = type + Date.now(); // Unique ID for each new element
     main.draggable = true;
     main.tagName = type;
@@ -624,7 +624,6 @@ async function handleFill(event) {
                 1. Identify **each unique bank or financial entity** mentioned in the text.
                 2. For each one, extract the following fields where reasonably available.
                 3. Include **multiple entries** if more than one bank appears.
-                4. If a field cannot be confidently filled, set it to **null**.
 
                 === FIELD DEFINITIONS ===
                 ${fieldDescriptions}
@@ -783,7 +782,6 @@ function handleBigDocument(event) {
                 1. Identify **each unique bank or financial entity** mentioned in the text.
                 2. For each one, extract the following fields where reasonably available.
                 3. Include **multiple entries** if more than one bank appears.
-                4. If a field cannot be confidently filled, set it to **null**.
 
                 === FIELD DEFINITIONS ===
                 ${fieldDescriptions}
