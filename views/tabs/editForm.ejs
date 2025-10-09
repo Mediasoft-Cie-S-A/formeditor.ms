@@ -2,7 +2,8 @@
     <div class="row display-flex" id="formProperties" style="width: 100%; padding: 10px;">
         <!-- Form properties will be added here -->
         <form class="container-fluid" id="formDataForm">
-            <div class="row table-hover editor-fields">
+            <div class="row table-hover editor-fields"
+                style="display:flex;align-items:flex-start;justify-content:center;flex-wrap:wrap;">
                 <div class="col form-field">
                     <label for="objectId" class="input-group-text">ID:</label>
                     <input class="input-element" id="objectId" name="objectId" placeholder="ID" required type="text"
@@ -30,42 +31,38 @@
                 </div>
                 <div class="col form-field">
                     <label for="objectType">Type:</label>
-                    <select class="input-element" id="objectType" name="objectType" required>
+                    <select class="input-element" id="objectType" name="type" required>
                         <option value="" disabled selected>Select Type</option>
                         <option value="page">Page</option>
                         <option value="form">Form</option>
                         <option value="business_component">Business Component</option>
                     </select>
-                </div>
-                <div class="col form-field form-field--textarea" id="pageHeaderGroup" hidden>
-                    <label for="pageHeaderTextarea">Header:</label>
-                    <textarea class="input-element" id="pageHeaderTextarea" name="pageHeader"
-                        placeholder="Insert header HTML" rows="4"></textarea>
-                    <small class="form-text">Displayed when the selected type is "Page".</small>
+                    <input id="objectTypeHidden" name="pageHeader" type="hidden" value="">
                 </div>
                 <div class="col form-field form-field--textarea">
                     <label for="objectDescription">Description:</label>
                     <textarea class="input-element" id="objectDescription" name="objectDescription"
                         placeholder="Insert Description" required rows="3"></textarea>
                 </div>
-                <div class="col form-actions">
+                <div class="col" style="display:inline-block;padding:10px">
                     <button class="button form-edit-button success" id="registerObjectBtn"
-                        onclick="registerObject(event)" title="Register Object" type="button">
+                        onclick="registerObject(event)" title="Register Object" type="button" style="float:left;">
                         <i class="bi bi-check-lg"></i>
                     </button>
                     <button class="button form-edit-button" id="clearObjectBtn" onclick="showClearConfirmation()"
-                        title="Clear" type="button">
+                        title="Clear" type="button" style="float:left;">
                         <i class="bi bi-trash"></i>
                     </button>
                     <button class="button form-edit-button" id="undoDeleteBtn" onclick="undoDelete()"
-                        title="Undo Delete" type="button">
+                        title="Undo Delete" type="button" style="float:left;">
                         <i class="bi bi-arrow-counterclockwise"></i>
                     </button>
                     <button class="button form-edit-button" onclick="exportJson()" title="Export JSON" type="button"
+                        style="float:left;">
                         <i class="bi bi-filetype-json"></i>
                     </button>
                     <button class="button form-edit-button" id="createFormBtn" onclick="promptCreateForm()"
-                        title="Create Form" type="button">
+                        title="Create Form" type="button" style="float: left;">
                         <i class="bi bi-ui-checks"></i>
                     </button>
                 </div>
@@ -174,24 +171,6 @@
 
 <script>
     const root = document.getElementById('editForm');
-    const typeSelect = document.getElementById('objectType');
-    const pageHeaderGroup = document.getElementById('pageHeaderGroup');
-    const pageHeaderTextarea = document.getElementById('pageHeaderTextarea');
-
-    function togglePageHeaderField(selectedType) {
-        if (!pageHeaderGroup) {
-            return;
-        }
-        const isPage = selectedType === 'page';
-        pageHeaderGroup.hidden = !isPage;
-    }
-
-    if (typeSelect) {
-        togglePageHeaderField(typeSelect.value);
-        typeSelect.addEventListener('change', (event) => {
-            togglePageHeaderField(event.target.value);
-        });
-    }
 
     // Panneaux
     const sideComponents = document.getElementById('componentsSidebar');
