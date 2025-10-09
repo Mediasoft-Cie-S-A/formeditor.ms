@@ -1,13 +1,7 @@
 const axios = require('axios');
 
 module.exports = function registerAskAiRoute(app, askAIConfig = {}) {
-  const { postUrl, apiKey, model = 'llama-3.3-70b-versatile', backup = {} } =
-    askAIConfig;
-  const {
-    baseUrl: backupBaseUrl = 'https://api.openai.com/v1/chat/completions',
-    apiKey: backupApiKey = process.env.OPENAI_API_KEY,
-    model: backupModel = 'gpt-4o-mini',
-  } = backup;
+  const { postUrl, apiKey, model = 'llama-3.3-70b-versatile' } = askAIConfig;
 
   if (!postUrl) {
     console.warn('⚠️  askAI.postUrl is not configured. The /api/ask-ai route will not be registered.');
@@ -49,52 +43,32 @@ module.exports = function registerAskAiRoute(app, askAIConfig = {}) {
   }
 
   app.post('/api/lm', async (req, res) => {
-    const { prompt, messages } = req.body || {};
-    const requestMessages = Array.isArray(messages) && messages.length
-      ? messages
-      : prompt
-        ? [{ role: 'user', content: prompt }]
-        : null;
-
-    if (!backupApiKey) {
-      console.error('❌ Backup OpenAI API key is not configured.');
-      return res
-        .status(500)
-        .json({ error: 'Backup AI service is not configured properly.' });
-    }
-
-    if (!requestMessages) {
-      return res
-        .status(400)
-        .json({ error: 'prompt or messages must be provided.' });
-    }
+    const { prompt } = req.body;
 
     try {
       const response = await axios.post(
-        backupBaseUrl,
+        'http://localhost:1234/v1/chat/completions',
         {
-          model: backupModel,
-          messages: requestMessages,
+          model: 'google/gemma-3-12b',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.1,
+          top_p: 0.9,
+          max_tokens: 512,
+          stop: ['}'],
         },
         {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${backupApiKey}`,
+            Authorization: 'Bearer lm-studio',
           },
-          timeout: 2 * 60 * 1000,
+          timeout: 15 * 60 * 1000,
         }
       );
 
       res.json(response.data);
     } catch (err) {
-      console.error('❌ OpenAI backup fetch failed:', err.message);
-      const status = err.response && err.response.status ? err.response.status : 500;
-      const errorPayload = err.response && err.response.data && err.response.data.error;
-      const errorMessage =
-        typeof errorPayload === 'string'
-          ? errorPayload
-          : (errorPayload && errorPayload.message) || 'OpenAI backup request failed.';
-      res.status(status).json({ error: errorMessage });
+      console.error('❌ LM Studio fetch failed:', err.message);
+      res.status(500).json({ error: 'LM Studio timed out or failed.' });
     }
   });
 };
