@@ -1163,7 +1163,16 @@ function drawGridRow(
     const header = tab.querySelector("ul");
     if (header.childNodes.length > 0) {
       // second tab
-      activateTab(event, header.childNodes[1].querySelector("a"), document.getElementById(header.childNodes[1].getAttribute("data-tab")));
+      // generate a click event on the second tab
+      const secondTab = header.childNodes[1].querySelector("a");
+      if (secondTab) {
+        const clickEvent = new MouseEvent("click", {
+          bubbles: true,
+          cancelable: true,
+          view: window
+        });
+        secondTab.dispatchEvent(clickEvent);
+      }
 
     } // end if
   });
