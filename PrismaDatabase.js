@@ -213,34 +213,65 @@ class PrismaDatabase {
   }
 
   whereFromJson(json) {
-    if (!json || !Array.isArray(json.filters) || json.filters.length === 0) {
+    const buildClause = (filter) => {
+      if (!filter) {
+        return { clause: '', params: [] };
+      }
+
+      const subFilters = Array.isArray(filter.filters) ? filter.filters : null;
+      if (subFilters && subFilters.length > 0) {
+        const condition = (filter.condition || 'and').toLowerCase() === 'or' ? 'OR' : 'AND';
+        const built = subFilters
+          .map((sub) => buildClause(sub))
+          .filter((result) => result.clause);
+
+        if (!built.length) {
+          return { clause: '', params: [] };
+        }
+
+        const clause = built.length === 1
+          ? built[0].clause
+          : '(' + built.map((item) => item.clause).join(` ${condition} `) + ')';
+        const params = built.reduce((acc, item) => acc.concat(item.params), []);
+        return { clause, params };
+      }
+
+      const fieldName = filter.field || filter.fieldName;
+      if (!fieldName) {
+        return { clause: '', params: [] };
+      }
+
+      if (Array.isArray(filter.values) && filter.values.length > 0) {
+        const placeholders = filter.values.map(() => '?').join(', ');
+        return {
+          clause: `${this.quoteIdentifier(fieldName)} IN (${placeholders})`,
+          params: [...filter.values],
+        };
+      }
+
+      if (filter.value !== undefined && filter.operator) {
+        return {
+          clause: `${this.quoteIdentifier(fieldName)} ${filter.operator} ?`,
+          params: [filter.value],
+        };
+      }
+
+      return { clause: '', params: [] };
+    };
+
+    const rootFilters = Array.isArray(json)
+      ? json
+      : Array.isArray(json?.filters)
+      ? json.filters
+      : [];
+    const rootCondition = typeof json?.condition === 'string' ? json.condition : 'and';
+    const { clause, params } = buildClause({ filters: rootFilters, condition: rootCondition });
+
+    if (!clause) {
       return { where: '', params: [] };
     }
-    const params = [];
-    const conditions = json.filters
-      .map(filter => {
-        if (!filter || !filter.field) {
-          return null;
-        }
-        const column = this.quoteIdentifier(filter.field);
-        if (Array.isArray(filter.values) && filter.values.length > 0) {
-          const placeholders = filter.values.map(() => '?').join(', ');
-          params.push(...filter.values);
-          return `${column} IN (${placeholders})`;
-        }
-        if (filter.value !== undefined && filter.operator) {
-          params.push(filter.value);
-          return `${column} ${filter.operator} ?`;
-        }
-        return null;
-      })
-      .filter(Boolean);
 
-    if (conditions.length === 0) {
-      return { where: '', params: [] };
-    }
-
-    return { where: ` WHERE ${conditions.join(' AND ')}`, params };
+    return { where: ` WHERE ${clause}`, params };
   }
 
   getRowIdIdentifier() {
