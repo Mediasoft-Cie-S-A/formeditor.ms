@@ -101,14 +101,14 @@ class OdbcDatabase {
     }
   }
 
-  async queryData(queryString) {
+  async queryData(queryString, params = []) {
     try {
       console.log(queryString);
       // Execute the query
 
       const connection = await odbc.connect(this.connectionString);
       await connection.setIsolationLevel(odbc.SQL_TXN_READ_UNCOMMITTED);
-      const result = await connection.query(queryString);
+      const result = await connection.query(queryString, params);
       await connection.close();
       return result;
     } catch (err) {
